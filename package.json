@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "devDependencies": {
+    "pulp": "^4.0.2",
+    "browserify": "*",
+    "benchmark": "~1.0.0",
+    "microtime": "~2.0.0"
+  },
+  "scripts": {
+    "bench": "./benchmarks/run.sh"
+  }
+}

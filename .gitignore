@@ -4,3 +4,11 @@
 /output/
 /.psci*
 /src/.webpack.js
+
+*~
+*.cache
+*#*
+
+*log.txt
+log.txt*
+*.log

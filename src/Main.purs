@@ -1,30 +1,37 @@
-module Lib where
+module Main where
 
 import Prelude
-import Graphics.WebGLAll
+import Data.Maybe
+import Data.Either
 
-import qualified Data.Matrix4 as M
-import qualified Data.Matrix as M
-import qualified Data.Vector3 as V
-
+import Control.Monad.Eff.Console
 import Control.Monad.Eff.Alert
 
 import Control.Monad.Eff
-import Control.Monad.Eff.Console
-import Data.Int (toNumber)
+--import Control.Monad.Eff.JQuery
+import Control.Monad.Trans
+import Control.Monad.Except.Trans
+import Control.Monad.Eff.Exception
+import Control.Monad.Eff.Class
 
+import Graphics.WebGL
+import Graphics.WebGL.Types
+import Graphics.WebGL.Context
+import Graphics.WebGL.Shader
+import Graphics.WebGL.Methods
+import Graphics.WebGL.Unsafe
+import Graphics.Canvas
 
-shaders :: Shaders {aVertexPosition :: Attribute Vec3, uPMatrix :: Uniform Mat4, uMVMatrix:: Uniform Mat4}
-shaders = Shaders
-
-  """precision mediump float;
-
+vertSource :: String
+vertSource = """precision mediump float;
+asdf
   void main(void) {
     gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
       }
   """
 
-  """
+fragSource :: String
+fragSource = """
       attribute vec3 aVertexPosition;
 
       uniform mat4 uMVMatrix;
@@ -35,41 +42,18 @@ shaders = Shaders
       }
   """
 
-  main :: Eff (console :: CONSOLE, alert :: Alert) Unit
-          main = runWebGL "glcanvas" (\s -> alert s)
-  \ context -> do
-    log "WebGL ready"
-    withShaders shaders (\s -> alert s)
-      \ bindings -> do
-        log "Shaders and bindings ready"
-        clearColor 0.0 0.0 0.0 1.0
-        enable DEPTH_TEST
 
-        canvasWidth <- getCanvasWidth context
-        canvasHeight <- getCanvasHeight context
-        viewport 0 0 canvasWidth canvasHeight
-        clear [COLOR_BUFFER_BIT, DEPTH_BUFFER_BIT]
+initWebGL :: forall r. WebGLProgram -> Object ( |r) -> Object ( |r) -> WebGL Unit
+initWebGL prog attr unif = do
+  clearColor 0.0 0.0 0.0 1.0
 
-        let pMatrix = M.makePerspective 45.0 (toNumber canvasWidth / toNumber canvasHeight) 0.1 100.0
-        setUniformFloats bindings.uPMatrix (M.toArray pMatrix)
+main :: Eff (console :: CONSOLE, alert :: Alert, canvas :: Canvas) Unit
+main = do
+  Just canvas <- getCanvasElementById "glcanvas"
+  Just ctx <- getWebglContext canvas
+  res <- (runWebglWithShaders initWebGL) ctx vertSource fragSource
+  handleError res
 
-        let mvMatrix = M.translate (V.vec3 (-1.5) 0.0 (-7.0))
-                          M.identity
-        setUniformFloats bindings.uMVMatrix (M.toArray mvMatrix)
-
-        buf1 <- makeBufferFloat [0.0,  1.0,  0.0,
-                           (-1.0), (-1.0),  0.0,
-                            1.0, (-1.0),  0.0]
-        drawArr TRIANGLES buf1 bindings.aVertexPosition
-
-        let mvMatrix' = M.translate (V.vec3 3.0 0.0 0.0)
-                          mvMatrix
-        setUniformFloats bindings.uMVMatrix (M.toArray mvMatrix')
-
-        buf2 <- makeBufferFloat [1.0,  1.0,  0.0,
-                           (-1.0), 1.0,  0.0,
-                            1.0, (-1.0),  0.0,
-                           (-1.0), (-1.0),  0.0]
-        drawArr TRIANGLE_STRIP buf2 bindings.aVertexPosition
-
-        log "WebGL completed"
+  where
+    handleError (Left er) = log $ "WebGL error: " ++ (show er)
+    handleError (Right r) = return unit

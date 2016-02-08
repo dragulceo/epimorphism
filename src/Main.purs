@@ -4,15 +4,15 @@ import Prelude
 import Data.Maybe
 import Data.Either
 
+import Control.Monad.Eff
 import Control.Monad.Eff.Console
 import Control.Monad.Eff.Alert
-
-import Control.Monad.Eff
---import Control.Monad.Eff.JQuery
 import Control.Monad.Trans
 import Control.Monad.Except.Trans
 import Control.Monad.Eff.Exception
 import Control.Monad.Eff.Class
+import Control.Monad.Reader.Class (ask)
+import Control.Monad.Eff.Class (liftEff)
 
 import Graphics.WebGL
 import Graphics.WebGL.Types
@@ -21,39 +21,41 @@ import Graphics.WebGL.Shader
 import Graphics.WebGL.Methods
 import Graphics.WebGL.Unsafe
 import Graphics.Canvas
+import Graphics.WebGL.Raw as GL
+import Graphics.WebGL.Raw.Enums as GLE
 
-vertSource :: String
-vertSource = """precision mediump float;
-asdf
-  void main(void) {
-    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-      }
-  """
+foreign import getURL :: String -> String
 
-fragSource :: String
-fragSource = """
-      attribute vec3 aVertexPosition;
+initWebGL :: WebGL Unit
+initWebGL = do
+  ctx <- ask
 
-      uniform mat4 uMVMatrix;
-      uniform mat4 uPMatrix;
-
-      void main(void) {
-          gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-      }
-  """
-
-
-initWebGL :: forall r. WebGLProgram -> Object ( |r) -> Object ( |r) -> WebGL Unit
-initWebGL prog attr unif = do
   clearColor 0.0 0.0 0.0 1.0
+  canvasWidth <- drawingBufferWidth
+  canvasHeight <- drawingBufferWidth
+
+  liftEff $ GL.viewport ctx 0 0 canvasWidth canvasHeight
+  liftEff $ GL.clear ctx GLE.colorBufferBit
+
+  let basicVert   = getURL "/shaders/basic.vert.glsl"
+  let mainFrag    = getURL "/shaders/main.frag.glsl"
+  let displayFrag = getURL "/shaders/display.frag.glsl"
+
+  displayProg <- compileShadersIntoProgram basicVert displayFrag
+  mainProg    <- compileShadersIntoProgram basicVert mainFrag
+
+  liftEff $ GL.viewport ctx 0 0 canvasWidth canvasHeight
+  liftEff $ GL.clear ctx GLE.colorBufferBit
+
+
 
 main :: Eff (console :: CONSOLE, alert :: Alert, canvas :: Canvas) Unit
 main = do
   Just canvas <- getCanvasElementById "glcanvas"
   Just ctx <- getWebglContext canvas
-  res <- (runWebglWithShaders initWebGL) ctx vertSource fragSource
+  res <- runWebgl initWebGL ctx
   handleError res
 
   where
-    handleError (Left er) = log $ "WebGL error: " ++ (show er)
+    handleError (Left er) = log $ show er
     handleError (Right r) = return unit

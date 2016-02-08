@@ -6780,9 +6780,37 @@ var linkProgram = function (prog) {
         return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.linkProgram(v)(prog));
     });
 };
-var isContextLost = Prelude[">>="](Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function ($150) {
-    return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.isContextLost($150));
+var isContextLost = Prelude[">>="](Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function ($162) {
+    return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.isContextLost($162));
 });
+var getShaderParameter = function (prog) {
+    return function (param) {
+        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function (v) {
+            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.getShaderParameter(v)(prog)(Graphics_WebGL_Types.toWebglEnum(Graphics_WebGL_Types.toWebglEnumShaderParam)(param))))(function (v1) {
+                if (v1 instanceof Data_Maybe.Just) {
+                    return Prelude["return"](Control_Monad_Reader_Trans.applicativeReaderT(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff)))(v1.value0);
+                };
+                if (v1 instanceof Data_Maybe.Nothing) {
+                    return Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(new Graphics_WebGL_Types.NullValue("getShaderParameter"));
+                };
+                throw new Error("Failed pattern match at Graphics.WebGL.Methods line 90, column 1 - line 91, column 1: " + [ v1.constructor.name ]);
+            });
+        });
+    };
+};
+var getShaderInfoLog = function (shader) {
+    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function (v) {
+        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.getShaderInfoLog(v)(shader)))(function (v1) {
+            if (v1 instanceof Data_Maybe.Just) {
+                return Prelude["return"](Control_Monad_Reader_Trans.applicativeReaderT(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff)))(v1.value0);
+            };
+            if (v1 instanceof Data_Maybe.Nothing) {
+                return Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(new Graphics_WebGL_Types.NullValue("getShaderInfoLog"));
+            };
+            throw new Error("Failed pattern match at Graphics.WebGL.Methods line 98, column 1 - line 99, column 1: " + [ v1.constructor.name ]);
+        });
+    });
+};
 var getProgramParameter = function (prog) {
     return function (param) {
         return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function (v) {
@@ -6798,8 +6826,8 @@ var getProgramParameter = function (prog) {
         });
     };
 };
-var getError = Prelude[">>="](Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function ($151) {
-    return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.getError($151));
+var getError = Prelude[">>="](Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function ($163) {
+    return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.getError($163));
 });
 var enableVertexAttribArray = function (v) {
     return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function (v1) {
@@ -6839,8 +6867,8 @@ var createProgram = Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_
         throw new Error("Failed pattern match at Graphics.WebGL.Methods line 53, column 1 - line 54, column 1: " + [ v1.constructor.name ]);
     });
 });
-var createBuffer = Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Prelude[">>="](Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function ($152) {
-    return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.createBuffer($152));
+var createBuffer = Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Prelude[">>="](Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function ($164) {
+    return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.createBuffer($164));
 }))(function (v) {
     if (v instanceof Data_Maybe.Just) {
         return Prelude["return"](Control_Monad_Reader_Trans.applicativeReaderT(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff)))(v.value0);
@@ -6924,6 +6952,8 @@ module.exports = {
     shaderSource: shaderSource, 
     linkProgram: linkProgram, 
     isContextLost: isContextLost, 
+    getShaderInfoLog: getShaderInfoLog, 
+    getShaderParameter: getShaderParameter, 
     getProgramParameter: getProgramParameter, 
     getError: getError, 
     enableVertexAttribArray: enableVertexAttribArray, 
@@ -10061,8 +10091,8 @@ var setUniform = function (dict) {
 var getUniformBindings_ = function (ctx) {
     return function (prog) {
         return function __do() {
-            var $56 = $foreign.getUniformBindingsImpl(ctx, prog, Graphics_WebGL_Types.Uniform)();
-            return Graphics_WebGL_Raw_Util.toMaybe($56);
+            var $58 = $foreign.getUniformBindingsImpl(ctx, prog, Graphics_WebGL_Types.Uniform)();
+            return Graphics_WebGL_Raw_Util.toMaybe($58);
         };
     };
 };
@@ -10075,15 +10105,15 @@ var getUniformBindings = function (prog) {
             if (v1 instanceof Data_Maybe.Nothing) {
                 return Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(new Graphics_WebGL_Types.NullValue("getUniformBindings"));
             };
-            throw new Error("Failed pattern match at Graphics.WebGL.Shader line 92, column 1 - line 93, column 1: " + [ v1.constructor.name ]);
+            throw new Error("Failed pattern match at Graphics.WebGL.Shader line 94, column 1 - line 95, column 1: " + [ v1.constructor.name ]);
         });
     });
 };
 var getAttrBindings_ = function (ctx) {
     return function (prog) {
         return function __do() {
-            var $57 = $foreign.getAttrBindingsImpl(ctx, prog, Graphics_WebGL_Types.Attribute)();
-            return Graphics_WebGL_Raw_Util.toMaybe($57);
+            var $59 = $foreign.getAttrBindingsImpl(ctx, prog, Graphics_WebGL_Types.Attribute)();
+            return Graphics_WebGL_Raw_Util.toMaybe($59);
         };
     };
 };
@@ -10096,7 +10126,7 @@ var getAttrBindings = function (prog) {
             if (v1 instanceof Data_Maybe.Nothing) {
                 return Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(new Graphics_WebGL_Types.NullValue("getAttrBindings"));
             };
-            throw new Error("Failed pattern match at Graphics.WebGL.Shader line 84, column 1 - line 85, column 1: " + [ v1.constructor.name ]);
+            throw new Error("Failed pattern match at Graphics.WebGL.Shader line 86, column 1 - line 87, column 1: " + [ v1.constructor.name ]);
         });
     });
 };
@@ -10106,7 +10136,13 @@ var addShaderToProgram = function (prog) {
             return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.createShader(stype))(function (v) {
                 return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.shaderSource(v)(src))(function () {
                     return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.compileShader(v))(function () {
-                        return Graphics_WebGL_Methods.attachShader(prog)(v);
+                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.attachShader(prog)(v))(function () {
+                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.getShaderParameter(v)(Graphics_WebGL_Types.CompileStatusSP.value))(function (v1) {
+                                return Control_Monad.when(Control_Monad_Reader_Trans.monadReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(!v1)(Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.getShaderInfoLog(v))(function (v2) {
+                                    return Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(new Graphics_WebGL_Types.ShaderError(v2));
+                                }));
+                            });
+                        });
                     });
                 });
             });
@@ -10119,14 +10155,10 @@ var compileShadersIntoProgram = function (vertSrc) {
             return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(addShaderToProgram(v)(Graphics_WebGL_Types.VertexShader.value)(vertSrc))(function () {
                 return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(addShaderToProgram(v)(Graphics_WebGL_Types.FragmentShader.value)(fragSrc))(function () {
                     return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.linkProgram(v))(function () {
-                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Prelude["<$>"](Control_Monad_Reader_Trans.functorReaderT(Control_Monad_Except_Trans.functorExceptT(Control_Monad_Eff.functorEff)))(Graphics_WebGL_Types.fromWebglEnum(Graphics_WebGL_Types.fromWebglEnumErrorCode))(Graphics_WebGL_Methods.getError))(function (v1) {
-                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(new Graphics_WebGL_Types.ErrorCode(v1)))(function () {
-                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.getProgramParameter(v)(Graphics_WebGL_Types.LinkStatus.value))(function (v2) {
-                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad.when(Control_Monad_Reader_Trans.monadReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(!v2)(Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(shaderLinkError)))(function () {
-                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.useProgram(v))(function () {
-                                            return Prelude["return"](Control_Monad_Reader_Trans.applicativeReaderT(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff)))(v);
-                                        });
-                                    });
+                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.getProgramParameter(v)(Graphics_WebGL_Types.LinkStatus.value))(function (v1) {
+                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad.when(Control_Monad_Reader_Trans.monadReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(!v1)(Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(shaderLinkError)))(function () {
+                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.useProgram(v))(function () {
+                                    return Prelude["return"](Control_Monad_Reader_Trans.applicativeReaderT(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff)))(v);
                                 });
                             });
                         });
@@ -10147,8 +10179,6 @@ module.exports = {
 // Generated by psc version 0.8.0.0
 "use strict";
 var Prelude = require("Prelude");
-var Control_Monad_Eff_Console = require("Control.Monad.Eff.Console");
-var Control_Monad_Eff_Alert = require("Control.Monad.Eff.Alert");
 var Control_Monad_Except_Trans = require("Control.Monad.Except.Trans");
 var Control_Monad_Eff = require("Control.Monad.Eff");
 var Control_Monad_Reader_Trans = require("Control.Monad.Reader.Trans");
@@ -10218,6 +10248,27 @@ var VertexShader = (function () {
     };
     VertexShader.value = new VertexShader();
     return VertexShader;
+})();
+var ShaderTypeSP = (function () {
+    function ShaderTypeSP() {
+
+    };
+    ShaderTypeSP.value = new ShaderTypeSP();
+    return ShaderTypeSP;
+})();
+var DeleteStatusSP = (function () {
+    function DeleteStatusSP() {
+
+    };
+    DeleteStatusSP.value = new DeleteStatusSP();
+    return DeleteStatusSP;
+})();
+var CompileStatusSP = (function () {
+    function CompileStatusSP() {
+
+    };
+    CompileStatusSP.value = new CompileStatusSP();
+    return CompileStatusSP;
 })();
 var DeleteStatus = (function () {
     function DeleteStatus() {
@@ -10623,6 +10674,18 @@ var ToWebGLEnum = function (toWebglEnum) {
 var FromWebGLEnum = function (fromWebglEnum) {
     this.fromWebglEnum = fromWebglEnum;
 };
+var toWebglEnumShaderParam = new ToWebGLEnum(function (v) {
+    if (v instanceof ShaderTypeSP) {
+        return Graphics_WebGL_Raw_Enums.shaderType;
+    };
+    if (v instanceof DeleteStatusSP) {
+        return Graphics_WebGL_Raw_Enums.deleteStatus;
+    };
+    if (v instanceof CompileStatusSP) {
+        return Graphics_WebGL_Raw_Enums.compileStatus;
+    };
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 181, column 1 - line 187, column 1: " + [ v.constructor.name ]);
+});
 var toWebglEnumShader = new ToWebGLEnum(function (v) {
     if (v instanceof FragmentShader) {
         return Graphics_WebGL_Raw_Enums.fragmentShader;
@@ -10630,7 +10693,7 @@ var toWebglEnumShader = new ToWebGLEnum(function (v) {
     if (v instanceof VertexShader) {
         return Graphics_WebGL_Raw_Enums.vertexShader;
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 184, column 1 - line 190, column 1: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 191, column 1 - line 197, column 1: " + [ v.constructor.name ]);
 });
 var toWebglEnumProgramParam = new ToWebGLEnum(function (v) {
     if (v instanceof DeleteStatus) {
@@ -10651,7 +10714,7 @@ var toWebglEnumProgramParam = new ToWebGLEnum(function (v) {
     if (v instanceof ActiveUniforms) {
         return Graphics_WebGL_Raw_Enums.activeUniforms;
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 172, column 1 - line 180, column 1: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 168, column 1 - line 176, column 1: " + [ v.constructor.name ]);
 });
 var toWebglEnumDrawMode = new ToWebGLEnum(function (v) {
     if (v instanceof Points) {
@@ -10675,7 +10738,7 @@ var toWebglEnumDrawMode = new ToWebGLEnum(function (v) {
     if (v instanceof TriangleFan) {
         return Graphics_WebGL_Raw_Enums.triangleFan;
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 131, column 1 - line 140, column 1: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 127, column 1 - line 136, column 1: " + [ v.constructor.name ]);
 });
 var toWebglEnumDataType = new ToWebGLEnum(function (v) {
     if (v instanceof Byte) {
@@ -10699,7 +10762,7 @@ var toWebglEnumDataType = new ToWebGLEnum(function (v) {
     if (v instanceof Float) {
         return Graphics_WebGL_Raw_Enums["float"];
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 113, column 1 - line 122, column 1: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 109, column 1 - line 118, column 1: " + [ v.constructor.name ]);
 });
 var toWebglEnumBufferUsage = new ToWebGLEnum(function (v) {
     if (v instanceof DynamicDraw) {
@@ -10711,7 +10774,7 @@ var toWebglEnumBufferUsage = new ToWebGLEnum(function (v) {
     if (v instanceof StreamDraw) {
         return Graphics_WebGL_Raw_Enums.streamDraw;
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 99, column 1 - line 104, column 1: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 95, column 1 - line 100, column 1: " + [ v.constructor.name ]);
 });
 var toWebglEnumBufferType = new ToWebGLEnum(function (v) {
     if (v instanceof DepthBuffer) {
@@ -10723,7 +10786,7 @@ var toWebglEnumBufferType = new ToWebGLEnum(function (v) {
     if (v instanceof StencilBuffer) {
         return Graphics_WebGL_Raw_Enums.stencilBufferBit;
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 89, column 1 - line 94, column 1: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 85, column 1 - line 90, column 1: " + [ v.constructor.name ]);
 });
 var toWebglEnumArrayBufferType = new ToWebGLEnum(function (v) {
     if (v instanceof $$ArrayBuffer) {
@@ -10732,7 +10795,7 @@ var toWebglEnumArrayBufferType = new ToWebGLEnum(function (v) {
     if (v instanceof ElementArrayBuffer) {
         return Graphics_WebGL_Raw_Enums.elementArrayBuffer;
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 80, column 1 - line 84, column 1: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 76, column 1 - line 80, column 1: " + [ v.constructor.name ]);
 });
 var toWebglEnum = function (dict) {
     return dict.toWebglEnum;
@@ -10766,9 +10829,9 @@ var showWebGLError = new Prelude.Show(function (err) {
         return "WebGL Error: " + ("null value in " + (err.value0 + " (due to an OpenGL error)"));
     };
     if (err instanceof ShaderError) {
-        return "WebGL Error: " + err.value0;
+        return "Shader Error: " + err.value0;
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 27, column 1 - line 38, column 1: " + [ err.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 23, column 1 - line 34, column 1: " + [ err.constructor.name ]);
 });
 var fromWebglEnumErrorCode = new FromWebGLEnum(function (n) {
     if (n === Graphics_WebGL_Raw_Enums.noError) {
@@ -10786,7 +10849,7 @@ var fromWebglEnumErrorCode = new FromWebGLEnum(function (n) {
     if (Prelude.otherwise) {
         return UnknownError.value;
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 148, column 1 - line 156, column 1: " + [ n.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 144, column 1 - line 152, column 1: " + [ n.constructor.name ]);
 });
 var fromWebglEnum = function (dict) {
     return dict.fromWebglEnum;
@@ -10796,6 +10859,9 @@ module.exports = {
     DataSource: DataSource, 
     FragmentShader: FragmentShader, 
     VertexShader: VertexShader, 
+    ShaderTypeSP: ShaderTypeSP, 
+    DeleteStatusSP: DeleteStatusSP, 
+    CompileStatusSP: CompileStatusSP, 
     DeleteStatus: DeleteStatus, 
     LinkStatus: LinkStatus, 
     ValidateStatus: ValidateStatus, 
@@ -10855,10 +10921,11 @@ module.exports = {
     fromWebglEnumErrorCode: fromWebglEnumErrorCode, 
     showErrorCode: showErrorCode, 
     toWebglEnumProgramParam: toWebglEnumProgramParam, 
+    toWebglEnumShaderParam: toWebglEnumShaderParam, 
     toWebglEnumShader: toWebglEnumShader
 };
 
-},{"Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Eff.Alert":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Alert/index.js","Control.Monad.Eff.Console":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Console/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","Control.Monad.Reader.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Reader.Trans/index.js","Data.ArrayBuffer.Types":"/Users/gene/Programming/pure_morph/output/Data.ArrayBuffer.Types/index.js","Data.Int":"/Users/gene/Programming/pure_morph/output/Data.Int/index.js","Graphics.Canvas":"/Users/gene/Programming/pure_morph/output/Graphics.Canvas/index.js","Graphics.WebGL.Raw.Enums":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw.Enums/index.js","Graphics.WebGL.Raw.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw.Types/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Unsafe/foreign.js":[function(require,module,exports){
+},{"Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","Control.Monad.Reader.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Reader.Trans/index.js","Data.ArrayBuffer.Types":"/Users/gene/Programming/pure_morph/output/Data.ArrayBuffer.Types/index.js","Data.Int":"/Users/gene/Programming/pure_morph/output/Data.Int/index.js","Graphics.Canvas":"/Users/gene/Programming/pure_morph/output/Graphics.Canvas/index.js","Graphics.WebGL.Raw.Enums":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw.Enums/index.js","Graphics.WebGL.Raw.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw.Types/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Unsafe/foreign.js":[function(require,module,exports){
 "use strict";
 
 // module Graphics.WebGL.Unsafe
@@ -10886,8 +10953,6 @@ module.exports = {
 // Generated by psc version 0.8.0.0
 "use strict";
 var Prelude = require("Prelude");
-var Control_Monad_Eff_Console = require("Control.Monad.Eff.Console");
-var Control_Monad_Eff_Alert = require("Control.Monad.Eff.Alert");
 var Control_Monad = require("Control.Monad");
 var Control_Monad_Eff = require("Control.Monad.Eff");
 var Control_Monad_Error_Class = require("Control.Monad.Error.Class");
@@ -10940,19 +11005,37 @@ module.exports = {
     runWebgl: runWebgl
 };
 
-},{"Control.Monad":"/Users/gene/Programming/pure_morph/output/Control.Monad/index.js","Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Eff.Alert":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Alert/index.js","Control.Monad.Eff.Console":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Console/index.js","Control.Monad.Error.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Error.Class/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","Control.Monad.Reader.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Reader.Trans/index.js","Data.Either":"/Users/gene/Programming/pure_morph/output/Data.Either/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Graphics.Canvas":"/Users/gene/Programming/pure_morph/output/Graphics.Canvas/index.js","Graphics.WebGL.Methods":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Methods/index.js","Graphics.WebGL.Raw.Enums":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw.Enums/index.js","Graphics.WebGL.Raw.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw.Types/index.js","Graphics.WebGL.Shader":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Shader/index.js","Graphics.WebGL.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Types/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Main/index.js":[function(require,module,exports){
+},{"Control.Monad":"/Users/gene/Programming/pure_morph/output/Control.Monad/index.js","Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Error.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Error.Class/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","Control.Monad.Reader.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Reader.Trans/index.js","Data.Either":"/Users/gene/Programming/pure_morph/output/Data.Either/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Graphics.Canvas":"/Users/gene/Programming/pure_morph/output/Graphics.Canvas/index.js","Graphics.WebGL.Methods":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Methods/index.js","Graphics.WebGL.Raw.Enums":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw.Enums/index.js","Graphics.WebGL.Raw.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw.Types/index.js","Graphics.WebGL.Shader":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Shader/index.js","Graphics.WebGL.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Types/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Main/foreign.js":[function(require,module,exports){
+"use strict";
+
+// module Main
+
+exports.getURL = function(url) {
+  var result;
+  var request = new XMLHttpRequest();
+  request.open('GET', url, false);
+  request.addEventListener('load', function() {
+    result = request.responseText;
+  });
+  request.send();
+  return result;
+}
+
+},{}],"/Users/gene/Programming/pure_morph/output/Main/index.js":[function(require,module,exports){
 // Generated by psc version 0.8.0.0
 "use strict";
+var $foreign = require("./foreign");
 var Prelude = require("Prelude");
 var Data_Maybe = require("Data.Maybe");
 var Data_Either = require("Data.Either");
+var Control_Monad_Eff = require("Control.Monad.Eff");
 var Control_Monad_Eff_Console = require("Control.Monad.Eff.Console");
 var Control_Monad_Eff_Alert = require("Control.Monad.Eff.Alert");
-var Control_Monad_Eff = require("Control.Monad.Eff");
 var Control_Monad_Trans = require("Control.Monad.Trans");
 var Control_Monad_Except_Trans = require("Control.Monad.Except.Trans");
 var Control_Monad_Eff_Exception = require("Control.Monad.Eff.Exception");
 var Control_Monad_Eff_Class = require("Control.Monad.Eff.Class");
+var Control_Monad_Reader_Class = require("Control.Monad.Reader.Class");
 var Graphics_WebGL = require("Graphics.WebGL");
 var Graphics_WebGL_Types = require("Graphics.WebGL.Types");
 var Graphics_WebGL_Context = require("Graphics.WebGL.Context");
@@ -10960,46 +11043,61 @@ var Graphics_WebGL_Shader = require("Graphics.WebGL.Shader");
 var Graphics_WebGL_Methods = require("Graphics.WebGL.Methods");
 var Graphics_WebGL_Unsafe = require("Graphics.WebGL.Unsafe");
 var Graphics_Canvas = require("Graphics.Canvas");
-var vertSource = "precision mediump float;\nasdf\n  void main(void) {\n    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);\n      }\n  ";
-var initWebGL = function (prog) {
-    return function (attr) {
-        return function (unif) {
-            return Graphics_WebGL_Methods.clearColor(0.0)(0.0)(0.0)(1.0);
-        };
-    };
-};
-var fragSource = "\n      attribute vec3 aVertexPosition;\n\n      uniform mat4 uMVMatrix;\n      uniform mat4 uPMatrix;\n\n      void main(void) {\n          gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\n      }\n  ";
+var Graphics_WebGL_Raw = require("Graphics.WebGL.Raw");
+var Graphics_WebGL_Raw_Enums = require("Graphics.WebGL.Raw.Enums");
+var Control_Monad_Reader_Trans = require("Control.Monad.Reader.Trans");
+var initWebGL = Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function (v) {
+    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.clearColor(0.0)(0.0)(0.0)(1.0))(function () {
+        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Context.drawingBufferWidth)(function (v1) {
+            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Context.drawingBufferWidth)(function (v2) {
+                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.viewport(v)(0)(0)(v1)(v2)))(function () {
+                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.clear(v)(Graphics_WebGL_Raw_Enums.colorBufferBit)))(function () {
+                        var basicVert = $foreign.getURL("/shaders/basic.vert.glsl");
+                        var mainFrag = $foreign.getURL("/shaders/main.frag.glsl");
+                        var displayFrag = $foreign.getURL("/shaders/display.frag.glsl");
+                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.compileShadersIntoProgram(basicVert)(displayFrag))(function (v3) {
+                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.compileShadersIntoProgram(basicVert)(mainFrag))(function (v4) {
+                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.viewport(v)(0)(0)(v1)(v2)))(function () {
+                                    return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.clear(v)(Graphics_WebGL_Raw_Enums.colorBufferBit));
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
 var main = (function () {
     var handleError = function (v) {
         if (v instanceof Data_Either.Left) {
-            return Control_Monad_Eff_Console.log("WebGL error: " + Prelude.show(Graphics_WebGL_Types.showWebGLError)(v.value0));
+            return Control_Monad_Eff_Console.log(Prelude.show(Graphics_WebGL_Types.showWebGLError)(v.value0));
         };
         if (v instanceof Data_Either.Right) {
             return Prelude["return"](Control_Monad_Eff.applicativeEff)(Prelude.unit);
         };
-        throw new Error("Failed pattern match at Main line 58, column 5 - line 59, column 5: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Main line 60, column 5 - line 61, column 5: " + [ v.constructor.name ]);
     };
     return function __do() {
         var v = Graphics_Canvas.getCanvasElementById("glcanvas")();
         if (v instanceof Data_Maybe.Just) {
             var v1 = Graphics_WebGL_Context.getWebglContext(v.value0)();
             if (v1 instanceof Data_Maybe.Just) {
-                var v2 = Graphics_WebGL.runWebglWithShaders(initWebGL)(v1.value0)(vertSource)(fragSource)();
+                var v2 = Graphics_WebGL.runWebgl(initWebGL)(v1.value0)();
                 return handleError(v2)();
             };
-            throw new Error("Failed pattern match at Main line 50, column 1 - line 51, column 1: " + [ v1.constructor.name ]);
+            throw new Error("Failed pattern match at Main line 52, column 1 - line 53, column 1: " + [ v1.constructor.name ]);
         };
-        throw new Error("Failed pattern match at Main line 50, column 1 - line 51, column 1: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Main line 52, column 1 - line 53, column 1: " + [ v.constructor.name ]);
     };
 })();
 module.exports = {
     main: main, 
     initWebGL: initWebGL, 
-    fragSource: fragSource, 
-    vertSource: vertSource
+    getURL: $foreign.getURL
 };
 
-},{"Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Eff.Alert":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Alert/index.js","Control.Monad.Eff.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Class/index.js","Control.Monad.Eff.Console":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Console/index.js","Control.Monad.Eff.Exception":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Exception/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","Control.Monad.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Trans/index.js","Data.Either":"/Users/gene/Programming/pure_morph/output/Data.Either/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Graphics.Canvas":"/Users/gene/Programming/pure_morph/output/Graphics.Canvas/index.js","Graphics.WebGL":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL/index.js","Graphics.WebGL.Context":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Context/index.js","Graphics.WebGL.Methods":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Methods/index.js","Graphics.WebGL.Shader":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Shader/index.js","Graphics.WebGL.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Types/index.js","Graphics.WebGL.Unsafe":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Unsafe/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Math/foreign.js":[function(require,module,exports){
+},{"./foreign":"/Users/gene/Programming/pure_morph/output/Main/foreign.js","Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Eff.Alert":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Alert/index.js","Control.Monad.Eff.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Class/index.js","Control.Monad.Eff.Console":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Console/index.js","Control.Monad.Eff.Exception":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Exception/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","Control.Monad.Reader.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Reader.Class/index.js","Control.Monad.Reader.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Reader.Trans/index.js","Control.Monad.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Trans/index.js","Data.Either":"/Users/gene/Programming/pure_morph/output/Data.Either/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Graphics.Canvas":"/Users/gene/Programming/pure_morph/output/Graphics.Canvas/index.js","Graphics.WebGL":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL/index.js","Graphics.WebGL.Context":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Context/index.js","Graphics.WebGL.Methods":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Methods/index.js","Graphics.WebGL.Raw":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw/index.js","Graphics.WebGL.Raw.Enums":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw.Enums/index.js","Graphics.WebGL.Shader":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Shader/index.js","Graphics.WebGL.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Types/index.js","Graphics.WebGL.Unsafe":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Unsafe/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Math/foreign.js":[function(require,module,exports){
 /* global exports */
 "use strict";
 

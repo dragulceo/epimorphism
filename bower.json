@@ -17,6 +17,7 @@
   ],
   "dependencies": {
     "purescript-webgl-monad" : "/Users/gene/Programming/purescript-webgl-monad",
+    "purescript-affjax" : "*",
     "purescript-datetime" : "*",
     "purescript-random" : "*",
     "purescript-extensions" : "*",

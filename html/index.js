@@ -1654,7 +1654,669 @@ module.exports = {
     plusArray: plusArray
 };
 
-},{"Control.Alt":"/Users/gene/Programming/pure_morph/output/Control.Alt/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Data.ArrayBuffer.Types/index.js":[function(require,module,exports){
+},{"Control.Alt":"/Users/gene/Programming/pure_morph/output/Control.Alt/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Data.Array/foreign.js":[function(require,module,exports){
+/* global exports */
+"use strict";
+
+// module Data.Array
+
+//------------------------------------------------------------------------------
+// Array creation --------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+exports.range = function (start) {
+  return function (end) {
+    var step = start > end ? -1 : 1;
+    var result = [];
+    for (var i = start, n = 0; i !== end; i += step) {
+      result[n++] = i;
+    }
+    result[n] = i;
+    return result;
+  };
+};
+
+exports.replicate = function (n) {
+  return function (v) {
+    if (n < 1) return [];
+    var r = new Array(n);
+    for (var i = 0; i < n; i++) r[i] = v;
+    return r;
+  };
+};
+
+//------------------------------------------------------------------------------
+// Array size ------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+exports.length = function (xs) {
+  return xs.length;
+};
+
+//------------------------------------------------------------------------------
+// Extending arrays ------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+exports.cons = function (e) {
+  return function (l) {
+    return [e].concat(l);
+  };
+};
+
+exports.snoc = function (l) {
+  return function (e) {
+    var l1 = l.slice();
+    l1.push(e);
+    return l1;
+  };
+};
+
+//------------------------------------------------------------------------------
+// Non-indexed reads -----------------------------------------------------------
+//------------------------------------------------------------------------------
+
+exports["uncons'"] = function (empty) {
+  return function (next) {
+    return function (xs) {
+      return xs.length === 0 ? empty({}) : next(xs[0])(xs.slice(1));
+    };
+  };
+};
+
+//------------------------------------------------------------------------------
+// Indexed operations ----------------------------------------------------------
+//------------------------------------------------------------------------------
+
+exports.indexImpl = function (just) {
+  return function (nothing) {
+    return function (xs) {
+      return function (i) {
+        return i < 0 || i >= xs.length ? nothing :  just(xs[i]);
+      };
+    };
+  };
+};
+
+exports.findIndexImpl = function (just) {
+  return function (nothing) {
+    return function (f) {
+      return function (xs) {
+        for (var i = 0, l = xs.length; i < l; i++) {
+          if (f(xs[i])) return just(i);
+        }
+        return nothing;
+      };
+    };
+  };
+};
+
+exports.findLastIndexImpl = function (just) {
+  return function (nothing) {
+    return function (f) {
+      return function (xs) {
+        for (var i = xs.length - 1; i >= 0; i--) {
+          if (f(xs[i])) return just(i);
+        }
+        return nothing;
+      };
+    };
+  };
+};
+
+exports._insertAt = function (just) {
+  return function (nothing) {
+    return function (i) {
+      return function (a) {
+        return function (l) {
+          if (i < 0 || i > l.length) return nothing;
+          var l1 = l.slice();
+          l1.splice(i, 0, a);
+          return just(l1);
+        };
+      };
+    };
+  };
+};
+
+exports._deleteAt = function (just) {
+  return function (nothing) {
+    return function (i) {
+      return function (l) {
+        if (i < 0 || i >= l.length) return nothing;
+        var l1 = l.slice();
+        l1.splice(i, 1);
+        return just(l1);
+      };
+    };
+  };
+};
+
+exports._updateAt = function (just) {
+  return function (nothing) {
+    return function (i) {
+      return function (a) {
+        return function (l) {
+          if (i < 0 || i >= l.length) return nothing;
+          var l1 = l.slice();
+          l1[i] = a;
+          return just(l1);
+        };
+      };
+    };
+  };
+};
+
+//------------------------------------------------------------------------------
+// Transformations -------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+exports.reverse = function (l) {
+  return l.slice().reverse();
+};
+
+exports.concat = function (xss) {
+  var result = [];
+  for (var i = 0, l = xss.length; i < l; i++) {
+    var xs = xss[i];
+    for (var j = 0, m = xs.length; j < m; j++) {
+      result.push(xs[j]);
+    }
+  }
+  return result;
+};
+
+exports.filter = function (f) {
+  return function (xs) {
+    return xs.filter(f);
+  };
+};
+
+//------------------------------------------------------------------------------
+// Sorting ---------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+exports.sortImpl = function (f) {
+  return function (l) {
+    /* jshint maxparams: 2 */
+    return l.slice().sort(function (x, y) {
+      return f(x)(y);
+    });
+  };
+};
+
+//------------------------------------------------------------------------------
+// Subarrays -------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+exports.slice = function (s) {
+  return function (e) {
+    return function (l) {
+      return l.slice(s, e);
+    };
+  };
+};
+
+exports.drop = function (n) {
+  return function (l) {
+    return n < 1 ? l : l.slice(n);
+  };
+};
+
+//------------------------------------------------------------------------------
+// Zipping ---------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+exports.zipWith = function (f) {
+  return function (xs) {
+    return function (ys) {
+      var l = xs.length < ys.length ? xs.length : ys.length;
+      var result = new Array(l);
+      for (var i = 0; i < l; i++) {
+        result[i] = f(xs[i])(ys[i]);
+      }
+      return result;
+    };
+  };
+};
+
+},{}],"/Users/gene/Programming/pure_morph/output/Data.Array/index.js":[function(require,module,exports){
+// Generated by psc version 0.8.0.0
+"use strict";
+var $foreign = require("./foreign");
+var Prelude = require("Prelude");
+var Control_Alt = require("Control.Alt");
+var Control_Alternative = require("Control.Alternative");
+var Control_Lazy = require("Control.Lazy");
+var Control_MonadPlus = require("Control.MonadPlus");
+var Control_Plus = require("Control.Plus");
+var Data_Foldable = require("Data.Foldable");
+var Data_Functor_Invariant = require("Data.Functor.Invariant");
+var Data_Maybe = require("Data.Maybe");
+var Data_Monoid = require("Data.Monoid");
+var Data_Traversable = require("Data.Traversable");
+var Data_Tuple = require("Data.Tuple");
+var Data_Maybe_Unsafe = require("Data.Maybe.Unsafe");
+var $colon = $foreign.cons;
+var $dot$dot = $foreign.range;
+var zipWithA = function (dictApplicative) {
+    return function (f) {
+        return function (xs) {
+            return function (ys) {
+                return Data_Traversable.sequence(Data_Traversable.traversableArray)(dictApplicative)($foreign.zipWith(f)(xs)(ys));
+            };
+        };
+    };
+};
+var zip = $foreign.zipWith(Data_Tuple.Tuple.create);
+var updateAt = $foreign._updateAt(Data_Maybe.Just.create)(Data_Maybe.Nothing.value);
+var unzip = $foreign["uncons'"](function (v) {
+    return new Data_Tuple.Tuple([  ], [  ]);
+})(function (v) {
+    return function (ts) {
+        var $36 = unzip(ts);
+        return new Data_Tuple.Tuple($colon(v.value0)($36.value0), $colon(v.value1)($36.value1));
+    };
+});
+var uncons = $foreign["uncons'"](Prelude["const"](Data_Maybe.Nothing.value))(function (x) {
+    return function (xs) {
+        return new Data_Maybe.Just({
+            head: x, 
+            tail: xs
+        });
+    };
+});
+var take = $foreign.slice(0);
+var tail = $foreign["uncons'"](Prelude["const"](Data_Maybe.Nothing.value))(function (v) {
+    return function (xs) {
+        return new Data_Maybe.Just(xs);
+    };
+});
+var span = function (p) {
+    var go = function (__copy_acc) {
+        return function (__copy_xs) {
+            var acc = __copy_acc;
+            var xs = __copy_xs;
+            tco: while (true) {
+                var $42 = uncons(xs);
+                if ($42 instanceof Data_Maybe.Just && p($42.value0.head)) {
+                    var __tco_acc = $colon($42.value0.head)(acc);
+                    acc = __tco_acc;
+                    xs = $42.value0.tail;
+                    continue tco;
+                };
+                return {
+                    init: $foreign.reverse(acc), 
+                    rest: xs
+                };
+            };
+        };
+    };
+    return go([  ]);
+};
+var takeWhile = function (p) {
+    return function (xs) {
+        return (span(p)(xs)).init;
+    };
+};
+var sortBy = function (comp) {
+    return function (xs) {
+        var comp$prime = function (x) {
+            return function (y) {
+                var $46 = comp(x)(y);
+                if ($46 instanceof Prelude.GT) {
+                    return 1;
+                };
+                if ($46 instanceof Prelude.EQ) {
+                    return 0;
+                };
+                if ($46 instanceof Prelude.LT) {
+                    return -1;
+                };
+                throw new Error("Failed pattern match at Data.Array line 409, column 3 - line 414, column 1: " + [ $46.constructor.name ]);
+            };
+        };
+        return $foreign.sortImpl(comp$prime)(xs);
+    };
+};
+var sort = function (dictOrd) {
+    return function (xs) {
+        return sortBy(Prelude.compare(dictOrd))(xs);
+    };
+};
+var singleton = function (a) {
+    return [ a ];
+};
+var replicateM = function (dictMonad) {
+    return function (n) {
+        return function (m) {
+            if (n < 1) {
+                return Prelude["return"](dictMonad["__superclass_Prelude.Applicative_0"]())([  ]);
+            };
+            if (Prelude.otherwise) {
+                return Data_Traversable.sequence(Data_Traversable.traversableArray)(dictMonad["__superclass_Prelude.Applicative_0"]())($foreign.replicate(n)(m));
+            };
+            throw new Error("Failed pattern match at Data.Array line 136, column 1 - line 137, column 1: " + [ n.constructor.name, m.constructor.name ]);
+        };
+    };
+};
+var $$null = function (xs) {
+    return $foreign.length(xs) === 0;
+};
+var nubBy = function (eq) {
+    return function (xs) {
+        var $49 = uncons(xs);
+        if ($49 instanceof Data_Maybe.Just) {
+            return $colon($49.value0.head)(nubBy(eq)($foreign.filter(function (y) {
+                return !eq($49.value0.head)(y);
+            })($49.value0.tail)));
+        };
+        if ($49 instanceof Data_Maybe.Nothing) {
+            return [  ];
+        };
+        throw new Error("Failed pattern match: " + [ $49.constructor.name ]);
+    };
+};
+var nub = function (dictEq) {
+    return nubBy(Prelude.eq(dictEq));
+};
+var some = function (dictAlternative) {
+    return function (dictLazy) {
+        return function (v) {
+            return Prelude["<*>"]((dictAlternative["__superclass_Prelude.Applicative_0"]())["__superclass_Prelude.Apply_0"]())(Prelude["<$>"](((dictAlternative["__superclass_Control.Plus.Plus_1"]())["__superclass_Control.Alt.Alt_0"]())["__superclass_Prelude.Functor_0"]())($colon)(v))(Control_Lazy.defer(dictLazy)(function (v1) {
+                return many(dictAlternative)(dictLazy)(v);
+            }));
+        };
+    };
+};
+var many = function (dictAlternative) {
+    return function (dictLazy) {
+        return function (v) {
+            return Control_Alt["<|>"]((dictAlternative["__superclass_Control.Plus.Plus_1"]())["__superclass_Control.Alt.Alt_0"]())(some(dictAlternative)(dictLazy)(v))(Prelude.pure(dictAlternative["__superclass_Prelude.Applicative_0"]())([  ]));
+        };
+    };
+};
+var insertAt = $foreign._insertAt(Data_Maybe.Just.create)(Data_Maybe.Nothing.value);
+var init = function (xs) {
+    if ($$null(xs)) {
+        return Data_Maybe.Nothing.value;
+    };
+    if (Prelude.otherwise) {
+        return new Data_Maybe.Just($foreign.slice(0)($foreign.length(xs) - 1)(xs));
+    };
+    throw new Error("Failed pattern match at Data.Array line 226, column 1 - line 227, column 1: " + [ xs.constructor.name ]);
+};
+var index = $foreign.indexImpl(Data_Maybe.Just.create)(Data_Maybe.Nothing.value);
+var $bang$bang = index;
+var last = function (xs) {
+    return $bang$bang(xs)($foreign.length(xs) - 1);
+};
+var modifyAt = function (i) {
+    return function (f) {
+        return function (xs) {
+            var go = function (x) {
+                return updateAt(i)(f(x))(xs);
+            };
+            return Data_Maybe.maybe(Data_Maybe.Nothing.value)(go)($bang$bang(xs)(i));
+        };
+    };
+};
+var head = $foreign["uncons'"](Prelude["const"](Data_Maybe.Nothing.value))(function (x) {
+    return function (v) {
+        return new Data_Maybe.Just(x);
+    };
+});
+var groupBy = function (op) {
+    var go = function (__copy_acc) {
+        return function (__copy_xs) {
+            var acc = __copy_acc;
+            var xs = __copy_xs;
+            tco: while (true) {
+                var $54 = uncons(xs);
+                if ($54 instanceof Data_Maybe.Just) {
+                    var sp = span(op($54.value0.head))($54.value0.tail);
+                    var __tco_acc = $colon($colon($54.value0.head)(sp.init))(acc);
+                    acc = __tco_acc;
+                    xs = sp.rest;
+                    continue tco;
+                };
+                if ($54 instanceof Data_Maybe.Nothing) {
+                    return $foreign.reverse(acc);
+                };
+                throw new Error("Failed pattern match at Data.Array line 476, column 1 - line 477, column 1: " + [ $54.constructor.name ]);
+            };
+        };
+    };
+    return go([  ]);
+};
+var group = function (dictEq) {
+    return function (xs) {
+        return groupBy(Prelude.eq(dictEq))(xs);
+    };
+};
+var group$prime = function (dictOrd) {
+    return function ($68) {
+        return group(dictOrd["__superclass_Prelude.Eq_0"]())(sort(dictOrd)($68));
+    };
+};
+var foldM = function (dictMonad) {
+    return function (f) {
+        return function (a) {
+            return $foreign["uncons'"](function (v) {
+                return Prelude["return"](dictMonad["__superclass_Prelude.Applicative_0"]())(a);
+            })(function (b) {
+                return function (bs) {
+                    return Prelude[">>="](dictMonad["__superclass_Prelude.Bind_1"]())(f(a)(b))(function (a$prime) {
+                        return foldM(dictMonad)(f)(a$prime)(bs);
+                    });
+                };
+            });
+        };
+    };
+};
+var findLastIndex = $foreign.findLastIndexImpl(Data_Maybe.Just.create)(Data_Maybe.Nothing.value);
+var insertBy = function (cmp) {
+    return function (x) {
+        return function (ys) {
+            var i = Data_Maybe.maybe(0)(function (v) {
+                return v + 1 | 0;
+            })(findLastIndex(function (y) {
+                return Prelude["=="](Prelude.eqOrdering)(cmp(x)(y))(Prelude.GT.value);
+            })(ys));
+            return Data_Maybe_Unsafe.fromJust(insertAt(i)(x)(ys));
+        };
+    };
+};
+var insert = function (dictOrd) {
+    return insertBy(Prelude.compare(dictOrd));
+};
+var findIndex = $foreign.findIndexImpl(Data_Maybe.Just.create)(Data_Maybe.Nothing.value);
+var intersectBy = function (eq) {
+    return function (xs) {
+        return function (ys) {
+            return $foreign.filter(function (x) {
+                return Data_Maybe.isJust(findIndex(eq(x))(ys));
+            })(xs);
+        };
+    };
+};
+var intersect = function (dictEq) {
+    return intersectBy(Prelude.eq(dictEq));
+};
+var filterM = function (dictMonad) {
+    return function (p) {
+        return $foreign["uncons'"](function (v) {
+            return Prelude.pure(dictMonad["__superclass_Prelude.Applicative_0"]())([  ]);
+        })(function (x) {
+            return function (xs) {
+                return Prelude.bind(dictMonad["__superclass_Prelude.Bind_1"]())(p(x))(function (v) {
+                    return Prelude.bind(dictMonad["__superclass_Prelude.Bind_1"]())(filterM(dictMonad)(p)(xs))(function (v1) {
+                        return Prelude["return"](dictMonad["__superclass_Prelude.Applicative_0"]())((function () {
+                            if (v) {
+                                return $colon(x)(v1);
+                            };
+                            if (!v) {
+                                return v1;
+                            };
+                            throw new Error("Failed pattern match: " + [ v.constructor.name ]);
+                        })());
+                    });
+                });
+            };
+        });
+    };
+};
+var elemLastIndex = function (dictEq) {
+    return function (x) {
+        return findLastIndex(function (v) {
+            return Prelude["=="](dictEq)(v)(x);
+        });
+    };
+};
+var elemIndex = function (dictEq) {
+    return function (x) {
+        return findIndex(function (v) {
+            return Prelude["=="](dictEq)(v)(x);
+        });
+    };
+};
+var dropWhile = function (p) {
+    return function (xs) {
+        return (span(p)(xs)).rest;
+    };
+};
+var deleteAt = $foreign._deleteAt(Data_Maybe.Just.create)(Data_Maybe.Nothing.value);
+var deleteBy = function (v) {
+    return function (v1) {
+        return function (v2) {
+            if (v2.length === 0) {
+                return [  ];
+            };
+            return Data_Maybe.maybe(v2)(function (i) {
+                return Data_Maybe_Unsafe.fromJust(deleteAt(i)(v2));
+            })(findIndex(v(v1))(v2));
+        };
+    };
+};
+var unionBy = function (eq) {
+    return function (xs) {
+        return function (ys) {
+            return Prelude["++"](Prelude.semigroupArray)(xs)(Data_Foldable.foldl(Data_Foldable.foldableArray)(Prelude.flip(deleteBy(eq)))(nubBy(eq)(ys))(xs));
+        };
+    };
+};
+var union = function (dictEq) {
+    return unionBy(Prelude["=="](dictEq));
+};
+var $$delete = function (dictEq) {
+    return deleteBy(Prelude.eq(dictEq));
+};
+var $bslash$bslash = function (dictEq) {
+    return function (xs) {
+        return function (ys) {
+            if ($$null(xs)) {
+                return [  ];
+            };
+            if (Prelude.otherwise) {
+                return $foreign["uncons'"](Prelude["const"](xs))(function (y) {
+                    return function (ys2) {
+                        return $bslash$bslash(dictEq)($$delete(dictEq)(y)(xs))(ys2);
+                    };
+                })(ys);
+            };
+            throw new Error("Failed pattern match: " + [ xs.constructor.name, ys.constructor.name ]);
+        };
+    };
+};
+var concatMap = Prelude.flip(Prelude.bind(Prelude.bindArray));
+var mapMaybe = function (f) {
+    return concatMap(function ($69) {
+        return Data_Maybe.maybe([  ])(singleton)(f($69));
+    });
+};
+var catMaybes = mapMaybe(Prelude.id(Prelude.categoryFn));
+var alterAt = function (i) {
+    return function (f) {
+        return function (xs) {
+            var go = function (x) {
+                var $66 = f(x);
+                if ($66 instanceof Data_Maybe.Nothing) {
+                    return deleteAt(i)(xs);
+                };
+                if ($66 instanceof Data_Maybe.Just) {
+                    return updateAt(i)($66.value0)(xs);
+                };
+                throw new Error("Failed pattern match at Data.Array line 349, column 3 - line 358, column 1: " + [ $66.constructor.name ]);
+            };
+            return Data_Maybe.maybe(Data_Maybe.Nothing.value)(go)($bang$bang(xs)(i));
+        };
+    };
+};
+module.exports = {
+    foldM: foldM, 
+    unzip: unzip, 
+    zip: zip, 
+    zipWithA: zipWithA, 
+    intersectBy: intersectBy, 
+    intersect: intersect, 
+    "\\\\": $bslash$bslash, 
+    deleteBy: deleteBy, 
+    "delete": $$delete, 
+    unionBy: unionBy, 
+    union: union, 
+    nubBy: nubBy, 
+    nub: nub, 
+    groupBy: groupBy, 
+    "group'": group$prime, 
+    group: group, 
+    span: span, 
+    dropWhile: dropWhile, 
+    takeWhile: takeWhile, 
+    take: take, 
+    sortBy: sortBy, 
+    sort: sort, 
+    catMaybes: catMaybes, 
+    mapMaybe: mapMaybe, 
+    filterM: filterM, 
+    concatMap: concatMap, 
+    alterAt: alterAt, 
+    modifyAt: modifyAt, 
+    updateAt: updateAt, 
+    deleteAt: deleteAt, 
+    insertAt: insertAt, 
+    findLastIndex: findLastIndex, 
+    findIndex: findIndex, 
+    elemLastIndex: elemLastIndex, 
+    elemIndex: elemIndex, 
+    index: index, 
+    "!!": $bang$bang, 
+    uncons: uncons, 
+    init: init, 
+    tail: tail, 
+    last: last, 
+    head: head, 
+    insertBy: insertBy, 
+    insert: insert, 
+    ":": $colon, 
+    "null": $$null, 
+    many: many, 
+    some: some, 
+    replicateM: replicateM, 
+    "..": $dot$dot, 
+    singleton: singleton, 
+    zipWith: $foreign.zipWith, 
+    drop: $foreign.drop, 
+    slice: $foreign.slice, 
+    filter: $foreign.filter, 
+    concat: $foreign.concat, 
+    reverse: $foreign.reverse, 
+    snoc: $foreign.snoc, 
+    cons: $foreign.cons, 
+    length: $foreign.length, 
+    replicate: $foreign.replicate, 
+    range: $foreign.range
+};
+
+},{"./foreign":"/Users/gene/Programming/pure_morph/output/Data.Array/foreign.js","Control.Alt":"/Users/gene/Programming/pure_morph/output/Control.Alt/index.js","Control.Alternative":"/Users/gene/Programming/pure_morph/output/Control.Alternative/index.js","Control.Lazy":"/Users/gene/Programming/pure_morph/output/Control.Lazy/index.js","Control.MonadPlus":"/Users/gene/Programming/pure_morph/output/Control.MonadPlus/index.js","Control.Plus":"/Users/gene/Programming/pure_morph/output/Control.Plus/index.js","Data.Foldable":"/Users/gene/Programming/pure_morph/output/Data.Foldable/index.js","Data.Functor.Invariant":"/Users/gene/Programming/pure_morph/output/Data.Functor.Invariant/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Data.Maybe.Unsafe":"/Users/gene/Programming/pure_morph/output/Data.Maybe.Unsafe/index.js","Data.Monoid":"/Users/gene/Programming/pure_morph/output/Data.Monoid/index.js","Data.Traversable":"/Users/gene/Programming/pure_morph/output/Data.Traversable/index.js","Data.Tuple":"/Users/gene/Programming/pure_morph/output/Data.Tuple/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Data.ArrayBuffer.Types/index.js":[function(require,module,exports){
 // Generated by psc version 0.8.0.0
 "use strict";
 module.exports = {};
@@ -5573,7 +6235,115 @@ module.exports = {
     bitraversableTuple: bitraversableTuple
 };
 
-},{"Control.Biapplicative":"/Users/gene/Programming/pure_morph/output/Control.Biapplicative/index.js","Control.Biapply":"/Users/gene/Programming/pure_morph/output/Control.Biapply/index.js","Control.Comonad":"/Users/gene/Programming/pure_morph/output/Control.Comonad/index.js","Control.Extend":"/Users/gene/Programming/pure_morph/output/Control.Extend/index.js","Control.Lazy":"/Users/gene/Programming/pure_morph/output/Control.Lazy/index.js","Data.Bifoldable":"/Users/gene/Programming/pure_morph/output/Data.Bifoldable/index.js","Data.Bifunctor":"/Users/gene/Programming/pure_morph/output/Data.Bifunctor/index.js","Data.Bitraversable":"/Users/gene/Programming/pure_morph/output/Data.Bitraversable/index.js","Data.Foldable":"/Users/gene/Programming/pure_morph/output/Data.Foldable/index.js","Data.Functor.Invariant":"/Users/gene/Programming/pure_morph/output/Data.Functor.Invariant/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Data.Maybe.First":"/Users/gene/Programming/pure_morph/output/Data.Maybe.First/index.js","Data.Monoid":"/Users/gene/Programming/pure_morph/output/Data.Monoid/index.js","Data.Traversable":"/Users/gene/Programming/pure_morph/output/Data.Traversable/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Graphics.Canvas/foreign.js":[function(require,module,exports){
+},{"Control.Biapplicative":"/Users/gene/Programming/pure_morph/output/Control.Biapplicative/index.js","Control.Biapply":"/Users/gene/Programming/pure_morph/output/Control.Biapply/index.js","Control.Comonad":"/Users/gene/Programming/pure_morph/output/Control.Comonad/index.js","Control.Extend":"/Users/gene/Programming/pure_morph/output/Control.Extend/index.js","Control.Lazy":"/Users/gene/Programming/pure_morph/output/Control.Lazy/index.js","Data.Bifoldable":"/Users/gene/Programming/pure_morph/output/Data.Bifoldable/index.js","Data.Bifunctor":"/Users/gene/Programming/pure_morph/output/Data.Bifunctor/index.js","Data.Bitraversable":"/Users/gene/Programming/pure_morph/output/Data.Bitraversable/index.js","Data.Foldable":"/Users/gene/Programming/pure_morph/output/Data.Foldable/index.js","Data.Functor.Invariant":"/Users/gene/Programming/pure_morph/output/Data.Functor.Invariant/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Data.Maybe.First":"/Users/gene/Programming/pure_morph/output/Data.Maybe.First/index.js","Data.Monoid":"/Users/gene/Programming/pure_morph/output/Data.Monoid/index.js","Data.Traversable":"/Users/gene/Programming/pure_morph/output/Data.Traversable/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Data.TypedArray/foreign.js":[function(require,module,exports){
+/* global exports */
+
+// module Data.TypedArray
+
+
+    "use strict";
+
+    // conversion from and to typed arrays
+    exports.asInt8Array = function(array)
+        {var res = new Int8Array(array);
+         return res;};
+
+    exports.asUint8Array = function (array)
+        {var res = new Uint8Array(array);
+         return res;};
+
+    exports.asUint8ClampedArray = function (array)
+        {var res = new Uint8ClampedArray(array);
+         return res;};
+
+    exports.asInt16Array = function (array)
+        {var res = new Int16Array (array);
+         return res;};
+
+    exports.asUint16Array = function (array)
+        {var res = new Uint16Array (array);
+         return res;};
+
+    exports.asInt32Array = function (array)
+        {var res = new Int32Array (array);
+         return res;};
+
+    exports.asUint32Array = function (array)
+        {var res = new Uint32Array (array);
+         return res;};
+
+    exports.asFloat32Array = function (array)
+        {var res = new Float32Array (array);
+         return res;};
+
+    exports.asFloat64Array = function (array)
+        {var res = new Float64Array (array);
+         return res;};
+
+    exports.asArray = function (arrayBuffer)
+        {var res = Array.prototype.slice.call(arrayBuffer);
+         return res;};
+
+    exports.length = function (arrayBuffer)
+        {return arrayBuffer.length;};
+
+    exports.byteLength = function (arrayBuffer)
+        {return arrayBuffer.byteLength;};
+
+    exports.insertAt = function (index) {
+        return function (a) {
+          return function (l) {
+            var l1 = l.slice();
+            l1.splice(index, 0, a);
+            return l1;
+          };
+        };
+    };
+
+    exports.unsafeIndex = function (xs) {
+        return function(n) {
+          return xs[n];
+        };
+    };
+
+},{}],"/Users/gene/Programming/pure_morph/output/Data.TypedArray/index.js":[function(require,module,exports){
+// Generated by psc version 0.8.0.0
+"use strict";
+var $foreign = require("./foreign");
+var Data_ArrayBuffer_Types = require("Data.ArrayBuffer.Types");
+var Data_Maybe = require("Data.Maybe");
+var Prelude = require("Prelude");
+var $bang$bang = function (xs) {
+    return function (n) {
+        var $0 = n < 0 || n >= $foreign.length(xs);
+        if ($0) {
+            return Data_Maybe.Nothing.value;
+        };
+        if (!$0) {
+            return new Data_Maybe.Just($foreign.unsafeIndex(xs)(n));
+        };
+        throw new Error("Failed pattern match at Data.TypedArray line 51, column 1 - line 52, column 1: " + [ $0.constructor.name ]);
+    };
+};
+module.exports = {
+    "!!": $bang$bang, 
+    unsafeIndex: $foreign.unsafeIndex, 
+    insertAt: $foreign.insertAt, 
+    byteLength: $foreign.byteLength, 
+    length: $foreign.length, 
+    asArray: $foreign.asArray, 
+    asFloat64Array: $foreign.asFloat64Array, 
+    asFloat32Array: $foreign.asFloat32Array, 
+    asUint32Array: $foreign.asUint32Array, 
+    asInt32Array: $foreign.asInt32Array, 
+    asUint16Array: $foreign.asUint16Array, 
+    asInt16Array: $foreign.asInt16Array, 
+    asUint8ClampedArray: $foreign.asUint8ClampedArray, 
+    asUint8Array: $foreign.asUint8Array, 
+    asInt8Array: $foreign.asInt8Array
+};
+
+},{"./foreign":"/Users/gene/Programming/pure_morph/output/Data.TypedArray/foreign.js","Data.ArrayBuffer.Types":"/Users/gene/Programming/pure_morph/output/Data.ArrayBuffer.Types/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Graphics.Canvas/foreign.js":[function(require,module,exports){
 /* global exports */
 "use strict";
 
@@ -6780,8 +7550,8 @@ var linkProgram = function (prog) {
         return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.linkProgram(v)(prog));
     });
 };
-var isContextLost = Prelude[">>="](Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function ($162) {
-    return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.isContextLost($162));
+var isContextLost = Prelude[">>="](Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function ($170) {
+    return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.isContextLost($170));
 });
 var getShaderParameter = function (prog) {
     return function (param) {
@@ -6793,7 +7563,7 @@ var getShaderParameter = function (prog) {
                 if (v1 instanceof Data_Maybe.Nothing) {
                     return Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(new Graphics_WebGL_Types.NullValue("getShaderParameter"));
                 };
-                throw new Error("Failed pattern match at Graphics.WebGL.Methods line 90, column 1 - line 91, column 1: " + [ v1.constructor.name ]);
+                throw new Error("Failed pattern match at Graphics.WebGL.Methods line 104, column 1 - line 105, column 1: " + [ v1.constructor.name ]);
             });
         });
     };
@@ -6807,7 +7577,7 @@ var getShaderInfoLog = function (shader) {
             if (v1 instanceof Data_Maybe.Nothing) {
                 return Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(new Graphics_WebGL_Types.NullValue("getShaderInfoLog"));
             };
-            throw new Error("Failed pattern match at Graphics.WebGL.Methods line 98, column 1 - line 99, column 1: " + [ v1.constructor.name ]);
+            throw new Error("Failed pattern match at Graphics.WebGL.Methods line 112, column 1 - line 113, column 1: " + [ v1.constructor.name ]);
         });
     });
 };
@@ -6821,13 +7591,13 @@ var getProgramParameter = function (prog) {
                 if (v1 instanceof Data_Maybe.Nothing) {
                     return Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(new Graphics_WebGL_Types.NullValue("getProgramParameter"));
                 };
-                throw new Error("Failed pattern match at Graphics.WebGL.Methods line 82, column 1 - line 83, column 1: " + [ v1.constructor.name ]);
+                throw new Error("Failed pattern match at Graphics.WebGL.Methods line 96, column 1 - line 97, column 1: " + [ v1.constructor.name ]);
             });
         });
     };
 };
-var getError = Prelude[">>="](Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function ($163) {
-    return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.getError($163));
+var getError = Prelude[">>="](Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function ($171) {
+    return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.getError($171));
 });
 var enableVertexAttribArray = function (v) {
     return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function (v1) {
@@ -6843,6 +7613,17 @@ var drawArrays = function (mode) {
         };
     };
 };
+var createTexture = Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Prelude[">>="](Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function ($172) {
+    return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.createTexture($172));
+}))(function (v) {
+    if (v instanceof Data_Maybe.Just) {
+        return Prelude["return"](Control_Monad_Reader_Trans.applicativeReaderT(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff)))(v.value0);
+    };
+    if (v instanceof Data_Maybe.Nothing) {
+        return Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(new Graphics_WebGL_Types.NullValue("createTexture"));
+    };
+    throw new Error("Failed pattern match at Graphics.WebGL.Methods line 53, column 1 - line 54, column 1: " + [ v.constructor.name ]);
+});
 var createShader = function (stype) {
     return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function (v) {
         return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.createShader(v)(Graphics_WebGL_Types.toWebglEnum(Graphics_WebGL_Types.toWebglEnumShader)(stype))))(function (v1) {
@@ -6852,7 +7633,7 @@ var createShader = function (stype) {
             if (v1 instanceof Data_Maybe.Nothing) {
                 return Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(new Graphics_WebGL_Types.NullValue("createShader"));
             };
-            throw new Error("Failed pattern match at Graphics.WebGL.Methods line 61, column 1 - line 62, column 1: " + [ v1.constructor.name ]);
+            throw new Error("Failed pattern match at Graphics.WebGL.Methods line 75, column 1 - line 76, column 1: " + [ v1.constructor.name ]);
         });
     });
 };
@@ -6864,11 +7645,22 @@ var createProgram = Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_
         if (v1 instanceof Data_Maybe.Nothing) {
             return Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(new Graphics_WebGL_Types.NullValue("createProgram"));
         };
-        throw new Error("Failed pattern match at Graphics.WebGL.Methods line 53, column 1 - line 54, column 1: " + [ v1.constructor.name ]);
+        throw new Error("Failed pattern match at Graphics.WebGL.Methods line 67, column 1 - line 68, column 1: " + [ v1.constructor.name ]);
     });
 });
-var createBuffer = Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Prelude[">>="](Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function ($164) {
-    return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.createBuffer($164));
+var createFramebuffer = Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Prelude[">>="](Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function ($173) {
+    return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.createFramebuffer($173));
+}))(function (v) {
+    if (v instanceof Data_Maybe.Just) {
+        return Prelude["return"](Control_Monad_Reader_Trans.applicativeReaderT(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff)))(v.value0);
+    };
+    if (v instanceof Data_Maybe.Nothing) {
+        return Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(new Graphics_WebGL_Types.NullValue("createFramebuffer"));
+    };
+    throw new Error("Failed pattern match at Graphics.WebGL.Methods line 60, column 1 - line 61, column 1: " + [ v.constructor.name ]);
+});
+var createBuffer = Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Prelude[">>="](Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function ($174) {
+    return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.createBuffer($174));
 }))(function (v) {
     if (v instanceof Data_Maybe.Just) {
         return Prelude["return"](Control_Monad_Reader_Trans.applicativeReaderT(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff)))(v.value0);
@@ -6960,6 +7752,8 @@ module.exports = {
     drawArrays: drawArrays, 
     createShader: createShader, 
     createProgram: createProgram, 
+    createFramebuffer: createFramebuffer, 
+    createTexture: createTexture, 
     createBuffer: createBuffer, 
     compileShader: compileShader, 
     clearColor: clearColor, 
@@ -10684,7 +11478,7 @@ var toWebglEnumShaderParam = new ToWebGLEnum(function (v) {
     if (v instanceof CompileStatusSP) {
         return Graphics_WebGL_Raw_Enums.compileStatus;
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 181, column 1 - line 187, column 1: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 183, column 1 - line 189, column 1: " + [ v.constructor.name ]);
 });
 var toWebglEnumShader = new ToWebGLEnum(function (v) {
     if (v instanceof FragmentShader) {
@@ -10693,7 +11487,7 @@ var toWebglEnumShader = new ToWebGLEnum(function (v) {
     if (v instanceof VertexShader) {
         return Graphics_WebGL_Raw_Enums.vertexShader;
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 191, column 1 - line 197, column 1: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 193, column 1 - line 199, column 1: " + [ v.constructor.name ]);
 });
 var toWebglEnumProgramParam = new ToWebGLEnum(function (v) {
     if (v instanceof DeleteStatus) {
@@ -10714,7 +11508,7 @@ var toWebglEnumProgramParam = new ToWebGLEnum(function (v) {
     if (v instanceof ActiveUniforms) {
         return Graphics_WebGL_Raw_Enums.activeUniforms;
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 168, column 1 - line 176, column 1: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 170, column 1 - line 178, column 1: " + [ v.constructor.name ]);
 });
 var toWebglEnumDrawMode = new ToWebGLEnum(function (v) {
     if (v instanceof Points) {
@@ -10738,7 +11532,7 @@ var toWebglEnumDrawMode = new ToWebGLEnum(function (v) {
     if (v instanceof TriangleFan) {
         return Graphics_WebGL_Raw_Enums.triangleFan;
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 127, column 1 - line 136, column 1: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 129, column 1 - line 138, column 1: " + [ v.constructor.name ]);
 });
 var toWebglEnumDataType = new ToWebGLEnum(function (v) {
     if (v instanceof Byte) {
@@ -10762,7 +11556,7 @@ var toWebglEnumDataType = new ToWebGLEnum(function (v) {
     if (v instanceof Float) {
         return Graphics_WebGL_Raw_Enums["float"];
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 109, column 1 - line 118, column 1: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 111, column 1 - line 120, column 1: " + [ v.constructor.name ]);
 });
 var toWebglEnumBufferUsage = new ToWebGLEnum(function (v) {
     if (v instanceof DynamicDraw) {
@@ -10774,7 +11568,7 @@ var toWebglEnumBufferUsage = new ToWebGLEnum(function (v) {
     if (v instanceof StreamDraw) {
         return Graphics_WebGL_Raw_Enums.streamDraw;
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 95, column 1 - line 100, column 1: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 97, column 1 - line 102, column 1: " + [ v.constructor.name ]);
 });
 var toWebglEnumBufferType = new ToWebGLEnum(function (v) {
     if (v instanceof DepthBuffer) {
@@ -10786,7 +11580,7 @@ var toWebglEnumBufferType = new ToWebGLEnum(function (v) {
     if (v instanceof StencilBuffer) {
         return Graphics_WebGL_Raw_Enums.stencilBufferBit;
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 85, column 1 - line 90, column 1: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 87, column 1 - line 92, column 1: " + [ v.constructor.name ]);
 });
 var toWebglEnumArrayBufferType = new ToWebGLEnum(function (v) {
     if (v instanceof $$ArrayBuffer) {
@@ -10795,7 +11589,7 @@ var toWebglEnumArrayBufferType = new ToWebGLEnum(function (v) {
     if (v instanceof ElementArrayBuffer) {
         return Graphics_WebGL_Raw_Enums.elementArrayBuffer;
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 76, column 1 - line 80, column 1: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 78, column 1 - line 82, column 1: " + [ v.constructor.name ]);
 });
 var toWebglEnum = function (dict) {
     return dict.toWebglEnum;
@@ -10849,7 +11643,7 @@ var fromWebglEnumErrorCode = new FromWebGLEnum(function (n) {
     if (Prelude.otherwise) {
         return UnknownError.value;
     };
-    throw new Error("Failed pattern match at Graphics.WebGL.Types line 144, column 1 - line 152, column 1: " + [ n.constructor.name ]);
+    throw new Error("Failed pattern match at Graphics.WebGL.Types line 146, column 1 - line 154, column 1: " + [ n.constructor.name ]);
 });
 var fromWebglEnum = function (dict) {
     return dict.fromWebglEnum;
@@ -10935,7 +11729,9 @@ exports.unsafeCoerce = function unsafeCoerce(x) {
 }
 
 exports.unsafeLog = function unsafeLog(x) {
-  console.log(x);
+  return function() {
+    console.log(x);
+  }
 }
 
 },{}],"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Unsafe/index.js":[function(require,module,exports){
@@ -11021,6 +11817,30 @@ exports.getURL = function(url) {
   return result;
 }
 
+exports.unsafeNull = null
+
+//exports.requestAnimationFrame = function(x) {
+  //return function() { return requestAnimationFrame(x) }
+  //alert("hey!")
+//}
+
+exports.requestAnimationFrame = function(x){
+  if (typeof rAF === 'undefined') {
+    var rAF = (function(){
+      return  window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame    ||
+        function( callback ){
+          window.setTimeout(callback, 1000 / 60);
+        };
+    })();
+  }
+  return function(){
+    console.log("hey!")
+    return rAF(x);
+  };
+};
+
 },{}],"/Users/gene/Programming/pure_morph/output/Main/index.js":[function(require,module,exports){
 // Generated by psc version 0.8.0.0
 "use strict";
@@ -11028,6 +11848,11 @@ var $foreign = require("./foreign");
 var Prelude = require("Prelude");
 var Data_Maybe = require("Data.Maybe");
 var Data_Either = require("Data.Either");
+var Data_Tuple = require("Data.Tuple");
+var Data_Array = require("Data.Array");
+var Data_TypedArray = require("Data.TypedArray");
+var Data_Int = require("Data.Int");
+var Data_Function = require("Data.Function");
 var Control_Monad_Eff = require("Control.Monad.Eff");
 var Control_Monad_Eff_Console = require("Control.Monad.Eff.Console");
 var Control_Monad_Eff_Alert = require("Control.Monad.Eff.Alert");
@@ -11036,6 +11861,7 @@ var Control_Monad_Except_Trans = require("Control.Monad.Except.Trans");
 var Control_Monad_Eff_Exception = require("Control.Monad.Eff.Exception");
 var Control_Monad_Eff_Class = require("Control.Monad.Eff.Class");
 var Control_Monad_Reader_Class = require("Control.Monad.Reader.Class");
+var Control_Monad_Reader_Trans = require("Control.Monad.Reader.Trans");
 var Graphics_WebGL = require("Graphics.WebGL");
 var Graphics_WebGL_Types = require("Graphics.WebGL.Types");
 var Graphics_WebGL_Context = require("Graphics.WebGL.Context");
@@ -11045,20 +11871,27 @@ var Graphics_WebGL_Unsafe = require("Graphics.WebGL.Unsafe");
 var Graphics_Canvas = require("Graphics.Canvas");
 var Graphics_WebGL_Raw = require("Graphics.WebGL.Raw");
 var Graphics_WebGL_Raw_Enums = require("Graphics.WebGL.Raw.Enums");
-var Control_Monad_Reader_Trans = require("Control.Monad.Reader.Trans");
-var initWebGL = Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function (v) {
-    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.clearColor(0.0)(0.0)(0.0)(1.0))(function () {
-        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Context.drawingBufferWidth)(function (v1) {
-            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Context.drawingBufferWidth)(function (v2) {
-                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.viewport(v)(0)(0)(v1)(v2)))(function () {
-                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.clear(v)(Graphics_WebGL_Raw_Enums.colorBufferBit)))(function () {
-                        var basicVert = $foreign.getURL("/shaders/basic.vert.glsl");
-                        var mainFrag = $foreign.getURL("/shaders/main.frag.glsl");
-                        var displayFrag = $foreign.getURL("/shaders/display.frag.glsl");
-                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.compileShadersIntoProgram(basicVert)(displayFrag))(function (v3) {
-                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.compileShadersIntoProgram(basicVert)(mainFrag))(function (v4) {
-                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.viewport(v)(0)(0)(v1)(v2)))(function () {
-                                    return Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.clear(v)(Graphics_WebGL_Raw_Enums.colorBufferBit));
+var Graphics_WebGL_Raw_Types = require("Graphics.WebGL.Raw.Types");
+var test = function __do() {
+    Graphics_WebGL_Unsafe.unsafeLog("asdf")();
+    return Prelude.unit;
+};
+var initTex = function (dim) {
+    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function (v) {
+        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.createTexture)(function (v1) {
+            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.createFramebuffer)(function (v2) {
+                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.bindTexture(v)(Graphics_WebGL_Raw_Enums.texture2d)(v1)))(function () {
+                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.texParameteri(v)(Graphics_WebGL_Raw_Enums.texture2d)(Graphics_WebGL_Raw_Enums.textureWrapS)(Graphics_WebGL_Raw_Enums.clampToEdge)))(function () {
+                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.texParameteri(v)(Graphics_WebGL_Raw_Enums.texture2d)(Graphics_WebGL_Raw_Enums.textureWrapT)(Graphics_WebGL_Raw_Enums.clampToEdge)))(function () {
+                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.texParameteri(v)(Graphics_WebGL_Raw_Enums.texture2d)(Graphics_WebGL_Raw_Enums.textureMinFilter)(Graphics_WebGL_Raw_Enums.linear)))(function () {
+                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.texParameteri(v)(Graphics_WebGL_Raw_Enums.texture2d)(Graphics_WebGL_Raw_Enums.textureMagFilter)(Graphics_WebGL_Raw_Enums.linear)))(function () {
+                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.texImage2D_(v)(Graphics_WebGL_Raw_Enums.texture2d)(0)(Graphics_WebGL_Raw_Enums.rgba)(dim)(dim)(0)(Graphics_WebGL_Raw_Enums.rgba)(Graphics_WebGL_Raw_Enums.unsignedByte)($foreign.unsafeNull)))(function () {
+                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.bindFramebuffer(v)(Graphics_WebGL_Raw_Enums.framebuffer)(v2)))(function () {
+                                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.framebufferTexture2D(v)(Graphics_WebGL_Raw_Enums.framebuffer)(Graphics_WebGL_Raw_Enums.colorAttachment0)(Graphics_WebGL_Raw_Enums.texture2d)(v1)(0)))(function () {
+                                                return Prelude["return"](Control_Monad_Reader_Trans.applicativeReaderT(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff)))(new Data_Tuple.Tuple(v1, v2));
+                                            });
+                                        });
+                                    });
                                 });
                             });
                         });
@@ -11067,7 +11900,121 @@ var initWebGL = Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Mona
             });
         });
     });
-});
+};
+var initWebGL = function (dim) {
+    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function (v) {
+        var basicVert = $foreign.getURL("/shaders/basic.vert.glsl");
+        var mainFrag = $foreign.getURL("/shaders/main.frag.glsl");
+        var displayFrag = $foreign.getURL("/shaders/display.frag.glsl");
+        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.compileShadersIntoProgram(basicVert)(mainFrag))(function (v1) {
+            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.compileShadersIntoProgram(basicVert)(displayFrag))(function (v2) {
+                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.getAttrBindings(v2))(function (v3) {
+                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.getAttrBindings(v2))(function (v4) {
+                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(initTex(dim))(function (v5) {
+                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(initTex(dim))(function (v6) {
+                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.createBuffer)(function (v7) {
+                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.bindBuffer((Graphics_WebGL_Types["ArrayBuffer"]).value)(v7))(function () {
+                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.bufferData((Graphics_WebGL_Types["ArrayBuffer"]).value)(new Graphics_WebGL_Types.DataSource(Data_TypedArray.asFloat32Array([ -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0 ])))(Graphics_WebGL_Types.StaticDraw.value))(function () {
+                                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.enableVertexAttribArray(v4.a_position))(function () {
+                                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.vertexAttribPointer(v4.a_position)(2)(Graphics_WebGL_Types.Float.value)(false)(0)(0))(function () {
+                                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.enableVertexAttribArray(v3.a_position))(function () {
+                                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.vertexAttribPointer(v3.a_position)(2)(Graphics_WebGL_Types.Float.value)(false)(0)(0))(function () {
+                                                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Context.drawingBufferWidth)(function (v8) {
+                                                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Context.drawingBufferWidth)(function (v9) {
+                                                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.viewport(v)(0)(0)(v8)(v9)))(function () {
+                                                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.clearColor(0.0)(0.0)(0.0)(1.0))(function () {
+                                                                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.clear(v)(Graphics_WebGL_Raw_Enums.colorBufferBit)))(function () {
+                                                                                return Prelude["return"](Control_Monad_Reader_Trans.applicativeReaderT(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff)))({
+                                                                                    displayProg: v2, 
+                                                                                    mainProg: v1, 
+                                                                                    ts: new Data_Tuple.Tuple(v5.value0, v6.value0), 
+                                                                                    fbs: new Data_Tuple.Tuple(v5.value1, v6.value1)
+                                                                                });
+                                                                            });
+                                                                        });
+                                                                    });
+                                                                });
+                                                            });
+                                                        });
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+};
+var animate = function (pd) {
+    return function (count) {
+        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Reader_Class.ask(Control_Monad_Reader_Trans.monadReaderReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))))(function (v) {
+            var tm = (function () {
+                var $39 = count % 2 === 0;
+                if ($39) {
+                    return Data_Tuple.fst(pd.ts);
+                };
+                if (!$39) {
+                    return Data_Tuple.snd(pd.ts);
+                };
+                throw new Error("Failed pattern match at Main line 99, column 7 - line 100, column 3: " + [ $39.constructor.name ]);
+            })();
+            var td = (function () {
+                var $40 = count % 2 === 1;
+                if ($40) {
+                    return Data_Tuple.fst(pd.ts);
+                };
+                if (!$40) {
+                    return Data_Tuple.snd(pd.ts);
+                };
+                throw new Error("Failed pattern match at Main line 100, column 7 - line 101, column 3: " + [ $40.constructor.name ]);
+            })();
+            var fb = (function () {
+                var $41 = count % 2 === 1;
+                if ($41) {
+                    return Data_Tuple.fst(pd.fbs);
+                };
+                if (!$41) {
+                    return Data_Tuple.snd(pd.fbs);
+                };
+                throw new Error("Failed pattern match at Main line 101, column 7 - line 104, column 3: " + [ $41.constructor.name ]);
+            })();
+            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.useProgram(v)(pd.mainProg)))(function () {
+                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.bindTexture(v)(Graphics_WebGL_Raw_Enums.texture2d)(tm)))(function () {
+                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.bindFramebuffer(v)(Graphics_WebGL_Raw_Enums.framebuffer)(fb)))(function () {
+                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.getUniformBindings(pd.mainProg))(function (v1) {
+                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.uniform1f(v1.kernel_dim)(1024.0))(function () {
+                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.uniform1f(v1.time)(Data_Int.toNumber(count / 1000 | 0)))(function () {
+                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.drawArrays(Graphics_WebGL_Types.Triangles.value)(0)(6))(function () {
+                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.useProgram(v)(pd.displayProg)))(function () {
+                                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.bindTexture(v)(Graphics_WebGL_Raw_Enums.texture2d)(td)))(function () {
+                                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.bindFramebuffer(v)(Graphics_WebGL_Raw_Enums.framebuffer)($foreign.unsafeNull)))(function () {
+                                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.getUniformBindings(pd.displayProg))(function (v2) {
+                                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.uniform1f(v2.kernel_dim)(1024.0))(function () {
+                                                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.drawArrays(Graphics_WebGL_Types.Triangles.value)(0)(6))(function () {
+                                                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))($foreign.requestAnimationFrame(test)))(function () {
+                                                                    return Prelude["return"](Control_Monad_Reader_Trans.applicativeReaderT(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff)))(Prelude.unit);
+                                                                });
+                                                            });
+                                                        });
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    };
+};
 var main = (function () {
     var handleError = function (v) {
         if (v instanceof Data_Either.Left) {
@@ -11076,28 +12023,37 @@ var main = (function () {
         if (v instanceof Data_Either.Right) {
             return Prelude["return"](Control_Monad_Eff.applicativeEff)(Prelude.unit);
         };
-        throw new Error("Failed pattern match at Main line 60, column 5 - line 61, column 5: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Main line 147, column 5 - line 148, column 5: " + [ v.constructor.name ]);
     };
     return function __do() {
         var v = Graphics_Canvas.getCanvasElementById("glcanvas")();
         if (v instanceof Data_Maybe.Just) {
             var v1 = Graphics_WebGL_Context.getWebglContext(v.value0)();
             if (v1 instanceof Data_Maybe.Just) {
-                var v2 = Graphics_WebGL.runWebgl(initWebGL)(v1.value0)();
+                var v2 = Graphics_WebGL.runWebgl(Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(initWebGL(1024))(function (v2) {
+                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Prelude["return"](Control_Monad_Reader_Trans.applicativeReaderT(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff)))(Prelude.unit))(function () {
+                        return animate(v2)(0);
+                    });
+                }))(v1.value0)();
                 return handleError(v2)();
             };
-            throw new Error("Failed pattern match at Main line 52, column 1 - line 53, column 1: " + [ v1.constructor.name ]);
+            throw new Error("Failed pattern match at Main line 134, column 1 - line 135, column 1: " + [ v1.constructor.name ]);
         };
-        throw new Error("Failed pattern match at Main line 52, column 1 - line 53, column 1: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Main line 134, column 1 - line 135, column 1: " + [ v.constructor.name ]);
     };
 })();
 module.exports = {
     main: main, 
+    test: test, 
+    animate: animate, 
     initWebGL: initWebGL, 
+    initTex: initTex, 
+    requestAnimationFrame: $foreign.requestAnimationFrame, 
+    unsafeNull: $foreign.unsafeNull, 
     getURL: $foreign.getURL
 };
 
-},{"./foreign":"/Users/gene/Programming/pure_morph/output/Main/foreign.js","Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Eff.Alert":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Alert/index.js","Control.Monad.Eff.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Class/index.js","Control.Monad.Eff.Console":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Console/index.js","Control.Monad.Eff.Exception":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Exception/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","Control.Monad.Reader.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Reader.Class/index.js","Control.Monad.Reader.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Reader.Trans/index.js","Control.Monad.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Trans/index.js","Data.Either":"/Users/gene/Programming/pure_morph/output/Data.Either/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Graphics.Canvas":"/Users/gene/Programming/pure_morph/output/Graphics.Canvas/index.js","Graphics.WebGL":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL/index.js","Graphics.WebGL.Context":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Context/index.js","Graphics.WebGL.Methods":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Methods/index.js","Graphics.WebGL.Raw":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw/index.js","Graphics.WebGL.Raw.Enums":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw.Enums/index.js","Graphics.WebGL.Shader":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Shader/index.js","Graphics.WebGL.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Types/index.js","Graphics.WebGL.Unsafe":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Unsafe/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Math/foreign.js":[function(require,module,exports){
+},{"./foreign":"/Users/gene/Programming/pure_morph/output/Main/foreign.js","Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Eff.Alert":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Alert/index.js","Control.Monad.Eff.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Class/index.js","Control.Monad.Eff.Console":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Console/index.js","Control.Monad.Eff.Exception":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Exception/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","Control.Monad.Reader.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Reader.Class/index.js","Control.Monad.Reader.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Reader.Trans/index.js","Control.Monad.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Trans/index.js","Data.Array":"/Users/gene/Programming/pure_morph/output/Data.Array/index.js","Data.Either":"/Users/gene/Programming/pure_morph/output/Data.Either/index.js","Data.Function":"/Users/gene/Programming/pure_morph/output/Data.Function/index.js","Data.Int":"/Users/gene/Programming/pure_morph/output/Data.Int/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Data.Tuple":"/Users/gene/Programming/pure_morph/output/Data.Tuple/index.js","Data.TypedArray":"/Users/gene/Programming/pure_morph/output/Data.TypedArray/index.js","Graphics.Canvas":"/Users/gene/Programming/pure_morph/output/Graphics.Canvas/index.js","Graphics.WebGL":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL/index.js","Graphics.WebGL.Context":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Context/index.js","Graphics.WebGL.Methods":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Methods/index.js","Graphics.WebGL.Raw":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw/index.js","Graphics.WebGL.Raw.Enums":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw.Enums/index.js","Graphics.WebGL.Raw.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw.Types/index.js","Graphics.WebGL.Shader":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Shader/index.js","Graphics.WebGL.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Types/index.js","Graphics.WebGL.Unsafe":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Unsafe/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Math/foreign.js":[function(require,module,exports){
 /* global exports */
 "use strict";
 

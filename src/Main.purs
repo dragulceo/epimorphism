@@ -1,8 +1,8 @@
 module Main where
 
 import Prelude
-import Data.Maybe
 import Data.Either
+import Data.Maybe
 import Data.Tuple
 import Data.Array
 import Data.TypedArray as T
@@ -12,21 +12,16 @@ import Data.Function
 import Control.Monad.Eff
 import Control.Monad.Eff.Console
 import Control.Monad.Eff.Alert
-import Control.Monad.Trans
-import Control.Monad.Except.Trans
 import Control.Monad.Eff.Exception
 import Control.Monad.Eff.Class
 import Control.Monad.Reader.Class (ask)
 import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Except.Trans
-import Control.Monad.Reader.Trans
 
 import Graphics.WebGL
 import Graphics.WebGL.Types
 import Graphics.WebGL.Context
 import Graphics.WebGL.Shader
 import Graphics.WebGL.Methods
-import Graphics.WebGL.Unsafe
 import Graphics.Canvas
 import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
@@ -34,8 +29,8 @@ import Graphics.WebGL.Raw.Types as GLT
 
 foreign import getURL :: String -> String
 foreign import unsafeNull :: forall a. a
+foreign import requestAnimationFrame :: forall eff a. Eff (console :: CONSOLE | eff) (Either WebGLError a) -> Eff ( | eff) Unit
 
-foreign import requestAnimationFrame :: forall eff a. WebGL a -> Eff (canvas :: Canvas | eff) Unit --forall a. WebGL a -> WebGL Unit
 
 initTex :: Int -> WebGL (Tuple WebGLTexture WebGLFramebuffer)
 initTex dim = do
@@ -107,7 +102,7 @@ animate pd count = do
 
   mainUnif <- getUniformBindings pd.mainProg
   uniform1f mainUnif.kernel_dim 1024.0
-  uniform1f mainUnif.time (toNumber (count / 1000))
+  uniform1f mainUnif.time (toNumber count / 45.0)
 
   drawArrays Triangles 0 6
 
@@ -120,15 +115,7 @@ animate pd count = do
   uniform1f displayUnif.kernel_dim 1024.0
   drawArrays Triangles 0 6
 
-  --lift $ lift $ log "test1"
-  --liftEff $ requestAnimationFrame (animate pd (count + 1))
-  liftEff $ requestAnimationFrame test
-  return unit
-
-test :: WebGL Unit
-test = do
-  lift $ lift $ unsafeLog "asdf"
-  return unit
+  liftEff $ requestAnimationFrame $ runWebgl (animate pd (count + 1)) ctx
 
 
 main :: Eff (console :: CONSOLE, alert :: Alert, canvas :: Canvas) Unit

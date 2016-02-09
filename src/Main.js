@@ -32,7 +32,6 @@ exports.requestAnimationFrame = function(x){
     })();
   }
   return function(){
-    console.log("hey!")
     return rAF(x);
   };
 };

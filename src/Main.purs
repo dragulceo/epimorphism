@@ -27,6 +27,8 @@ import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Graphics.WebGL.Raw.Types as GLT
 
+import Config
+
 foreign import getURL :: String -> String
 foreign import unsafeNull :: forall a. a
 foreign import requestAnimationFrame :: forall eff a. Eff (console :: CONSOLE | eff) (Either WebGLError a) -> Eff ( | eff) Unit

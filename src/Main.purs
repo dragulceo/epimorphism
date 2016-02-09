@@ -35,7 +35,7 @@ import Graphics.WebGL.Raw.Types as GLT
 foreign import getURL :: String -> String
 foreign import unsafeNull :: forall a. a
 
-foreign import requestAnimationFrame :: forall eff. Eff (console :: CONSOLE) Unit -> Eff (canvas :: Canvas | eff) Unit --forall a. WebGL a -> WebGL Unit
+foreign import requestAnimationFrame :: forall eff a. WebGL a -> Eff (canvas :: Canvas | eff) Unit --forall a. WebGL a -> WebGL Unit
 
 initTex :: Int -> WebGL (Tuple WebGLTexture WebGLFramebuffer)
 initTex dim = do
@@ -125,9 +125,9 @@ animate pd count = do
   liftEff $ requestAnimationFrame test
   return unit
 
-test :: Eff (console :: CONSOLE) Unit --WebGL Unit
+test :: WebGL Unit
 test = do
-  unsafeLog "asdf"
+  lift $ lift $ unsafeLog "asdf"
   return unit
 
 

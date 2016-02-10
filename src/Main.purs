@@ -27,7 +27,7 @@ import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Graphics.WebGL.Raw.Types as GLT
 
-import Config
+--import Config
 
 foreign import getURL :: String -> String
 foreign import unsafeNull :: forall a. a
@@ -89,13 +89,14 @@ initWebGL dim = do
   return { displayProg: displayProg, mainProg: mainProg, ts: (Tuple t0 t1), fbs: (Tuple fb0 fb1) }
 
 animate :: ProgData -> Int -> WebGL Unit
-animate pd count = do
+animate pd1 count = do
   ctx <- ask
 
   -- ping pong buffers
-  let tm = if count `mod` 2 == 0 then fst pd.ts else snd pd.ts
-  let td = if count `mod` 2 == 1 then fst pd.ts else snd pd.ts
-  let fb = if count `mod` 2 == 1 then fst pd.fbs else snd pd.fbs
+  let tm = if count `mod` 2 == 0 then fst pd1.ts else snd pd1.ts
+  let td = if count `mod` 2 == 1 then fst pd1.ts else snd pd1.ts
+  let fb = if count `mod` 2 == 1 then fst pd1.fbs else snd pd1.fbs
+  pd <- if count `mod` 10 /= 0 then return pd1 else (initWebGL 1024)
 
   -- main program
   liftEff $ GL.useProgram ctx pd.mainProg
@@ -117,7 +118,7 @@ animate pd count = do
   uniform1f displayUnif.kernel_dim 1024.0
   drawArrays Triangles 0 6
 
-  liftEff $ requestAnimationFrame $ runWebgl (animate pd (count + 1)) ctx
+  liftEff $ requestAnimationFrame $ runWebgl (animate pd1 (count + 1)) ctx
 
 
 main :: Eff (console :: CONSOLE, alert :: Alert, canvas :: Canvas) Unit

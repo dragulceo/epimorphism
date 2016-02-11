@@ -47,6 +47,8 @@ animate ecRef esRef pRef = do
   lift $ writeSTRef pRef pattern'
   render engineConf engineState pattern'
 
+  liftEff $ requestAnimationFrame $ runExceptT (animate ecRef esRef pRef)
+
 
 
 

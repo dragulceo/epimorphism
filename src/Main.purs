@@ -1,65 +1,65 @@
 module Main where
 
-import Prelude
-
+import Prelude (Unit, unit, return, bind, ($), show)
 import Data.Either (Either(Right, Left))
--- import Data.Maybe
--- import Data.Tuple
--- import Data.Array
--- import Data.TypedArray as T
--- import Data.Int (toNumber)
--- import Data.Function
 
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Eff.Alert (Alert)
---import Control.Monad.Error.Class (throwError)
-import Control.Monad.Except.Trans (runExceptT, ExceptT ())
--- import Control.Monad.Eff.Exception
--- import Control.Monad.Eff.Class
--- import Control.Monad.Reader.Class (ask)
--- import Control.Monad.Eff.Class (liftEff)
---
--- import Graphics.WebGL
--- import Graphics.WebGL.Types
--- import Graphics.WebGL.Context
--- import Graphics.WebGL.Shader
--- import Graphics.WebGL.Methods
+import Control.Monad.Except.Trans (runExceptT, lift, ExceptT ())
+import Control.Monad.ST (ST, STRef, writeSTRef, readSTRef, newSTRef, runST)
 import Graphics.Canvas (Canvas)
--- import Graphics.WebGL.Raw as GL
--- import Graphics.WebGL.Raw.Enums as GLE
--- import Graphics.WebGL.Raw.Types as GLT
 
---import JSUtil
---import Engine
-import Config
-
-loadConfig :: forall eff. String -> ExceptT String (Eff eff) { engConf :: EngineConfig } --, uiConf :: UIConfig, sysConf :: SystemConfig }
-loadConfig name = do
-  let engConf = defEngConf
-  return { engConf: engConf }
-
+import Engine (loadEngineConf, initEngine, render, EngineState, EngineConf)
+import UI (loadUIConf)
+import Pattern (loadPattern, updatePattern, Pattern)
+import JSUtil (unsafeLog)
 
 main :: Eff (console :: CONSOLE, alert :: Alert, canvas :: Canvas) Unit
-main = do
-  --{ engConf: engConf, uiConf: uiConf, sysConf: sysConf } <- loadConfig "default"
-  res <- runExceptT do
-    loadConfig "default"
+main = runST do
+  res <- runExceptT doMain
+  case res of
+    Left er -> log $ show er
+    Right _ -> return unit
 
-  handleError res
-  where
-    handleError (Left er) = log $ show er
-    handleError (Right _) = return unit
+doMain :: forall h. ExceptT String (Eff (console :: CONSOLE, alert :: Alert, canvas :: Canvas, st :: ST h)) Unit
+doMain = do
+    engineConf <- loadEngineConf "default"
+    uiConf     <- loadUIConf     "default"
+    pattern    <- loadPattern    "default"
+
+    ecRef  <- lift $ newSTRef engineConf
+    uicRef <- lift $ newSTRef uiConf
+    pRef   <- lift $ newSTRef pattern
+
+    esRef <- initEngine ecRef pRef
+
+    -- register ui handlers
+    animate ecRef esRef pRef
+
+animate :: forall h. (STRef h EngineConf) -> (STRef h EngineState) -> (STRef h Pattern) -> ExceptT String (Eff (console :: CONSOLE, alert :: Alert, canvas :: Canvas, st :: ST h)) Unit
+animate ecRef esRef pRef = do
+  engineConf  <- lift $ readSTRef ecRef
+  engineState <- lift $ readSTRef esRef
+  pattern     <- lift $ readSTRef pRef
+
+  let pattern' = updatePattern pattern
+  lift $ writeSTRef pRef pattern'
+  render engineConf engineState pattern'
 
 
-  --progState <- loadProgramState "default"
-  --uiState   <- initUI uiConf
-  --eState    <- initEngine engConf
-  -- register ui handlers
+
+
+
+
+
+
+
+  --
+  --
+  --
   --update progState
 
-  --Just canvas <- liftEff $ getCanvasElementById "glcanvas"
-  --Just ctx <- liftEff $ getWebglContext canvas
   --res <- runWebgl ( do
   --  progData <- initWebGL 1024
   --  animate progData 0

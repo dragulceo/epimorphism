@@ -40,3 +40,8 @@ exports.unsafeLog = function unsafeLog(x) {
     console.log(x);
   }
 }
+
+
+exports.now = function () {
+  return Date.now();
+};

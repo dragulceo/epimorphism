@@ -30,23 +30,25 @@ main = runST do
 
 doMain :: forall h. ExceptT String (Epi (st :: ST h)) Unit
 doMain = do
-    -- init configuration
-    let systemConf = defaultSystemConf
-    engineConf <- loadEngineConf "default"
-    uiConf     <- loadUIConf     "default"
-    pattern    <- loadPattern    "default"
+  -- init configuration
+  let systemConf = defaultSystemConf
+  engineConf <- loadEngineConf "default"
+  uiConf     <- loadUIConf     "default"
+  pattern    <- loadPattern    "default"
 
-    scRef <- lift $ newSTRef systemConf
-    ecRef <- lift $ newSTRef engineConf
-    ucRef <- lift $ newSTRef uiConf
-    pRef  <- lift $ newSTRef pattern
+  scRef <- lift $ newSTRef systemConf
+  ecRef <- lift $ newSTRef engineConf
+  ucRef <- lift $ newSTRef uiConf
+  pRef  <- lift $ newSTRef pattern
 
-    -- init states
-    esRef <- initEngine uiConf.canvasId ecRef pRef
-    initUIState ucRef scRef ecRef esRef pRef
+  return unit
 
-    -- go!
-    animate scRef ecRef esRef pRef
+  -- init states
+  esRef <- initEngine uiConf.canvasId ecRef pRef
+  initUIState ucRef scRef ecRef esRef pRef
+
+  -- go!
+  animate scRef ecRef esRef pRef
 
 animate :: forall h. (STRef h SystemConf) -> (STRef h EngineConf) -> (STRef h EngineState) -> (STRef h Pattern) -> ExceptT String (Epi (st :: ST h)) Unit
 animate scRef ecRef esRef pRef = do

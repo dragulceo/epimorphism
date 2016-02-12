@@ -1,0 +1,10 @@
+#glcanvas {
+    float:left;
+}
+
+#console {
+    float: left;
+    border: solid 1px green;
+    margin-left: 10px;
+    padding: 5px;
+}

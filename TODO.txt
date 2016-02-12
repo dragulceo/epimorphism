@@ -1,0 +1,29 @@
+CONFIG
+  - parsing config & state from files
+  - parsing state from files
+  - serializing states & configs
+  - database support
+ENGINE
+  - viewport issue with engine
+  - feedback isn't perfect/ misalligned square
+  - compiling patterns
+  - passing pattern pars to kernel
+  - execGL
+  - benchmarking tools
+  - basic refactoring of kernel
+  - better kernel debug support
+UI
+  - control handler/ui interface
+  - handle window resizing
+  - build some kind of UI
+  - investigate react, etc
+MISC
+  - fullscreen mode
+  - stop passing non-reference around for safety?
+  - save images
+  - animate w/ runExceptT
+  - make unsafe actions safe
+  - test on ipad
+  - test on android
+LATER
+  - webcam input

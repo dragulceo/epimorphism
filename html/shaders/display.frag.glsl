@@ -2,6 +2,7 @@ precision mediump float;
 
 // our texture
 uniform sampler2D u_image;
+uniform float kernel_dim;
 
 // the texCoords passed in from the vertex shader.
 varying vec2 v_texCoord;
@@ -65,7 +66,7 @@ vec4 post(vec4 v){
 
 
 void main() {
-  vec2 clipSpace = gl_FragCoord.xy / vec2(1024.0, 1024.0);
+  vec2 clipSpace = gl_FragCoord.xy / vec2(kernel_dim, kernel_dim);
   vec4 res = texture2D(u_image, clipSpace);
   gl_FragColor = post(vec4(res.rgb, 1));
 }

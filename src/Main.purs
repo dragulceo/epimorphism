@@ -1,6 +1,6 @@
 module Main where
 
-import Prelude (Unit, unit, return, bind, ($), (*), (-), (+), show)
+import Prelude (Unit, unit, return, bind, ($), (*), (-), (+), show, id)
 import Data.Either (Either(Right, Left))
 import Data.Maybe (maybe, Maybe(Just))
 
@@ -11,13 +11,15 @@ import Control.Monad.Except.Trans (runExceptT, lift, ExceptT ())
 import Control.Monad.ST (ST, STRef, writeSTRef, readSTRef, newSTRef, modifySTRef, runST)
 import Graphics.Canvas (Canvas)
 
-import Engine (loadEngineConf, initEngine, render, EngineState, EngineConf)
-import UI (loadUIConf)
-import Pattern (loadPattern, updatePattern, Pattern)
-import JSUtil (unsafeLog, requestAnimationFrame, now, Now)
-import System (SystemConf, defaultSystemConf)
+import DOM (DOM)
 
-type Epi eff = Eff (console :: CONSOLE, alert :: Alert, canvas :: Canvas, now :: Now | eff)
+import Engine (loadEngineConf, initEngine, render, EngineState, EngineConf)
+import UI (loadUIConf, initUIState)
+import Pattern (loadPattern, updatePattern, Pattern)
+import System (SystemConf, defaultSystemConf)
+import JSUtil (unsafeLog, requestAnimationFrame, now, Now)
+
+type Epi eff = Eff (console :: CONSOLE, alert :: Alert, canvas :: Canvas, now :: Now, dom :: DOM | eff)
 
 main :: Epi () Unit
 main = runST do
@@ -28,19 +30,22 @@ main = runST do
 
 doMain :: forall h. ExceptT String (Epi (st :: ST h)) Unit
 doMain = do
+    -- init configuration
     let systemConf = defaultSystemConf
     engineConf <- loadEngineConf "default"
     uiConf     <- loadUIConf     "default"
     pattern    <- loadPattern    "default"
 
-    scRef  <- lift $ newSTRef systemConf
-    ecRef  <- lift $ newSTRef engineConf
-    uicRef <- lift $ newSTRef uiConf
-    pRef   <- lift $ newSTRef pattern
+    scRef <- lift $ newSTRef systemConf
+    ecRef <- lift $ newSTRef engineConf
+    ucRef <- lift $ newSTRef uiConf
+    pRef  <- lift $ newSTRef pattern
 
-    esRef <- initEngine ecRef pRef
+    -- init states
+    esRef <- initEngine uiConf.canvasId ecRef pRef
+    initUIState ucRef scRef ecRef esRef pRef
 
-    -- register ui handlers
+    -- go!
     animate scRef ecRef esRef pRef
 
 animate :: forall h. (STRef h SystemConf) -> (STRef h EngineConf) -> (STRef h EngineState) -> (STRef h Pattern) -> ExceptT String (Epi (st :: ST h)) Unit
@@ -52,14 +57,15 @@ animate scRef ecRef esRef pRef = do
 
   -- update time
   currentTimeMS <- lift $ now
-  let lastTimeMS = maybe currentTimeMS (\a -> a) systemConf.lastTimeMS
+  let lastTimeMS = maybe currentTimeMS id systemConf.lastTimeMS
   let delta = (currentTimeMS - lastTimeMS) * pattern.tSpd
   lift $ modifySTRef scRef (\s -> s {lastTimeMS = Just currentTimeMS})
-  -- lift $ unsafeLog pRef
 
+  -- update pattern & render
   let pattern' = updatePattern pattern (pattern.t + delta)
   lift $ writeSTRef pRef pattern'
   render engineConf engineState pattern' systemConf.frameNum
 
+  -- request next frame
   lift $ modifySTRef scRef (\s -> s {frameNum = s.frameNum + 1})
   lift $ requestAnimationFrame $ runExceptT (animate scRef ecRef esRef pRef)

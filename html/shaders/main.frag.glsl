@@ -3,9 +3,9 @@ precision mediump float;
 uniform sampler2D u_image;
 
 uniform float time;
+uniform float kernel_dim;
 
 #define VOID_W -0.000001
-#define KERNEL_DIM 1024.0
 
 vec3 rgb2hsv(vec3 c)
 {
@@ -76,7 +76,7 @@ float cosh(float x){
 
 
 void main() {
-  vec2 z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(KERNEL_DIM, KERNEL_DIM) - vec2(1.0, 1.0);
+  vec2 z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(kernel_dim, kernel_dim) - vec2(1.0, 1.0);
 
   //z.x += 0.5;
   //z.x += cos(t / 20000.0);
@@ -112,7 +112,7 @@ void main() {
 
   z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
-  float one = 1.0 / KERNEL_DIM;
+  float one = 1.0 / kernel_dim;
   vec4 frame = texture2D(u_image, z);
   /*frame += texture2D(u_image, z + vec2(one, -1.0 * one));
   frame += texture2D(u_image, z + vec2(-1.0 * one, -1.0 * one));

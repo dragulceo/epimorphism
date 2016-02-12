@@ -17,7 +17,7 @@ import Config
 import Engine (loadEngineConf, initEngine, render)
 import UI (loadUIConf, initUIState)
 import Pattern (loadPattern, updatePattern)
-import System (defaultSystemConf)
+import System (initSystemState)
 import JSUtil (unsafeLog, requestAnimationFrame, now, Now)
 
 type Epi eff = Eff (console :: CONSOLE, alert :: Alert, canvas :: Canvas, now :: Now, dom :: DOM | eff)
@@ -29,43 +29,45 @@ main = runST do
     Left er -> log $ show er
     Right _ -> return unit
 
+-- this is in its own method for type inference reasons
 doMain :: forall h. ExceptT String (Epi (st :: ST h)) Unit
 doMain = do
-  -- init configuration
-  let systemConf = defaultSystemConf
+  -- init config
   engineConf <- loadEngineConf "default"
   uiConf     <- loadUIConf     "default"
   pattern    <- loadPattern    "default"
 
-  scRef <- lift $ newSTRef systemConf
+  ssRef <- lift $ newSTRef systemState
   ecRef <- lift $ newSTRef engineConf
   ucRef <- lift $ newSTRef uiConf
   pRef  <- lift $ newSTRef pattern
 
   -- init states
   esRef <- initEngine uiConf.canvasId ecRef pRef
-  initUIState ucRef scRef ecRef esRef pRef
+  ssRef <- initSystemState
+  initUIState ucRef ssRef ecRef esRef pRef
 
   -- go!
-  animate scRef ecRef esRef pRef
+  animate ssRef ecRef esRef pRef
 
-animate :: forall h. (STRef h SystemConf) -> (STRef h EngineConf) -> (STRef h EngineState) -> (STRef h Pattern) -> ExceptT String (Epi (st :: ST h)) Unit
+
+animate :: forall h. (STRef h SystemState) -> (STRef h EngineConf) -> (STRef h EngineState) -> (STRef h Pattern) -> ExceptT String (Epi (st :: ST h)) Unit
 animate scRef ecRef esRef pRef = do
-  systemConf  <- lift $ readSTRef scRef
+  systemState <- lift $ readSTRef ssRef
   engineConf  <- lift $ readSTRef ecRef
   engineState <- lift $ readSTRef esRef
   pattern     <- lift $ readSTRef pRef
 
   -- update time
   currentTimeMS <- lift $ now
-  let lastTimeMS = maybe currentTimeMS id systemConf.lastTimeMS
+  let lastTimeMS = maybe currentTimeMS id systemState.lastTimeMS
   let delta = (currentTimeMS - lastTimeMS) * pattern.tSpd
   lift $ modifySTRef scRef (\s -> s {lastTimeMS = Just currentTimeMS})
 
   -- update pattern & render
   let pattern' = updatePattern pattern (pattern.t + delta)
   lift $ writeSTRef pRef pattern'
-  render engineConf engineState pattern' systemConf.frameNum
+  render engineConf engineState pattern' systemState.frameNum
 
   -- request next frame
   lift $ modifySTRef scRef (\s -> s {frameNum = s.frameNum + 1})

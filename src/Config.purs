@@ -7,9 +7,11 @@ import Control.Monad.Eff (Eff)
 import Graphics.WebGL.Types (WebGLProgram, WebGLTexture, WebGLFramebuffer, WebGLContext)
 
 -- System
-type SystemConf = {
+type SystemState = {
     lastTimeMS :: Maybe Number
   , frameNum :: Int
+  , lastFpsTimeMS :: Maybe Number
+  , fps :: Maybe Number
 }
 
 -- Engine
@@ -30,6 +32,7 @@ type EngineState = {
 type UIConf = {
     canvasId :: String
   , consoleId :: String
+  , showFps :: Boolean
 }
 
 -- Pattern

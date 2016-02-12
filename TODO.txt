@@ -11,10 +11,13 @@ ENGINE
   - better kernel debug support
   - webgl debug statements?
 UI
-  - control handler/ui interface
-  - handle window resizing
+  - figure out how to render UI
   - build some kind of UI
+  - handle window resizing
   - fullscreen mode
+PATTERN
+  - programs
+  - lots of other stuff
 MISC
   - logging system
   - dev server/ci

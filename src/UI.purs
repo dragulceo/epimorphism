@@ -30,7 +30,6 @@ defaultUIConf = {
   , consoleId: "console"
 }
 
-
 -- PUBLIC
 loadUIConf :: forall eff. String -> ExceptT String (Eff eff) UIConf
 loadUIConf name = do
@@ -38,14 +37,14 @@ loadUIConf name = do
   return uiConf
 
 
-initUIState :: forall h eff. (STRef h UIConf) -> (STRef h SystemConf) -> (STRef h EngineConf) -> (STRef h EngineState) -> (STRef h Pattern) -> ExceptT String (Eff (st :: ST h, canvas :: Canvas, console :: CONSOLE, dom :: DOM  | eff)) Unit
-initUIState ucRef scRef ecRef esRef pRef = do
+initUIState :: forall h eff. (STRef h UIConf) -> (STRef h SystemState) -> (STRef h EngineConf) -> (STRef h EngineState) -> (STRef h Pattern) -> ExceptT String (Eff (st :: ST h, canvas :: Canvas, console :: CONSOLE, dom :: DOM  | eff)) Unit
+initUIState ucRef ecRef esRef pRef = do
   uiConf <- lift $ readSTRef ucRef
   initLayout uiConf
-  lift $ registerEventHandler (command ucRef scRef ecRef esRef pRef)
+  lift $ registerEventHandler (command ucRef ecRef esRef pRef)
 
 
-initLayout :: forall eff. UIConf  -> ExceptT String (Eff (canvas :: Canvas, console :: CONSOLE, dom :: DOM  | eff)) Unit
+initLayout :: forall eff. UIConf -> ExceptT String (Eff (canvas :: Canvas, console :: CONSOLE, dom :: DOM  | eff)) Unit
 initLayout uiConf = do
   let window = globalWindow
   doc <- lift $ document window

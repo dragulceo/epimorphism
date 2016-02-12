@@ -1,12 +1,9 @@
 module System where
 
 import Prelude
-import Data.Maybe
+import Data.Maybe (Maybe(Nothing))
 
-type SystemConf = {
-    lastTimeMS :: Maybe Number
-  , frameNum :: Int
-}
+import Config
 
 defaultSystemConf :: SystemConf
 defaultSystemConf = {

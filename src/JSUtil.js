@@ -45,3 +45,7 @@ exports.unsafeLog = function unsafeLog(x) {
 exports.now = function () {
   return Date.now();
 };
+
+exports.unsafeEval = function (s) {
+  return function () {eval(s);};
+}

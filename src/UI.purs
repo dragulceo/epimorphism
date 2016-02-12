@@ -18,31 +18,18 @@ import Data.DOM.Simple.Window
 import Data.DOM.Simple.Document
 import Data.DOM.Simple.Element
 
-import Engine (EngineConf, EngineState, resizeViewport)
-import Pattern (Pattern)
-import System (SystemConf)
+import Config
+import Command (command)
 import JSUtil (unsafeLog)
 
-foreign import registerEventHandler :: forall eff. (String -> Eff ( | eff) Unit)
-  -> Eff ( | eff) Unit
---foreign import onkeydown ::  forall eff. (Event -> Eff (webgl :: WebGl | eff) Unit)
---    -> Eff (webgl :: WebGl | eff) Unit
---foreign import onKeyUp ::  forall eff. (Event -> Eff (webgl :: WebGl | eff) Unit)
---    -> Eff (webgl :: WebGl | eff) Unit
---foreign import eventGetKeyCode :: Event -> Int
-
-
--- DATA
-type UIConf = {
-    canvasId :: String
-  , consoleId :: String
-}
+foreign import registerEventHandler :: forall eff. (String -> Eff eff Unit) -> Eff eff Unit
 
 defaultUIConf :: UIConf
 defaultUIConf = {
     canvasId: "glcanvas"
   , consoleId: "console"
 }
+
 
 -- PUBLIC
 loadUIConf :: forall eff. String -> ExceptT String (Eff eff) UIConf
@@ -53,33 +40,26 @@ loadUIConf name = do
 
 initUIState :: forall h eff. (STRef h UIConf) -> (STRef h SystemConf) -> (STRef h EngineConf) -> (STRef h EngineState) -> (STRef h Pattern) -> ExceptT String (Eff (st :: ST h, canvas :: Canvas, console :: CONSOLE, dom :: DOM  | eff)) Unit
 initUIState ucRef scRef ecRef esRef pRef = do
-  uiConf      <- lift $ readSTRef ucRef
-  systemConf  <- lift $ readSTRef scRef
-  engineConf  <- lift $ readSTRef ecRef
-  engineState <- lift $ readSTRef esRef
-  pattern     <- lift $ readSTRef pRef
-
-  initLayout uiConf engineState
+  uiConf <- lift $ readSTRef ucRef
+  initLayout uiConf
+  lift $ registerEventHandler (command ucRef scRef ecRef esRef pRef)
 
 
-initLayout :: forall eff. UIConf -> EngineState -> ExceptT String (Eff (canvas :: Canvas, console :: CONSOLE, dom :: DOM  | eff)) Unit
-initLayout uiConf engineState = do
-  -- this is unsafe
-  Just canvas <- liftEff $ getCanvasElementById uiConf.canvasId
-
+initLayout :: forall eff. UIConf  -> ExceptT String (Eff (canvas :: Canvas, console :: CONSOLE, dom :: DOM  | eff)) Unit
+initLayout uiConf = do
   let window = globalWindow
   doc <- lift $ document window
   width  <- lift $ innerWidth window
   height <- lift $ innerHeight window
 
-  lift $ setCanvasWidth (height - 11.0) canvas
-  lift $ setCanvasHeight (height - 11.0) canvas
+  --lift $ setCanvasWidth (height - 11.0) canvas
+  --lift $ setCanvasHeight (height - 11.0) canvas
+
+  Just c2 <- lift $ querySelector ("#" ++ uiConf.canvasId) doc
+  lift $ setStyleAttr "width" (show (height - 10.0) ++ "px") c2
+  lift $ setStyleAttr "height" (show (height - 11.0) ++ "px") c2
 
   -- this is unsafe
   Just console <- lift $ querySelector ("#" ++ uiConf.consoleId) doc
   lift $ setStyleAttr "width" (show (width - height - 30.0) ++ "px") console
   lift $ setStyleAttr "height" (show (height - 21.0) ++ "px") console
-  --lift $ unsafeLog $ console
-
-  --case (fromNumber height) of
-    --(Just h) -> resizeViewport engineState h h

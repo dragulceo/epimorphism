@@ -17,41 +17,23 @@ import Control.Monad.Reader.Class (ask)
 import Control.Monad.ST
 
 import Graphics.WebGL
-import Graphics.WebGL.Types (WebGLProgram, WebGLTexture, WebGLFramebuffer)
+import Graphics.WebGL.Types
 import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Graphics.WebGL.Raw.Types as GLT
-import Graphics.WebGL.Types
 import Graphics.WebGL.Context
 import Graphics.WebGL.Shader
 import Graphics.WebGL.Methods
-import Graphics.Canvas (Canvas, getCanvasElementById)
+import Graphics.Canvas (Canvas, getCanvasElementById, setCanvasWidth, setCanvasHeight)
 
-import Pattern (Pattern)
-import JSUtil (unsafeNull, unsafeURLGet)
-
--- DATA
-type EngineConf = {
-    kernelDim :: Int
-  , fract :: Int
-}
-
-type EngineState = {
-    displayProg :: WebGLProgram
-  , mainProg :: WebGLProgram
-  , tex :: (Tuple WebGLTexture WebGLTexture)
-  , fb :: (Tuple WebGLFramebuffer WebGLFramebuffer)
-  , ctx :: WebGLContext
-}
+import Config
+import JSUtil (unsafeLog, unsafeNull, unsafeURLGet)
 
 defaultEngineConf :: EngineConf
 defaultEngineConf = {
-    kernelDim: 512
+    kernelDim: 1024
   , fract: 3
 }
-
---defaultEngineState :: EngineState
---defaultEngineState = { }
 
 -- PUBLIC
 loadEngineConf :: forall eff. String -> ExceptT String (Eff eff) EngineConf
@@ -59,7 +41,7 @@ loadEngineConf name = do
   let engConf = defaultEngineConf
   return engConf
 
-
+-- this might throw an error
 initTex :: Int -> WebGL (Tuple WebGLTexture WebGLFramebuffer)
 initTex dim = do
   ctx <- ask
@@ -76,7 +58,7 @@ initTex dim = do
 
   return $ Tuple tex fb
 
-
+-- this might throw an error
 initShaders :: Pattern -> WebGL (Tuple WebGLProgram WebGLProgram)
 initShaders pattern = do
   basicVert   <- lift $ lift $ unsafeURLGet "/shaders/basic.vert.glsl"
@@ -88,7 +70,7 @@ initShaders pattern = do
   mainProg    <- compileShadersIntoProgram basicVert mainFrag
   displayProg <- compileShadersIntoProgram basicVert displayFrag
   displayAttr <- getAttrBindings displayProg
-  mainAttr    <- getAttrBindings displayProg
+  mainAttr    <- getAttrBindings mainProg
 
   pos <- createBuffer
   bindBuffer ArrayBuffer pos
@@ -101,6 +83,7 @@ initShaders pattern = do
 
   return $ Tuple mainProg displayProg
 
+-- this might throw an error
 initEngine :: forall h eff. String -> (STRef h EngineConf) -> (STRef h Pattern) -> ExceptT String (Eff (st :: ST h, canvas :: Canvas | eff))  (STRef h EngineState)
 initEngine canvasId ecRef pRef = do
 
@@ -110,9 +93,13 @@ initEngine canvasId ecRef pRef = do
 
   engineConf <- lift $ readSTRef ecRef
   pattern    <- lift $ readSTRef pRef
-
   let dim = engineConf.kernelDim
-  res <- execGL ctx ( do
+
+  -- if we change kernel_dim we need to redo this
+  lift $ setCanvasWidth (toNumber dim) canvas
+  lift $ setCanvasHeight (toNumber dim) canvas
+
+  st <- execGL ctx ( do
     Tuple tex0 fb0     <- initTex dim
     Tuple tex1 fb1     <- initTex dim
     Tuple main display <- initShaders pattern
@@ -122,7 +109,8 @@ initEngine canvasId ecRef pRef = do
     liftEff $ GL.viewport ctx 0 0 dim dim
     return {displayProg: display, mainProg: main, tex: (Tuple tex0 tex1), fb: (Tuple fb0 fb1), ctx: ctx}
   )
-  lift $ newSTRef res
+
+  lift $ newSTRef st
 
 render :: forall h eff. EngineConf -> EngineState -> Pattern -> Int -> ExceptT String (Eff (canvas :: Canvas, st :: ST h | eff)) Unit
 render engineConf engineState pattern frameNum = do
@@ -142,7 +130,6 @@ render engineConf engineState pattern frameNum = do
     mainUnif <- getUniformBindings engineState.mainProg
     uniform1f mainUnif.kernel_dim (toNumber engineConf.kernelDim)
     uniform1f mainUnif.time (pattern.t / 1000.0)
-
     drawArrays Triangles 0 6
 
     -- display/post program
@@ -155,12 +142,6 @@ render engineConf engineState pattern frameNum = do
     drawArrays Triangles 0 6
   )
 
-
-resizeViewport :: forall eff. EngineState -> Int -> Int -> ExceptT String (Eff (canvas :: Canvas | eff)) Unit
-resizeViewport engineState width height = do
-  execGL engineState.ctx (do
-    return unit
-  )
 
 -- PRIVATE
 execGL :: forall eff a. WebGLContext -> (WebGL a) -> ExceptT String (Eff (canvas :: Canvas | eff)) a

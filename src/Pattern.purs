@@ -6,28 +6,7 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (ExceptT ())
 
--- DATA
-newtype SubModules = SubModules (StrMap Module)
-
-type Module = {
-    name :: String
-  , id :: String
-  , family :: String
-  , modules :: SubModules
-  , par :: StrMap Number
-  , zn :: Array Number
-  , images :: Array String
-  , sub :: StrMap String
-}
-
-type Pattern = {
-    modules :: StrMap Module
-  , scripts :: Array String
-  -- , 3d shit
-  , t :: Number
-  , tPhase :: Number
-  , tSpd :: Number
-}
+import Config
 
 -- ?
 type PatternConf = {

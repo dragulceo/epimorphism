@@ -13,10 +13,11 @@ import Graphics.Canvas (Canvas)
 
 import DOM (DOM)
 
-import Engine (loadEngineConf, initEngine, render, EngineState, EngineConf)
+import Config
+import Engine (loadEngineConf, initEngine, render)
 import UI (loadUIConf, initUIState)
-import Pattern (loadPattern, updatePattern, Pattern)
-import System (SystemConf, defaultSystemConf)
+import Pattern (loadPattern, updatePattern)
+import System (defaultSystemConf)
 import JSUtil (unsafeLog, requestAnimationFrame, now, Now)
 
 type Epi eff = Eff (console :: CONSOLE, alert :: Alert, canvas :: Canvas, now :: Now, dom :: DOM | eff)
@@ -40,8 +41,6 @@ doMain = do
   ecRef <- lift $ newSTRef engineConf
   ucRef <- lift $ newSTRef uiConf
   pRef  <- lift $ newSTRef pattern
-
-  return unit
 
   -- init states
   esRef <- initEngine uiConf.canvasId ecRef pRef

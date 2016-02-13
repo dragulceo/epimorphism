@@ -84,7 +84,7 @@ initShaders pattern = do
   return $ Tuple mainProg displayProg
 
 -- this might throw an error
-initEngineST :: forall h eff. String -> (STRef h EngineConf) -> (STRef h Pattern) -> Epi (st :: ST h | eff) (STRef h EngineST)
+initEngineST :: forall h eff. String -> (STRef h EngineConf) -> (STRef h Pattern) -> Epi (st :: ST h | eff) EngineST
 initEngineST canvasId ecRef pRef = do
 
   -- these are unsafe
@@ -99,7 +99,7 @@ initEngineST canvasId ecRef pRef = do
   lift $ setCanvasWidth (toNumber dim) canvas
   lift $ setCanvasHeight (toNumber dim) canvas
 
-  st <- execGL ctx ( do
+  execGL ctx ( do
     Tuple tex0 fb0     <- initTex dim
     Tuple tex1 fb1     <- initTex dim
     Tuple main display <- initShaders pattern
@@ -109,8 +109,6 @@ initEngineST canvasId ecRef pRef = do
     liftEff $ GL.viewport ctx 0 0 dim dim
     return {displayProg: display, mainProg: main, tex: (Tuple tex0 tex1), fb: (Tuple fb0 fb1), ctx: ctx}
   )
-
-  lift $ newSTRef st
 
 render :: forall h eff. EngineConf -> EngineST -> Pattern -> Int -> Epi (st :: ST h | eff) Unit
 render engineConf engineST pattern frameNum = do

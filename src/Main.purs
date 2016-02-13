@@ -39,8 +39,10 @@ init = do
   pRef  <- lift $ newSTRef pattern
 
   -- init states
-  esRef <- initEngineST uiConf.canvasId ecRef pRef
-  ssRef <- initSystemST
+  engineST <- initEngineST uiConf.canvasId ecRef pRef
+  systemST <- initSystemST
+  esRef <- lift $ newSTRef engineST
+  ssRef <- lift $ newSTRef systemST
   initUIST ucRef ecRef esRef pRef
 
   return { ucRef: ucRef, ssRef: ssRef, ecRef: ecRef, esRef: esRef, pRef: pRef }

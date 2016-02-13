@@ -1,10 +1,8 @@
 module System where
 
-import Prelude
+import Prelude (return)
 import Data.Maybe (Maybe(Nothing))
-import Control.Monad.Eff (Eff)
-import Control.Monad.Except.Trans (ExceptT (), lift)
-import Control.Monad.ST (ST, STRef, newSTRef)
+import Control.Monad.ST (ST)
 
 import Config
 
@@ -17,7 +15,6 @@ defaultSystemST = {
 }
 
 -- PUBLIC
-initSystemST :: forall eff h. Epi (st :: ST h | eff) (STRef h SystemST)
+initSystemST :: forall eff h. Epi (st :: ST h | eff) SystemST
 initSystemST = do
-  let systemST = defaultSystemST
-  lift $ newSTRef systemST
+  return defaultSystemST

@@ -8,11 +8,6 @@ import Control.Monad.Except.Trans (ExceptT ())
 
 import Config
 
--- ?
-type PatternConf = {
-
-}
-
 
 defaultModule :: Module
 defaultModule = {

@@ -1,0 +1,72 @@
+SERIALIZING & COMPILING
+
+serializing
+ patterns & modules
+ config files
+ glsl components
+ glsl files
+ images
+
+1. read from url
+2. read from db
+3. sync url to db
+3. read from local storage
+4. sync db to local storage
+- split across multiple tables for organization (i.e. defaults vs module.seed.17623984237)
+
+
+
+UICONF, etc
+
+name $name
+canvasId glcanvas
+consoleId console
+
+
+
+MODULES, etc
+
+name $name
+..
+par.par1 shiz
+par.par2 shiz
+..
+sub.v1 "asfasf asdfasdf ..."
+..
+zn 3+4i
+zn 5+2i
+..
+module.name family.name.id
+..
+
+
+
+SEED_W, etc
+
+component $family.name{
+
+
+}
+
+T_FB, etc
+
+library $family.name.sub {
+
+
+}
+
+
+
+COMPILING
+
+ - library includes - #include
+ - par - @par
+ - zn - zn[i]
+ - modules - @@module
+
+1. load files from disk/db
+2. map par & zn values
+2. process main module
+  a. process & splice includes
+  b. process & splice components
+  c. substitute par & zn

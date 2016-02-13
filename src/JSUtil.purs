@@ -12,6 +12,6 @@ foreign import unsafeNull :: forall a. a
 foreign import unsafeLog :: forall a eff. a -> Eff eff Unit
 foreign import unsafeEval :: forall eff. String -> Eff eff Unit
 
-foreign import requestAnimationFrame :: forall eff a. Eff ( | eff) (Either String a) -> Eff ( | eff) Unit
+foreign import requestAnimationFrame :: forall eff a. Eff ( | eff) Unit -> Eff ( | eff) Unit
 
 foreign import now :: forall e. Eff (now :: Now | e) Number

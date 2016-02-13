@@ -8,8 +8,8 @@ import Control.Monad.ST (ST, STRef, newSTRef)
 
 import Config
 
-defaultSystemState :: SystemState
-defaultSystemState = {
+defaultSystemST :: SystemST
+defaultSystemST = {
     lastTimeMS: Nothing
   , frameNum: 0
   , lastFpsTimeMS: Nothing
@@ -17,7 +17,7 @@ defaultSystemState = {
 }
 
 -- PUBLIC
-initSystemState :: forall eff h. Epi (st :: ST h | eff) (STRef h SystemState)
-initSystemState = do
-  let systemState = defaultSystemState
-  lift $ newSTRef systemState
+initSystemST :: forall eff h. Epi (st :: ST h | eff) (STRef h SystemST)
+initSystemST = do
+  let systemST = defaultSystemST
+  lift $ newSTRef systemST

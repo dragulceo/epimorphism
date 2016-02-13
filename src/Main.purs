@@ -1,6 +1,6 @@
 module Main where
 
-import Prelude (Unit, unit, return, bind, ($), (*), (-), (+), (/), (==), id, mod)
+import Prelude (Unit, return, bind, ($), (*), (-), (+), (/), (==), id, mod)
 import Data.Either (Either(Right, Left))
 import Data.Maybe (maybe, Maybe(Just))
 import Data.Int (round)
@@ -12,23 +12,23 @@ import Control.Monad.ST (ST, STRef, writeSTRef, readSTRef, newSTRef, modifySTRef
 import Graphics.Canvas (Canvas)
 import DOM (DOM)
 
-import Config (Epi, Pattern, EngineState, EngineConf, SystemState)
-import Engine (loadEngineConf, initEngine, render)
-import UI (loadUIConf, initUIState, showFps)
+import Config (Epi, Pattern, EngineST, EngineConf, SystemST, UIConf)
+import Engine (loadEngineConf, initEngineST, render)
+import UI (loadUIConf, initUIST, showFps)
 import Pattern (loadPattern, updatePattern)
-import System (initSystemState)
+import System (initSystemST)
 import JSUtil (unsafeLog, requestAnimationFrame, now, Now)
 
-main :: Eff (canvas :: Canvas, dom :: DOM, now :: Now) Unit
-main = runST do
-  res <- runExceptT doMain
-  case res of
-    Left er -> unsafeLog er
-    Right _ -> return unit
+type STs h = {
+    ucRef :: STRef h UIConf
+  , ssRef :: STRef h SystemST
+  , ecRef :: STRef h EngineConf
+  , esRef :: STRef h EngineST
+  , pRef  :: STRef h Pattern
+}
 
--- this is in its own method for type inference reasons
-doMain :: forall h. Epi (now :: Now, st :: ST h) Unit
-doMain = do
+init :: forall h eff. Epi (st :: ST h | eff) (STs h)
+init = do
   -- init config
   engineConf <- loadEngineConf "default"
   uiConf     <- loadUIConf     "default"
@@ -39,30 +39,31 @@ doMain = do
   pRef  <- lift $ newSTRef pattern
 
   -- init states
-  esRef <- initEngine uiConf.canvasId ecRef pRef
-  ssRef <- initSystemState
-  initUIState ucRef ecRef esRef pRef
+  esRef <- initEngineST uiConf.canvasId ecRef pRef
+  ssRef <- initSystemST
+  initUIST ucRef ecRef esRef pRef
 
-  -- go!
-  animate ssRef ecRef esRef pRef
+  return { ucRef: ucRef, ssRef: ssRef, ecRef: ecRef, esRef: esRef, pRef: pRef }
 
 
-animate :: forall h. (STRef h SystemState) -> (STRef h EngineConf) -> (STRef h EngineState) -> (STRef h Pattern) -> Epi (now :: Now, st :: ST h) Unit
-animate ssRef ecRef esRef pRef = do
-  systemState <- lift $ readSTRef ssRef
-  engineConf  <- lift $ readSTRef ecRef
-  engineState <- lift $ readSTRef esRef
-  pattern     <- lift $ readSTRef pRef
+animate :: forall h. (Epi (st :: ST h, now :: Now) (STs h)) -> Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
+animate state = handleError do
+  -- unpack state
+  stateData@{ucRef: ucRef, ssRef: ssRef, ecRef: ecRef, esRef: esRef, pRef: pRef} <- state
+  systemST   <- lift $ readSTRef ssRef
+  engineConf <- lift $ readSTRef ecRef
+  engineST   <- lift $ readSTRef esRef
+  pattern    <- lift $ readSTRef pRef
 
   -- update time
   currentTimeMS <- lift $ now
-  let lastTimeMS = maybe currentTimeMS id systemState.lastTimeMS
+  let lastTimeMS = maybe currentTimeMS id systemST.lastTimeMS
   let delta = (currentTimeMS - lastTimeMS) * pattern.tSpd
   lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS})
 
   -- fps
-  when (systemState.frameNum `mod` 10 == 0) do
-    let lastFpsTimeMS = maybe currentTimeMS id systemState.lastFpsTimeMS
+  when (systemST.frameNum `mod` 10 == 0) do
+    let lastFpsTimeMS = maybe currentTimeMS id systemST.lastFpsTimeMS
     let fps = round $ 10.0 * 1000.0 / (currentTimeMS - lastFpsTimeMS)
     lift $ modifySTRef ssRef (\s -> s {lastFpsTimeMS = Just currentTimeMS, fps = Just fps})
     showFps fps
@@ -70,8 +71,21 @@ animate ssRef ecRef esRef pRef = do
   -- update pattern & render
   let pattern' = updatePattern pattern (pattern.t + delta)
   lift $ writeSTRef pRef pattern'
-  render engineConf engineState pattern' systemState.frameNum
+  render engineConf engineST pattern' systemST.frameNum
 
   -- request next frame
   lift $ modifySTRef ssRef (\s -> s {frameNum = s.frameNum + 1})
-  lift $ requestAnimationFrame $ runExceptT (animate ssRef ecRef esRef pRef)
+  lift $ requestAnimationFrame $ animate $ return stateData
+
+
+handleError :: forall eff. (Epi eff Unit) -> (Eff (canvas :: Canvas, dom :: DOM | eff)) Unit
+handleError epi = do
+  res <- runExceptT epi
+  case res of
+    Left er -> unsafeLog er
+    Right ret -> return ret
+
+
+main :: Eff (canvas :: Canvas, dom :: DOM, now :: Now) Unit
+main = runST do
+  animate init

@@ -22,13 +22,11 @@ MISC
   - test on ipad
   - test on android
   - logging system
-  - dev server/ci
   - stop passing non-reference around for safety?
-  - save images
-  - animate w/ runExceptT
-  - make unsafe code safe
+  - make unsafe code safe + catch more errors
   - unit tests
 LATER
+  - save images
   - webcam input
   - benchmarking tools
   - image comparison testing

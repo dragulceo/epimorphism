@@ -84,8 +84,8 @@ initShaders pattern = do
   return $ Tuple mainProg displayProg
 
 -- this might throw an error
-initEngine :: forall h eff. String -> (STRef h EngineConf) -> (STRef h Pattern) -> Epi (st :: ST h | eff) (STRef h EngineState)
-initEngine canvasId ecRef pRef = do
+initEngineST :: forall h eff. String -> (STRef h EngineConf) -> (STRef h Pattern) -> Epi (st :: ST h | eff) (STRef h EngineST)
+initEngineST canvasId ecRef pRef = do
 
   -- these are unsafe
   Just canvas <- liftEff $ getCanvasElementById canvasId
@@ -112,32 +112,32 @@ initEngine canvasId ecRef pRef = do
 
   lift $ newSTRef st
 
-render :: forall h eff. EngineConf -> EngineState -> Pattern -> Int -> Epi (st :: ST h | eff) Unit
-render engineConf engineState pattern frameNum = do
-  let ctx = engineState.ctx
+render :: forall h eff. EngineConf -> EngineST -> Pattern -> Int -> Epi (st :: ST h | eff) Unit
+render engineConf engineST pattern frameNum = do
+  let ctx = engineST.ctx
 
   execGL ctx ( do
     -- ping pong buffers
-    let tm = if frameNum `mod` 2 == 0 then fst engineState.tex else snd engineState.tex
-    let td = if frameNum `mod` 2 == 1 then fst engineState.tex else snd engineState.tex
-    let fb = if frameNum `mod` 2 == 1 then fst engineState.fb  else snd engineState.fb
+    let tm = if frameNum `mod` 2 == 0 then fst engineST.tex else snd engineST.tex
+    let td = if frameNum `mod` 2 == 1 then fst engineST.tex else snd engineST.tex
+    let fb = if frameNum `mod` 2 == 1 then fst engineST.fb  else snd engineST.fb
 
     -- main program
-    liftEff $ GL.useProgram ctx engineState.mainProg
+    liftEff $ GL.useProgram ctx engineST.mainProg
     liftEff $ GL.bindTexture ctx GLE.texture2d tm
     liftEff $ GL.bindFramebuffer ctx GLE.framebuffer fb
 
-    mainUnif <- getUniformBindings engineState.mainProg
+    mainUnif <- getUniformBindings engineST.mainProg
     uniform1f mainUnif.kernel_dim (toNumber engineConf.kernelDim)
     uniform1f mainUnif.time (pattern.t / 1000.0)
     drawArrays Triangles 0 6
 
     -- display/post program
-    liftEff $ GL.useProgram ctx engineState.displayProg
+    liftEff $ GL.useProgram ctx engineST.displayProg
     liftEff $ GL.bindTexture ctx GLE.texture2d td
     liftEff $ GL.bindFramebuffer ctx GLE.framebuffer unsafeNull
 
-    displayUnif <- getUniformBindings engineState.displayProg
+    displayUnif <- getUniformBindings engineST.displayProg
     uniform1f displayUnif.kernel_dim (toNumber engineConf.kernelDim)
     drawArrays Triangles 0 6
   )

@@ -12,7 +12,7 @@ import DOM (DOM)
 type Epi eff a = ExceptT String (Eff (canvas :: Canvas, dom :: DOM | eff)) a
 
 -- System
-type SystemState = {
+type SystemST = {
     lastTimeMS :: Maybe Number
   , frameNum :: Int
   , lastFpsTimeMS :: Maybe Number
@@ -25,7 +25,7 @@ type EngineConf = {
   , fract :: Int
 }
 
-type EngineState = {
+type EngineST = {
     displayProg :: WebGLProgram
   , mainProg :: WebGLProgram
   , tex :: (Tuple WebGLTexture WebGLTexture)

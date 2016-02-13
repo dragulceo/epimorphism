@@ -36,8 +36,8 @@ loadUIConf name = do
   return uiConf
 
 
-initUIState :: forall h eff. (STRef h UIConf) -> (STRef h EngineConf) -> (STRef h EngineState) -> (STRef h Pattern) -> Epi (st :: ST h | eff) Unit
-initUIState ucRef ecRef esRef pRef = do
+initUIST :: forall h eff. (STRef h UIConf) -> (STRef h EngineConf) -> (STRef h EngineST) -> (STRef h Pattern) -> Epi (st :: ST h | eff) Unit
+initUIST ucRef ecRef esRef pRef = do
   uiConf <- lift $ readSTRef ucRef
   initLayout uiConf
   lift $ registerEventHandler (command ucRef ecRef esRef pRef)

@@ -4,7 +4,12 @@ import Data.Maybe (Maybe ())
 import Data.Tuple (Tuple ())
 import Data.StrMap (StrMap ())
 import Control.Monad.Eff (Eff)
+import Control.Monad.Except.Trans (ExceptT ())
 import Graphics.WebGL.Types (WebGLProgram, WebGLTexture, WebGLFramebuffer, WebGLContext)
+import Graphics.Canvas (Canvas)
+import DOM (DOM)
+
+type Epi eff a = ExceptT String (Eff (canvas :: Canvas, dom :: DOM | eff)) a
 
 -- System
 type SystemState = {

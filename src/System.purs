@@ -17,7 +17,7 @@ defaultSystemState = {
 }
 
 -- PUBLIC
-initSystemState :: forall eff h. ExceptT String (Eff (st :: ST h | eff)) (STRef h SystemState)
+initSystemState :: forall eff h. Epi (st :: ST h | eff) (STRef h SystemState)
 initSystemState = do
   let systemState = defaultSystemState
   lift $ newSTRef systemState

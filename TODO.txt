@@ -3,11 +3,11 @@ CONFIG
   - serializing states & configs
   - database support
 ENGINE
-  - feedback isn't perfect/ misalligned square
-  - compiling patterns
-  - passing pattern pars to kernel
-  - fps
   - basic refactoring of kernel
+  - passing pattern pars to kernel
+  - compiling patterns
+
+  - feedback isn't perfect/ misalligned square
   - better kernel debug support
   - webgl debug statements?
 UI
@@ -19,6 +19,8 @@ PATTERN
   - programs
   - lots of other stuff
 MISC
+  - test on ipad
+  - test on android
   - logging system
   - dev server/ci
   - stop passing non-reference around for safety?
@@ -26,8 +28,6 @@ MISC
   - animate w/ runExceptT
   - make unsafe code safe
   - unit tests
-  - test on ipad
-  - test on android
 LATER
   - webcam input
   - benchmarking tools

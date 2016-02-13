@@ -36,7 +36,7 @@ defaultEngineConf = {
 }
 
 -- PUBLIC
-loadEngineConf :: forall eff. String -> ExceptT String (Eff eff) EngineConf
+loadEngineConf :: forall eff. String -> Epi eff EngineConf
 loadEngineConf name = do
   let engConf = defaultEngineConf
   return engConf
@@ -84,7 +84,7 @@ initShaders pattern = do
   return $ Tuple mainProg displayProg
 
 -- this might throw an error
-initEngine :: forall h eff. String -> (STRef h EngineConf) -> (STRef h Pattern) -> ExceptT String (Eff (st :: ST h, canvas :: Canvas | eff))  (STRef h EngineState)
+initEngine :: forall h eff. String -> (STRef h EngineConf) -> (STRef h Pattern) -> Epi (st :: ST h | eff) (STRef h EngineState)
 initEngine canvasId ecRef pRef = do
 
   -- these are unsafe
@@ -112,7 +112,7 @@ initEngine canvasId ecRef pRef = do
 
   lift $ newSTRef st
 
-render :: forall h eff. EngineConf -> EngineState -> Pattern -> Int -> ExceptT String (Eff (canvas :: Canvas, st :: ST h | eff)) Unit
+render :: forall h eff. EngineConf -> EngineState -> Pattern -> Int -> Epi (st :: ST h | eff) Unit
 render engineConf engineState pattern frameNum = do
   let ctx = engineState.ctx
 
@@ -144,7 +144,7 @@ render engineConf engineState pattern frameNum = do
 
 
 -- PRIVATE
-execGL :: forall eff a. WebGLContext -> (WebGL a) -> ExceptT String (Eff (canvas :: Canvas | eff)) a
+execGL :: forall eff a. WebGLContext -> (WebGL a) -> Epi eff a
 execGL ctx webGL = do
   res <- lift $ runWebgl webGL ctx
   case res of

@@ -1,37 +1,33 @@
 module Main where
 
-import Prelude (Unit, unit, return, bind, ($), (*), (-), (+), (/), (==), show, id, mod)
+import Prelude (Unit, unit, return, bind, ($), (*), (-), (+), (/), (==), id, mod)
 import Data.Either (Either(Right, Left))
 import Data.Maybe (maybe, Maybe(Just))
 import Data.Int (round)
 
 import Control.Monad (when)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (CONSOLE, log)
-import Control.Monad.Eff.Alert (Alert)
-import Control.Monad.Except.Trans (runExceptT, lift, ExceptT ())
+import Control.Monad.Except.Trans (runExceptT, lift)
 import Control.Monad.ST (ST, STRef, writeSTRef, readSTRef, newSTRef, modifySTRef, runST)
 import Graphics.Canvas (Canvas)
 import DOM (DOM)
 
-import Config (Pattern, EngineState, EngineConf, SystemState)
+import Config (Epi, Pattern, EngineState, EngineConf, SystemState)
 import Engine (loadEngineConf, initEngine, render)
 import UI (loadUIConf, initUIState, showFps)
 import Pattern (loadPattern, updatePattern)
 import System (initSystemState)
 import JSUtil (unsafeLog, requestAnimationFrame, now, Now)
 
-type Epi eff = Eff (console :: CONSOLE, alert :: Alert, canvas :: Canvas, now :: Now, dom :: DOM | eff)
-
-main :: Epi () Unit
+main :: Eff (canvas :: Canvas, dom :: DOM, now :: Now) Unit
 main = runST do
   res <- runExceptT doMain
   case res of
-    Left er -> log $ show er
+    Left er -> unsafeLog er
     Right _ -> return unit
 
 -- this is in its own method for type inference reasons
-doMain :: forall h. ExceptT String (Epi (st :: ST h)) Unit
+doMain :: forall h. Epi (now :: Now, st :: ST h) Unit
 doMain = do
   -- init config
   engineConf <- loadEngineConf "default"
@@ -51,7 +47,7 @@ doMain = do
   animate ssRef ecRef esRef pRef
 
 
-animate :: forall h. (STRef h SystemState) -> (STRef h EngineConf) -> (STRef h EngineState) -> (STRef h Pattern) -> ExceptT String (Epi (st :: ST h)) Unit
+animate :: forall h. (STRef h SystemState) -> (STRef h EngineConf) -> (STRef h EngineState) -> (STRef h Pattern) -> Epi (now :: Now, st :: ST h) Unit
 animate ssRef ecRef esRef pRef = do
   systemState <- lift $ readSTRef ssRef
   engineConf  <- lift $ readSTRef ecRef

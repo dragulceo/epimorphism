@@ -16107,23 +16107,23 @@ var Pattern = require("Pattern");
 var System = require("System");
 var JSUtil = require("JSUtil");
 var Control_Monad_Trans = require("Control.Monad.Trans");
-var init = Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Engine.loadEngineConf("default"))(function (v) {
-    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(UI.loadUIConf("default"))(function (v1) {
-        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Pattern.loadPattern("default"))(function (v2) {
-            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v)))(function (v3) {
-                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v1)))(function (v4) {
+var init = Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.initSystemST(System.defaultSystemConf))(function (v) {
+    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v)))(function (v1) {
+        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Engine.loadEngineConf(System.defaultSystemConf.initEngineConf))(function (v2) {
+            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(UI.loadUIConf(System.defaultSystemConf.initUIConf))(function (v3) {
+                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Pattern.loadPattern(System.defaultSystemConf.initPattern))(function (v4) {
                     return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v2)))(function (v5) {
-                        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Engine.initEngineST(v1.canvasId)(v3)(v5))(function (v6) {
-                            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.initSystemST)(function (v7) {
-                                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v6)))(function (v8) {
-                                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v7)))(function (v9) {
-                                        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(UI.initUIST(v4)(v3)(v8)(v5))(function () {
+                        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v3)))(function (v6) {
+                            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v4)))(function (v7) {
+                                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Engine.initEngineST(v3.canvasId)(v5)(v7))(function (v8) {
+                                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v8)))(function (v9) {
+                                        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(UI.initUIST(v6)(v5)(v9)(v7))(function () {
                                             return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))({
-                                                ucRef: v4, 
-                                                ssRef: v9, 
-                                                ecRef: v3, 
-                                                esRef: v8, 
-                                                pRef: v5
+                                                ucRef: v6, 
+                                                ssRef: v1, 
+                                                ecRef: v5, 
+                                                esRef: v9, 
+                                                pRef: v7
                                             });
                                         });
                                     });
@@ -16145,7 +16145,7 @@ var handleError = function (epi) {
         if (v instanceof Data_Either.Right) {
             return v.value0;
         };
-        throw new Error("Failed pattern match at Main line 83, column 1 - line 84, column 1: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Main line 86, column 1 - line 87, column 1: " + [ v.constructor.name ]);
     };
 };
 var animate = function (stateM) {
@@ -17485,23 +17485,63 @@ module.exports = {
 "use strict";
 var Prelude = require("Prelude");
 var Data_Maybe = require("Data.Maybe");
+var Data_StrMap = require("Data.StrMap");
 var Control_Monad_ST = require("Control.Monad.ST");
 var Config = require("Config");
 var Control_Monad_Except_Trans = require("Control.Monad.Except.Trans");
 var Control_Monad_Eff = require("Control.Monad.Eff");
+var LocalHTTP = (function () {
+    function LocalHTTP() {
+
+    };
+    LocalHTTP.value = new LocalHTTP();
+    return LocalHTTP;
+})();
+var LocalStorage = (function () {
+    function LocalStorage() {
+
+    };
+    LocalStorage.value = new LocalStorage();
+    return LocalStorage;
+})();
+var RemoteDB = (function () {
+    function RemoteDB() {
+
+    };
+    RemoteDB.value = new RemoteDB();
+    return RemoteDB;
+})();
 var defaultSystemST = {
     lastTimeMS: Data_Maybe.Nothing.value, 
     frameNum: 0, 
     lastFpsTimeMS: Data_Maybe.Nothing.value, 
-    fps: Data_Maybe.Nothing.value
+    fps: Data_Maybe.Nothing.value, 
+    uiConfigLib: Data_StrMap.empty, 
+    engineConfigLib: Data_StrMap.empty, 
+    patternLib: Data_StrMap.empty, 
+    moduleLib: Data_StrMap.empty, 
+    shaderLib: Data_StrMap.empty, 
+    componentLib: Data_StrMap.empty, 
+    libraryLib: Data_StrMap.empty
 };
-var initSystemST = Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))(defaultSystemST);
+var initSystemST = function (systemConf) {
+    return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))(defaultSystemST);
+};
+var defaultSystemConf = {
+    initEngineConf: "default", 
+    initUIConf: "default", 
+    initPattern: "default"
+};
 module.exports = {
+    LocalHTTP: LocalHTTP, 
+    LocalStorage: LocalStorage, 
+    RemoteDB: RemoteDB, 
     initSystemST: initSystemST, 
-    defaultSystemST: defaultSystemST
+    defaultSystemST: defaultSystemST, 
+    defaultSystemConf: defaultSystemConf
 };
 
-},{"Config":"/Users/gene/Programming/pure_morph/output/Config/index.js","Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","Control.Monad.ST":"/Users/gene/Programming/pure_morph/output/Control.Monad.ST/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/UI/foreign.js":[function(require,module,exports){
+},{"Config":"/Users/gene/Programming/pure_morph/output/Config/index.js","Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","Control.Monad.ST":"/Users/gene/Programming/pure_morph/output/Control.Monad.ST/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Data.StrMap":"/Users/gene/Programming/pure_morph/output/Data.StrMap/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/UI/foreign.js":[function(require,module,exports){
 "use strict";
 
 // module UI

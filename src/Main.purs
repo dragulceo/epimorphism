@@ -16,7 +16,7 @@ import Config (Epi, Pattern, EngineST, EngineConf, SystemST, UIConf)
 import Engine (loadEngineConf, initEngineST, render)
 import UI (loadUIConf, initUIST, showFps)
 import Pattern (loadPattern, updatePattern)
-import System (initSystemST)
+import System (defaultSystemConf, initSystemST)
 import JSUtil (unsafeLog, requestAnimationFrame, now, Now)
 
 type State h = {
@@ -29,10 +29,15 @@ type State h = {
 
 init :: forall h eff. Epi (st :: ST h | eff) (State h)
 init = do
+  -- init system
+  let systemConf = defaultSystemConf
+  systemST <- initSystemST systemConf
+  ssRef <- lift $ newSTRef systemST
+
   -- init config
-  engineConf <- loadEngineConf "default"
-  uiConf     <- loadUIConf     "default"
-  pattern    <- loadPattern    "default"
+  engineConf <- loadEngineConf systemConf.initEngineConf
+  uiConf     <- loadUIConf     systemConf.initUIConf
+  pattern    <- loadPattern    systemConf.initPattern
 
   ecRef <- lift $ newSTRef engineConf
   ucRef <- lift $ newSTRef uiConf
@@ -40,9 +45,7 @@ init = do
 
   -- init states
   engineST <- initEngineST uiConf.canvasId ecRef pRef
-  systemST <- initSystemST
   esRef <- lift $ newSTRef engineST
-  ssRef <- lift $ newSTRef systemST
   initUIST ucRef ecRef esRef pRef
 
   return { ucRef: ucRef, ssRef: ssRef, ecRef: ecRef, esRef: esRef, pRef: pRef }

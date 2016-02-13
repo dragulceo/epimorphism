@@ -12,11 +12,24 @@ import DOM (DOM)
 type Epi eff a = ExceptT String (Eff (canvas :: Canvas, dom :: DOM | eff)) a
 
 -- System
+type SystemConf = {
+    initEngineConf :: String
+  , initUIConf :: String
+  , initPattern :: String
+}
+
 type SystemST = {
     lastTimeMS :: Maybe Number
   , frameNum :: Int
   , lastFpsTimeMS :: Maybe Number
   , fps :: Maybe Int
+  , uiConfigLib :: StrMap UIConf
+  , engineConfigLib :: StrMap EngineConf
+  , patternLib :: StrMap Pattern
+  , moduleLib :: StrMap Module
+  , shaderLib :: StrMap String
+  , componentLib :: StrMap String
+  , libraryLib :: StrMap String
 }
 
 -- Engine

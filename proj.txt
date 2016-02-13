@@ -16,6 +16,11 @@ serializing
 
 
 
+
+
+
+
+
 UICONF, etc
 
 name $name
@@ -50,9 +55,10 @@ component $family.name{
 
 T_FB, etc
 
-library $family.name.sub {
-
-
+sub $family.name.sub {
+ exp(z)
+ sin(z) + cos(z)
+ ..
 }
 
 
@@ -70,3 +76,4 @@ COMPILING
   a. process & splice includes
   b. process & splice components
   c. substitute par & zn
+  d. magic for complex functions?

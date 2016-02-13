@@ -19,7 +19,7 @@ import Pattern (loadPattern, updatePattern)
 import System (initSystemST)
 import JSUtil (unsafeLog, requestAnimationFrame, now, Now)
 
-type STs h = {
+type State h = {
     ucRef :: STRef h UIConf
   , ssRef :: STRef h SystemST
   , ecRef :: STRef h EngineConf
@@ -27,7 +27,7 @@ type STs h = {
   , pRef  :: STRef h Pattern
 }
 
-init :: forall h eff. Epi (st :: ST h | eff) (STs h)
+init :: forall h eff. Epi (st :: ST h | eff) (State h)
 init = do
   -- init config
   engineConf <- loadEngineConf "default"
@@ -46,10 +46,10 @@ init = do
   return { ucRef: ucRef, ssRef: ssRef, ecRef: ecRef, esRef: esRef, pRef: pRef }
 
 
-animate :: forall h. (Epi (st :: ST h, now :: Now) (STs h)) -> Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
-animate state = handleError do
+animate :: forall h. (Epi (st :: ST h, now :: Now) (State h)) -> Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
+animate stateM = handleError do
   -- unpack state
-  stateData@{ucRef: ucRef, ssRef: ssRef, ecRef: ecRef, esRef: esRef, pRef: pRef} <- state
+  state@{ucRef: ucRef, ssRef: ssRef, ecRef: ecRef, esRef: esRef, pRef: pRef} <- stateM
   systemST   <- lift $ readSTRef ssRef
   engineConf <- lift $ readSTRef ecRef
   engineST   <- lift $ readSTRef esRef
@@ -75,7 +75,7 @@ animate state = handleError do
 
   -- request next frame
   lift $ modifySTRef ssRef (\s -> s {frameNum = s.frameNum + 1})
-  lift $ requestAnimationFrame $ animate $ return stateData
+  lift $ requestAnimationFrame $ animate $ return state
 
 
 handleError :: forall eff. (Epi eff Unit) -> (Eff (canvas :: Canvas, dom :: DOM | eff)) Unit

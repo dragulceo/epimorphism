@@ -8,7 +8,7 @@ import Control.Monad.ST
 import Config
 import JSUtil (unsafeLog)
 
-command :: forall h eff. (STRef h UIConf) -> (STRef h SystemConf) -> (STRef h EngineConf) -> (STRef h EngineState) -> (STRef h Pattern) -> String -> Eff (st :: ST h | eff) Unit
+command :: forall h eff. (STRef h UIConf) -> (STRef h EngineConf) -> (STRef h EngineState) -> (STRef h Pattern) -> String -> Eff (st :: ST h | eff) Unit
 command ucRef ecRef esRef pRef msg = do
   uiConf      <- readSTRef ucRef
   engineConf  <- readSTRef ecRef

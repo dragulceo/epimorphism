@@ -11,7 +11,7 @@ type SystemState = {
     lastTimeMS :: Maybe Number
   , frameNum :: Int
   , lastFpsTimeMS :: Maybe Number
-  , fps :: Maybe Number
+  , fps :: Maybe Int
 }
 
 -- Engine
@@ -32,7 +32,7 @@ type EngineState = {
 type UIConf = {
     canvasId :: String
   , consoleId :: String
-  , showFps :: Boolean
+  -- , showFps :: Boolean
 }
 
 -- Pattern

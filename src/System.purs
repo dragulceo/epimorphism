@@ -2,8 +2,9 @@ module System where
 
 import Prelude
 import Data.Maybe (Maybe(Nothing))
-import Control.Monad.Trans (lift)
-import Control.Monad.ST (newSTRef)
+import Control.Monad.Eff (Eff)
+import Control.Monad.Except.Trans (ExceptT (), lift)
+import Control.Monad.ST (ST, STRef, newSTRef)
 
 import Config
 
@@ -16,7 +17,7 @@ defaultSystemState = {
 }
 
 -- PUBLIC
-initSystemState :: forall eff. String -> ExceptT String (Eff eff) SystemState
-initSystemState name = do
+initSystemState :: forall eff h. ExceptT String (Eff (st :: ST h | eff)) (STRef h SystemState)
+initSystemState = do
   let systemState = defaultSystemState
   lift $ newSTRef systemState

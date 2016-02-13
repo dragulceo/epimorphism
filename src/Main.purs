@@ -1,21 +1,22 @@
 module Main where
 
-import Prelude (Unit, unit, return, bind, ($), (*), (-), (+), show, id)
+import Prelude (Unit, unit, return, bind, ($), (*), (-), (+), (/), (==), show, id, mod)
 import Data.Either (Either(Right, Left))
 import Data.Maybe (maybe, Maybe(Just))
+import Data.Int (round)
 
+import Control.Monad (when)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Eff.Alert (Alert)
 import Control.Monad.Except.Trans (runExceptT, lift, ExceptT ())
 import Control.Monad.ST (ST, STRef, writeSTRef, readSTRef, newSTRef, modifySTRef, runST)
 import Graphics.Canvas (Canvas)
-
 import DOM (DOM)
 
-import Config
+import Config (Pattern, EngineState, EngineConf, SystemState)
 import Engine (loadEngineConf, initEngine, render)
-import UI (loadUIConf, initUIState)
+import UI (loadUIConf, initUIState, showFps)
 import Pattern (loadPattern, updatePattern)
 import System (initSystemState)
 import JSUtil (unsafeLog, requestAnimationFrame, now, Now)
@@ -37,7 +38,6 @@ doMain = do
   uiConf     <- loadUIConf     "default"
   pattern    <- loadPattern    "default"
 
-  ssRef <- lift $ newSTRef systemState
   ecRef <- lift $ newSTRef engineConf
   ucRef <- lift $ newSTRef uiConf
   pRef  <- lift $ newSTRef pattern
@@ -45,14 +45,14 @@ doMain = do
   -- init states
   esRef <- initEngine uiConf.canvasId ecRef pRef
   ssRef <- initSystemState
-  initUIState ucRef ssRef ecRef esRef pRef
+  initUIState ucRef ecRef esRef pRef
 
   -- go!
   animate ssRef ecRef esRef pRef
 
 
 animate :: forall h. (STRef h SystemState) -> (STRef h EngineConf) -> (STRef h EngineState) -> (STRef h Pattern) -> ExceptT String (Epi (st :: ST h)) Unit
-animate scRef ecRef esRef pRef = do
+animate ssRef ecRef esRef pRef = do
   systemState <- lift $ readSTRef ssRef
   engineConf  <- lift $ readSTRef ecRef
   engineState <- lift $ readSTRef esRef
@@ -62,7 +62,14 @@ animate scRef ecRef esRef pRef = do
   currentTimeMS <- lift $ now
   let lastTimeMS = maybe currentTimeMS id systemState.lastTimeMS
   let delta = (currentTimeMS - lastTimeMS) * pattern.tSpd
-  lift $ modifySTRef scRef (\s -> s {lastTimeMS = Just currentTimeMS})
+  lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS})
+
+  -- fps
+  when (systemState.frameNum `mod` 10 == 0) do
+    let lastFpsTimeMS = maybe currentTimeMS id systemState.lastFpsTimeMS
+    let fps = round $ 10.0 * 1000.0 / (currentTimeMS - lastFpsTimeMS)
+    lift $ modifySTRef ssRef (\s -> s {lastFpsTimeMS = Just currentTimeMS, fps = Just fps})
+    showFps fps
 
   -- update pattern & render
   let pattern' = updatePattern pattern (pattern.t + delta)
@@ -70,5 +77,5 @@ animate scRef ecRef esRef pRef = do
   render engineConf engineState pattern' systemState.frameNum
 
   -- request next frame
-  lift $ modifySTRef scRef (\s -> s {frameNum = s.frameNum + 1})
-  lift $ requestAnimationFrame $ runExceptT (animate scRef ecRef esRef pRef)
+  lift $ modifySTRef ssRef (\s -> s {frameNum = s.frameNum + 1})
+  lift $ requestAnimationFrame $ runExceptT (animate ssRef ecRef esRef pRef)

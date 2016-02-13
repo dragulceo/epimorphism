@@ -37,7 +37,7 @@ loadUIConf name = do
   return uiConf
 
 
-initUIState :: forall h eff. (STRef h UIConf) -> (STRef h SystemState) -> (STRef h EngineConf) -> (STRef h EngineState) -> (STRef h Pattern) -> ExceptT String (Eff (st :: ST h, canvas :: Canvas, console :: CONSOLE, dom :: DOM  | eff)) Unit
+initUIState :: forall h eff. (STRef h UIConf) -> (STRef h EngineConf) -> (STRef h EngineState) -> (STRef h Pattern) -> ExceptT String (Eff (st :: ST h, canvas :: Canvas, console :: CONSOLE, dom :: DOM  | eff)) Unit
 initUIState ucRef ecRef esRef pRef = do
   uiConf <- lift $ readSTRef ucRef
   initLayout uiConf
@@ -62,3 +62,12 @@ initLayout uiConf = do
   Just console <- lift $ querySelector ("#" ++ uiConf.consoleId) doc
   lift $ setStyleAttr "width" (show (width - height - 30.0) ++ "px") console
   lift $ setStyleAttr "height" (show (height - 21.0) ++ "px") console
+
+
+-- hackish
+showFps :: forall eff. Int -> ExceptT String (Eff (canvas :: Canvas, console :: CONSOLE, dom :: DOM  | eff)) Unit
+showFps fps = do
+  let window = globalWindow
+  doc <- lift $ document window
+  Just fpsDiv <- lift $ querySelector ("#showfps") doc
+  lift $ setInnerHTML ((show fps) ++ "fps") fpsDiv

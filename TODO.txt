@@ -6,7 +6,7 @@ ENGINE
   - feedback isn't perfect/ misalligned square
   - compiling patterns
   - passing pattern pars to kernel
-  - benchmarking tools
+  - fps
   - basic refactoring of kernel
   - better kernel debug support
   - webgl debug statements?
@@ -21,7 +21,6 @@ PATTERN
 MISC
   - logging system
   - dev server/ci
-  - system conf vs system state
   - stop passing non-reference around for safety?
   - save images
   - animate w/ runExceptT
@@ -31,3 +30,5 @@ MISC
   - test on android
 LATER
   - webcam input
+  - benchmarking tools
+  - image comparison testing

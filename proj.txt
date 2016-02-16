@@ -14,24 +14,27 @@ serializing
 4. sync db to local storage
 - split across multiple tables for organization (i.e. defaults vs module.seed.17623984237)
 
+modules & patterns not serialized inline
 
 
-
-
+LIBRARY USES CASES
+- load configuration files by name
+- load patterns & modules by name
+- save patterns & modules - generate new name, or manual name - no updates(unless forced by me)
+- synchronizing local/remote/etc
 
 
 
 UICONF, etc
 
-name $name
+$name
 canvasId glcanvas
 consoleId console
 
 
-
 MODULES, etc
 
-name $name
+$name
 ..
 par.par1 shiz
 par.par2 shiz
@@ -41,7 +44,7 @@ sub.v1 "asfasf asdfasdf ..."
 zn 3+4i
 zn 5+2i
 ..
-module.name family.name.id
+module.name name
 ..
 
 
@@ -53,13 +56,18 @@ component $family.name{
 
 }
 
-T_FB, etc
+t_FB, etc
 
-sub $family.name.sub {
+sub $family.name.var {
  exp(z)
  sin(z) + cos(z)
  ..
 }
+
+
+PARSING - configs
+
+
 
 
 
@@ -69,6 +77,7 @@ COMPILING
  - par - @par
  - zn - zn[i]
  - modules - @@module
+ - sub - $sub
 
 1. load files from disk/db
 2. map par & zn values

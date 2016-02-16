@@ -32,8 +32,7 @@ import JSUtil (unsafeLog, unsafeNull, unsafeURLGet)
 
 defaultEngineConf :: EngineConf
 defaultEngineConf = {
-    name: "default"
-  , kernelDim: 1024
+    kernelDim: 1024
   , fract: 3
 }
 

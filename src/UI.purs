@@ -25,8 +25,7 @@ foreign import registerEventHandler :: forall eff. (String -> Eff eff Unit) -> E
 
 defaultUIConf :: UIConf
 defaultUIConf = {
-    name: "default"
-  , canvasId: "glcanvas"
+    canvasId: "glcanvas"
   , consoleId: "console"
 }
 

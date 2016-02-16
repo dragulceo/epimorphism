@@ -11,9 +11,8 @@ import Config
 
 defaultModule :: Module
 defaultModule = {
-    name: ""
-  , id: ""
-  , family: ""
+    component: ""
+  , flags: empty
   , modules: SubModules empty
   , par: empty
   , zn: []
@@ -24,8 +23,7 @@ defaultModule = {
 
 defaultPattern :: Pattern
 defaultPattern = {
-    name: "default"
-  , id: ""
+    flags: empty
   , modules: empty
   , scripts: []
   , t: 0.0

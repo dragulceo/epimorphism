@@ -1,0 +1,20 @@
+--color_id
+flags default true
+flags family color
+component color_id
+
+-- seed_border
+flags default true
+flags family seed
+component seed_border
+par seed_w 0.4
+module t t
+sub reduce torus_reduce
+
+-- t_wrap
+flags default true
+flags family t
+component t_wrap
+sub t_inner z = zn[#0] * z + zn[#1]
+sub t       z = exp(z)
+sub t_outer z = zn[#2] * z + @zn[#3]

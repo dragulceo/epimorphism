@@ -16,8 +16,7 @@ type Epi eff a = ExceptT String (Eff (canvas :: Canvas, dom :: DOM | eff)) a
 
 -- System
 type SystemConf = {
-    name :: String
-  , initEngineConf :: String
+    initEngineConf :: String
   , initUIConf :: String
   , initPattern :: String
 }
@@ -27,10 +26,10 @@ type SystemST = {
   , frameNum :: Int
   , lastFpsTimeMS :: Maybe Number
   , fps :: Maybe Int
-  , uiConfLib :: Array UIConf
-  , engineConfLib :: Array EngineConf
-  , patternLib :: Array Pattern
-  , moduleLib :: Array Module
+  , uiConfLib :: StrMap UIConf
+  , engineConfLib :: StrMap EngineConf
+  , patternLib :: StrMap Pattern
+  , moduleLib :: StrMap Module
   , shaderLib :: StrMap String
   , componentLib :: StrMap String
   , libraryLib :: StrMap String
@@ -38,8 +37,7 @@ type SystemST = {
 
 -- Engine
 type EngineConf = {
-    name :: String
-  , kernelDim :: Int
+    kernelDim :: Int
   , fract :: Int
 }
 
@@ -51,45 +49,19 @@ type EngineST = {
   , ctx :: WebGLContext
 }
 
-data EngineConfD = EngineConfD EngineConf
-
-instance showEngineConfD :: Show EngineConfD where
-  show (EngineConfD o) = "{ name: " ++ show o.name ++ ", kernelDim: " ++ show o.kernelDim ++ ", fract: " ++ show o.fract ++ " }"
-
-instance engineConfDIsForeign :: IsForeign EngineConfD where
-  read value = do
-    name      <- readProp "name" value
-    kernelDim <- readProp "kernelDim" value
-    fract     <- readProp "fract" value
-
-    return $ EngineConfD {name: name, kernelDim: kernelDim, fract: fract}
-
-unpackEngineConf :: EngineConfD -> EngineConf
-unpackEngineConf (EngineConfD c) = c
-
 -- UI
 type UIConf = {
-    name :: String
-  , canvasId :: String
+    canvasId :: String
   , consoleId :: String
   -- , showFps :: Boolean
 }
 
 -- Pattern
-
-class Shiz a where
-  shiz :: a -> String
-
-instance tmp :: Shiz (StrMap String) where
-  shiz v = "asdf"
-
-
 newtype SubModules = SubModules (StrMap Module)
 
 type Module = {
-    name :: String
-  , id :: String
-  , family :: String
+    component :: String
+  , flags :: StrMap String
   , modules :: SubModules
   , par :: StrMap Number
   , zn :: Array Number
@@ -98,8 +70,7 @@ type Module = {
 }
 
 type Pattern = {
-    name :: String
-  , id :: String
+    flags :: StrMap String
   , modules :: StrMap Module
   , scripts :: Array String
   -- , 3d shit

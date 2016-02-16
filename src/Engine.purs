@@ -3,6 +3,7 @@ module Engine where
 import Prelude
 import Data.Tuple
 import Data.Maybe
+
 import Data.Either
 import Data.Array
 import Data.TypedArray as T
@@ -31,7 +32,8 @@ import JSUtil (unsafeLog, unsafeNull, unsafeURLGet)
 
 defaultEngineConf :: EngineConf
 defaultEngineConf = {
-    kernelDim: 1024
+    name: "default"
+  , kernelDim: 1024
   , fract: 3
 }
 

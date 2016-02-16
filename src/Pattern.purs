@@ -24,7 +24,9 @@ defaultModule = {
 
 defaultPattern :: Pattern
 defaultPattern = {
-    modules: empty
+    name: "default"
+  , id: ""
+  , modules: empty
   , scripts: []
   , t: 0.0
   , tPhase: 0.0

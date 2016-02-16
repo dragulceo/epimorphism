@@ -1,5 +1,8 @@
 module Config where
 
+import Prelude
+import Data.Foreign
+import Data.Foreign.Class
 import Data.Maybe (Maybe ())
 import Data.Tuple (Tuple ())
 import Data.StrMap (StrMap ())
@@ -13,7 +16,8 @@ type Epi eff a = ExceptT String (Eff (canvas :: Canvas, dom :: DOM | eff)) a
 
 -- System
 type SystemConf = {
-    initEngineConf :: String
+    name :: String
+  , initEngineConf :: String
   , initUIConf :: String
   , initPattern :: String
 }
@@ -23,10 +27,10 @@ type SystemST = {
   , frameNum :: Int
   , lastFpsTimeMS :: Maybe Number
   , fps :: Maybe Int
-  , uiConfigLib :: StrMap UIConf
-  , engineConfigLib :: StrMap EngineConf
-  , patternLib :: StrMap Pattern
-  , moduleLib :: StrMap Module
+  , uiConfLib :: Array UIConf
+  , engineConfLib :: Array EngineConf
+  , patternLib :: Array Pattern
+  , moduleLib :: Array Module
   , shaderLib :: StrMap String
   , componentLib :: StrMap String
   , libraryLib :: StrMap String
@@ -34,7 +38,8 @@ type SystemST = {
 
 -- Engine
 type EngineConf = {
-    kernelDim :: Int
+    name :: String
+  , kernelDim :: Int
   , fract :: Int
 }
 
@@ -46,14 +51,39 @@ type EngineST = {
   , ctx :: WebGLContext
 }
 
+data EngineConfD = EngineConfD EngineConf
+
+instance showEngineConfD :: Show EngineConfD where
+  show (EngineConfD o) = "{ name: " ++ show o.name ++ ", kernelDim: " ++ show o.kernelDim ++ ", fract: " ++ show o.fract ++ " }"
+
+instance engineConfDIsForeign :: IsForeign EngineConfD where
+  read value = do
+    name      <- readProp "name" value
+    kernelDim <- readProp "kernelDim" value
+    fract     <- readProp "fract" value
+
+    return $ EngineConfD {name: name, kernelDim: kernelDim, fract: fract}
+
+unpackEngineConf :: EngineConfD -> EngineConf
+unpackEngineConf (EngineConfD c) = c
+
 -- UI
 type UIConf = {
-    canvasId :: String
+    name :: String
+  , canvasId :: String
   , consoleId :: String
   -- , showFps :: Boolean
 }
 
 -- Pattern
+
+class Shiz a where
+  shiz :: a -> String
+
+instance tmp :: Shiz (StrMap String) where
+  shiz v = "asdf"
+
+
 newtype SubModules = SubModules (StrMap Module)
 
 type Module = {
@@ -68,7 +98,9 @@ type Module = {
 }
 
 type Pattern = {
-    modules :: StrMap Module
+    name :: String
+  , id :: String
+  , modules :: StrMap Module
   , scripts :: Array String
   -- , 3d shit
   , t :: Number

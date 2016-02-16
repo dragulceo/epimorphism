@@ -6,7 +6,6 @@ ENGINE
   - basic refactoring of kernel
   - passing pattern pars to kernel
   - compiling patterns
-
   - feedback isn't perfect/ misalligned square
   - better kernel debug support
   - webgl debug statements?
@@ -16,8 +15,9 @@ UI
   - handle window resizing
   - fullscreen mode
 PATTERN
+  - pattern switching
   - programs
-  - lots of other stuff
+  - build out library
 MISC
   - test on ipad
   - test on android
@@ -25,8 +25,10 @@ MISC
   - stop passing non-reference around for safety?
   - make unsafe code safe + catch more errors
   - unit tests
+  - website
 LATER
   - save images
   - webcam input
   - benchmarking tools
   - image comparison testing
+  - make pattern module?

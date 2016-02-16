@@ -12,7 +12,7 @@ import Control.Monad.ST (ST, STRef, writeSTRef, readSTRef, newSTRef, modifySTRef
 import Graphics.Canvas (Canvas)
 import DOM (DOM)
 
-import Config (Epi, Pattern, EngineST, EngineConf, SystemST, UIConf)
+import Config
 import Engine (loadEngineConf, initEngineST, render)
 import UI (loadUIConf, initUIST, showFps)
 import Pattern (loadPattern, updatePattern)

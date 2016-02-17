@@ -15,6 +15,7 @@ sub reduce torus_reduce
 flags default true
 flags family t
 component t_wrap
+zn 1.0 + 0j, 0.0 + 0j, 1.0 + 0j, 0.0 + 0j,
 sub t_inner z = zn[#0] * z + zn[#1]
 sub t       z = exp(z)
 sub t_outer z = zn[#2] * z + @zn[#3]

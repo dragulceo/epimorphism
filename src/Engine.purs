@@ -37,11 +37,6 @@ defaultEngineConf = {
 }
 
 -- PUBLIC
-loadEngineConf :: forall eff. String -> Epi eff EngineConf
-loadEngineConf name = do
-  let engConf = defaultEngineConf
-  return engConf
-
 -- this might throw an error
 initTex :: Int -> WebGL (Tuple WebGLTexture WebGLFramebuffer)
 initTex dim = do

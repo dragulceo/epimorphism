@@ -41,6 +41,10 @@ exports.unsafeLog = function unsafeLog(x) {
   }
 }
 
+exports.reallyUnsafeLog = function reallyUnsafeLog(x) {
+  console.log(x);
+}
+
 
 exports.now = function () {
   return Date.now();

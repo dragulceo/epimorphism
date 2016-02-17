@@ -30,12 +30,6 @@ defaultUIConf = {
 }
 
 -- PUBLIC
-loadUIConf :: forall eff. String -> Epi eff UIConf
-loadUIConf name = do
-  let uiConf = defaultUIConf
-  return uiConf
-
-
 initUIST :: forall h eff. (STRef h UIConf) -> (STRef h EngineConf) -> (STRef h EngineST) -> (STRef h Pattern) -> Epi (st :: ST h | eff) Unit
 initUIST ucRef ecRef esRef pRef = do
   uiConf <- lift $ readSTRef ucRef

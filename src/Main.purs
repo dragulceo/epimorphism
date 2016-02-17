@@ -13,10 +13,10 @@ import Graphics.Canvas (Canvas)
 import DOM (DOM)
 
 import Config
-import Engine (loadEngineConf, initEngineST, render)
-import UI (loadUIConf, initUIST, showFps)
+import Engine (initEngineST, render)
+import UI (initUIST, showFps)
 import Pattern (loadPattern, updatePattern)
-import System (defaultSystemConf, initSystemST)
+import System (defaultSystemConf, initSystemST, loadConf)
 import JSUtil (unsafeLog, requestAnimationFrame, now, Now)
 
 type State h = {
@@ -35,8 +35,8 @@ init = do
   ssRef <- lift $ newSTRef systemST
 
   -- init config
-  engineConf <- loadEngineConf systemConf.initEngineConf
-  uiConf     <- loadUIConf     systemConf.initUIConf
+  engineConf <- loadConf systemConf.initEngineConf systemST.engineConfLib
+  uiConf     <- loadConf systemConf.initUIConf systemST.uiConfLib
   pattern    <- loadPattern    systemConf.initPattern
 
   ecRef <- lift $ newSTRef engineConf

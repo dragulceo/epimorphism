@@ -20,6 +20,7 @@
     "purescript-extensions" : "*",
     "purescript-console" : "*",
     "purescript-jquery" : "*",
-    "purescript-simple-dom" : "*"
+    "purescript-simple-dom" : "*",
+    "purescript-complex": "*"
   }
 }

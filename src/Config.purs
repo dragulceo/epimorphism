@@ -1,11 +1,10 @@
 module Config where
 
 import Prelude
-import Data.Foreign
-import Data.Foreign.Class
 import Data.Maybe (Maybe ())
 import Data.Tuple (Tuple ())
 import Data.StrMap (StrMap ())
+import Data.Complex
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (ExceptT ())
 import Graphics.WebGL.Types (WebGLProgram, WebGLTexture, WebGLFramebuffer, WebGLContext)
@@ -64,7 +63,7 @@ type Module = {
   , flags :: StrMap String
   , modules :: SubModules
   , par :: StrMap Number
-  , zn :: Array Number
+  , zn :: Array Complex
   , images :: Array String
   , sub :: StrMap String
 }

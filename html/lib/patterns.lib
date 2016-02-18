@@ -1,5 +1,4 @@
---test
+--default
 t      0.0
 tPhase 0.0
 tSpd   1.0
-module color color_id_test

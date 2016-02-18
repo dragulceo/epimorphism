@@ -15,8 +15,8 @@ import DOM (DOM)
 import Config
 import Engine (initEngineST, render)
 import UI (initUIST, showFps)
-import Pattern (loadPattern, updatePattern)
-import System (defaultSystemConf, initSystemST, loadConf)
+import Pattern (updatePattern)
+import System (initSystemST, loadConf)
 import JSUtil (unsafeLog, requestAnimationFrame, now, Now)
 
 type State h = {
@@ -30,14 +30,14 @@ type State h = {
 init :: forall h eff. Epi (st :: ST h | eff) (State h)
 init = do
   -- init system
-  let systemConf = defaultSystemConf
-  systemST <- initSystemST systemConf
+  systemST <- initSystemST
   ssRef <- lift $ newSTRef systemST
 
   -- init config
+  systemConf <- loadConf "default" systemST.systemConfLib
   engineConf <- loadConf systemConf.initEngineConf systemST.engineConfLib
   uiConf     <- loadConf systemConf.initUIConf systemST.uiConfLib
-  pattern    <- loadPattern    systemConf.initPattern
+  pattern    <- loadConf systemConf.initPattern systemST.patternLib
 
   ecRef <- lift $ newSTRef engineConf
   ucRef <- lift $ newSTRef uiConf

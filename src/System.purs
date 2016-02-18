@@ -9,17 +9,10 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 
 import Config
-import JSUtil (unsafeURLGet, unsafeLog)
+import JSUtil (unsafeURLGet, unsafeLog, reallyUnsafeLog)
 import Library
 
 data DataSource = LocalHTTP | LocalStorage | RemoteDB
-
-defaultSystemConf :: SystemConf
-defaultSystemConf = {
-    initEngineConf: "default"
-  , initUIConf: "default"
-  , initPattern: "default"
-}
 
 defaultSystemST :: SystemST
 defaultSystemST = {
@@ -27,6 +20,7 @@ defaultSystemST = {
   , frameNum: 0
   , lastFpsTimeMS: Nothing
   , fps: Nothing
+  , systemConfLib: empty
   , uiConfLib: empty
   , engineConfLib: empty
   , patternLib: empty
@@ -37,20 +31,29 @@ defaultSystemST = {
 }
 
 
-initSystemST :: forall eff h. SystemConf -> Epi (st :: ST h | eff) SystemST
-initSystemST systemConf = do
-  let st = defaultSystemST
+initSystemST :: forall eff h. Epi (st :: ST h | eff) SystemST
+initSystemST = do
+  systemConfLib <- buildLib buildSystemConf "lib/system_conf.lib"
   engineConfLib <- buildLib buildEngineConf "lib/engine_conf.lib"
   uiConfLib     <- buildLib buildUIConf "lib/ui_conf.lib"
-  return $ st {engineConfLib = engineConfLib,
-               uiConfLib = uiConfLib}
-  where
-    buildLib :: forall a.  (StrMap LineVal -> Lib a) -> String -> Epi (st :: ST h | eff) (StrMap a)
-    buildLib f loc = do
-      dta <- lift $ unsafeURLGet loc
-      case (parseLib f dta) of
-        (Right res) -> return res
-        (Left (LibError s)) -> throwError s
+  moduleLib     <- buildLib buildModule "lib/modules.lib"
+  patternLib    <- buildLib buildPattern "lib/patterns.lib"
+  return $ defaultSystemST {
+    systemConfLib = systemConfLib,
+    engineConfLib = engineConfLib,
+    uiConfLib     = uiConfLib,
+    moduleLib     = moduleLib,
+    patternLib    = patternLib
+  }
+
+
+buildLib :: forall a h eff.  (StrMap LineVal -> Lib a) -> String -> Epi (st :: ST h | eff) (StrMap a)
+buildLib f loc = do
+  dta <- lift $ unsafeURLGet loc
+  case (parseLib f dta) of
+    (Right res) -> return res
+    (Left (LibError s)) -> throwError s
+
 
 loadConf :: forall eff h a. String -> (StrMap a) -> Epi (st :: ST h | eff) a
 loadConf name lib = do

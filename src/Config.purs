@@ -25,6 +25,7 @@ type SystemST = {
   , frameNum :: Int
   , lastFpsTimeMS :: Maybe Number
   , fps :: Maybe Int
+  , systemConfLib :: StrMap SystemConf
   , uiConfLib :: StrMap UIConf
   , engineConfLib :: StrMap EngineConf
   , patternLib :: StrMap Pattern
@@ -56,7 +57,7 @@ type UIConf = {
 }
 
 -- Pattern
-newtype SubModules = SubModules (StrMap Module)
+data SubModules = SubModules (StrMap Module) | SubModuleRef (StrMap String)
 
 type Module = {
     component :: String
@@ -70,7 +71,7 @@ type Module = {
 
 type Pattern = {
     flags :: StrMap String
-  , modules :: StrMap Module
+  , modules :: SubModules
   , scripts :: Array String
   -- , 3d shit
   , t :: Number

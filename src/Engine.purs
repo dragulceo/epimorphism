@@ -30,12 +30,6 @@ import Graphics.Canvas (Canvas, getCanvasElementById, setCanvasWidth, setCanvasH
 import Config
 import JSUtil (unsafeLog, unsafeNull, unsafeURLGet)
 
-defaultEngineConf :: EngineConf
-defaultEngineConf = {
-    kernelDim: 1024
-  , fract: 3
-}
-
 -- PUBLIC
 -- this might throw an error
 initTex :: Int -> WebGL (Tuple WebGLTexture WebGLFramebuffer)

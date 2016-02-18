@@ -23,12 +23,6 @@ import JSUtil (unsafeLog)
 
 foreign import registerEventHandler :: forall eff. (String -> Eff eff Unit) -> Eff eff Unit
 
-defaultUIConf :: UIConf
-defaultUIConf = {
-    canvasId: "glcanvas"
-  , consoleId: "console"
-}
-
 -- PUBLIC
 initUIST :: forall h eff. (STRef h UIConf) -> (STRef h EngineConf) -> (STRef h EngineST) -> (STRef h Pattern) -> Epi (st :: ST h | eff) Unit
 initUIST ucRef ecRef esRef pRef = do

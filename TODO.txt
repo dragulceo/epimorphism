@@ -1,11 +1,15 @@
 CONFIG
-  - parsing config & state from files
-  - serializing states & configs
-  - database support
+  - cleanup/finish parsing of libs & slibs
+    - info on engine, etc split across library, engine, config :/
+    - general refactoring
+    - better error messages
+    - split familes across multiple files
+    - serializing / unifying with parsing
+    - database support
 ENGINE
-  - basic refactoring of kernel
-  - passing pattern pars to kernel
   - compiling patterns
+  - passing pattern pars to kernel
+
   - feedback isn't perfect/ misalligned square
   - better kernel debug support
   - webgl debug statements?

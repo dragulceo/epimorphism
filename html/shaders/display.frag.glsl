@@ -4,9 +4,6 @@ precision mediump float;
 uniform sampler2D u_image;
 uniform float kernel_dim;
 
-// the texCoords passed in from the vertex shader.
-varying vec2 v_texCoord;
-
 vec3 rgb2hsv(vec3 c)
 {
   vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);

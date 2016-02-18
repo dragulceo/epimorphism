@@ -5,7 +5,7 @@ import Data.Array (cons, foldM, length, index, drop, filter, init) as A
 import Data.Either (Either(..))
 import Data.String (split, joinWith, stripPrefix, trim, contains)
 import Data.Tuple (Tuple(..))
-import Data.Maybe (Maybe(Nothing, Just), isJust)
+import Data.Maybe (Maybe(..), isJust)
 import Data.Maybe.Unsafe
 import Data.StrMap (StrMap (), empty, fromFoldable, foldM, insert, lookup, update)
 import Data.Traversable
@@ -238,7 +238,6 @@ defaultPattern = {
 
 buildPattern :: StrMap LineVal -> Lib Pattern
 buildPattern vals = do
-  let x = reallyUnsafeLog vals
   foldM handle defaultPattern vals
   where
     handle dt key val = case key of

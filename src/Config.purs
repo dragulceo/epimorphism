@@ -30,9 +30,9 @@ type SystemST = {
   , engineConfLib :: StrMap EngineConf
   , patternLib :: StrMap Pattern
   , moduleLib :: StrMap Module
-  , shaderLib :: StrMap String
-  , componentLib :: StrMap String
-  , libraryLib :: StrMap String
+  , shaderLib :: StrMap Shader
+  , componentLib :: StrMap Component
+  , indexLib :: StrMap Index
 }
 
 -- Engine
@@ -77,4 +77,23 @@ type Pattern = {
   , t :: Number
   , tPhase :: Number
   , tSpd :: Number
+}
+
+
+--SLib
+type Component = {
+    name :: String
+  , family :: String
+  , body :: String
+}
+
+type Index = {
+    name :: String
+  , lib :: Array String
+}
+
+type Shader = {
+    name :: String
+  , family :: String
+  , body :: String
 }

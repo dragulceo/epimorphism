@@ -1,14 +1,14 @@
-component color color_id {
+color color_id {{
   color = res;
-}
+}}
 
-component color color_bgr {
+color color_bgr {{
   color = res.bgra;
-}
+}}
 
-component seed seed_border {
+seed seed_border {{
   @@t
-  $reduce
+  $reduce;
 
   float w = VOID_W;
   float wx = (z.x + @seed_w) / (2.0 * @seed_w);
@@ -31,15 +31,49 @@ component seed seed_border {
 
   vec4 frame_w = vec4(w, (abs(w-VOID_W) < 0.00001 ? 0.0 : w * 0.7), wx, wy);
   seed = vec4(frame_w.x, 0, 0, frame_w.y);
-}
+}}
 
-component t t_wrap {
+t t_wrap {{
   z = zz;
-  $t_inner
-  $t
-  $t_outer
-}
+  $t_inner;
+  $t;
+  $t_outer;
+}}
 
-component reduce torus_reduce {
+reduce torus_reduce {{
   z = torus_reduce(z);
+}}
+
+
+post post {{
+  frame = _gamma3(frame, 2.0 / 1.5);
+
+  frame = vec4(rgb2hsv(frame.rgb), v.a);
+
+  vec3 c0 = hsv2rgb(vec3(0.0, 1.0, 0.5));
+  vec3 c1 = hsv2rgb(vec3(0.66 + 0.8 / 2.0, 1.0, 0.5));
+  vec3 c2 = hsv2rgb(vec3(0.66 - 0.8 / 2.0, 1.0, -1.0 * 0.5));
+
+  vec3 res, r0, r1;
+  float f;
+
+  if(frame.x < 1.0 / 3.0){
+    f = 3.0 * frame.x;
+    r0 = c0;
+    r1 = c1;
+  }else if(frame.x < 2.0 / 3.0){
+    f = 3.0 * frame.x - 1.0;
+    r0 = c1;
+    r1 = c2;
+  }else{
+    f = 3.0 * frame.x - 2.0;
+    r0 = c2;
+    r1 = c0;
+  }
+  res = (1.0 - f) * r0 + f * r1;
+
+  res = rgb2hsv(res.rgb);
+  frame.x = res.x;
+
+  post = vec4(hsv2rgb(frame.rgb), frame.a);
 }

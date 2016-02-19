@@ -64,8 +64,8 @@ buildLib f loc = do
     (Left (LibError s)) -> throwError s
 
 
-loadConf :: forall eff h a. String -> (StrMap a) -> Epi (st :: ST h | eff) a
-loadConf name lib = do
+loadLib :: forall eff h a. String -> (StrMap a) -> Epi (st :: ST h | eff) a
+loadLib name lib = do
   case (lookup name lib) of
     (Just d) -> return d
     Nothing  -> throwError ("can't find library: " ++ name)

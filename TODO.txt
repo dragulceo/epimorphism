@@ -12,6 +12,7 @@ ENGINE
 
   - feedback isn't perfect/ misalligned square
   - better kernel debug support
+  - better error checking
   - webgl debug statements?
 UI
   - figure out how to render UI
@@ -26,7 +27,7 @@ MISC
   - test on ipad
   - test on android
   - logging system
-  - stop passing non-reference around for safety?
+  - only pass references when the function can mutate unless event handler or animator?
   - make unsafe code safe + catch more errors
   - unit tests
   - website

@@ -42,10 +42,10 @@ type EngineConf = {
 }
 
 type EngineST = {
-    displayProg :: WebGLProgram
-  , mainProg :: WebGLProgram
-  , tex :: (Tuple WebGLTexture WebGLTexture)
-  , fb :: (Tuple WebGLFramebuffer WebGLFramebuffer)
+    displayProg :: Maybe WebGLProgram
+  , mainProg :: Maybe WebGLProgram
+  , tex :: Maybe (Tuple WebGLTexture WebGLTexture)
+  , fb :: Maybe (Tuple WebGLFramebuffer WebGLFramebuffer)
   , ctx :: WebGLContext
 }
 
@@ -70,7 +70,10 @@ type Module = {
 }
 
 type Pattern = {
-    flags :: StrMap String
+    vert :: String
+  , main :: String
+  , disp :: String
+  , flags :: StrMap String
   , modules :: SubModules
   , scripts :: Array String
   -- , 3d shit

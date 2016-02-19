@@ -227,7 +227,10 @@ buildModule vals = do
 
 defaultPattern :: Pattern
 defaultPattern = {
-    flags: empty
+    vert: "vert"
+  , main: "main"
+  , disp: "disp"
+  , flags: empty
   , modules: SubModules empty
   , scripts: []
   , t: 0.0
@@ -241,6 +244,9 @@ buildPattern vals = do
   foldM handle defaultPattern vals
   where
     handle dt key val = case key of
+      "vert" -> (fromLAsgn "vert" val) >>= (\x -> return $ dt {vert = x})
+      "main" -> (fromLAsgn "main" val) >>= (\x -> return $ dt {main = x})
+      "disp" -> (fromLAsgn "disp" val) >>= (\x -> return $ dt {disp = x})
       "flags" -> (fromLMp "flags" val) >>= (\x -> return $ dt {flags = x})
       "modules" -> (fromLMp "modules" val) >>= (\x -> return $ dt {modules = (SubModuleRef x)})
       "scripts" -> (fromLLst "scripts" val) >>= (\x -> return $ dt {scripts = x})

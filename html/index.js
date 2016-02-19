@@ -11146,37 +11146,6 @@ var initTex = function (dim) {
         });
     });
 };
-var initShaders = function (pattern) {
-    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Trans.lift(Control_Monad_Reader_Trans.monadTransReaderT)(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(JSUtil.unsafeURLGet("/shaders/basic.vert.glsl"))))(function (v) {
-        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Trans.lift(Control_Monad_Reader_Trans.monadTransReaderT)(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(JSUtil.unsafeURLGet("/shaders/main.frag.glsl"))))(function (v1) {
-            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Trans.lift(Control_Monad_Reader_Trans.monadTransReaderT)(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(JSUtil.unsafeURLGet("/shaders/display.frag.glsl"))))(function (v2) {
-                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.compileShadersIntoProgram(v)(v1))(function (v3) {
-                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.compileShadersIntoProgram(v)(v2))(function (v4) {
-                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.getAttrBindings(v4))(function (v5) {
-                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.getAttrBindings(v3))(function (v6) {
-                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.createBuffer)(function (v7) {
-                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.bindBuffer((Graphics_WebGL_Types["ArrayBuffer"]).value)(v7))(function () {
-                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.bufferData((Graphics_WebGL_Types["ArrayBuffer"]).value)(new Graphics_WebGL_Types.DataSource(Data_TypedArray.asFloat32Array([ -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0 ])))(Graphics_WebGL_Types.StaticDraw.value))(function () {
-                                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.enableVertexAttribArray(v6.a_position))(function () {
-                                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.vertexAttribPointer(v6.a_position)(2)(Graphics_WebGL_Types.Float.value)(false)(0)(0))(function () {
-                                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.enableVertexAttribArray(v5.a_position))(function () {
-                                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.vertexAttribPointer(v5.a_position)(2)(Graphics_WebGL_Types.Float.value)(false)(0)(0))(function () {
-                                                            return Prelude["return"](Control_Monad_Reader_Trans.applicativeReaderT(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff)))(new Data_Tuple.Tuple(v3, v4));
-                                                        });
-                                                    });
-                                                });
-                                            });
-                                        });
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        });
-    });
-};
 var execGL = function (ctx) {
     return function (webGL) {
         return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Graphics_WebGL.runWebgl(webGL)(ctx)))(function (v) {
@@ -11186,101 +11155,123 @@ var execGL = function (ctx) {
             if (v instanceof Data_Either.Right) {
                 return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))(v.value0);
             };
-            throw new Error("Failed pattern match at Engine line 135, column 1 - line 136, column 1: " + [ v.constructor.name ]);
+            throw new Error("Failed pattern match at Engine line 163, column 1 - line 164, column 1: " + [ v.constructor.name ]);
         });
-    };
-};
-var initEngineST = function (canvasId) {
-    return function (ecRef) {
-        return function (pRef) {
-            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Eff_Class.liftEff(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff))(Graphics_Canvas.getCanvasElementById(canvasId)))(function (v) {
-                if (v instanceof Data_Maybe.Just) {
-                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Eff_Class.liftEff(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff))(Graphics_WebGL_Context.getWebglContext(v.value0)))(function (v1) {
-                        if (v1 instanceof Data_Maybe.Just) {
-                            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.readSTRef(ecRef)))(function (v2) {
-                                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.readSTRef(pRef)))(function (v3) {
-                                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Graphics_Canvas.setCanvasWidth(Data_Int.toNumber(v2.kernelDim))(v.value0)))(function () {
-                                        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Graphics_Canvas.setCanvasHeight(Data_Int.toNumber(v2.kernelDim))(v.value0)))(function () {
-                                            return execGL(v1.value0)(Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(initTex(v2.kernelDim))(function (v4) {
-                                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(initTex(v2.kernelDim))(function (v5) {
-                                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(initShaders(v3))(function (v6) {
-                                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.clearColor(0.0)(0.0)(0.0)(1.0))(function () {
-                                                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.clear(v1.value0)(Graphics_WebGL_Raw_Enums.colorBufferBit)))(function () {
-                                                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.viewport(v1.value0)(0)(0)(v2.kernelDim)(v2.kernelDim)))(function () {
-                                                                    return Prelude["return"](Control_Monad_Reader_Trans.applicativeReaderT(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff)))({
-                                                                        displayProg: v6.value1, 
-                                                                        mainProg: v6.value0, 
-                                                                        tex: new Data_Tuple.Tuple(v4.value0, v5.value0), 
-                                                                        fb: new Data_Tuple.Tuple(v4.value1, v5.value1), 
-                                                                        ctx: v1.value0
-                                                                    });
-                                                                });
-                                                            });
-                                                        });
-                                                    });
-                                                });
-                                            }));
-                                        });
-                                    });
-                                });
-                            });
-                        };
-                        throw new Error("Failed pattern match at Engine line 77, column 1 - line 78, column 1: " + [ v1.constructor.name ]);
-                    });
-                };
-                throw new Error("Failed pattern match at Engine line 77, column 1 - line 78, column 1: " + [ v.constructor.name ]);
-            });
-        };
     };
 };
 var render = function (engineConf) {
     return function (engineST) {
         return function (pattern) {
             return function (frameNum) {
-                return execGL(engineST.ctx)((function () {
-                    var tm = (function () {
-                        var $51 = frameNum % 2 === 0;
-                        if ($51) {
-                            return Data_Tuple.fst(engineST.tex);
+                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))((function () {
+                    if (engineST.tex instanceof Data_Maybe.Just) {
+                        return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))(engineST.tex.value0);
+                    };
+                    return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))("Render: missing textures");
+                })())(function (v) {
+                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))((function () {
+                        if (engineST.fb instanceof Data_Maybe.Just) {
+                            return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))(engineST.fb.value0);
                         };
-                        if (!$51) {
-                            return Data_Tuple.snd(engineST.tex);
-                        };
-                        throw new Error("Failed pattern match at Engine line 109, column 9 - line 110, column 5: " + [ $51.constructor.name ]);
-                    })();
-                    var td = (function () {
-                        var $52 = frameNum % 2 === 1;
-                        if ($52) {
-                            return Data_Tuple.fst(engineST.tex);
-                        };
-                        if (!$52) {
-                            return Data_Tuple.snd(engineST.tex);
-                        };
-                        throw new Error("Failed pattern match at Engine line 110, column 9 - line 111, column 5: " + [ $52.constructor.name ]);
-                    })();
-                    var fb = (function () {
-                        var $53 = frameNum % 2 === 1;
-                        if ($53) {
-                            return Data_Tuple.fst(engineST.fb);
-                        };
-                        if (!$53) {
-                            return Data_Tuple.snd(engineST.fb);
-                        };
-                        throw new Error("Failed pattern match at Engine line 111, column 9 - line 114, column 5: " + [ $53.constructor.name ]);
-                    })();
-                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.useProgram(engineST.ctx)(engineST.mainProg)))(function () {
-                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.bindTexture(engineST.ctx)(Graphics_WebGL_Raw_Enums.texture2d)(tm)))(function () {
-                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.bindFramebuffer(engineST.ctx)(Graphics_WebGL_Raw_Enums.framebuffer)(fb)))(function () {
-                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.getUniformBindings(engineST.mainProg))(function (v) {
-                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.uniform1f(v.kernel_dim)(Data_Int.toNumber(engineConf.kernelDim)))(function () {
-                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.uniform1f(v.time)(pattern.t / 1000.0))(function () {
-                                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.drawArrays(Graphics_WebGL_Types.Triangles.value)(0)(6))(function () {
-                                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.useProgram(engineST.ctx)(engineST.displayProg)))(function () {
-                                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.bindTexture(engineST.ctx)(Graphics_WebGL_Raw_Enums.texture2d)(td)))(function () {
-                                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.bindFramebuffer(engineST.ctx)(Graphics_WebGL_Raw_Enums.framebuffer)(JSUtil.unsafeNull)))(function () {
-                                                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.getUniformBindings(engineST.displayProg))(function (v1) {
-                                                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.uniform1f(v1.kernel_dim)(Data_Int.toNumber(engineConf.kernelDim)))(function () {
-                                                                    return Graphics_WebGL_Methods.drawArrays(Graphics_WebGL_Types.Triangles.value)(0)(6);
+                        return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))("Render: missing framebuffers");
+                    })())(function (v1) {
+                        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))((function () {
+                            if (engineST.mainProg instanceof Data_Maybe.Just) {
+                                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))(engineST.mainProg.value0);
+                            };
+                            return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))("Render: missing main program");
+                        })())(function (v2) {
+                            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))((function () {
+                                if (engineST.displayProg instanceof Data_Maybe.Just) {
+                                    return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))(engineST.displayProg.value0);
+                                };
+                                return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))("Render: missing display program");
+                            })())(function (v3) {
+                                return execGL(engineST.ctx)((function () {
+                                    var tm = (function () {
+                                        var $46 = frameNum % 2 === 0;
+                                        if ($46) {
+                                            return Data_Tuple.fst(v);
+                                        };
+                                        if (!$46) {
+                                            return Data_Tuple.snd(v);
+                                        };
+                                        throw new Error("Failed pattern match at Engine line 137, column 9 - line 138, column 5: " + [ $46.constructor.name ]);
+                                    })();
+                                    var td = (function () {
+                                        var $47 = frameNum % 2 === 1;
+                                        if ($47) {
+                                            return Data_Tuple.fst(v);
+                                        };
+                                        if (!$47) {
+                                            return Data_Tuple.snd(v);
+                                        };
+                                        throw new Error("Failed pattern match at Engine line 138, column 9 - line 139, column 5: " + [ $47.constructor.name ]);
+                                    })();
+                                    var fb = (function () {
+                                        var $48 = frameNum % 2 === 1;
+                                        if ($48) {
+                                            return Data_Tuple.fst(v1);
+                                        };
+                                        if (!$48) {
+                                            return Data_Tuple.snd(v1);
+                                        };
+                                        throw new Error("Failed pattern match at Engine line 139, column 9 - line 142, column 5: " + [ $48.constructor.name ]);
+                                    })();
+                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.useProgram(engineST.ctx)(v2)))(function () {
+                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.bindTexture(engineST.ctx)(Graphics_WebGL_Raw_Enums.texture2d)(tm)))(function () {
+                                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.bindFramebuffer(engineST.ctx)(Graphics_WebGL_Raw_Enums.framebuffer)(fb)))(function () {
+                                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.getUniformBindings(v2))(function (v4) {
+                                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.uniform1f(v4.kernel_dim)(Data_Int.toNumber(engineConf.kernelDim)))(function () {
+                                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.uniform1f(v4.time)(pattern.t / 1000.0))(function () {
+                                                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.drawArrays(Graphics_WebGL_Types.Triangles.value)(0)(6))(function () {
+                                                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.useProgram(engineST.ctx)(v3)))(function () {
+                                                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.bindTexture(engineST.ctx)(Graphics_WebGL_Raw_Enums.texture2d)(td)))(function () {
+                                                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.bindFramebuffer(engineST.ctx)(Graphics_WebGL_Raw_Enums.framebuffer)(JSUtil.unsafeNull)))(function () {
+                                                                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.getUniformBindings(v3))(function (v5) {
+                                                                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.uniform1f(v5.kernel_dim)(Data_Int.toNumber(engineConf.kernelDim)))(function () {
+                                                                                    return Graphics_WebGL_Methods.drawArrays(Graphics_WebGL_Types.Triangles.value)(0)(6);
+                                                                                });
+                                                                            });
+                                                                        });
+                                                                    });
+                                                                });
+                                                            });
+                                                        });
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    });
+                                })());
+                            });
+                        });
+                    });
+                });
+            };
+        };
+    };
+};
+var setShaders = function (esRef) {
+    return function (sys) {
+        return function (pattern) {
+            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.readSTRef(esRef)))(function (v) {
+                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(execGL(v.ctx)(Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Trans.lift(Control_Monad_Reader_Trans.monadTransReaderT)(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(JSUtil.unsafeURLGet("/shaders/basic.vert.glsl"))))(function (v1) {
+                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Trans.lift(Control_Monad_Reader_Trans.monadTransReaderT)(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(JSUtil.unsafeURLGet("/shaders/main.frag.glsl"))))(function (v2) {
+                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Trans.lift(Control_Monad_Reader_Trans.monadTransReaderT)(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(JSUtil.unsafeURLGet("/shaders/display.frag.glsl"))))(function (v3) {
+                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.compileShadersIntoProgram(v1)(v2))(function (v4) {
+                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.compileShadersIntoProgram(v1)(v3))(function (v5) {
+                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.getAttrBindings(v5))(function (v6) {
+                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.getAttrBindings(v4))(function (v7) {
+                                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.createBuffer)(function (v8) {
+                                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.bindBuffer((Graphics_WebGL_Types["ArrayBuffer"]).value)(v8))(function () {
+                                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.bufferData((Graphics_WebGL_Types["ArrayBuffer"]).value)(new Graphics_WebGL_Types.DataSource(Data_TypedArray.asFloat32Array([ -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0 ])))(Graphics_WebGL_Types.StaticDraw.value))(function () {
+                                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.enableVertexAttribArray(v7.a_position))(function () {
+                                                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.vertexAttribPointer(v7.a_position)(2)(Graphics_WebGL_Types.Float.value)(false)(0)(0))(function () {
+                                                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.enableVertexAttribArray(v6.a_position))(function () {
+                                                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.vertexAttribPointer(v6.a_position)(2)(Graphics_WebGL_Types.Float.value)(false)(0)(0))(function () {
+                                                                        return Prelude["return"](Control_Monad_Reader_Trans.applicativeReaderT(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff)))(new Data_Tuple.Tuple(v4, v5));
+                                                                    });
                                                                 });
                                                             });
                                                         });
@@ -11293,7 +11284,79 @@ var render = function (engineConf) {
                             });
                         });
                     });
-                })());
+                })))(function (v1) {
+                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.modifySTRef(esRef)(function (s) {
+                        var $61 = {};
+                        for (var $62 in s) {
+                            if (s.hasOwnProperty($62)) {
+                                $61[$62] = s[$62];
+                            };
+                        };
+                        $61.displayProg = new Data_Maybe.Just(v1.value1);
+                        $61.mainProg = new Data_Maybe.Just(v1.value0);
+                        return $61;
+                    })))(function () {
+                        return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))(Prelude.unit);
+                    });
+                });
+            });
+        };
+    };
+};
+var initEngineST = function (engineConf) {
+    return function (sys) {
+        return function (pattern) {
+            return function (canvasId) {
+                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Eff_Class.liftEff(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff))(Graphics_Canvas.getCanvasElementById(canvasId)))(function (v) {
+                    if (v instanceof Data_Maybe.Just) {
+                        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Eff_Class.liftEff(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff))(Graphics_WebGL_Context.getWebglContext(v.value0)))(function (v1) {
+                            if (v1 instanceof Data_Maybe.Just) {
+                                var es = {
+                                    displayProg: Data_Maybe.Nothing.value, 
+                                    mainProg: Data_Maybe.Nothing.value, 
+                                    tex: Data_Maybe.Nothing.value, 
+                                    fb: Data_Maybe.Nothing.value, 
+                                    ctx: v1.value0
+                                };
+                                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(es)))(function (v2) {
+                                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Graphics_Canvas.setCanvasWidth(Data_Int.toNumber(engineConf.kernelDim))(v.value0)))(function () {
+                                        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Graphics_Canvas.setCanvasHeight(Data_Int.toNumber(engineConf.kernelDim))(v.value0)))(function () {
+                                            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(setShaders(v2)(sys)(pattern))(function () {
+                                                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.readSTRef(v2)))(function (v3) {
+                                                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(execGL(v1.value0)(Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(initTex(engineConf.kernelDim))(function (v4) {
+                                                        return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(initTex(engineConf.kernelDim))(function (v5) {
+                                                            return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.clearColor(0.0)(0.0)(0.0)(1.0))(function () {
+                                                                return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.clear(v1.value0)(Graphics_WebGL_Raw_Enums.colorBufferBit)))(function () {
+                                                                    return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.viewport(v1.value0)(0)(0)(engineConf.kernelDim)(engineConf.kernelDim)))(function () {
+                                                                        return Prelude["return"](Control_Monad_Reader_Trans.applicativeReaderT(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff)))((function () {
+                                                                            var $71 = {};
+                                                                            for (var $72 in v3) {
+                                                                                if (v3.hasOwnProperty($72)) {
+                                                                                    $71[$72] = v3[$72];
+                                                                                };
+                                                                            };
+                                                                            $71.fb = new Data_Maybe.Just(new Data_Tuple.Tuple(v4.value1, v5.value1));
+                                                                            $71.tex = new Data_Maybe.Just(new Data_Tuple.Tuple(v4.value0, v5.value0));
+                                                                            return $71;
+                                                                        })());
+                                                                    });
+                                                                });
+                                                            });
+                                                        });
+                                                    })))(function (v4) {
+                                                        return Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v4));
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+                            };
+                            throw new Error("Failed pattern match at Engine line 84, column 1 - line 85, column 1: " + [ v1.constructor.name ]);
+                        });
+                    };
+                    throw new Error("Failed pattern match at Engine line 84, column 1 - line 85, column 1: " + [ v.constructor.name ]);
+                });
             };
         };
     };
@@ -11302,7 +11365,7 @@ module.exports = {
     execGL: execGL, 
     render: render, 
     initEngineST: initEngineST, 
-    initShaders: initShaders, 
+    setShaders: setShaders, 
     initTex: initTex
 };
 
@@ -17081,6 +17144,9 @@ var defaultSystemConf = {
     initPattern: "default"
 };
 var defaultPattern = {
+    vert: "vert", 
+    main: "main", 
+    disp: "disp", 
     flags: Data_StrMap.empty, 
     modules: new Config.SubModules(Data_StrMap.empty), 
     scripts: [  ], 
@@ -17213,8 +17279,8 @@ var buildPattern = function (vals) {
     var handle = function (dt) {
         return function (key) {
             return function (val) {
-                if (key === "flags") {
-                    return Prelude[">>="](Data_Either.bindEither)(fromLMp("flags")(val))(function (x) {
+                if (key === "vert") {
+                    return Prelude[">>="](Data_Either.bindEither)(fromLAsgn("vert")(val))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $53 = {};
                             for (var $54 in dt) {
@@ -17222,13 +17288,13 @@ var buildPattern = function (vals) {
                                     $53[$54] = dt[$54];
                                 };
                             };
-                            $53.flags = x;
+                            $53.vert = x;
                             return $53;
                         })());
                     });
                 };
-                if (key === "modules") {
-                    return Prelude[">>="](Data_Either.bindEither)(fromLMp("modules")(val))(function (x) {
+                if (key === "main") {
+                    return Prelude[">>="](Data_Either.bindEither)(fromLAsgn("main")(val))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $55 = {};
                             for (var $56 in dt) {
@@ -17236,13 +17302,13 @@ var buildPattern = function (vals) {
                                     $55[$56] = dt[$56];
                                 };
                             };
-                            $55.modules = new Config.SubModuleRef(x);
+                            $55.main = x;
                             return $55;
                         })());
                     });
                 };
-                if (key === "scripts") {
-                    return Prelude[">>="](Data_Either.bindEither)(fromLLst("scripts")(val))(function (x) {
+                if (key === "disp") {
+                    return Prelude[">>="](Data_Either.bindEither)(fromLAsgn("disp")(val))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $57 = {};
                             for (var $58 in dt) {
@@ -17250,13 +17316,13 @@ var buildPattern = function (vals) {
                                     $57[$58] = dt[$58];
                                 };
                             };
-                            $57.scripts = x;
+                            $57.disp = x;
                             return $57;
                         })());
                     });
                 };
-                if (key === "t") {
-                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLAsgn("t")(val))(parseNum))(function (x) {
+                if (key === "flags") {
+                    return Prelude[">>="](Data_Either.bindEither)(fromLMp("flags")(val))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $59 = {};
                             for (var $60 in dt) {
@@ -17264,13 +17330,13 @@ var buildPattern = function (vals) {
                                     $59[$60] = dt[$60];
                                 };
                             };
-                            $59.t = x;
+                            $59.flags = x;
                             return $59;
                         })());
                     });
                 };
-                if (key === "tPhase") {
-                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLAsgn("tPhase")(val))(parseNum))(function (x) {
+                if (key === "modules") {
+                    return Prelude[">>="](Data_Either.bindEither)(fromLMp("modules")(val))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $61 = {};
                             for (var $62 in dt) {
@@ -17278,13 +17344,13 @@ var buildPattern = function (vals) {
                                     $61[$62] = dt[$62];
                                 };
                             };
-                            $61.tPhase = x;
+                            $61.modules = new Config.SubModuleRef(x);
                             return $61;
                         })());
                     });
                 };
-                if (key === "tSpd") {
-                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLAsgn("tSpd")(val))(parseNum))(function (x) {
+                if (key === "scripts") {
+                    return Prelude[">>="](Data_Either.bindEither)(fromLLst("scripts")(val))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $63 = {};
                             for (var $64 in dt) {
@@ -17292,8 +17358,50 @@ var buildPattern = function (vals) {
                                     $63[$64] = dt[$64];
                                 };
                             };
-                            $63.tSpd = x;
+                            $63.scripts = x;
                             return $63;
+                        })());
+                    });
+                };
+                if (key === "t") {
+                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLAsgn("t")(val))(parseNum))(function (x) {
+                        return Prelude["return"](Data_Either.applicativeEither)((function () {
+                            var $65 = {};
+                            for (var $66 in dt) {
+                                if (dt.hasOwnProperty($66)) {
+                                    $65[$66] = dt[$66];
+                                };
+                            };
+                            $65.t = x;
+                            return $65;
+                        })());
+                    });
+                };
+                if (key === "tPhase") {
+                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLAsgn("tPhase")(val))(parseNum))(function (x) {
+                        return Prelude["return"](Data_Either.applicativeEither)((function () {
+                            var $67 = {};
+                            for (var $68 in dt) {
+                                if (dt.hasOwnProperty($68)) {
+                                    $67[$68] = dt[$68];
+                                };
+                            };
+                            $67.tPhase = x;
+                            return $67;
+                        })());
+                    });
+                };
+                if (key === "tSpd") {
+                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLAsgn("tSpd")(val))(parseNum))(function (x) {
+                        return Prelude["return"](Data_Either.applicativeEither)((function () {
+                            var $69 = {};
+                            for (var $70 in dt) {
+                                if (dt.hasOwnProperty($70)) {
+                                    $69[$70] = dt[$70];
+                                };
+                            };
+                            $69.tSpd = x;
+                            return $69;
                         })());
                     });
                 };
@@ -17310,61 +17418,19 @@ var buildModule = function (vals) {
                 if (key === "component") {
                     return Prelude[">>="](Data_Either.bindEither)(fromLAsgn("component")(val))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
-                            var $66 = {};
-                            for (var $67 in dt) {
-                                if (dt.hasOwnProperty($67)) {
-                                    $66[$67] = dt[$67];
-                                };
-                            };
-                            $66.component = x;
-                            return $66;
-                        })());
-                    });
-                };
-                if (key === "flags") {
-                    return Prelude[">>="](Data_Either.bindEither)(fromLMp("flags")(val))(function (x) {
-                        return Prelude["return"](Data_Either.applicativeEither)((function () {
-                            var $68 = {};
-                            for (var $69 in dt) {
-                                if (dt.hasOwnProperty($69)) {
-                                    $68[$69] = dt[$69];
-                                };
-                            };
-                            $68.flags = x;
-                            return $68;
-                        })());
-                    });
-                };
-                if (key === "sub") {
-                    return Prelude[">>="](Data_Either.bindEither)(fromLMp("sub")(val))(function (x) {
-                        return Prelude["return"](Data_Either.applicativeEither)((function () {
-                            var $70 = {};
-                            for (var $71 in dt) {
-                                if (dt.hasOwnProperty($71)) {
-                                    $70[$71] = dt[$71];
-                                };
-                            };
-                            $70.sub = x;
-                            return $70;
-                        })());
-                    });
-                };
-                if (key === "modules") {
-                    return Prelude[">>="](Data_Either.bindEither)(fromLMp("modules")(val))(function (x) {
-                        return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $72 = {};
                             for (var $73 in dt) {
                                 if (dt.hasOwnProperty($73)) {
                                     $72[$73] = dt[$73];
                                 };
                             };
-                            $72.modules = new Config.SubModuleRef(x);
+                            $72.component = x;
                             return $72;
                         })());
                     });
                 };
-                if (key === "par") {
-                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLMp("par")(val))(parseNMp))(function (x) {
+                if (key === "flags") {
+                    return Prelude[">>="](Data_Either.bindEither)(fromLMp("flags")(val))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $74 = {};
                             for (var $75 in dt) {
@@ -17372,13 +17438,13 @@ var buildModule = function (vals) {
                                     $74[$75] = dt[$75];
                                 };
                             };
-                            $74.par = x;
+                            $74.flags = x;
                             return $74;
                         })());
                     });
                 };
-                if (key === "zn") {
-                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLLst("zn")(val))(parseCLst))(function (x) {
+                if (key === "sub") {
+                    return Prelude[">>="](Data_Either.bindEither)(fromLMp("sub")(val))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $76 = {};
                             for (var $77 in dt) {
@@ -17386,13 +17452,13 @@ var buildModule = function (vals) {
                                     $76[$77] = dt[$77];
                                 };
                             };
-                            $76.zn = x;
+                            $76.sub = x;
                             return $76;
                         })());
                     });
                 };
-                if (key === "images") {
-                    return Prelude[">>="](Data_Either.bindEither)(fromLLst("images")(val))(function (x) {
+                if (key === "modules") {
+                    return Prelude[">>="](Data_Either.bindEither)(fromLMp("modules")(val))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $78 = {};
                             for (var $79 in dt) {
@@ -17400,8 +17466,50 @@ var buildModule = function (vals) {
                                     $78[$79] = dt[$79];
                                 };
                             };
-                            $78.images = x;
+                            $78.modules = new Config.SubModuleRef(x);
                             return $78;
+                        })());
+                    });
+                };
+                if (key === "par") {
+                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLMp("par")(val))(parseNMp))(function (x) {
+                        return Prelude["return"](Data_Either.applicativeEither)((function () {
+                            var $80 = {};
+                            for (var $81 in dt) {
+                                if (dt.hasOwnProperty($81)) {
+                                    $80[$81] = dt[$81];
+                                };
+                            };
+                            $80.par = x;
+                            return $80;
+                        })());
+                    });
+                };
+                if (key === "zn") {
+                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLLst("zn")(val))(parseCLst))(function (x) {
+                        return Prelude["return"](Data_Either.applicativeEither)((function () {
+                            var $82 = {};
+                            for (var $83 in dt) {
+                                if (dt.hasOwnProperty($83)) {
+                                    $82[$83] = dt[$83];
+                                };
+                            };
+                            $82.zn = x;
+                            return $82;
+                        })());
+                    });
+                };
+                if (key === "images") {
+                    return Prelude[">>="](Data_Either.bindEither)(fromLLst("images")(val))(function (x) {
+                        return Prelude["return"](Data_Either.applicativeEither)((function () {
+                            var $84 = {};
+                            for (var $85 in dt) {
+                                if (dt.hasOwnProperty($85)) {
+                                    $84[$85] = dt[$85];
+                                };
+                            };
+                            $84.images = x;
+                            return $84;
                         })());
                     });
                 };
@@ -17418,28 +17526,28 @@ var buildEngineConf = function (vals) {
                 if (key === "kernelDim") {
                     return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLAsgn("kernelDim")(val))($$parseInt))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
-                            var $81 = {};
-                            for (var $82 in dt) {
-                                if (dt.hasOwnProperty($82)) {
-                                    $81[$82] = dt[$82];
+                            var $87 = {};
+                            for (var $88 in dt) {
+                                if (dt.hasOwnProperty($88)) {
+                                    $87[$88] = dt[$88];
                                 };
                             };
-                            $81.kernelDim = x;
-                            return $81;
+                            $87.kernelDim = x;
+                            return $87;
                         })());
                     });
                 };
                 if (key === "fract") {
                     return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLAsgn("fract")(val))($$parseInt))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
-                            var $83 = {};
-                            for (var $84 in dt) {
-                                if (dt.hasOwnProperty($84)) {
-                                    $83[$84] = dt[$84];
+                            var $89 = {};
+                            for (var $90 in dt) {
+                                if (dt.hasOwnProperty($90)) {
+                                    $89[$90] = dt[$90];
                                 };
                             };
-                            $83.fract = x;
-                            return $83;
+                            $89.fract = x;
+                            return $89;
                         })());
                     });
                 };
@@ -17563,23 +17671,21 @@ var JSUtil = require("JSUtil");
 var Control_Monad_Trans = require("Control.Monad.Trans");
 var init = Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.initSystemST)(function (v) {
     return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v)))(function (v1) {
-        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadConf("default")(v.systemConfLib))(function (v2) {
-            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadConf(v2.initEngineConf)(v.engineConfLib))(function (v3) {
-                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadConf(v2.initUIConf)(v.uiConfLib))(function (v4) {
-                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadConf(v2.initPattern)(v.patternLib))(function (v5) {
+        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadLib("default")(v.systemConfLib))(function (v2) {
+            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadLib(v2.initEngineConf)(v.engineConfLib))(function (v3) {
+                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadLib(v2.initUIConf)(v.uiConfLib))(function (v4) {
+                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadLib(v2.initPattern)(v.patternLib))(function (v5) {
                         return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v3)))(function (v6) {
                             return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v4)))(function (v7) {
                                 return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v5)))(function (v8) {
-                                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Engine.initEngineST(v4.canvasId)(v6)(v8))(function (v9) {
-                                        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v9)))(function (v10) {
-                                            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(UI.initUIST(v7)(v6)(v10)(v8))(function () {
-                                                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))({
-                                                    ucRef: v7, 
-                                                    ssRef: v1, 
-                                                    ecRef: v6, 
-                                                    esRef: v10, 
-                                                    pRef: v8
-                                                });
+                                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Engine.initEngineST(v3)(v)(v5)(v4.canvasId))(function (v9) {
+                                        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(UI.initUIST(v7)(v6)(v9)(v8))(function () {
+                                            return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))({
+                                                ucRef: v7, 
+                                                ssRef: v1, 
+                                                ecRef: v6, 
+                                                esRef: v9, 
+                                                pRef: v8
                                             });
                                         });
                                     });
@@ -17601,7 +17707,7 @@ var handleError = function (epi) {
         if (v instanceof Data_Either.Right) {
             return v.value0;
         };
-        throw new Error("Failed pattern match at Main line 86, column 1 - line 87, column 1: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Main line 85, column 1 - line 86, column 1: " + [ v.constructor.name ]);
     };
 };
 var animate = function (stateM) {
@@ -17614,28 +17720,28 @@ var animate = function (stateM) {
                             var lastTimeMS = Data_Maybe.maybe(v5)(Prelude.id(Prelude.categoryFn))(v1.lastTimeMS);
                             var delta = (v5 - lastTimeMS) * v4.tSpd;
                             return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.modifySTRef(v.ssRef)(function (s) {
-                                var $39 = {};
-                                for (var $40 in s) {
-                                    if (s.hasOwnProperty($40)) {
-                                        $39[$40] = s[$40];
+                                var $37 = {};
+                                for (var $38 in s) {
+                                    if (s.hasOwnProperty($38)) {
+                                        $37[$38] = s[$38];
                                     };
                                 };
-                                $39.lastTimeMS = new Data_Maybe.Just(v5);
-                                return $39;
+                                $37.lastTimeMS = new Data_Maybe.Just(v5);
+                                return $37;
                             })))(function () {
                                 return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad.when(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))(v1.frameNum % 10 === 0)((function () {
                                     var lastFpsTimeMS = Data_Maybe.maybe(v5)(Prelude.id(Prelude.categoryFn))(v1.lastFpsTimeMS);
                                     var fps = Data_Int.round((10.0 * 1000.0) / (v5 - lastFpsTimeMS));
                                     return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.modifySTRef(v.ssRef)(function (s) {
-                                        var $41 = {};
-                                        for (var $42 in s) {
-                                            if (s.hasOwnProperty($42)) {
-                                                $41[$42] = s[$42];
+                                        var $39 = {};
+                                        for (var $40 in s) {
+                                            if (s.hasOwnProperty($40)) {
+                                                $39[$40] = s[$40];
                                             };
                                         };
-                                        $41.lastFpsTimeMS = new Data_Maybe.Just(v5);
-                                        $41.fps = new Data_Maybe.Just(fps);
-                                        return $41;
+                                        $39.lastFpsTimeMS = new Data_Maybe.Just(v5);
+                                        $39.fps = new Data_Maybe.Just(fps);
+                                        return $39;
                                     })))(function () {
                                         return UI.showFps(fps);
                                     });
@@ -17644,14 +17750,14 @@ var animate = function (stateM) {
                                     return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.writeSTRef(v.pRef)(pattern$prime)))(function () {
                                         return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Engine.render(v2)(v3)(pattern$prime)(v1.frameNum))(function () {
                                             return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.modifySTRef(v.ssRef)(function (s) {
-                                                var $43 = {};
-                                                for (var $44 in s) {
-                                                    if (s.hasOwnProperty($44)) {
-                                                        $43[$44] = s[$44];
+                                                var $41 = {};
+                                                for (var $42 in s) {
+                                                    if (s.hasOwnProperty($42)) {
+                                                        $41[$42] = s[$42];
                                                     };
                                                 };
-                                                $43.frameNum = s.frameNum + 1 | 0;
-                                                return $43;
+                                                $41.frameNum = s.frameNum + 1 | 0;
+                                                return $41;
                                             })))(function () {
                                                 return Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(JSUtil.requestAnimationFrame(animate(Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))(v))));
                                             });
@@ -19093,7 +19199,7 @@ var RemoteDB = (function () {
     RemoteDB.value = new RemoteDB();
     return RemoteDB;
 })();
-var loadConf = function (name) {
+var loadLib = function (name) {
     return function (lib) {
         var $10 = Data_StrMap.lookup(name)(lib);
         if ($10 instanceof Data_Maybe.Just) {
@@ -19186,7 +19292,7 @@ module.exports = {
     LocalStorage: LocalStorage, 
     RemoteDB: RemoteDB, 
     buildSLib: buildSLib, 
-    loadConf: loadConf, 
+    loadLib: loadLib, 
     buildLib: buildLib, 
     initSystemST: initSystemST, 
     defaultSystemST: defaultSystemST

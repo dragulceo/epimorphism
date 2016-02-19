@@ -49,83 +49,111 @@ initTex dim = do
   return $ Tuple tex fb
 
 -- this might throw an error
-initShaders :: Pattern -> WebGL (Tuple WebGLProgram WebGLProgram)
-initShaders pattern = do
-  basicVert   <- lift $ lift $ unsafeURLGet "/shaders/basic.vert.glsl"
-  mainFrag    <- lift $ lift $ unsafeURLGet "/shaders/main.frag.glsl"
-  displayFrag <- lift $ lift $ unsafeURLGet "/shaders/display.frag.glsl"
+setShaders :: forall eff h. (STRef h EngineST) -> SystemST -> Pattern -> Epi (st :: ST h | eff) Unit
+setShaders esRef sys pattern = do
+  es <- lift $ readSTRef esRef
+  Tuple main disp <- execGL es.ctx ( do
+    basicVert   <- lift $ lift $ unsafeURLGet "/shaders/basic.vert.glsl"
+    mainFrag    <- lift $ lift $ unsafeURLGet "/shaders/main.frag.glsl"
+    displayFrag <- lift $ lift $ unsafeURLGet "/shaders/display.frag.glsl"
 
-  -- compile sources w/ pattern
+    -- compile sources w/ pattern
 
-  mainProg    <- compileShadersIntoProgram basicVert mainFrag
-  displayProg <- compileShadersIntoProgram basicVert displayFrag
-  displayAttr <- getAttrBindings displayProg
-  mainAttr    <- getAttrBindings mainProg
+    mainProg    <- compileShadersIntoProgram basicVert mainFrag
+    displayProg <- compileShadersIntoProgram basicVert displayFrag
+    displayAttr <- getAttrBindings displayProg
+    mainAttr    <- getAttrBindings mainProg
 
-  pos <- createBuffer
-  bindBuffer ArrayBuffer pos
-  bufferData ArrayBuffer (DataSource (T.asFloat32Array [-1.0,-1.0,1.0,-1.0,-1.0, 1.0, -1.0,1.0,1.0,-1.0,1.0,1.0])) StaticDraw
+    pos <- createBuffer
+    bindBuffer ArrayBuffer pos
+    bufferData ArrayBuffer (DataSource (T.asFloat32Array [-1.0,-1.0,1.0,-1.0,-1.0, 1.0, -1.0,1.0,1.0,-1.0,1.0,1.0])) StaticDraw
 
-  enableVertexAttribArray mainAttr.a_position
-  vertexAttribPointer mainAttr.a_position 2 Float false 0 0
-  enableVertexAttribArray displayAttr.a_position
-  vertexAttribPointer displayAttr.a_position 2 Float false 0 0
+    enableVertexAttribArray mainAttr.a_position
+    vertexAttribPointer mainAttr.a_position 2 Float false 0 0
+    enableVertexAttribArray displayAttr.a_position
+    vertexAttribPointer displayAttr.a_position 2 Float false 0 0
 
-  return $ Tuple mainProg displayProg
+    return $ Tuple mainProg displayProg
+  )
+
+  lift $ modifySTRef esRef (\s -> s { displayProg = Just disp, mainProg = Just main })
+  return unit
+
 
 -- this might throw an error
-initEngineST :: forall h eff. String -> (STRef h EngineConf) -> (STRef h Pattern) -> Epi (st :: ST h | eff) EngineST
-initEngineST canvasId ecRef pRef = do
-
+initEngineST :: forall h eff. EngineConf -> SystemST -> Pattern -> String -> Epi (st :: ST h | eff) (STRef h EngineST)
+initEngineST engineConf sys pattern canvasId = do
   -- these are unsafe
   Just canvas <- liftEff $ getCanvasElementById canvasId
   Just ctx <- liftEff $ getWebglContext canvas
 
-  engineConf <- lift $ readSTRef ecRef
-  pattern    <- lift $ readSTRef pRef
+  let es = {displayProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, ctx: ctx}
+  esRef <- lift $ newSTRef es
+
   let dim = engineConf.kernelDim
 
   -- if we change kernel_dim we need to redo this
   lift $ setCanvasWidth (toNumber dim) canvas
   lift $ setCanvasHeight (toNumber dim) canvas
 
-  execGL ctx ( do
-    Tuple tex0 fb0     <- initTex dim
-    Tuple tex1 fb1     <- initTex dim
-    Tuple main display <- initShaders pattern
+  setShaders esRef sys pattern
+  es' <- lift $ readSTRef esRef
+
+  res <- execGL ctx ( do
+    Tuple tex0 fb0 <- initTex dim
+    Tuple tex1 fb1 <- initTex dim
 
     clearColor 0.0 0.0 0.0 1.0
     liftEff $ GL.clear ctx GLE.colorBufferBit
     liftEff $ GL.viewport ctx 0 0 dim dim
-    return {displayProg: display, mainProg: main, tex: (Tuple tex0 tex1), fb: (Tuple fb0 fb1), ctx: ctx}
+    return $ es' {
+        fb = (Just (Tuple fb0 fb1))
+      , tex = (Just (Tuple tex0 tex1))
+    }
   )
+  lift $ newSTRef res
+
 
 render :: forall h eff. EngineConf -> EngineST -> Pattern -> Int -> Epi (st :: ST h | eff) Unit
 render engineConf engineST pattern frameNum = do
   let ctx = engineST.ctx
 
+  -- unpack
+  tex <- case engineST.tex of
+    (Just x) -> return x
+    otherwise -> throwError "Render: missing textures"
+  fbs <- case engineST.fb of
+    (Just x) -> return x
+    otherwise -> throwError "Render: missing framebuffers"
+  main <- case engineST.mainProg of
+    (Just x) -> return x
+    otherwise -> throwError "Render: missing main program"
+  disp <- case engineST.displayProg of
+    (Just x) -> return x
+    otherwise -> throwError "Render: missing display program"
+
   execGL ctx ( do
     -- ping pong buffers
-    let tm = if frameNum `mod` 2 == 0 then fst engineST.tex else snd engineST.tex
-    let td = if frameNum `mod` 2 == 1 then fst engineST.tex else snd engineST.tex
-    let fb = if frameNum `mod` 2 == 1 then fst engineST.fb  else snd engineST.fb
+    let tm = if frameNum `mod` 2 == 0 then fst tex else snd tex
+    let td = if frameNum `mod` 2 == 1 then fst tex else snd tex
+    let fb = if frameNum `mod` 2 == 1 then fst fbs else snd fbs
 
     -- main program
-    liftEff $ GL.useProgram ctx engineST.mainProg
+    liftEff $ GL.useProgram ctx main
     liftEff $ GL.bindTexture ctx GLE.texture2d tm
     liftEff $ GL.bindFramebuffer ctx GLE.framebuffer fb
 
-    mainUnif <- getUniformBindings engineST.mainProg
+    mainUnif <- getUniformBindings main
     uniform1f mainUnif.kernel_dim (toNumber engineConf.kernelDim)
     uniform1f mainUnif.time (pattern.t / 1000.0)
     drawArrays Triangles 0 6
 
     -- display/post program
-    liftEff $ GL.useProgram ctx engineST.displayProg
+    liftEff $ GL.useProgram ctx disp
     liftEff $ GL.bindTexture ctx GLE.texture2d td
     liftEff $ GL.bindFramebuffer ctx GLE.framebuffer unsafeNull
 
-    displayUnif <- getUniformBindings engineST.displayProg
+    displayUnif <- getUniformBindings disp
     uniform1f displayUnif.kernel_dim (toNumber engineConf.kernelDim)
     drawArrays Triangles 0 6
   )

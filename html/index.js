@@ -52,7 +52,6 @@ var Data_Complex = require("Data.Complex");
 var Data_Foldable = require("Data.Foldable");
 var Data_Int = require("Data.Int");
 var Data_Maybe_Unsafe = require("Data.Maybe.Unsafe");
-var Data_String = require("Data.String");
 var Data_StrMap = require("Data.StrMap");
 var Data_Tuple = require("Data.Tuple");
 var Control_Monad_Error_Class = require("Control.Monad.Error.Class");
@@ -61,103 +60,79 @@ var Config = require("Config");
 var System = require("System");
 var JSUtil = require("JSUtil");
 var Control_Monad_Eff = require("Control.Monad.Eff");
-var Control_Monad_Trans = require("Control.Monad.Trans");
-var compileShaders = function (pattern) {
-    return function (sys) {
-        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(JSUtil.unsafeURLGet("/shaders/basic.vert.glsl")))(function (v) {
-            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(JSUtil.unsafeURLGet("/shaders/main.frag.glsl")))(function (v1) {
-                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(JSUtil.unsafeURLGet("/shaders/display.frag.glsl")))(function (v2) {
-                    return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))({
-                        vert: v, 
-                        main: v1, 
-                        disp: v2
-                    });
-                });
-            });
-        });
-    };
-};
-var compile = function (v) {
+var compile = function (mod) {
     return function (sys) {
         return function (zOfs) {
             return function (parOfs) {
-                return function (parDef) {
-                    var handleZn = function (v1) {
-                        return function (v2) {
-                            return new Data_Tuple.Tuple(v1.value0 + 1 | 0, Data_String.replace("#" + Prelude.show(Prelude.showInt)(v2))(Prelude.show(Prelude.showInt)(v2 + v1.value0 | 0))(v1.value1));
+                var handleZn = function (dt) {
+                    return function (v) {
+                        return JSUtil.replaceAll("#" + Prelude.show(Prelude.showInt)(v))(Prelude.show(Prelude.showInt)(v + zOfs | 0))(dt);
+                    };
+                };
+                var handleSub = function (dt) {
+                    return function (k) {
+                        return function (v) {
+                            return JSUtil.replaceAll("\\$" + k)(v)(dt);
                         };
                     };
-                    var handleSub = function (dt) {
-                        return function (k) {
-                            return function (v1) {
-                                return Data_String.replace(k)(v1)(dt);
-                            };
-                        };
+                };
+                var handlePar = function (v) {
+                    return function (v1) {
+                        return new Data_Tuple.Tuple(v.value0 + 1 | 0, JSUtil.replaceAll("@" + v1)("par[" + (Prelude.show(Prelude.showInt)(v.value0) + "]"))(v.value1));
                     };
-                    var handlePar = function (v1) {
-                        return function (v2) {
-                            return new Data_Tuple.Tuple(v1.value0 + 1 | 0, Data_String.replace("@" + v2)("par[" + (Prelude.show(Prelude.showInt)(v1.value0) + "]"))(v1.value1));
-                        };
-                    };
-                    var handleChild = function (v1) {
-                        return function (k) {
-                            return function (v2) {
-                                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(compile(v2)(sys)(v1.zOfs)(v1.parOfs)(v1.parDef))(function (v4) {
-                                    var child = Data_String.replace("@@" + k)(v4.component)(v1.component);
-                                    return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))((function () {
-                                        var $33 = {};
-                                        for (var $34 in v4) {
-                                            if (v4.hasOwnProperty($34)) {
-                                                $33[$34] = v4[$34];
-                                            };
+                };
+                var handleChild = function (v) {
+                    return function (k) {
+                        return function (v1) {
+                            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(compile(v1)(sys)(v.zOfs)(v.parOfs))(function (v3) {
+                                var child = JSUtil.replaceAll("@@" + k)("{\n" + (v3.component + "\n}\n"))(v.component);
+                                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))((function () {
+                                    var $19 = {};
+                                    for (var $20 in v3) {
+                                        if (v3.hasOwnProperty($20)) {
+                                            $19[$20] = v3[$20];
                                         };
-                                        $33.component = child;
-                                        return $33;
-                                    })());
-                                });
-                            };
+                                    };
+                                    $19.component = child;
+                                    return $19;
+                                })());
+                            });
                         };
                     };
-                    var component$prime = Data_StrMap.fold(handleSub)(v.component)(v.sub);
-                    var k = Data_Array.sort(Prelude.ordString)(Data_StrMap.keys(v.par));
+                };
+                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadLib(mod.component)(sys.componentLib))(function (v) {
+                    var component$prime = Data_StrMap.fold(handleSub)(v.body)(mod.sub);
+                    var k = Data_Array.sort(Prelude.ordString)(Data_StrMap.keys(mod.par));
                     var component$prime$prime = Data_Tuple.snd(Data_Foldable.foldl(Data_Foldable.foldableArray)(handlePar)(new Data_Tuple.Tuple(parOfs, component$prime))(k));
-                    var parOfs$prime = parOfs + Data_Maybe_Unsafe.fromJust(Data_Int.fromNumber(Data_StrMap.size(v.par))) | 0;
-                    var parDef$prime = Prelude["++"](Prelude.semigroupArray)(parDef)(k);
-                    var component$prime$prime$prime = Data_Tuple.snd(Data_Foldable.foldl(Data_Foldable.foldableArray)(handleZn)(new Data_Tuple.Tuple(zOfs, component$prime$prime))(Data_Array[".."](0)(Data_Array.length(v.zn) - 1)));
-                    var zOfs$prime = zOfs + Data_Array.length(v.zn) | 0;
-                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadModules(v.modules)(sys.moduleLib))(function (v1) {
+                    var parOfs$prime = parOfs + Data_Maybe_Unsafe.fromJust(Data_Int.fromNumber(Data_StrMap.size(mod.par))) | 0;
+                    var component$prime$prime$prime = Data_Foldable.foldl(Data_Foldable.foldableArray)(handleZn)(component$prime$prime)(Data_Array[".."](0)(Data_Array.length(mod.zn) - 1));
+                    var zOfs$prime = zOfs + Data_Array.length(mod.zn) | 0;
+                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadModules(mod.modules)(sys.moduleLib))(function (v1) {
                         return Data_StrMap.foldM(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))(handleChild)({
                             component: component$prime$prime$prime, 
                             zOfs: zOfs$prime, 
-                            parOfs: parOfs$prime, 
-                            parDef: parDef$prime
+                            parOfs: parOfs$prime
                         })(v1);
                     });
-                };
+                });
             };
         };
     };
 };
-var compileShaders2 = function (pattern) {
+var compileShaders = function (pattern) {
     return function (sys) {
-        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadLib(pattern.main)(sys.shaderLib))(function (v) {
-            var patternM = (function () {
-                var $46 = {};
-                for (var $47 in pattern) {
-                    if (pattern.hasOwnProperty($47)) {
-                        $46[$47] = pattern[$47];
-                    };
-                };
-                $46.component = v.body;
-                return $46;
-            })();
-            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(compile(patternM)(sys)(0)(0)([  ]))(function (v1) {
-                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadLib(pattern.disp)(sys.shaderLib))(function (v2) {
-                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadLib(pattern.vert)(sys.shaderLib))(function (v3) {
-                        return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))({
-                            vert: v3.body, 
-                            main: v1.component, 
-                            disp: v2.body
+        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadModule(pattern.vert)(sys.moduleLib))(function (v) {
+            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(compile(v)(sys)(0)(0))(function (v1) {
+                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadModule(pattern.disp)(sys.moduleLib))(function (v2) {
+                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(compile(v2)(sys)(0)(0))(function (v3) {
+                        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadModule(pattern.main)(sys.moduleLib))(function (v4) {
+                            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(compile(v4)(sys)(0)(0))(function (v5) {
+                                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))({
+                                    vert: v1.component, 
+                                    main: v5.component, 
+                                    disp: v3.component
+                                });
+                            });
                         });
                     });
                 });
@@ -167,13 +142,27 @@ var compileShaders2 = function (pattern) {
 };
 module.exports = {
     compile: compile, 
-    compileShaders2: compileShaders2, 
     compileShaders: compileShaders
 };
 
-},{"Config":"/Users/gene/Programming/pure_morph/output/Config/index.js","Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Error.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Error.Class/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","Control.Monad.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Trans/index.js","Data.Array":"/Users/gene/Programming/pure_morph/output/Data.Array/index.js","Data.Complex":"/Users/gene/Programming/pure_morph/output/Data.Complex/index.js","Data.Foldable":"/Users/gene/Programming/pure_morph/output/Data.Foldable/index.js","Data.Int":"/Users/gene/Programming/pure_morph/output/Data.Int/index.js","Data.Maybe.Unsafe":"/Users/gene/Programming/pure_morph/output/Data.Maybe.Unsafe/index.js","Data.StrMap":"/Users/gene/Programming/pure_morph/output/Data.StrMap/index.js","Data.String":"/Users/gene/Programming/pure_morph/output/Data.String/index.js","Data.Tuple":"/Users/gene/Programming/pure_morph/output/Data.Tuple/index.js","JSUtil":"/Users/gene/Programming/pure_morph/output/JSUtil/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js","System":"/Users/gene/Programming/pure_morph/output/System/index.js"}],"/Users/gene/Programming/pure_morph/output/Config/index.js":[function(require,module,exports){
+},{"Config":"/Users/gene/Programming/pure_morph/output/Config/index.js","Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Error.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Error.Class/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","Data.Array":"/Users/gene/Programming/pure_morph/output/Data.Array/index.js","Data.Complex":"/Users/gene/Programming/pure_morph/output/Data.Complex/index.js","Data.Foldable":"/Users/gene/Programming/pure_morph/output/Data.Foldable/index.js","Data.Int":"/Users/gene/Programming/pure_morph/output/Data.Int/index.js","Data.Maybe.Unsafe":"/Users/gene/Programming/pure_morph/output/Data.Maybe.Unsafe/index.js","Data.StrMap":"/Users/gene/Programming/pure_morph/output/Data.StrMap/index.js","Data.Tuple":"/Users/gene/Programming/pure_morph/output/Data.Tuple/index.js","JSUtil":"/Users/gene/Programming/pure_morph/output/JSUtil/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js","System":"/Users/gene/Programming/pure_morph/output/System/index.js"}],"/Users/gene/Programming/pure_morph/output/Config/foreign.js":[function(require,module,exports){
+/* global exports */
+"use strict";
+
+// module Config
+
+exports.stAsMr = function(x) {
+  return x;
+};
+
+exports.mrAsSt = function(x) {
+  return x;
+};
+
+},{}],"/Users/gene/Programming/pure_morph/output/Config/index.js":[function(require,module,exports){
 // Generated by psc version 0.8.0.0
 "use strict";
+var $foreign = require("./foreign");
 var Prelude = require("Prelude");
 var Data_Maybe = require("Data.Maybe");
 var Data_Tuple = require("Data.Tuple");
@@ -184,9 +173,12 @@ var Control_Monad_Except_Trans = require("Control.Monad.Except.Trans");
 var Graphics_WebGL_Types = require("Graphics.WebGL.Types");
 var Graphics_Canvas = require("Graphics.Canvas");
 var DOM = require("DOM");
-module.exports = {};
+module.exports = {
+    mrAsSt: $foreign.mrAsSt, 
+    stAsMr: $foreign.stAsMr
+};
 
-},{"Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","DOM":"/Users/gene/Programming/pure_morph/output/DOM/index.js","Data.Complex":"/Users/gene/Programming/pure_morph/output/Data.Complex/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Data.StrMap":"/Users/gene/Programming/pure_morph/output/Data.StrMap/index.js","Data.Tuple":"/Users/gene/Programming/pure_morph/output/Data.Tuple/index.js","Graphics.Canvas":"/Users/gene/Programming/pure_morph/output/Graphics.Canvas/index.js","Graphics.WebGL.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Types/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Control.Alt/index.js":[function(require,module,exports){
+},{"./foreign":"/Users/gene/Programming/pure_morph/output/Config/foreign.js","Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","DOM":"/Users/gene/Programming/pure_morph/output/DOM/index.js","Data.Complex":"/Users/gene/Programming/pure_morph/output/Data.Complex/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Data.StrMap":"/Users/gene/Programming/pure_morph/output/Data.StrMap/index.js","Data.Tuple":"/Users/gene/Programming/pure_morph/output/Data.Tuple/index.js","Graphics.Canvas":"/Users/gene/Programming/pure_morph/output/Graphics.Canvas/index.js","Graphics.WebGL.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Types/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Control.Alt/index.js":[function(require,module,exports){
 // Generated by psc version 0.8.0.0
 "use strict";
 var Prelude = require("Prelude");
@@ -11263,7 +11255,7 @@ var execGL = function (ctx) {
             if (v instanceof Data_Either.Right) {
                 return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))(v.value0);
             };
-            throw new Error("Failed pattern match at Engine line 166, column 1 - line 167, column 1: " + [ v.constructor.name ]);
+            throw new Error("Failed pattern match at Engine line 168, column 1 - line 169, column 1: " + [ v.constructor.name ]);
         });
     };
 };
@@ -11304,7 +11296,7 @@ var render = function (engineConf) {
                                         if (!$44) {
                                             return Data_Tuple.snd(v);
                                         };
-                                        throw new Error("Failed pattern match at Engine line 138, column 9 - line 139, column 5: " + [ $44.constructor.name ]);
+                                        throw new Error("Failed pattern match at Engine line 140, column 9 - line 141, column 5: " + [ $44.constructor.name ]);
                                     })();
                                     var td = (function () {
                                         var $45 = frameNum % 2 === 1;
@@ -11314,7 +11306,7 @@ var render = function (engineConf) {
                                         if (!$45) {
                                             return Data_Tuple.snd(v);
                                         };
-                                        throw new Error("Failed pattern match at Engine line 139, column 9 - line 140, column 5: " + [ $45.constructor.name ]);
+                                        throw new Error("Failed pattern match at Engine line 141, column 9 - line 142, column 5: " + [ $45.constructor.name ]);
                                     })();
                                     var fb = (function () {
                                         var $46 = frameNum % 2 === 1;
@@ -11324,7 +11316,7 @@ var render = function (engineConf) {
                                         if (!$46) {
                                             return Data_Tuple.snd(v1);
                                         };
-                                        throw new Error("Failed pattern match at Engine line 140, column 9 - line 143, column 5: " + [ $46.constructor.name ]);
+                                        throw new Error("Failed pattern match at Engine line 142, column 9 - line 145, column 5: " + [ $46.constructor.name ]);
                                     })();
                                     return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.useProgram(engineST.ctx)(v2)))(function () {
                                         return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Control_Monad_Eff_Class.liftEff(Control_Monad_Reader_Trans.monadEffReader(Control_Monad_Except_Trans.monadEffExceptT(Control_Monad_Eff_Class.monadEffEff)))(Graphics_WebGL_Raw.bindTexture(engineST.ctx)(Graphics_WebGL_Raw_Enums.texture2d)(tm)))(function () {
@@ -11365,6 +11357,8 @@ var setShaders = function (esRef) {
         return function (pattern) {
             return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.readSTRef(esRef)))(function (v) {
                 return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Compiler.compileShaders(pattern)(sys))(function (v1) {
+                    var x = JSUtil.reallyUnsafeLog("asdfaefasdfasdfasdfa\n\n\n\n\n");
+                    var x$prime = JSUtil.reallyUnsafeLog(v1.main);
                     return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(execGL(v.ctx)(Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.compileShadersIntoProgram(v1.vert)(v1.main))(function (v2) {
                         return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.compileShadersIntoProgram(v1.vert)(v1.disp))(function (v3) {
                             return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Shader.getAttrBindings(v3))(function (v4) {
@@ -11456,10 +11450,10 @@ var initEngineST = function (engineConf) {
                                     });
                                 });
                             };
-                            throw new Error("Failed pattern match at Engine line 85, column 1 - line 86, column 1: " + [ v1.constructor.name ]);
+                            throw new Error("Failed pattern match at Engine line 87, column 1 - line 88, column 1: " + [ v1.constructor.name ]);
                         });
                     };
-                    throw new Error("Failed pattern match at Engine line 85, column 1 - line 86, column 1: " + [ v.constructor.name ]);
+                    throw new Error("Failed pattern match at Engine line 87, column 1 - line 88, column 1: " + [ v.constructor.name ]);
                 });
             };
         };
@@ -15945,6 +15939,9 @@ exports.getUniformBindingsImpl = function getUniformBindingsImpl(ctx, prog, wrap
 "use strict";
 var $foreign = require("./foreign");
 var Prelude = require("Prelude");
+var Data_String = require("Data.String");
+var Data_Foldable = require("Data.Foldable");
+var Data_Tuple = require("Data.Tuple");
 var Control_Monad = require("Control.Monad");
 var Control_Monad_Eff = require("Control.Monad.Eff");
 var Control_Monad_Eff_Class = require("Control.Monad.Eff.Class");
@@ -16012,11 +16009,27 @@ var setUniformNumber = new SetUniform(function (unif) {
 var setUniform = function (dict) {
     return dict.setUniform;
 };
+var pad = function (__copy_s) {
+    return function (__copy_v) {
+        var s = __copy_s;
+        var v = __copy_v;
+        tco: while (true) {
+            if (Data_String.length(s) < v) {
+                var __tco_s = " " + s;
+                var __tco_v = v;
+                s = __tco_s;
+                v = __tco_v;
+                continue tco;
+            };
+            return s;
+        };
+    };
+};
 var getUniformBindings_ = function (ctx) {
     return function (prog) {
         return function __do() {
-            var $58 = $foreign.getUniformBindingsImpl(ctx, prog, Graphics_WebGL_Types.Uniform)();
-            return Graphics_WebGL_Raw_Util.toMaybe($58);
+            var $66 = $foreign.getUniformBindingsImpl(ctx, prog, Graphics_WebGL_Types.Uniform)();
+            return Graphics_WebGL_Raw_Util.toMaybe($66);
         };
     };
 };
@@ -16029,15 +16042,15 @@ var getUniformBindings = function (prog) {
             if (v1 instanceof Data_Maybe.Nothing) {
                 return Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(new Graphics_WebGL_Types.NullValue("getUniformBindings"));
             };
-            throw new Error("Failed pattern match at Graphics.WebGL.Shader line 94, column 1 - line 95, column 1: " + [ v1.constructor.name ]);
+            throw new Error("Failed pattern match at Graphics.WebGL.Shader line 107, column 1 - line 108, column 1: " + [ v1.constructor.name ]);
         });
     });
 };
 var getAttrBindings_ = function (ctx) {
     return function (prog) {
         return function __do() {
-            var $59 = $foreign.getAttrBindingsImpl(ctx, prog, Graphics_WebGL_Types.Attribute)();
-            return Graphics_WebGL_Raw_Util.toMaybe($59);
+            var $67 = $foreign.getAttrBindingsImpl(ctx, prog, Graphics_WebGL_Types.Attribute)();
+            return Graphics_WebGL_Raw_Util.toMaybe($67);
         };
     };
 };
@@ -16050,9 +16063,17 @@ var getAttrBindings = function (prog) {
             if (v1 instanceof Data_Maybe.Nothing) {
                 return Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(new Graphics_WebGL_Types.NullValue("getAttrBindings"));
             };
-            throw new Error("Failed pattern match at Graphics.WebGL.Shader line 86, column 1 - line 87, column 1: " + [ v1.constructor.name ]);
+            throw new Error("Failed pattern match at Graphics.WebGL.Shader line 99, column 1 - line 100, column 1: " + [ v1.constructor.name ]);
         });
     });
+};
+var annotateSource = function (src) {
+    var handle = function (v) {
+        return function (l) {
+            return new Data_Tuple.Tuple(v.value0 + 1 | 0, v.value1 + ("\n" + (pad(Prelude.show(Prelude.showInt)(v.value0))(3) + (" - " + l))));
+        };
+    };
+    return Data_Tuple.snd(Data_Foldable.foldl(Data_Foldable.foldableArray)(handle)(new Data_Tuple.Tuple(1, ""))(Data_String.split("\n")(src)));
 };
 var addShaderToProgram = function (prog) {
     return function (stype) {
@@ -16063,7 +16084,7 @@ var addShaderToProgram = function (prog) {
                         return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.attachShader(prog)(v))(function () {
                             return Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.getShaderParameter(v)(Graphics_WebGL_Types.CompileStatusSP.value))(function (v1) {
                                 return Control_Monad.when(Control_Monad_Reader_Trans.monadReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(!v1)(Prelude.bind(Control_Monad_Reader_Trans.bindReaderT(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff)))(Graphics_WebGL_Methods.getShaderInfoLog(v))(function (v2) {
-                                    return Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(new Graphics_WebGL_Types.ShaderError(v2));
+                                    return Control_Monad_Error_Class.throwError(Control_Monad_Reader_Trans.monadErrorReaderT(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff)))(new Graphics_WebGL_Types.ShaderError("\n\n--------------SHADER-------------:" + (annotateSource(src) + ("\n\n--------------ERRORS--------------\n" + v2))));
                                 }));
                             });
                         });
@@ -16099,7 +16120,7 @@ module.exports = {
     addShaderToProgram: addShaderToProgram
 };
 
-},{"./foreign":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Shader/foreign.js","Control.Monad":"/Users/gene/Programming/pure_morph/output/Control.Monad/index.js","Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Eff.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Class/index.js","Control.Monad.Error.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Error.Class/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","Control.Monad.Reader.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Reader.Class/index.js","Control.Monad.Reader.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Reader.Trans/index.js","Data.Function":"/Users/gene/Programming/pure_morph/output/Data.Function/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Graphics.Canvas":"/Users/gene/Programming/pure_morph/output/Graphics.Canvas/index.js","Graphics.WebGL.Methods":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Methods/index.js","Graphics.WebGL.Raw.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw.Types/index.js","Graphics.WebGL.Raw.Util":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw.Util/index.js","Graphics.WebGL.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Types/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Types/index.js":[function(require,module,exports){
+},{"./foreign":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Shader/foreign.js","Control.Monad":"/Users/gene/Programming/pure_morph/output/Control.Monad/index.js","Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Eff.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff.Class/index.js","Control.Monad.Error.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Error.Class/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","Control.Monad.Reader.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Reader.Class/index.js","Control.Monad.Reader.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Reader.Trans/index.js","Data.Foldable":"/Users/gene/Programming/pure_morph/output/Data.Foldable/index.js","Data.Function":"/Users/gene/Programming/pure_morph/output/Data.Function/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Data.String":"/Users/gene/Programming/pure_morph/output/Data.String/index.js","Data.Tuple":"/Users/gene/Programming/pure_morph/output/Data.Tuple/index.js","Graphics.Canvas":"/Users/gene/Programming/pure_morph/output/Graphics.Canvas/index.js","Graphics.WebGL.Methods":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Methods/index.js","Graphics.WebGL.Raw.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw.Types/index.js","Graphics.WebGL.Raw.Util":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Raw.Util/index.js","Graphics.WebGL.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Types/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Types/index.js":[function(require,module,exports){
 // Generated by psc version 0.8.0.0
 "use strict";
 var Prelude = require("Prelude");
@@ -16981,6 +17002,20 @@ exports.unsafeEval = function (s) {
   return function () {eval(s);};
 }
 
+exports.winLog = function (x) {
+  return function() {
+    window.document.body.innerHTML = "<pre>" + x.replace(new RegExp("\n", 'g'), "<br/>") + "</pre>";
+  };
+}
+
+exports.replaceAll = function(search) {
+  return function (replacement) {
+    return function (target) {
+      return target.replace(new RegExp(search, 'g'), replacement);
+    };
+  };
+};
+
 },{}],"/Users/gene/Programming/pure_morph/output/JSUtil/index.js":[function(require,module,exports){
 // Generated by psc version 0.8.0.0
 "use strict";
@@ -16990,8 +17025,10 @@ var Data_Either = require("Data.Either");
 var Control_Monad_Eff = require("Control.Monad.Eff");
 var Control_Monad_Eff_Console = require("Control.Monad.Eff.Console");
 module.exports = {
+    replaceAll: $foreign.replaceAll, 
     now: $foreign.now, 
     requestAnimationFrame: $foreign.requestAnimationFrame, 
+    winLog: $foreign.winLog, 
     unsafeEval: $foreign.unsafeEval, 
     reallyUnsafeLog: $foreign.reallyUnsafeLog, 
     unsafeLog: $foreign.unsafeLog, 
@@ -17040,11 +17077,6 @@ exports.cxFromStringImpl = function (tuple) {
       };
     };
   };
-};
-
-
-exports.asModRef = function(x) {
-  return x;
 };
 
 },{}],"/Users/gene/Programming/pure_morph/output/Library/index.js":[function(require,module,exports){
@@ -17153,7 +17185,7 @@ var parseMMp = function (sm) {
     var handle = function (dt) {
         return function (k) {
             return function (v) {
-                var mv = $foreign.asModRef(v);
+                var mv = Config.stAsMr(v);
                 return Prelude["return"](Data_Either.applicativeEither)(Data_StrMap.insert(k)(mv)(dt));
             };
         };
@@ -17177,7 +17209,7 @@ var parseLibLine = function (line) {
         if ($16 instanceof Data_Maybe.Nothing) {
             return new Data_Either.Left(LibError.create("expecting a name: " + line1));
         };
-        throw new Error("Failed pattern match at Library line 64, column 1 - line 65, column 1: " + [ $16.constructor.name ]);
+        throw new Error("Failed pattern match at Library line 61, column 1 - line 62, column 1: " + [ $16.constructor.name ]);
     };
     var tokens = Data_Array.filter(Prelude["/="](Prelude.eqString)(""))(Data_String.split(" ")(line));
     var at0 = Data_Array.index(tokens)(0);
@@ -17201,7 +17233,7 @@ var parseLibLine = function (line) {
         };
         return Prelude["return"](Data_Either.applicativeEither)(new Mp(Data_Maybe_Unsafe.fromJust(at0), Data_Maybe_Unsafe.fromJust(at1), rem(2)(tokens)));
     };
-    throw new Error("Failed pattern match at Library line 64, column 1 - line 65, column 1: " + [ $19.constructor.name ]);
+    throw new Error("Failed pattern match at Library line 61, column 1 - line 62, column 1: " + [ $19.constructor.name ]);
 };
 var $$parseInt = function (s) {
     var $21 = Data_Int.fromString(s);
@@ -17268,11 +17300,6 @@ var defaultPattern = {
     main: "main", 
     disp: "disp", 
     flags: Data_StrMap.empty, 
-    component: "", 
-    par: Data_StrMap.empty, 
-    zn: [  ], 
-    modules: Data_StrMap.empty, 
-    sub: Data_StrMap.empty, 
     scripts: [  ], 
     t: 0.0, 
     tPhase: 0.0, 
@@ -17459,8 +17486,8 @@ var buildPattern = function (vals) {
                         })());
                     });
                 };
-                if (key === "modules") {
-                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLMp("modules")(val))(parseMMp))(function (x) {
+                if (key === "scripts") {
+                    return Prelude[">>="](Data_Either.bindEither)(fromLLst("scripts")(val))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $61 = {};
                             for (var $62 in dt) {
@@ -17468,13 +17495,13 @@ var buildPattern = function (vals) {
                                     $61[$62] = dt[$62];
                                 };
                             };
-                            $61.modules = x;
+                            $61.scripts = x;
                             return $61;
                         })());
                     });
                 };
-                if (key === "component") {
-                    return Prelude[">>="](Data_Either.bindEither)(fromLAsgn("component")(val))(function (x) {
+                if (key === "t") {
+                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLAsgn("t")(val))(parseNum))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $63 = {};
                             for (var $64 in dt) {
@@ -17482,13 +17509,13 @@ var buildPattern = function (vals) {
                                     $63[$64] = dt[$64];
                                 };
                             };
-                            $63.component = x;
+                            $63.t = x;
                             return $63;
                         })());
                     });
                 };
-                if (key === "par") {
-                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLMp("par")(val))(parseNMp))(function (x) {
+                if (key === "tPhase") {
+                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLAsgn("tPhase")(val))(parseNum))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $65 = {};
                             for (var $66 in dt) {
@@ -17496,13 +17523,13 @@ var buildPattern = function (vals) {
                                     $65[$66] = dt[$66];
                                 };
                             };
-                            $65.par = x;
+                            $65.tPhase = x;
                             return $65;
                         })());
                     });
                 };
-                if (key === "zn") {
-                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLLst("zn")(val))(parseCLst))(function (x) {
+                if (key === "tSpd") {
+                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLAsgn("tSpd")(val))(parseNum))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $67 = {};
                             for (var $68 in dt) {
@@ -17510,78 +17537,8 @@ var buildPattern = function (vals) {
                                     $67[$68] = dt[$68];
                                 };
                             };
-                            $67.zn = x;
+                            $67.tSpd = x;
                             return $67;
-                        })());
-                    });
-                };
-                if (key === "sub") {
-                    return Prelude[">>="](Data_Either.bindEither)(fromLMp("sub")(val))(function (x) {
-                        return Prelude["return"](Data_Either.applicativeEither)((function () {
-                            var $69 = {};
-                            for (var $70 in dt) {
-                                if (dt.hasOwnProperty($70)) {
-                                    $69[$70] = dt[$70];
-                                };
-                            };
-                            $69.sub = x;
-                            return $69;
-                        })());
-                    });
-                };
-                if (key === "scripts") {
-                    return Prelude[">>="](Data_Either.bindEither)(fromLLst("scripts")(val))(function (x) {
-                        return Prelude["return"](Data_Either.applicativeEither)((function () {
-                            var $71 = {};
-                            for (var $72 in dt) {
-                                if (dt.hasOwnProperty($72)) {
-                                    $71[$72] = dt[$72];
-                                };
-                            };
-                            $71.scripts = x;
-                            return $71;
-                        })());
-                    });
-                };
-                if (key === "t") {
-                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLAsgn("t")(val))(parseNum))(function (x) {
-                        return Prelude["return"](Data_Either.applicativeEither)((function () {
-                            var $73 = {};
-                            for (var $74 in dt) {
-                                if (dt.hasOwnProperty($74)) {
-                                    $73[$74] = dt[$74];
-                                };
-                            };
-                            $73.t = x;
-                            return $73;
-                        })());
-                    });
-                };
-                if (key === "tPhase") {
-                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLAsgn("tPhase")(val))(parseNum))(function (x) {
-                        return Prelude["return"](Data_Either.applicativeEither)((function () {
-                            var $75 = {};
-                            for (var $76 in dt) {
-                                if (dt.hasOwnProperty($76)) {
-                                    $75[$76] = dt[$76];
-                                };
-                            };
-                            $75.tPhase = x;
-                            return $75;
-                        })());
-                    });
-                };
-                if (key === "tSpd") {
-                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLAsgn("tSpd")(val))(parseNum))(function (x) {
-                        return Prelude["return"](Data_Either.applicativeEither)((function () {
-                            var $77 = {};
-                            for (var $78 in dt) {
-                                if (dt.hasOwnProperty($78)) {
-                                    $77[$78] = dt[$78];
-                                };
-                            };
-                            $77.tSpd = x;
-                            return $77;
                         })());
                     });
                 };
@@ -17598,19 +17555,89 @@ var buildModule = function (vals) {
                 if (key === "component") {
                     return Prelude[">>="](Data_Either.bindEither)(fromLAsgn("component")(val))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
+                            var $70 = {};
+                            for (var $71 in dt) {
+                                if (dt.hasOwnProperty($71)) {
+                                    $70[$71] = dt[$71];
+                                };
+                            };
+                            $70.component = x;
+                            return $70;
+                        })());
+                    });
+                };
+                if (key === "flags") {
+                    return Prelude[">>="](Data_Either.bindEither)(fromLMp("flags")(val))(function (x) {
+                        return Prelude["return"](Data_Either.applicativeEither)((function () {
+                            var $72 = {};
+                            for (var $73 in dt) {
+                                if (dt.hasOwnProperty($73)) {
+                                    $72[$73] = dt[$73];
+                                };
+                            };
+                            $72.flags = x;
+                            return $72;
+                        })());
+                    });
+                };
+                if (key === "sub") {
+                    return Prelude[">>="](Data_Either.bindEither)(fromLMp("sub")(val))(function (x) {
+                        return Prelude["return"](Data_Either.applicativeEither)((function () {
+                            var $74 = {};
+                            for (var $75 in dt) {
+                                if (dt.hasOwnProperty($75)) {
+                                    $74[$75] = dt[$75];
+                                };
+                            };
+                            $74.sub = x;
+                            return $74;
+                        })());
+                    });
+                };
+                if (key === "modules") {
+                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLMp("modules")(val))(parseMMp))(function (x) {
+                        return Prelude["return"](Data_Either.applicativeEither)((function () {
+                            var $76 = {};
+                            for (var $77 in dt) {
+                                if (dt.hasOwnProperty($77)) {
+                                    $76[$77] = dt[$77];
+                                };
+                            };
+                            $76.modules = x;
+                            return $76;
+                        })());
+                    });
+                };
+                if (key === "par") {
+                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLMp("par")(val))(parseNMp))(function (x) {
+                        return Prelude["return"](Data_Either.applicativeEither)((function () {
+                            var $78 = {};
+                            for (var $79 in dt) {
+                                if (dt.hasOwnProperty($79)) {
+                                    $78[$79] = dt[$79];
+                                };
+                            };
+                            $78.par = x;
+                            return $78;
+                        })());
+                    });
+                };
+                if (key === "zn") {
+                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLLst("zn")(val))(parseCLst))(function (x) {
+                        return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $80 = {};
                             for (var $81 in dt) {
                                 if (dt.hasOwnProperty($81)) {
                                     $80[$81] = dt[$81];
                                 };
                             };
-                            $80.component = x;
+                            $80.zn = x;
                             return $80;
                         })());
                     });
                 };
-                if (key === "flags") {
-                    return Prelude[">>="](Data_Either.bindEither)(fromLMp("flags")(val))(function (x) {
+                if (key === "images") {
+                    return Prelude[">>="](Data_Either.bindEither)(fromLLst("images")(val))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $82 = {};
                             for (var $83 in dt) {
@@ -17618,78 +17645,8 @@ var buildModule = function (vals) {
                                     $82[$83] = dt[$83];
                                 };
                             };
-                            $82.flags = x;
+                            $82.images = x;
                             return $82;
-                        })());
-                    });
-                };
-                if (key === "sub") {
-                    return Prelude[">>="](Data_Either.bindEither)(fromLMp("sub")(val))(function (x) {
-                        return Prelude["return"](Data_Either.applicativeEither)((function () {
-                            var $84 = {};
-                            for (var $85 in dt) {
-                                if (dt.hasOwnProperty($85)) {
-                                    $84[$85] = dt[$85];
-                                };
-                            };
-                            $84.sub = x;
-                            return $84;
-                        })());
-                    });
-                };
-                if (key === "modules") {
-                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLMp("modules")(val))(parseMMp))(function (x) {
-                        return Prelude["return"](Data_Either.applicativeEither)((function () {
-                            var $86 = {};
-                            for (var $87 in dt) {
-                                if (dt.hasOwnProperty($87)) {
-                                    $86[$87] = dt[$87];
-                                };
-                            };
-                            $86.modules = x;
-                            return $86;
-                        })());
-                    });
-                };
-                if (key === "par") {
-                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLMp("par")(val))(parseNMp))(function (x) {
-                        return Prelude["return"](Data_Either.applicativeEither)((function () {
-                            var $88 = {};
-                            for (var $89 in dt) {
-                                if (dt.hasOwnProperty($89)) {
-                                    $88[$89] = dt[$89];
-                                };
-                            };
-                            $88.par = x;
-                            return $88;
-                        })());
-                    });
-                };
-                if (key === "zn") {
-                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLLst("zn")(val))(parseCLst))(function (x) {
-                        return Prelude["return"](Data_Either.applicativeEither)((function () {
-                            var $90 = {};
-                            for (var $91 in dt) {
-                                if (dt.hasOwnProperty($91)) {
-                                    $90[$91] = dt[$91];
-                                };
-                            };
-                            $90.zn = x;
-                            return $90;
-                        })());
-                    });
-                };
-                if (key === "images") {
-                    return Prelude[">>="](Data_Either.bindEither)(fromLLst("images")(val))(function (x) {
-                        return Prelude["return"](Data_Either.applicativeEither)((function () {
-                            var $92 = {};
-                            for (var $93 in dt) {
-                                if (dt.hasOwnProperty($93)) {
-                                    $92[$93] = dt[$93];
-                                };
-                            };
-                            $92.images = x;
-                            return $92;
                         })());
                     });
                 };
@@ -17706,28 +17663,28 @@ var buildEngineConf = function (vals) {
                 if (key === "kernelDim") {
                     return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLAsgn("kernelDim")(val))($$parseInt))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
-                            var $95 = {};
-                            for (var $96 in dt) {
-                                if (dt.hasOwnProperty($96)) {
-                                    $95[$96] = dt[$96];
+                            var $85 = {};
+                            for (var $86 in dt) {
+                                if (dt.hasOwnProperty($86)) {
+                                    $85[$86] = dt[$86];
                                 };
                             };
-                            $95.kernelDim = x;
-                            return $95;
+                            $85.kernelDim = x;
+                            return $85;
                         })());
                     });
                 };
                 if (key === "fract") {
                     return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLAsgn("fract")(val))($$parseInt))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
-                            var $97 = {};
-                            for (var $98 in dt) {
-                                if (dt.hasOwnProperty($98)) {
-                                    $97[$98] = dt[$98];
+                            var $87 = {};
+                            for (var $88 in dt) {
+                                if (dt.hasOwnProperty($88)) {
+                                    $87[$88] = dt[$88];
                                 };
                             };
-                            $97.fract = x;
-                            return $97;
+                            $87.fract = x;
+                            return $87;
                         })());
                     });
                 };
@@ -17773,7 +17730,7 @@ var parseGroup = function (builder) {
                 if (v instanceof Data_Maybe.Nothing) {
                     return Data_Either.Left.create(LibError.create("name your group chump " + group));
                 };
-                throw new Error("Failed pattern match at Library line 109, column 5 - line 110, column 5: " + [ v.constructor.name, v1.constructor.name ]);
+                throw new Error("Failed pattern match at Library line 106, column 5 - line 107, column 5: " + [ v.constructor.name, v1.constructor.name ]);
             };
         };
         var lines = Data_Array.filter(Prelude["/="](Prelude.eqString)(""))(Data_String.split("\n")(group));
@@ -17826,7 +17783,6 @@ module.exports = {
     fromLAsgn: fromLAsgn, 
     cxFromString: cxFromString, 
     numFromString: numFromString, 
-    asModRef: $foreign.asModRef, 
     cxFromStringImpl: $foreign.cxFromStringImpl, 
     numFromStringImpl: $foreign.numFromStringImpl
 };
@@ -17884,7 +17840,7 @@ var handleError = function (epi) {
     return function __do() {
         var v = Control_Monad_Except_Trans.runExceptT(epi)();
         if (v instanceof Data_Either.Left) {
-            return JSUtil.unsafeLog(v.value0)();
+            return JSUtil.winLog(v.value0)();
         };
         if (v instanceof Data_Either.Right) {
             return v.value0;
@@ -19269,30 +19225,6 @@ var parseSLib = function (builder) {
         return Prelude["<$>"](Data_Either.functorEither)(Data_StrMap.fromFoldable(Data_Foldable.foldableArray))(Data_Traversable.traverse(Data_Traversable.traversableArray)(Data_Either.applicativeEither)(parseSGroup(builder))(groups));
     };
 };
-var buildShader = function (v) {
-    var getName = function (v1) {
-        if (v1.length === 2) {
-            return Prelude["return"](Data_Either.applicativeEither)(v1[1]);
-        };
-        return Data_Either.Left.create(SLibError.create("expecting only a name in: " + v.value0));
-    };
-    var getFamily = function (v1) {
-        if (v1.length === 2) {
-            return Prelude["return"](Data_Either.applicativeEither)(v1[0]);
-        };
-        return Data_Either.Left.create(SLibError.create("expecting a family in: " + v.value0));
-    };
-    var tokens = Data_Array.filter(Prelude["/="](Prelude.eqString)(""))(Data_String.split(" ")(v.value0));
-    return Prelude.bind(Data_Either.bindEither)(getName(tokens))(function (v1) {
-        return Prelude.bind(Data_Either.bindEither)(getFamily(tokens))(function (v2) {
-            return Prelude["return"](Data_Either.applicativeEither)(new Data_Tuple.Tuple(v1, {
-                name: v1, 
-                family: v2, 
-                body: v.value1
-            }));
-        });
-    });
-};
 var buildIndex = function (v) {
     var getName = function (v1) {
         if (v1.length === 1) {
@@ -19335,7 +19267,6 @@ var buildComponent = function (v) {
 module.exports = {
     SHandle: SHandle, 
     SLibError: SLibError, 
-    buildShader: buildShader, 
     buildIndex: buildIndex, 
     buildComponent: buildComponent, 
     parseSLib: parseSLib, 
@@ -19383,14 +19314,20 @@ var RemoteDB = (function () {
 })();
 var loadLib = function (name) {
     return function (lib) {
-        var $11 = Data_StrMap.lookup(name)(lib);
-        if ($11 instanceof Data_Maybe.Just) {
-            return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($11.value0);
+        var $10 = Data_StrMap.lookup(name)(lib);
+        if ($10 instanceof Data_Maybe.Just) {
+            return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($10.value0);
         };
-        if ($11 instanceof Data_Maybe.Nothing) {
-            return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))("can't find library: " + name);
+        if ($10 instanceof Data_Maybe.Nothing) {
+            return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))("Load from lib - can't find: " + name);
         };
-        throw new Error("Failed pattern match at System line 75, column 1 - line 76, column 1: " + [ $11.constructor.name ]);
+        throw new Error("Failed pattern match at System line 71, column 1 - line 72, column 1: " + [ $10.constructor.name ]);
+    };
+};
+var loadModule = function (mr) {
+    return function (lib) {
+        var ms = Config.mrAsSt(mr);
+        return loadLib(ms)(lib);
     };
 };
 var loadModules = function (mr) {
@@ -19398,7 +19335,7 @@ var loadModules = function (mr) {
         var handle = function (dt) {
             return function (k) {
                 return function (v) {
-                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(loadLib(v)(lib))(function (v1) {
+                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(loadModule(v)(lib))(function (v1) {
                         return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))(Data_StrMap.insert(k)(v1)(dt));
                     });
                 };
@@ -19417,35 +19354,34 @@ var defaultSystemST = {
     engineConfLib: Data_StrMap.empty, 
     patternLib: Data_StrMap.empty, 
     moduleLib: Data_StrMap.empty, 
-    shaderLib: Data_StrMap.empty, 
     componentLib: Data_StrMap.empty, 
     indexLib: Data_StrMap.empty
 };
 var buildSLib = function (f) {
     return function (loc) {
         return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(JSUtil.unsafeURLGet(loc)))(function (v) {
-            var $15 = SLibrary.parseSLib(f)(v);
-            if ($15 instanceof Data_Either.Right) {
-                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($15.value0);
+            var $14 = SLibrary.parseSLib(f)(v);
+            if ($14 instanceof Data_Either.Right) {
+                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($14.value0);
             };
-            if ($15 instanceof Data_Either.Left) {
-                return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))($15.value0.value0);
+            if ($14 instanceof Data_Either.Left) {
+                return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))($14.value0.value0);
             };
-            throw new Error("Failed pattern match at System line 67, column 1 - line 68, column 1: " + [ $15.constructor.name ]);
+            throw new Error("Failed pattern match at System line 63, column 1 - line 64, column 1: " + [ $14.constructor.name ]);
         });
     };
 };
 var buildLib = function (f) {
     return function (loc) {
         return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(JSUtil.unsafeURLGet(loc)))(function (v) {
-            var $20 = Library.parseLib(f)(v);
-            if ($20 instanceof Data_Either.Right) {
-                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($20.value0);
+            var $19 = Library.parseLib(f)(v);
+            if ($19 instanceof Data_Either.Right) {
+                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($19.value0);
             };
-            if ($20 instanceof Data_Either.Left) {
-                return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))($20.value0.value0);
+            if ($19 instanceof Data_Either.Left) {
+                return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))($19.value0.value0);
             };
-            throw new Error("Failed pattern match at System line 59, column 1 - line 60, column 1: " + [ $20.constructor.name ]);
+            throw new Error("Failed pattern match at System line 55, column 1 - line 56, column 1: " + [ $19.constructor.name ]);
         });
     };
 };
@@ -19456,26 +19392,22 @@ var initSystemST = Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_M
                 return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(buildLib(Library.buildPattern)("lib/patterns.lib"))(function (v4) {
                     return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(buildSLib(SLibrary.buildComponent)("lib/components.slib"))(function (v5) {
                         return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(buildSLib(SLibrary.buildIndex)("lib/indexes.slib"))(function (v6) {
-                            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(buildSLib(SLibrary.buildShader)("lib/shaders.slib"))(function (v7) {
-                                var x = JSUtil.reallyUnsafeLog(v7);
-                                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))((function () {
-                                    var $32 = {};
-                                    for (var $33 in defaultSystemST) {
-                                        if (defaultSystemST.hasOwnProperty($33)) {
-                                            $32[$33] = defaultSystemST[$33];
-                                        };
+                            return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))((function () {
+                                var $30 = {};
+                                for (var $31 in defaultSystemST) {
+                                    if (defaultSystemST.hasOwnProperty($31)) {
+                                        $30[$31] = defaultSystemST[$31];
                                     };
-                                    $32.systemConfLib = v;
-                                    $32.engineConfLib = v1;
-                                    $32.uiConfLib = v2;
-                                    $32.moduleLib = v3;
-                                    $32.patternLib = v4;
-                                    $32.componentLib = v5;
-                                    $32.indexLib = v6;
-                                    $32.shaderLib = v7;
-                                    return $32;
-                                })());
-                            });
+                                };
+                                $30.systemConfLib = v;
+                                $30.engineConfLib = v1;
+                                $30.uiConfLib = v2;
+                                $30.moduleLib = v3;
+                                $30.patternLib = v4;
+                                $30.componentLib = v5;
+                                $30.indexLib = v6;
+                                return $30;
+                            })());
                         });
                     });
                 });
@@ -19487,6 +19419,7 @@ module.exports = {
     LocalHTTP: LocalHTTP, 
     LocalStorage: LocalStorage, 
     RemoteDB: RemoteDB, 
+    loadModule: loadModule, 
     loadModules: loadModules, 
     loadLib: loadLib, 
     buildSLib: buildSLib, 

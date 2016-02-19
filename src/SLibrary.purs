@@ -63,17 +63,3 @@ buildIndex (SHandle sig body) = do
   where
     getName [x] = return x
     getName _ = Left $ SLibError $ "expecting only a name in: " ++ sig
-
-
-
-buildShader :: SHandle -> SLib (Tuple String Shader)
-buildShader (SHandle sig body) = do
-  let tokens = filter ((/=) "") $ split " " sig
-  name <- getName tokens
-  family <- getFamily tokens
-  return $ Tuple name {name, family, body}
-  where
-    getName [_, x] = return x
-    getName _ = Left $ SLibError $ "expecting only a name in: " ++ sig
-    getFamily [x, _] = return x
-    getFamily _ = Left $ SLibError $ "expecting a family in: " ++ sig

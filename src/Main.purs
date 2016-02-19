@@ -17,7 +17,7 @@ import Engine (initEngineST, render)
 import UI (initUIST, showFps)
 import Pattern (updatePattern)
 import System (initSystemST, loadLib)
-import JSUtil (unsafeLog, requestAnimationFrame, now, Now)
+import JSUtil (winLog, unsafeLog, requestAnimationFrame, now, Now)
 
 type State h = {
     ucRef :: STRef h UIConf
@@ -86,7 +86,7 @@ handleError :: forall eff. (Epi eff Unit) -> (Eff (canvas :: Canvas, dom :: DOM 
 handleError epi = do
   res <- runExceptT epi
   case res of
-    Left er -> unsafeLog er
+    Left er -> winLog er -- unsafeLog er
     Right ret -> return ret
 
 

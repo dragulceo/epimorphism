@@ -11,7 +11,7 @@ t_outer {{
   z = zn[#2] * z + zn[#3]
 }}
 
-t {{
+t_main {{
   z = z
   z = exp(z)
   z = cos(z)

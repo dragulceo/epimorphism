@@ -27,14 +27,11 @@ foreign import numFromStringImpl :: (forall a. a -> Maybe a)
 cxFromString :: String -> Maybe (Tuple Number Number)
 cxFromString = cxFromStringImpl Tuple Just Nothing
 
-foreign import cxFromStringImpl :: (forall a b. Number -> Number -> (Tuple Number Number))
+foreign import cxFromStringImpl :: (Number -> Number -> (Tuple Number Number))
                                 -> (forall a. a -> Maybe a)
                                 -> (forall a. Maybe a)
                                 -> String
                                 -> Maybe (Tuple Number Number)
-
-
-foreign import asModRef :: String -> ModRef
 
 
 data LibError = LibError String
@@ -153,7 +150,7 @@ parseMMp :: StrMap String -> Lib (StrMap ModRef)
 parseMMp sm = foldM handle empty sm
   where
     handle dt k v = do
-      let mv = asModRef v
+      let mv = stAsMr v
       return $ insert k mv dt
 
 -- BUILDERS - maybe move somewhere else?
@@ -241,11 +238,6 @@ defaultPattern = {
   , main: "main"
   , disp: "disp"
   , flags: empty
-  , component: ""
-  , par: empty
-  , zn: []
-  , modules: empty
-  , sub: empty
   , scripts: []
   , t: 0.0
   , tPhase: 0.0
@@ -262,11 +254,6 @@ buildPattern vals = do
       "main" -> (fromLAsgn "main" val) >>= (\x -> return $ dt {main = x})
       "disp" -> (fromLAsgn "disp" val) >>= (\x -> return $ dt {disp = x})
       "flags" -> (fromLMp "flags" val) >>= (\x -> return $ dt {flags = x})
-      "modules" -> (fromLMp "modules" val) >>= parseMMp >>= (\x -> return $ dt {modules = x})
-      "component" -> (fromLAsgn "component" val) >>= (\x -> return $ dt {component = x})
-      "par" -> (fromLMp "par" val) >>= parseNMp >>= (\x -> return $ dt {par = x})
-      "zn" -> (fromLLst "zn" val) >>= parseCLst >>= (\x -> return $ dt {zn = x})
-      "sub" -> (fromLMp "sub" val) >>= (\x -> return $ dt {sub = x})
       "scripts" -> (fromLLst "scripts" val) >>= (\x -> return $ dt {scripts = x})
       "t" -> (fromLAsgn "t" val) >>= parseNum >>= (\x -> return $ dt {t = x})
       "tPhase" -> (fromLAsgn "tPhase" val) >>= parseNum >>= (\x -> return $ dt {tPhase = x})

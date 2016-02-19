@@ -27,7 +27,6 @@ defaultSystemST = {
   , engineConfLib: empty
   , patternLib: empty
   , moduleLib: empty
-  , shaderLib: empty
   , componentLib: empty
   , indexLib: empty
 }
@@ -42,8 +41,6 @@ initSystemST = do
   patternLib    <- buildLib buildPattern "lib/patterns.lib"
   componentLib  <- buildSLib buildComponent "lib/components.slib"
   indexLib      <- buildSLib buildIndex "lib/indexes.slib"
-  shaderLib     <- buildSLib buildShader "lib/shaders.slib"
-  let x = reallyUnsafeLog shaderLib
   return $ defaultSystemST {
       systemConfLib = systemConfLib
     , engineConfLib = engineConfLib
@@ -52,7 +49,6 @@ initSystemST = do
     , patternLib    = patternLib
     , componentLib  = componentLib
     , indexLib      = indexLib
-    , shaderLib     = shaderLib
   }
 
 
@@ -76,13 +72,20 @@ loadLib :: forall a eff. String -> (StrMap a) -> Epi eff a
 loadLib name lib = do
   case (lookup name lib) of
     (Just d) -> return d
-    Nothing  -> throwError ("can't find library: " ++ name)
+    Nothing  -> throwError ("Load from lib - can't find: " ++ name)
 
 
+-- should this go here?
 loadModules :: forall eff. StrMap ModRef -> (StrMap Module) -> Epi eff (StrMap Module)
 loadModules mr lib = do
   foldM handle empty mr
   where
     handle dt k v = do
-      m <- loadLib v lib
+      m <- loadModule v lib
       return $ insert k m dt
+
+
+loadModule :: forall eff. ModRef -> (StrMap Module) -> Epi eff Module
+loadModule mr lib = do
+  let ms = mrAsSt mr
+  loadLib ms lib

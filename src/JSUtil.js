@@ -53,3 +53,17 @@ exports.now = function () {
 exports.unsafeEval = function (s) {
   return function () {eval(s);};
 }
+
+exports.winLog = function (x) {
+  return function() {
+    window.document.body.innerHTML = "<pre>" + x.replace(new RegExp("\n", 'g'), "<br/>") + "</pre>";
+  };
+}
+
+exports.replaceAll = function(search) {
+  return function (replacement) {
+    return function (target) {
+      return target.replace(new RegExp(search, 'g'), replacement);
+    };
+  };
+};

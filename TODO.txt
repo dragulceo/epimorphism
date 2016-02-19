@@ -1,5 +1,6 @@
 CONFIG
   - cleanup/finish parsing of libs & slibs
+    - comments
     - info on engine, etc split across library, engine, config :/
     - general refactoring
     - better error messages
@@ -7,6 +8,8 @@ CONFIG
     - serializing / unifying with parsing
     - database support
 ENGINE
+  - stop @seed_w, @seed_wt etc overlapping replacements from happening!
+  - work on compiler performance
   - compiling patterns
   - passing pattern pars to kernel
 

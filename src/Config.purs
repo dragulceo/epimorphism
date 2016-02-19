@@ -30,7 +30,6 @@ type SystemST = {
   , engineConfLib :: StrMap EngineConf
   , patternLib :: StrMap Pattern
   , moduleLib :: StrMap Module
-  , shaderLib :: StrMap Shader
   , componentLib :: StrMap Component
   , indexLib :: StrMap Index
 }
@@ -58,6 +57,8 @@ type UIConf = {
 
 -- Pattern
 type ModRef = String
+foreign import stAsMr :: String -> ModRef
+foreign import mrAsSt :: ModRef -> String
 
 type Module = {
     component :: String
@@ -70,15 +71,10 @@ type Module = {
 }
 
 type Pattern = {
-    vert :: String
-  , main :: String
-  , disp :: String
-  , component :: String
+    vert :: ModRef
+  , main :: ModRef
+  , disp :: ModRef
   , flags :: StrMap String
-  , modules :: StrMap ModRef
-  , par :: StrMap Number
-  , zn :: Array Complex
-  , sub :: StrMap String
   , scripts :: Array String
   -- , 3d shit
   , t :: Number
@@ -97,10 +93,4 @@ type Component = {
 type Index = {
     name :: String
   , lib :: Array String
-}
-
-type Shader = {
-    name :: String
-  , family :: String
-  , body :: String
 }

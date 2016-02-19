@@ -29,7 +29,7 @@ import Graphics.Canvas (Canvas, getCanvasElementById, setCanvasWidth, setCanvasH
 
 import Config
 import Compiler
-import JSUtil (unsafeLog, unsafeNull, unsafeURLGet)
+import JSUtil (reallyUnsafeLog, unsafeLog, unsafeNull, unsafeURLGet, winLog)
 
 -- PUBLIC
 -- this might throw an error
@@ -56,13 +56,15 @@ setShaders esRef sys pattern = do
 
   -- load & compile shaders
   {main: main, disp: disp, vert: vert} <- compileShaders pattern sys
+  let x = reallyUnsafeLog "asdfaefasdfasdfasdfa\n\n\n\n\n"
+  let x' = reallyUnsafeLog main
 
   Tuple main disp <- execGL es.ctx ( do
     -- creater programs
-    mainProg    <- compileShadersIntoProgram vert main
+    mainProg <- compileShadersIntoProgram vert main
     dispProg <- compileShadersIntoProgram vert disp
     dispAttr <- getAttrBindings dispProg
-    mainAttr    <- getAttrBindings mainProg
+    mainAttr <- getAttrBindings mainProg
 
     -- vertex coords
     pos <- createBuffer

@@ -7,7 +7,7 @@ import Data.Either (Either(..))
 import Data.String (split, joinWith, stripPrefix, trim, contains)
 import Data.Tuple (Tuple(..))
 import Data.Maybe (Maybe(..), isJust)
-import Data.Maybe.Unsafe
+import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (StrMap (), empty, fromFoldable, foldM, insert, lookup, update)
 import Data.Traversable
 import Data.Int (fromString) as I
@@ -32,6 +32,9 @@ foreign import cxFromStringImpl :: (forall a b. Number -> Number -> (Tuple Numbe
                                 -> (forall a. Maybe a)
                                 -> String
                                 -> Maybe (Tuple Number Number)
+
+
+foreign import asModRef :: String -> ModRef
 
 
 data LibError = LibError String
@@ -146,6 +149,13 @@ parseCLst sl = A.foldM handle [] sl
       cv <- parseCX v
       return $ A.cons cv dt
 
+parseMMp :: StrMap String -> Lib (StrMap ModRef)
+parseMMp sm = foldM handle empty sm
+  where
+    handle dt k v = do
+      let mv = asModRef v
+      return $ insert k mv dt
+
 -- BUILDERS - maybe move somewhere else?
 defaultSystemConf :: SystemConf
 defaultSystemConf = {
@@ -200,7 +210,7 @@ defaultModule :: Module
 defaultModule = {
     component: ""
   , flags: empty
-  , modules: SubModules empty
+  , modules: empty
   , par: empty
   , zn: []
   , images: []
@@ -217,7 +227,7 @@ buildModule vals = do
       "component" -> (fromLAsgn "component" val) >>= (\x -> return $ dt {component = x})
       "flags" -> (fromLMp "flags" val) >>= (\x -> return $ dt {flags = x})
       "sub" -> (fromLMp "sub" val) >>= (\x -> return $ dt {sub = x})
-      "modules" -> (fromLMp "modules" val) >>= (\x -> return $ dt {modules = (SubModuleRef x)})
+      "modules" -> (fromLMp "modules" val) >>= parseMMp >>= (\x -> return $ dt {modules = x})
       "par" -> (fromLMp "par" val) >>= parseNMp >>= (\x -> return $ dt {par = x})
       "zn" -> (fromLLst "zn" val) >>= parseCLst >>= (\x -> return $ dt {zn = x})
       "images" -> (fromLLst "images" val) >>= (\x -> return $ dt {images = x})
@@ -234,7 +244,7 @@ defaultPattern = {
   , component: ""
   , par: empty
   , zn: []
-  , modules: SubModules empty
+  , modules: empty
   , sub: empty
   , scripts: []
   , t: 0.0
@@ -252,7 +262,7 @@ buildPattern vals = do
       "main" -> (fromLAsgn "main" val) >>= (\x -> return $ dt {main = x})
       "disp" -> (fromLAsgn "disp" val) >>= (\x -> return $ dt {disp = x})
       "flags" -> (fromLMp "flags" val) >>= (\x -> return $ dt {flags = x})
-      "modules" -> (fromLMp "modules" val) >>= (\x -> return $ dt {modules = (SubModuleRef x)})
+      "modules" -> (fromLMp "modules" val) >>= parseMMp >>= (\x -> return $ dt {modules = x})
       "component" -> (fromLAsgn "component" val) >>= (\x -> return $ dt {component = x})
       "par" -> (fromLMp "par" val) >>= parseNMp >>= (\x -> return $ dt {par = x})
       "zn" -> (fromLLst "zn" val) >>= parseCLst >>= (\x -> return $ dt {zn = x})

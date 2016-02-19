@@ -99,42 +99,24 @@ var compile = function (v) {
                             return new Data_Tuple.Tuple(v1.value0 + 1 | 0, Data_String.replace("@" + v2)("par[" + (Prelude.show(Prelude.showInt)(v1.value0) + "]"))(v1.value1));
                         };
                     };
-                    var handleGetSub = function (dt) {
-                        return function (k) {
-                            return function (v1) {
-                                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadLib(v1)(sys.moduleLib))(function (v2) {
-                                    return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))(Data_StrMap.insert(k)(v2)(dt));
-                                });
-                            };
-                        };
-                    };
                     var handleChild = function (v1) {
                         return function (k) {
                             return function (v2) {
                                 return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(compile(v2)(sys)(v1.zOfs)(v1.parOfs)(v1.parDef))(function (v4) {
                                     var child = Data_String.replace("@@" + k)(v4.component)(v1.component);
                                     return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))((function () {
-                                        var $36 = {};
-                                        for (var $37 in v4) {
-                                            if (v4.hasOwnProperty($37)) {
-                                                $36[$37] = v4[$37];
+                                        var $33 = {};
+                                        for (var $34 in v4) {
+                                            if (v4.hasOwnProperty($34)) {
+                                                $33[$34] = v4[$34];
                                             };
                                         };
-                                        $36.component = child;
-                                        return $36;
+                                        $33.component = child;
+                                        return $33;
                                     })());
                                 });
                             };
                         };
-                    };
-                    var getSubModules = function (v1) {
-                        if (v1 instanceof Config.SubModules) {
-                            return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))(v1.value0);
-                        };
-                        if (v1 instanceof Config.SubModuleRef) {
-                            return Data_StrMap.foldM(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))(handleGetSub)(Data_StrMap.empty)(v1.value0);
-                        };
-                        throw new Error("Failed pattern match: " + [ v1.constructor.name ]);
                     };
                     var component$prime = Data_StrMap.fold(handleSub)(v.component)(v.sub);
                     var k = Data_Array.sort(Prelude.ordString)(Data_StrMap.keys(v.par));
@@ -143,7 +125,7 @@ var compile = function (v) {
                     var parDef$prime = Prelude["++"](Prelude.semigroupArray)(parDef)(k);
                     var component$prime$prime$prime = Data_Tuple.snd(Data_Foldable.foldl(Data_Foldable.foldableArray)(handleZn)(new Data_Tuple.Tuple(zOfs, component$prime$prime))(Data_Array[".."](0)(Data_Array.length(v.zn) - 1)));
                     var zOfs$prime = zOfs + Data_Array.length(v.zn) | 0;
-                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(getSubModules(v.modules))(function (v1) {
+                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadModules(v.modules)(sys.moduleLib))(function (v1) {
                         return Data_StrMap.foldM(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))(handleChild)({
                             component: component$prime$prime$prime, 
                             zOfs: zOfs$prime, 
@@ -160,14 +142,14 @@ var compileShaders2 = function (pattern) {
     return function (sys) {
         return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadLib(pattern.main)(sys.shaderLib))(function (v) {
             var patternM = (function () {
-                var $52 = {};
-                for (var $53 in pattern) {
-                    if (pattern.hasOwnProperty($53)) {
-                        $52[$53] = pattern[$53];
+                var $46 = {};
+                for (var $47 in pattern) {
+                    if (pattern.hasOwnProperty($47)) {
+                        $46[$47] = pattern[$47];
                     };
                 };
-                $52.component = v.body;
-                return $52;
+                $46.component = v.body;
+                return $46;
             })();
             return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(compile(patternM)(sys)(0)(0)([  ]))(function (v1) {
                 return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadLib(pattern.disp)(sys.shaderLib))(function (v2) {
@@ -202,28 +184,7 @@ var Control_Monad_Except_Trans = require("Control.Monad.Except.Trans");
 var Graphics_WebGL_Types = require("Graphics.WebGL.Types");
 var Graphics_Canvas = require("Graphics.Canvas");
 var DOM = require("DOM");
-var SubModules = (function () {
-    function SubModules(value0) {
-        this.value0 = value0;
-    };
-    SubModules.create = function (value0) {
-        return new SubModules(value0);
-    };
-    return SubModules;
-})();
-var SubModuleRef = (function () {
-    function SubModuleRef(value0) {
-        this.value0 = value0;
-    };
-    SubModuleRef.create = function (value0) {
-        return new SubModuleRef(value0);
-    };
-    return SubModuleRef;
-})();
-module.exports = {
-    SubModules: SubModules, 
-    SubModuleRef: SubModuleRef
-};
+module.exports = {};
 
 },{"Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","DOM":"/Users/gene/Programming/pure_morph/output/DOM/index.js","Data.Complex":"/Users/gene/Programming/pure_morph/output/Data.Complex/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Data.StrMap":"/Users/gene/Programming/pure_morph/output/Data.StrMap/index.js","Data.Tuple":"/Users/gene/Programming/pure_morph/output/Data.Tuple/index.js","Graphics.Canvas":"/Users/gene/Programming/pure_morph/output/Graphics.Canvas/index.js","Graphics.WebGL.Types":"/Users/gene/Programming/pure_morph/output/Graphics.WebGL.Types/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js"}],"/Users/gene/Programming/pure_morph/output/Control.Alt/index.js":[function(require,module,exports){
 // Generated by psc version 0.8.0.0
@@ -17081,6 +17042,11 @@ exports.cxFromStringImpl = function (tuple) {
   };
 };
 
+
+exports.asModRef = function(x) {
+  return x;
+};
+
 },{}],"/Users/gene/Programming/pure_morph/output/Library/index.js":[function(require,module,exports){
 // Generated by psc version 0.8.0.0
 "use strict";
@@ -17183,6 +17149,17 @@ var LibError = (function () {
     };
     return LibError;
 })();
+var parseMMp = function (sm) {
+    var handle = function (dt) {
+        return function (k) {
+            return function (v) {
+                var mv = $foreign.asModRef(v);
+                return Prelude["return"](Data_Either.applicativeEither)(Data_StrMap.insert(k)(mv)(dt));
+            };
+        };
+    };
+    return Data_StrMap.foldM(Data_Either.monadEither)(handle)(Data_StrMap.empty)(sm);
+};
 var parseLibLine = function (line) {
     var rem = function (n) {
         return function (tokens) {
@@ -17200,7 +17177,7 @@ var parseLibLine = function (line) {
         if ($16 instanceof Data_Maybe.Nothing) {
             return new Data_Either.Left(LibError.create("expecting a name: " + line1));
         };
-        throw new Error("Failed pattern match at Library line 61, column 1 - line 62, column 1: " + [ $16.constructor.name ]);
+        throw new Error("Failed pattern match at Library line 64, column 1 - line 65, column 1: " + [ $16.constructor.name ]);
     };
     var tokens = Data_Array.filter(Prelude["/="](Prelude.eqString)(""))(Data_String.split(" ")(line));
     var at0 = Data_Array.index(tokens)(0);
@@ -17224,7 +17201,7 @@ var parseLibLine = function (line) {
         };
         return Prelude["return"](Data_Either.applicativeEither)(new Mp(Data_Maybe_Unsafe.fromJust(at0), Data_Maybe_Unsafe.fromJust(at1), rem(2)(tokens)));
     };
-    throw new Error("Failed pattern match at Library line 61, column 1 - line 62, column 1: " + [ $19.constructor.name ]);
+    throw new Error("Failed pattern match at Library line 64, column 1 - line 65, column 1: " + [ $19.constructor.name ]);
 };
 var $$parseInt = function (s) {
     var $21 = Data_Int.fromString(s);
@@ -17294,7 +17271,7 @@ var defaultPattern = {
     component: "", 
     par: Data_StrMap.empty, 
     zn: [  ], 
-    modules: new Config.SubModules(Data_StrMap.empty), 
+    modules: Data_StrMap.empty, 
     sub: Data_StrMap.empty, 
     scripts: [  ], 
     t: 0.0, 
@@ -17304,7 +17281,7 @@ var defaultPattern = {
 var defaultModule = {
     component: "", 
     flags: Data_StrMap.empty, 
-    modules: new Config.SubModules(Data_StrMap.empty), 
+    modules: Data_StrMap.empty, 
     par: Data_StrMap.empty, 
     zn: [  ], 
     images: [  ], 
@@ -17483,7 +17460,7 @@ var buildPattern = function (vals) {
                     });
                 };
                 if (key === "modules") {
-                    return Prelude[">>="](Data_Either.bindEither)(fromLMp("modules")(val))(function (x) {
+                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLMp("modules")(val))(parseMMp))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $61 = {};
                             for (var $62 in dt) {
@@ -17491,7 +17468,7 @@ var buildPattern = function (vals) {
                                     $61[$62] = dt[$62];
                                 };
                             };
-                            $61.modules = new Config.SubModuleRef(x);
+                            $61.modules = x;
                             return $61;
                         })());
                     });
@@ -17661,7 +17638,7 @@ var buildModule = function (vals) {
                     });
                 };
                 if (key === "modules") {
-                    return Prelude[">>="](Data_Either.bindEither)(fromLMp("modules")(val))(function (x) {
+                    return Prelude[">>="](Data_Either.bindEither)(Prelude[">>="](Data_Either.bindEither)(fromLMp("modules")(val))(parseMMp))(function (x) {
                         return Prelude["return"](Data_Either.applicativeEither)((function () {
                             var $86 = {};
                             for (var $87 in dt) {
@@ -17669,7 +17646,7 @@ var buildModule = function (vals) {
                                     $86[$87] = dt[$87];
                                 };
                             };
-                            $86.modules = new Config.SubModuleRef(x);
+                            $86.modules = x;
                             return $86;
                         })());
                     });
@@ -17796,7 +17773,7 @@ var parseGroup = function (builder) {
                 if (v instanceof Data_Maybe.Nothing) {
                     return Data_Either.Left.create(LibError.create("name your group chump " + group));
                 };
-                throw new Error("Failed pattern match at Library line 106, column 5 - line 107, column 5: " + [ v.constructor.name, v1.constructor.name ]);
+                throw new Error("Failed pattern match at Library line 109, column 5 - line 110, column 5: " + [ v.constructor.name, v1.constructor.name ]);
             };
         };
         var lines = Data_Array.filter(Prelude["/="](Prelude.eqString)(""))(Data_String.split("\n")(group));
@@ -17834,6 +17811,7 @@ module.exports = {
     defaultEngineConf: defaultEngineConf, 
     buildSystemConf: buildSystemConf, 
     defaultSystemConf: defaultSystemConf, 
+    parseMMp: parseMMp, 
     parseCLst: parseCLst, 
     parseNMp: parseNMp, 
     parseCX: parseCX, 
@@ -17848,6 +17826,7 @@ module.exports = {
     fromLAsgn: fromLAsgn, 
     cxFromString: cxFromString, 
     numFromString: numFromString, 
+    asModRef: $foreign.asModRef, 
     cxFromStringImpl: $foreign.cxFromStringImpl, 
     numFromStringImpl: $foreign.numFromStringImpl
 };
@@ -19404,14 +19383,28 @@ var RemoteDB = (function () {
 })();
 var loadLib = function (name) {
     return function (lib) {
-        var $10 = Data_StrMap.lookup(name)(lib);
-        if ($10 instanceof Data_Maybe.Just) {
-            return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($10.value0);
+        var $11 = Data_StrMap.lookup(name)(lib);
+        if ($11 instanceof Data_Maybe.Just) {
+            return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($11.value0);
         };
-        if ($10 instanceof Data_Maybe.Nothing) {
+        if ($11 instanceof Data_Maybe.Nothing) {
             return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))("can't find library: " + name);
         };
-        throw new Error("Failed pattern match at System line 75, column 1 - line 76, column 1: " + [ $10.constructor.name ]);
+        throw new Error("Failed pattern match at System line 75, column 1 - line 76, column 1: " + [ $11.constructor.name ]);
+    };
+};
+var loadModules = function (mr) {
+    return function (lib) {
+        var handle = function (dt) {
+            return function (k) {
+                return function (v) {
+                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(loadLib(v)(lib))(function (v1) {
+                        return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))(Data_StrMap.insert(k)(v1)(dt));
+                    });
+                };
+            };
+        };
+        return Data_StrMap.foldM(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))(handle)(Data_StrMap.empty)(mr);
     };
 };
 var defaultSystemST = {
@@ -19431,28 +19424,28 @@ var defaultSystemST = {
 var buildSLib = function (f) {
     return function (loc) {
         return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(JSUtil.unsafeURLGet(loc)))(function (v) {
-            var $13 = SLibrary.parseSLib(f)(v);
-            if ($13 instanceof Data_Either.Right) {
-                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($13.value0);
+            var $15 = SLibrary.parseSLib(f)(v);
+            if ($15 instanceof Data_Either.Right) {
+                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($15.value0);
             };
-            if ($13 instanceof Data_Either.Left) {
-                return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))($13.value0.value0);
+            if ($15 instanceof Data_Either.Left) {
+                return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))($15.value0.value0);
             };
-            throw new Error("Failed pattern match at System line 67, column 1 - line 68, column 1: " + [ $13.constructor.name ]);
+            throw new Error("Failed pattern match at System line 67, column 1 - line 68, column 1: " + [ $15.constructor.name ]);
         });
     };
 };
 var buildLib = function (f) {
     return function (loc) {
         return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(JSUtil.unsafeURLGet(loc)))(function (v) {
-            var $18 = Library.parseLib(f)(v);
-            if ($18 instanceof Data_Either.Right) {
-                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($18.value0);
+            var $20 = Library.parseLib(f)(v);
+            if ($20 instanceof Data_Either.Right) {
+                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($20.value0);
             };
-            if ($18 instanceof Data_Either.Left) {
-                return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))($18.value0.value0);
+            if ($20 instanceof Data_Either.Left) {
+                return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))($20.value0.value0);
             };
-            throw new Error("Failed pattern match at System line 59, column 1 - line 60, column 1: " + [ $18.constructor.name ]);
+            throw new Error("Failed pattern match at System line 59, column 1 - line 60, column 1: " + [ $20.constructor.name ]);
         });
     };
 };
@@ -19466,21 +19459,21 @@ var initSystemST = Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_M
                             return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(buildSLib(SLibrary.buildShader)("lib/shaders.slib"))(function (v7) {
                                 var x = JSUtil.reallyUnsafeLog(v7);
                                 return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))((function () {
-                                    var $30 = {};
-                                    for (var $31 in defaultSystemST) {
-                                        if (defaultSystemST.hasOwnProperty($31)) {
-                                            $30[$31] = defaultSystemST[$31];
+                                    var $32 = {};
+                                    for (var $33 in defaultSystemST) {
+                                        if (defaultSystemST.hasOwnProperty($33)) {
+                                            $32[$33] = defaultSystemST[$33];
                                         };
                                     };
-                                    $30.systemConfLib = v;
-                                    $30.engineConfLib = v1;
-                                    $30.uiConfLib = v2;
-                                    $30.moduleLib = v3;
-                                    $30.patternLib = v4;
-                                    $30.componentLib = v5;
-                                    $30.indexLib = v6;
-                                    $30.shaderLib = v7;
-                                    return $30;
+                                    $32.systemConfLib = v;
+                                    $32.engineConfLib = v1;
+                                    $32.uiConfLib = v2;
+                                    $32.moduleLib = v3;
+                                    $32.patternLib = v4;
+                                    $32.componentLib = v5;
+                                    $32.indexLib = v6;
+                                    $32.shaderLib = v7;
+                                    return $32;
                                 })());
                             });
                         });
@@ -19494,6 +19487,7 @@ module.exports = {
     LocalHTTP: LocalHTTP, 
     LocalStorage: LocalStorage, 
     RemoteDB: RemoteDB, 
+    loadModules: loadModules, 
     loadLib: loadLib, 
     buildSLib: buildSLib, 
     buildLib: buildLib, 

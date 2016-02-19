@@ -46,7 +46,7 @@ compileShaders2 pattern sys = do
   return {vert, main, disp}
 
 compile :: forall eff r. {
-    modules :: SubModules
+    modules :: StrMap ModRef
   , par :: StrMap Number
   , zn :: Array Complex
   , sub :: StrMap String
@@ -62,7 +62,7 @@ compile {modules, par, zn, sub, component} sys zOfs parOfs parDef = do
   let component''' = snd $ foldl handleZn (Tuple zOfs component'') (0..((length zn) - 1))
   let zOfs' = zOfs + length zn
 
-  mod <- getSubModules modules
+  mod <- loadModules modules sys.moduleLib
   foldM handleChild { component: component''', zOfs: zOfs', parOfs: parOfs', parDef: parDef'} mod
   where
     handleSub dt k v = replace k v dt
@@ -73,11 +73,3 @@ compile {modules, par, zn, sub, component} sys zOfs parOfs parDef = do
       res <- compile v sys zOfsC parOfsC parDefC
       let child = replace ("@@" ++ k) res.component componentC
       return $ res { component = child }
-    getSubModules :: forall eff. SubModules -> Epi eff (StrMap Module)
-    getSubModules (SubModules m) = return m
-    getSubModules (SubModuleRef r) = do
-      foldM handleGetSub empty r
-    handleGetSub :: forall eff. (StrMap Module) -> String -> String -> Epi eff (StrMap Module)
-    handleGetSub dt k v = do
-      m <- loadLib v sys.moduleLib
-      return $ insert k m dt

@@ -39,3 +39,8 @@ exports.cxFromStringImpl = function (tuple) {
     };
   };
 };
+
+
+exports.asModRef = function(x) {
+  return x;
+};

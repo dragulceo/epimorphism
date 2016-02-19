@@ -3,7 +3,7 @@ module System where
 import Prelude
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import Data.StrMap (empty, lookup, StrMap())
+import Data.StrMap (empty, lookup, insert, foldM, StrMap())
 import Data.Tuple (Tuple(..))
 import Control.Monad.ST (ST)
 import Control.Monad.Error.Class (throwError)
@@ -77,3 +77,12 @@ loadLib name lib = do
   case (lookup name lib) of
     (Just d) -> return d
     Nothing  -> throwError ("can't find library: " ++ name)
+
+
+loadModules :: forall eff. StrMap ModRef -> (StrMap Module) -> Epi eff (StrMap Module)
+loadModules mr lib = do
+  foldM handle empty mr
+  where
+    handle dt k v = do
+      m <- loadLib v lib
+      return $ insert k m dt

@@ -33,7 +33,7 @@ defaultSystemST = {
 }
 
 
-initSystemST :: forall eff h. Epi (st :: ST h | eff) SystemST
+initSystemST :: forall eff. Epi eff SystemST
 initSystemST = do
   systemConfLib <- buildLib buildSystemConf "lib/system_conf.lib"
   engineConfLib <- buildLib buildEngineConf "lib/engine_conf.lib"
@@ -56,7 +56,7 @@ initSystemST = do
   }
 
 
-buildLib :: forall a h eff.  (StrMap LineVal -> Lib a) -> String -> Epi (st :: ST h | eff) (StrMap a)
+buildLib :: forall a eff.  (StrMap LineVal -> Lib a) -> String -> Epi eff (StrMap a)
 buildLib f loc = do
   dta <- lift $ unsafeURLGet loc
   case (parseLib f dta) of
@@ -64,17 +64,16 @@ buildLib f loc = do
     (Left (LibError s)) -> throwError s
 
 
-loadLib :: forall eff h a. String -> (StrMap a) -> Epi (st :: ST h | eff) a
-loadLib name lib = do
-  case (lookup name lib) of
-    (Just d) -> return d
-    Nothing  -> throwError ("can't find library: " ++ name)
-
-
-
-buildSLib :: forall a h eff.  (SHandle -> SLib (Tuple String a)) -> String -> Epi (st :: ST h | eff) (StrMap a)
+buildSLib :: forall a eff.  (SHandle -> SLib (Tuple String a)) -> String -> Epi eff (StrMap a)
 buildSLib f loc = do
   dta <- lift $ unsafeURLGet loc
   case (parseSLib f dta) of
     (Right res) -> return res
     (Left (SLibError s)) -> throwError s
+
+
+loadLib :: forall a eff. String -> (StrMap a) -> Epi eff a
+loadLib name lib = do
+  case (lookup name lib) of
+    (Just d) -> return d
+    Nothing  -> throwError ("can't find library: " ++ name)

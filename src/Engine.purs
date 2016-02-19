@@ -55,12 +55,12 @@ setShaders esRef sys pattern = do
   es <- lift $ readSTRef esRef
 
   -- load & compile shaders
-  {mainFrag: mainFrag, dispFrag: dispFrag, vert: vert} <- compileShaders pattern sys
+  {main: main, disp: disp, vert: vert} <- compileShaders pattern sys
 
   Tuple main disp <- execGL es.ctx ( do
     -- creater programs
-    mainProg    <- compileShadersIntoProgram vert mainFrag
-    dispProg <- compileShadersIntoProgram vert dispFrag
+    mainProg    <- compileShadersIntoProgram vert main
+    dispProg <- compileShadersIntoProgram vert disp
     dispAttr <- getAttrBindings dispProg
     mainAttr    <- getAttrBindings mainProg
 

@@ -2,6 +2,7 @@ module Library where
 
 import Prelude
 import Data.Array (cons, foldM, length, index, drop, filter, init) as A
+import Data.Complex
 import Data.Either (Either(..))
 import Data.String (split, joinWith, stripPrefix, trim, contains)
 import Data.Tuple (Tuple(..))
@@ -10,7 +11,6 @@ import Data.Maybe.Unsafe
 import Data.StrMap (StrMap (), empty, fromFoldable, foldM, insert, lookup, update)
 import Data.Traversable
 import Data.Int (fromString) as I
-import Data.Complex
 
 import Config
 import JSUtil(reallyUnsafeLog)
@@ -66,13 +66,13 @@ parseLibLine line = do
   case (A.length tokens) of
     0 -> Left (LibError $ "you broke something: " ++ line)
     1 -> getName line
-    otherwise -> do
+    _ -> do
       let lst = rem 1 tokens
       if (isLst lst) then
         return $ Lst (fromJust at0) (map trim $ fromJust $ A.init (split "," lst)) else
         case (A.length tokens) of
           2 -> return $ Asgn (fromJust at0) (fromJust at1)
-          otherwise -> return $ Mp (fromJust at0) (fromJust at1) (rem 2 tokens)
+          _ -> return $ Mp (fromJust at0) (fromJust at1) (rem 2 tokens)
   where
     getName :: String -> Lib LineResult
     getName line = case (stripPrefix "--" line) of
@@ -162,7 +162,7 @@ buildSystemConf vals = do
       "initEngineConf" -> (fromLAsgn "initEngineConf" val) >>= (\x -> return $ dt {initEngineConf = x})
       "initUIConf" -> (fromLAsgn "initUIConf" val) >>= (\x -> return $ dt {initUIConf = x})
       "initPattern" -> (fromLAsgn "initPattern" val) >>= (\x -> return $ dt {initPattern = x})
-      otherwise -> Left (LibError $ "SystemConf - unknown key - " ++ key)
+      _ -> Left (LibError $ "SystemConf - unknown key - " ++ key)
 
 
 defaultEngineConf :: EngineConf
@@ -178,7 +178,7 @@ buildEngineConf vals = do
     handle dt key val = case key of
       "kernelDim" -> (fromLAsgn "kernelDim" val) >>= parseInt >>= (\x -> return $ dt {kernelDim = x})
       "fract" -> (fromLAsgn "fract" val) >>= parseInt >>= (\x -> return $ dt {fract = x})
-      otherwise -> Left (LibError $ "EngineConf - unknown key - " ++ key)
+      _ -> Left (LibError $ "EngineConf - unknown key - " ++ key)
 
 defaultUIConf :: UIConf
 defaultUIConf = {
@@ -193,7 +193,7 @@ buildUIConf vals = do
     handle dt key val = case key of
       "canvasId" -> (fromLAsgn "canvasId" val) >>= (\x -> return $ dt {canvasId = x})
       "consoleId" -> (fromLAsgn "consoleId" val) >>= (\x -> return $ dt {consoleId = x})
-      otherwise -> Left (LibError $ "UIConf - unknown key - " ++ key)
+      _ -> Left (LibError $ "UIConf - unknown key - " ++ key)
 
 
 defaultModule :: Module
@@ -221,7 +221,7 @@ buildModule vals = do
       "par" -> (fromLMp "par" val) >>= parseNMp >>= (\x -> return $ dt {par = x})
       "zn" -> (fromLLst "zn" val) >>= parseCLst >>= (\x -> return $ dt {zn = x})
       "images" -> (fromLLst "images" val) >>= (\x -> return $ dt {images = x})
-      otherwise -> Left (LibError $ "Module - unknown key - " ++ key)
+      _ -> Left (LibError $ "Module - unknown key - " ++ key)
 
 
 
@@ -231,7 +231,11 @@ defaultPattern = {
   , main: "main"
   , disp: "disp"
   , flags: empty
+  , component: ""
+  , par: empty
+  , zn: []
   , modules: SubModules empty
+  , sub: empty
   , scripts: []
   , t: 0.0
   , tPhase: 0.0
@@ -249,8 +253,12 @@ buildPattern vals = do
       "disp" -> (fromLAsgn "disp" val) >>= (\x -> return $ dt {disp = x})
       "flags" -> (fromLMp "flags" val) >>= (\x -> return $ dt {flags = x})
       "modules" -> (fromLMp "modules" val) >>= (\x -> return $ dt {modules = (SubModuleRef x)})
+      "component" -> (fromLAsgn "component" val) >>= (\x -> return $ dt {component = x})
+      "par" -> (fromLMp "par" val) >>= parseNMp >>= (\x -> return $ dt {par = x})
+      "zn" -> (fromLLst "zn" val) >>= parseCLst >>= (\x -> return $ dt {zn = x})
+      "sub" -> (fromLMp "sub" val) >>= (\x -> return $ dt {sub = x})
       "scripts" -> (fromLLst "scripts" val) >>= (\x -> return $ dt {scripts = x})
       "t" -> (fromLAsgn "t" val) >>= parseNum >>= (\x -> return $ dt {t = x})
       "tPhase" -> (fromLAsgn "tPhase" val) >>= parseNum >>= (\x -> return $ dt {tPhase = x})
       "tSpd" -> (fromLAsgn "tSpd" val) >>= parseNum >>= (\x -> return $ dt {tSpd = x})
-      otherwise -> Left (LibError $ "Pattern - unknown key - " ++ key)
+      _ -> Left (LibError $ "Pattern - unknown key - " ++ key)

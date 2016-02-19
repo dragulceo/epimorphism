@@ -59,6 +59,13 @@ type UIConf = {
 -- Pattern
 data SubModules = SubModules (StrMap Module) | SubModuleRef (StrMap String)
 
+type MType = forall r. {
+    modules :: SubModules
+  , par :: StrMap Number
+  , zn :: Array Complex
+  , component :: String | r
+}
+
 type Module = {
     component :: String
   , flags :: StrMap String
@@ -73,8 +80,12 @@ type Pattern = {
     vert :: String
   , main :: String
   , disp :: String
+  , component :: String
   , flags :: StrMap String
   , modules :: SubModules
+  , par :: StrMap Number
+  , zn :: Array Complex
+  , sub :: StrMap String
   , scripts :: Array String
   -- , 3d shit
   , t :: Number

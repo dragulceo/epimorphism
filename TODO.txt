@@ -26,6 +26,7 @@ PATTERN
   - programs
   - build out library
 MISC
+  - detect system/perf profile
   - test on ipad
   - test on android
   - logging system

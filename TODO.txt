@@ -20,6 +20,8 @@ UI
   - handle window resizing
   - fullscreen mode
 PATTERN
+  - module families
+  - indices
   - pattern switching
   - programs
   - build out library

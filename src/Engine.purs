@@ -28,6 +28,7 @@ import Graphics.WebGL.Methods
 import Graphics.Canvas (Canvas, getCanvasElementById, setCanvasWidth, setCanvasHeight)
 
 import Config
+import Compiler
 import JSUtil (unsafeLog, unsafeNull, unsafeURLGet)
 
 -- PUBLIC
@@ -52,31 +53,31 @@ initTex dim = do
 setShaders :: forall eff h. (STRef h EngineST) -> SystemST -> Pattern -> Epi (st :: ST h | eff) Unit
 setShaders esRef sys pattern = do
   es <- lift $ readSTRef esRef
+
+  -- load & compile shaders
+  {mainFrag: mainFrag, dispFrag: dispFrag, vert: vert} <- compileShaders pattern sys
+
   Tuple main disp <- execGL es.ctx ( do
-    basicVert   <- lift $ lift $ unsafeURLGet "/shaders/basic.vert.glsl"
-    mainFrag    <- lift $ lift $ unsafeURLGet "/shaders/main.frag.glsl"
-    displayFrag <- lift $ lift $ unsafeURLGet "/shaders/display.frag.glsl"
-
-    -- compile sources w/ pattern
-
-    mainProg    <- compileShadersIntoProgram basicVert mainFrag
-    displayProg <- compileShadersIntoProgram basicVert displayFrag
-    displayAttr <- getAttrBindings displayProg
+    -- creater programs
+    mainProg    <- compileShadersIntoProgram vert mainFrag
+    dispProg <- compileShadersIntoProgram vert dispFrag
+    dispAttr <- getAttrBindings dispProg
     mainAttr    <- getAttrBindings mainProg
 
+    -- vertex coords
     pos <- createBuffer
     bindBuffer ArrayBuffer pos
     bufferData ArrayBuffer (DataSource (T.asFloat32Array [-1.0,-1.0,1.0,-1.0,-1.0, 1.0, -1.0,1.0,1.0,-1.0,1.0,1.0])) StaticDraw
 
     enableVertexAttribArray mainAttr.a_position
     vertexAttribPointer mainAttr.a_position 2 Float false 0 0
-    enableVertexAttribArray displayAttr.a_position
-    vertexAttribPointer displayAttr.a_position 2 Float false 0 0
+    enableVertexAttribArray dispAttr.a_position
+    vertexAttribPointer dispAttr.a_position 2 Float false 0 0
 
-    return $ Tuple mainProg displayProg
+    return $ Tuple mainProg dispProg
   )
 
-  lift $ modifySTRef esRef (\s -> s { displayProg = Just disp, mainProg = Just main })
+  lift $ modifySTRef esRef (\s -> s { dispProg = Just disp, mainProg = Just main })
   return unit
 
 
@@ -87,7 +88,7 @@ initEngineST engineConf sys pattern canvasId = do
   Just canvas <- liftEff $ getCanvasElementById canvasId
   Just ctx <- liftEff $ getWebglContext canvas
 
-  let es = {displayProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, ctx: ctx}
+  let es = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, ctx: ctx}
   esRef <- lift $ newSTRef es
 
   let dim = engineConf.kernelDim
@@ -128,9 +129,9 @@ render engineConf engineST pattern frameNum = do
   main <- case engineST.mainProg of
     (Just x) -> return x
     otherwise -> throwError "Render: missing main program"
-  disp <- case engineST.displayProg of
+  disp <- case engineST.dispProg of
     (Just x) -> return x
-    otherwise -> throwError "Render: missing display program"
+    otherwise -> throwError "Render: missing disp program"
 
   execGL ctx ( do
     -- ping pong buffers
@@ -143,18 +144,20 @@ render engineConf engineST pattern frameNum = do
     liftEff $ GL.bindTexture ctx GLE.texture2d tm
     liftEff $ GL.bindFramebuffer ctx GLE.framebuffer fb
 
+    -- bind main uniforms
     mainUnif <- getUniformBindings main
+    uniform1f mainUnif.time ((pattern.t - pattern.tPhase) / 1000.0)
     uniform1f mainUnif.kernel_dim (toNumber engineConf.kernelDim)
-    uniform1f mainUnif.time (pattern.t / 1000.0)
     drawArrays Triangles 0 6
 
-    -- display/post program
+    -- disp/post program
     liftEff $ GL.useProgram ctx disp
     liftEff $ GL.bindTexture ctx GLE.texture2d td
     liftEff $ GL.bindFramebuffer ctx GLE.framebuffer unsafeNull
 
-    displayUnif <- getUniformBindings disp
-    uniform1f displayUnif.kernel_dim (toNumber engineConf.kernelDim)
+    -- bind disp uniforms
+    dispUnif <- getUniformBindings disp
+    uniform1f dispUnif.kernel_dim (toNumber engineConf.kernelDim)
     drawArrays Triangles 0 6
   )
 

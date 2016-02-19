@@ -11,6 +11,14 @@ par seed_w 0.4
 modules t t
 sub reduce z = torus_reduce(z)
 
+--seed_multi
+flags default true
+flags family seed
+component seed_multi
+modules seed0 seed_border
+modules seed1 seed_border
+sub reduce z = torus_reduce(z)
+
 --t_wrap
 flags default true
 flags family t

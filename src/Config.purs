@@ -42,7 +42,7 @@ type EngineConf = {
 }
 
 type EngineST = {
-    displayProg :: Maybe WebGLProgram
+    dispProg :: Maybe WebGLProgram
   , mainProg :: Maybe WebGLProgram
   , tex :: Maybe (Tuple WebGLTexture WebGLTexture)
   , fb :: Maybe (Tuple WebGLFramebuffer WebGLFramebuffer)

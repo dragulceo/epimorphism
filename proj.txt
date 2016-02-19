@@ -66,23 +66,3 @@ sub $family.name.var {
 
 
 PARSING - configs
-
-
-
-
-
-COMPILING
-
- - library includes - #include
- - par - @par
- - zn - zn[i]
- - modules - @@module
- - sub - $sub
-
-1. load files from disk/db
-2. map par & zn values
-2. process main module
-  a. process & splice includes
-  b. process & splice components
-  c. substitute par & zn
-  d. magic for complex functions?

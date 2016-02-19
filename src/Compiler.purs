@@ -1,9 +1,14 @@
 module Compiler where
 
 import Prelude
-import Data.StrMap
+import Data.Array (sort, length, (..))
 import Data.Complex
-import Data.Tuple (Tuple(..))
+import Data.Foldable (foldl)
+import Data.Int (fromNumber)
+import Data.Maybe.Unsafe (fromJust)
+import Data.String (replace)
+import Data.StrMap (StrMap(), fold, empty, keys, size, foldM, insert)
+import Data.Tuple (Tuple(..), snd)
 
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
@@ -23,13 +28,14 @@ compileShaders pattern sys = do
 
   return {vert, main, disp}
 
-type CompRes = { component :: String, zOfs :: Int, parOfs :: Int }
+type CompRes = { component :: String, zOfs :: Int, parOfs :: Int, parDef :: (Array String) }
 compileShaders2 :: forall eff. Pattern -> SystemST -> Epi eff Shaders
 compileShaders2 pattern sys = do
   -- get shaders
+  -- substitute includes
   mainS <- loadLib pattern.main sys.shaderLib
   let patternM = pattern { component = mainS.body }
-  mainRes <- compile patternM sys 0 0
+  mainRes <- compile patternM sys 0 0 []
   let main = mainRes.component
 
   dispS <- loadLib pattern.disp sys.shaderLib
@@ -44,12 +50,34 @@ compile :: forall eff r. {
   , par :: StrMap Number
   , zn :: Array Complex
   , sub :: StrMap String
-  , component :: String | r } -> SystemST -> Int -> Int-> Epi eff CompRes
-compile {modules, par, zn, component} sys zOfs parOfs = do
-  -- substitute includes
+  , component :: String | r } -> SystemST -> Int -> Int -> (Array String) -> Epi eff CompRes
+compile {modules, par, zn, sub, component} sys zOfs parOfs parDef = do
+  let component' = fold handleSub component sub
 
-  -- substitute substitutions
-  -- substitute par
-  -- substitute zn
-  -- substitute children
-  return {component, zOfs: 0, parOfs: 0}
+  let k = (sort $ keys par)
+  let component'' = snd $ foldl handlePar (Tuple parOfs component') k
+  let parOfs' = parOfs + (fromJust $ fromNumber $ size par)
+  let parDef' = parDef ++ k
+
+  let component''' = snd $ foldl handleZn (Tuple zOfs component'') (0..((length zn) - 1))
+  let zOfs' = zOfs + length zn
+
+  mod <- getSubModules modules
+  foldM handleChild { component: component''', zOfs: zOfs', parOfs: parOfs', parDef: parDef'} mod
+  where
+    handleSub dt k v = replace k v dt
+    handlePar (Tuple n dt) v = Tuple (n + 1) (replace ("@" ++ v) ("par[" ++ show n ++ "]") dt)
+    handleZn (Tuple n dt) v = Tuple (n + 1) (replace ("#" ++ show v) (show $ v + n) dt)
+    handleChild :: forall eff. CompRes -> String -> Module -> Epi eff CompRes
+    handleChild {component: componentC, zOfs: zOfsC, parOfs: parOfsC, parDef: parDefC} k v = do
+      res <- compile v sys zOfsC parOfsC parDefC
+      let child = replace ("@@" ++ k) res.component componentC
+      return $ res { component = child }
+    getSubModules :: forall eff. SubModules -> Epi eff (StrMap Module)
+    getSubModules (SubModules m) = return m
+    getSubModules (SubModuleRef r) = do
+      foldM handleGetSub empty r
+    handleGetSub :: forall eff. (StrMap Module) -> String -> String -> Epi eff (StrMap Module)
+    handleGetSub dt k v = do
+      m <- loadLib v sys.moduleLib
+      return $ insert k m dt

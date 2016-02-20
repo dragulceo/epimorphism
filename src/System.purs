@@ -3,8 +3,9 @@ module System where
 import Prelude
 import Data.Array (foldM) as A
 import Data.Either (Either(..))
+import Data.List (fromList)
 import Data.Maybe (Maybe(..))
-import Data.StrMap (empty, lookup, insert, foldM, keys, StrMap())
+import Data.StrMap (empty, lookup, insert, foldM, values, StrMap())
 import Data.Tuple (Tuple(..), fst)
 import Control.Monad.ST (ST, STRef, modifySTRef, newSTRef, readSTRef)
 import Control.Monad.Error.Class (throwError)
@@ -71,7 +72,7 @@ buildModuleRefLib ssRef pattern = do
       m <- loadLib n systemST.moduleLib
       ref <- lift $ newSTRef m
       let dt' = insert n ref dt
-      A.foldM handle (Tuple dt' systemST) (keys m.modules)
+      A.foldM handle (Tuple dt' systemST) (fromList $ values m.modules)
 
 
 buildLib :: forall a eff.  (StrMap LineVal -> Lib a) -> String -> Epi eff (StrMap a)

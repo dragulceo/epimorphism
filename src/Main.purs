@@ -39,7 +39,7 @@ init = do
   uiConf     <- loadLib systemConf.initUIConf systemST.uiConfLib
   pattern    <- loadLib systemConf.initPattern systemST.patternLib
 
-  --buildModuleRefLib ssRef pattern
+  buildModuleRefLib ssRef pattern
   systemST' <- lift $ readSTRef ssRef
 
   ecRef <- lift $ newSTRef engineConf

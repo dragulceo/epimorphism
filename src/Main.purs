@@ -21,7 +21,7 @@ import JSUtil (winLog, unsafeLog, requestAnimationFrame, now, Now)
 
 type State h = {
     ucRef :: STRef h UIConf
-  , ssRef :: STRef h SystemST
+  , ssRef :: STRef h (SystemST h)
   , ecRef :: STRef h EngineConf
   , esRef :: STRef h EngineST
   , pRef  :: STRef h Pattern

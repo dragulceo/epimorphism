@@ -1,10 +1,10 @@
 module Config where
 
 import Prelude
+import Data.Complex
 import Data.Maybe (Maybe ())
 import Data.Tuple (Tuple ())
 import Data.StrMap (StrMap ())
-import Data.Complex
 import Control.Monad.ST (STRef)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (ExceptT ())
@@ -23,7 +23,7 @@ type SystemConf = {
   , initPattern :: String
 }
 
-type SystemST = {
+type SystemST h = {
     lastTimeMS :: Maybe Number
   , frameNum :: Int
   , lastFpsTimeMS :: Maybe Number
@@ -33,6 +33,7 @@ type SystemST = {
   , engineConfLib :: StrMap EngineConf
   , patternLib :: StrMap Pattern
   , moduleLib :: StrMap Module
+  , moduleRefLib :: StrMap (STRef h Module)
   , componentLib :: StrMap Component
   , indexLib :: StrMap Index
 }

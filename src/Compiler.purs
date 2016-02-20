@@ -21,7 +21,7 @@ import JSUtil (replaceAll, unsafeURLGet, reallyUnsafeLog)
 type Shaders = { vert :: String, main :: String, disp :: String }
 type CompRes = { component :: String, zOfs :: Int, parOfs :: Int }
 
-compileShaders :: forall eff. Pattern -> SystemST -> Epi eff Shaders
+compileShaders :: forall eff h. Pattern -> (SystemST h) -> Epi eff Shaders
 compileShaders pattern sys = do
   vertM   <- loadLib pattern.vert sys.moduleLib
   vertRes <- compile vertM sys 0 0
@@ -39,7 +39,7 @@ compileShaders pattern sys = do
   return {vert: vertRes.component, main: (allIncludes ++ mainRes.component), disp: (allIncludes ++ dispRes.component)}
 
 
-compile :: forall eff. Module -> SystemST -> Int -> Int -> Epi eff CompRes
+compile :: forall eff h. Module -> (SystemST h) -> Int -> Int -> Epi eff CompRes
 compile mod sys zOfs parOfs = do
   comp <- loadLib mod.component sys.componentLib
   let component' = fold handleSub comp.body mod.sub

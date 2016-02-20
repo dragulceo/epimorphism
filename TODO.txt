@@ -6,14 +6,16 @@ CONFIG
     - better error messages
     - serializing / unifying with parsing
     - database support
+    - library duplicates & general library integrity
 ENGINE
-  - passing pattern pars to kernel
   - live module lib
+  - passing pattern pars to kernel
 
+  - get complex numbers working right
   - indent spliced components
-  - stop @seed_w, @seed_wt etc overlapping replacements from happening!
+  - stop @@seed_w, @@seed_wt etc overlapping replacements from happening!
   - work on compiler performance
-  - feedback isn't perfect/ misalligned square
+  - feedback isn't perfect/ misalligned square?
   - better error checking
   - webgl debug statements?
 UI
@@ -22,15 +24,15 @@ UI
   - handle window resizing
   - fullscreen mode
 PATTERN
-  - module families
-  - indices
-  - pattern switching
   - programs
+  - derive module families & use indices
+  - pattern switching
   - build out library
 MISC
-  - detect system/perf profile
   - test on ipad
   - test on android
+  - complex numbers library?
+  - detect system/perf profile
   - logging system
   - only pass references when the function can mutate unless event handler or animator?
   - make unsafe code safe + catch more errors
@@ -43,5 +45,3 @@ LATER
   - webcam input
   - benchmarking tools
   - image comparison testing
-  - make pattern module?
-  - library duplicates & general library s

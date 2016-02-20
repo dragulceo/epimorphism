@@ -50,7 +50,7 @@ initTex dim = do
   return $ Tuple tex fb
 
 -- this might throw an error
-setShaders :: forall eff h. (STRef h EngineST) -> SystemST -> Pattern -> Epi (st :: ST h | eff) Unit
+setShaders :: forall eff h. (STRef h EngineST) -> (SystemST h) -> Pattern -> Epi (st :: ST h | eff) Unit
 setShaders esRef sys pattern = do
   es <- lift $ readSTRef esRef
 
@@ -82,7 +82,7 @@ setShaders esRef sys pattern = do
 
 
 -- this might throw an error
-initEngineST :: forall h eff. EngineConf -> SystemST -> Pattern -> String -> Epi (st :: ST h | eff) (STRef h EngineST)
+initEngineST :: forall h eff. EngineConf -> (SystemST h) -> Pattern -> String -> Epi (st :: ST h | eff) (STRef h EngineST)
 initEngineST engineConf sys pattern canvasId = do
   -- these are unsafe
   Just canvas <- liftEff $ getCanvasElementById canvasId

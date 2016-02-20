@@ -16,7 +16,7 @@ import SLibrary
 
 data DataSource = LocalHTTP | LocalStorage | RemoteDB
 
-defaultSystemST :: SystemST
+defaultSystemST :: forall h. SystemST h
 defaultSystemST = {
     lastTimeMS: Nothing
   , frameNum: 0
@@ -27,12 +27,13 @@ defaultSystemST = {
   , engineConfLib: empty
   , patternLib: empty
   , moduleLib: empty
+  , moduleRefLib: empty
   , componentLib: empty
   , indexLib: empty
 }
 
 
-initSystemST :: forall eff. Epi eff SystemST
+initSystemST :: forall eff h . Epi eff (SystemST h)
 initSystemST = do
   systemConfLib <- buildLib buildSystemConf "lib/system_conf.lib"
   engineConfLib <- buildLib buildEngineConf "lib/engine_conf.lib"

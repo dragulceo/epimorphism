@@ -17814,17 +17814,19 @@ var init = Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff
             return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadLib(v2.initEngineConf)(v.engineConfLib))(function (v3) {
                 return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadLib(v2.initUIConf)(v.uiConfLib))(function (v4) {
                     return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadLib(v2.initPattern)(v.patternLib))(function (v5) {
-                        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v3)))(function (v6) {
-                            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v4)))(function (v7) {
-                                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v5)))(function (v8) {
-                                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Engine.initEngineST(v3)(v)(v5)(v4.canvasId))(function (v9) {
-                                        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(UI.initUIST(v7)(v6)(v9)(v8))(function () {
-                                            return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))({
-                                                ucRef: v7, 
-                                                ssRef: v1, 
-                                                ecRef: v6, 
-                                                esRef: v9, 
-                                                pRef: v8
+                        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.readSTRef(v1)))(function (v6) {
+                            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v3)))(function (v7) {
+                                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v4)))(function (v8) {
+                                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v5)))(function (v9) {
+                                        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Engine.initEngineST(v3)(v6)(v5)(v4.canvasId))(function (v10) {
+                                            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(UI.initUIST(v8)(v7)(v10)(v9))(function () {
+                                                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))({
+                                                    ucRef: v8, 
+                                                    ssRef: v1, 
+                                                    ecRef: v7, 
+                                                    esRef: v10, 
+                                                    pRef: v9
+                                                });
                                             });
                                         });
                                     });
@@ -17846,7 +17848,7 @@ var handleError = function (epi) {
         if (v instanceof Data_Either.Right) {
             return v.value0;
         };
-        throw new Error("Failed pattern match at Main line 85, column 1 - line 86, column 1: " + [ v.constructor.name ]);
+        throw new Error("Failed pattern match at Main line 88, column 1 - line 89, column 1: " + [ v.constructor.name ]);
     };
 };
 var animate = function (stateM) {
@@ -17859,28 +17861,28 @@ var animate = function (stateM) {
                             var lastTimeMS = Data_Maybe.maybe(v5)(Prelude.id(Prelude.categoryFn))(v1.lastTimeMS);
                             var delta = (v5 - lastTimeMS) * v4.tSpd;
                             return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.modifySTRef(v.ssRef)(function (s) {
-                                var $37 = {};
-                                for (var $38 in s) {
-                                    if (s.hasOwnProperty($38)) {
-                                        $37[$38] = s[$38];
+                                var $39 = {};
+                                for (var $40 in s) {
+                                    if (s.hasOwnProperty($40)) {
+                                        $39[$40] = s[$40];
                                     };
                                 };
-                                $37.lastTimeMS = new Data_Maybe.Just(v5);
-                                return $37;
+                                $39.lastTimeMS = new Data_Maybe.Just(v5);
+                                return $39;
                             })))(function () {
                                 return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad.when(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))(v1.frameNum % 10 === 0)((function () {
                                     var lastFpsTimeMS = Data_Maybe.maybe(v5)(Prelude.id(Prelude.categoryFn))(v1.lastFpsTimeMS);
                                     var fps = Data_Int.round((10.0 * 1000.0) / (v5 - lastFpsTimeMS));
                                     return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.modifySTRef(v.ssRef)(function (s) {
-                                        var $39 = {};
-                                        for (var $40 in s) {
-                                            if (s.hasOwnProperty($40)) {
-                                                $39[$40] = s[$40];
+                                        var $41 = {};
+                                        for (var $42 in s) {
+                                            if (s.hasOwnProperty($42)) {
+                                                $41[$42] = s[$42];
                                             };
                                         };
-                                        $39.lastFpsTimeMS = new Data_Maybe.Just(v5);
-                                        $39.fps = new Data_Maybe.Just(fps);
-                                        return $39;
+                                        $41.lastFpsTimeMS = new Data_Maybe.Just(v5);
+                                        $41.fps = new Data_Maybe.Just(fps);
+                                        return $41;
                                     })))(function () {
                                         return UI.showFps(fps);
                                     });
@@ -17889,14 +17891,14 @@ var animate = function (stateM) {
                                     return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.writeSTRef(v.pRef)(pattern$prime)))(function () {
                                         return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Engine.render(v2)(v3)(pattern$prime)(v1.frameNum))(function () {
                                             return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.modifySTRef(v.ssRef)(function (s) {
-                                                var $41 = {};
-                                                for (var $42 in s) {
-                                                    if (s.hasOwnProperty($42)) {
-                                                        $41[$42] = s[$42];
+                                                var $43 = {};
+                                                for (var $44 in s) {
+                                                    if (s.hasOwnProperty($44)) {
+                                                        $43[$44] = s[$44];
                                                     };
                                                 };
-                                                $41.frameNum = s.frameNum + 1 | 0;
-                                                return $41;
+                                                $43.frameNum = s.frameNum + 1 | 0;
+                                                return $43;
                                             })))(function () {
                                                 return Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(JSUtil.requestAnimationFrame(animate(Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))(v))));
                                             });
@@ -19279,6 +19281,7 @@ module.exports = {
 // Generated by psc version 0.8.0.0
 "use strict";
 var Prelude = require("Prelude");
+var Data_Array = require("Data.Array");
 var Data_Either = require("Data.Either");
 var Data_Maybe = require("Data.Maybe");
 var Data_StrMap = require("Data.StrMap");
@@ -19315,14 +19318,14 @@ var RemoteDB = (function () {
 })();
 var loadLib = function (name) {
     return function (lib) {
-        var $10 = Data_StrMap.lookup(name)(lib);
-        if ($10 instanceof Data_Maybe.Just) {
-            return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($10.value0);
+        var $17 = Data_StrMap.lookup(name)(lib);
+        if ($17 instanceof Data_Maybe.Just) {
+            return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($17.value0);
         };
-        if ($10 instanceof Data_Maybe.Nothing) {
+        if ($17 instanceof Data_Maybe.Nothing) {
             return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))("Load from lib - can't find: " + name);
         };
-        throw new Error("Failed pattern match at System line 72, column 1 - line 73, column 1: " + [ $10.constructor.name ]);
+        throw new Error("Failed pattern match at System line 93, column 1 - line 94, column 1: " + [ $17.constructor.name ]);
     };
 };
 var loadModules = function (mr) {
@@ -19356,28 +19359,64 @@ var defaultSystemST = {
 var buildSLib = function (f) {
     return function (loc) {
         return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(JSUtil.unsafeURLGet(loc)))(function (v) {
-            var $14 = SLibrary.parseSLib(f)(v);
-            if ($14 instanceof Data_Either.Right) {
-                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($14.value0);
+            var $21 = SLibrary.parseSLib(f)(v);
+            if ($21 instanceof Data_Either.Right) {
+                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($21.value0);
             };
-            if ($14 instanceof Data_Either.Left) {
-                return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))($14.value0.value0);
+            if ($21 instanceof Data_Either.Left) {
+                return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))($21.value0.value0);
             };
-            throw new Error("Failed pattern match at System line 64, column 1 - line 65, column 1: " + [ $14.constructor.name ]);
+            throw new Error("Failed pattern match at System line 85, column 1 - line 86, column 1: " + [ $21.constructor.name ]);
+        });
+    };
+};
+var buildModuleRefLib = function (ssRef) {
+    return function (pattern) {
+        var handle = function (v) {
+            return function (n) {
+                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))(new Data_Tuple.Tuple(v.value0, v.value1)))(function () {
+                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(loadLib(n)(v.value1.moduleLib))(function (v1) {
+                        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.newSTRef(v1)))(function (v2) {
+                            var dt$prime = Data_StrMap.insert(n)(v2)(v.value0);
+                            return Data_Array.foldM(Control_Monad_Except_Trans.monadExceptT(Control_Monad_Eff.monadEff))(handle)(new Data_Tuple.Tuple(dt$prime, v.value1))(Data_StrMap.keys(v1.modules));
+                        });
+                    });
+                });
+            };
+        };
+        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.readSTRef(ssRef)))(function (v) {
+            return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(handle(new Data_Tuple.Tuple(Data_StrMap.empty, v))(pattern.main))(function (v1) {
+                return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(handle(v1)(pattern.disp))(function (v2) {
+                    return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(handle(v2)(pattern.vert))(function (v3) {
+                        return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(Control_Monad_ST.modifySTRef(ssRef)(function (s) {
+                            var $35 = {};
+                            for (var $36 in s) {
+                                if (s.hasOwnProperty($36)) {
+                                    $35[$36] = s[$36];
+                                };
+                            };
+                            $35.moduleRefLib = Data_Tuple.fst(v3);
+                            return $35;
+                        })))(function () {
+                            return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))(Prelude.unit);
+                        });
+                    });
+                });
+            });
         });
     };
 };
 var buildLib = function (f) {
     return function (loc) {
         return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Control_Monad_Trans.lift(Control_Monad_Except_Trans.monadTransExceptT)(Control_Monad_Eff.monadEff)(JSUtil.unsafeURLGet(loc)))(function (v) {
-            var $19 = Library.parseLib(f)(v);
-            if ($19 instanceof Data_Either.Right) {
-                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($19.value0);
+            var $38 = Library.parseLib(f)(v);
+            if ($38 instanceof Data_Either.Right) {
+                return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))($38.value0);
             };
-            if ($19 instanceof Data_Either.Left) {
-                return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))($19.value0.value0);
+            if ($38 instanceof Data_Either.Left) {
+                return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))($38.value0.value0);
             };
-            throw new Error("Failed pattern match at System line 56, column 1 - line 57, column 1: " + [ $19.constructor.name ]);
+            throw new Error("Failed pattern match at System line 77, column 1 - line 78, column 1: " + [ $38.constructor.name ]);
         });
     };
 };
@@ -19389,20 +19428,20 @@ var initSystemST = Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_M
                     return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(buildSLib(SLibrary.buildComponent)("lib/components.slib"))(function (v5) {
                         return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(buildSLib(SLibrary.buildIndex)("lib/indexes.slib"))(function (v6) {
                             return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))((function () {
-                                var $30 = {};
-                                for (var $31 in defaultSystemST) {
-                                    if (defaultSystemST.hasOwnProperty($31)) {
-                                        $30[$31] = defaultSystemST[$31];
+                                var $49 = {};
+                                for (var $50 in defaultSystemST) {
+                                    if (defaultSystemST.hasOwnProperty($50)) {
+                                        $49[$50] = defaultSystemST[$50];
                                     };
                                 };
-                                $30.systemConfLib = v;
-                                $30.engineConfLib = v1;
-                                $30.uiConfLib = v2;
-                                $30.moduleLib = v3;
-                                $30.patternLib = v4;
-                                $30.componentLib = v5;
-                                $30.indexLib = v6;
-                                return $30;
+                                $49.systemConfLib = v;
+                                $49.engineConfLib = v1;
+                                $49.uiConfLib = v2;
+                                $49.moduleLib = v3;
+                                $49.patternLib = v4;
+                                $49.componentLib = v5;
+                                $49.indexLib = v6;
+                                return $49;
                             })());
                         });
                     });
@@ -19419,11 +19458,12 @@ module.exports = {
     loadLib: loadLib, 
     buildSLib: buildSLib, 
     buildLib: buildLib, 
+    buildModuleRefLib: buildModuleRefLib, 
     initSystemST: initSystemST, 
     defaultSystemST: defaultSystemST
 };
 
-},{"Config":"/Users/gene/Programming/pure_morph/output/Config/index.js","Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Error.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Error.Class/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","Control.Monad.ST":"/Users/gene/Programming/pure_morph/output/Control.Monad.ST/index.js","Control.Monad.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Trans/index.js","Data.Either":"/Users/gene/Programming/pure_morph/output/Data.Either/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Data.StrMap":"/Users/gene/Programming/pure_morph/output/Data.StrMap/index.js","Data.Tuple":"/Users/gene/Programming/pure_morph/output/Data.Tuple/index.js","JSUtil":"/Users/gene/Programming/pure_morph/output/JSUtil/index.js","Library":"/Users/gene/Programming/pure_morph/output/Library/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js","SLibrary":"/Users/gene/Programming/pure_morph/output/SLibrary/index.js"}],"/Users/gene/Programming/pure_morph/output/Test.QuickCheck.Arbitrary/index.js":[function(require,module,exports){
+},{"Config":"/Users/gene/Programming/pure_morph/output/Config/index.js","Control.Monad.Eff":"/Users/gene/Programming/pure_morph/output/Control.Monad.Eff/index.js","Control.Monad.Error.Class":"/Users/gene/Programming/pure_morph/output/Control.Monad.Error.Class/index.js","Control.Monad.Except.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Except.Trans/index.js","Control.Monad.ST":"/Users/gene/Programming/pure_morph/output/Control.Monad.ST/index.js","Control.Monad.Trans":"/Users/gene/Programming/pure_morph/output/Control.Monad.Trans/index.js","Data.Array":"/Users/gene/Programming/pure_morph/output/Data.Array/index.js","Data.Either":"/Users/gene/Programming/pure_morph/output/Data.Either/index.js","Data.Maybe":"/Users/gene/Programming/pure_morph/output/Data.Maybe/index.js","Data.StrMap":"/Users/gene/Programming/pure_morph/output/Data.StrMap/index.js","Data.Tuple":"/Users/gene/Programming/pure_morph/output/Data.Tuple/index.js","JSUtil":"/Users/gene/Programming/pure_morph/output/JSUtil/index.js","Library":"/Users/gene/Programming/pure_morph/output/Library/index.js","Prelude":"/Users/gene/Programming/pure_morph/output/Prelude/index.js","SLibrary":"/Users/gene/Programming/pure_morph/output/SLibrary/index.js"}],"/Users/gene/Programming/pure_morph/output/Test.QuickCheck.Arbitrary/index.js":[function(require,module,exports){
 // Generated by psc version 0.8.0.0
 "use strict";
 var Prelude = require("Prelude");

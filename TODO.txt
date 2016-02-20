@@ -6,7 +6,7 @@ CONFIG
     - better error messages
     - serializing / unifying with parsing
     - database support
-    - library duplicates & general library integrity
+    - library duplicates, namespace colissions & general library integrity
 ENGINE
   - live module lib
   - passing pattern pars to kernel
@@ -24,11 +24,12 @@ UI
   - handle window resizing
   - fullscreen mode
 PATTERN
-  - programs
+  - scripts
   - derive module families & use indices
   - pattern switching
   - build out library
 MISC
+  - better use of type synonyms to clarify type annotations
   - test on ipad
   - test on android
   - complex numbers library?

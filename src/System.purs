@@ -1,11 +1,12 @@
 module System where
 
 import Prelude
+import Data.Array (foldM) as A
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import Data.StrMap (empty, lookup, insert, foldM, StrMap())
-import Data.Tuple (Tuple(..))
-import Control.Monad.ST (ST)
+import Data.StrMap (empty, lookup, insert, foldM, keys, StrMap())
+import Data.Tuple (Tuple(..), fst)
+import Control.Monad.ST (ST, STRef, modifySTRef, newSTRef, readSTRef)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 
@@ -51,6 +52,26 @@ initSystemST = do
     , componentLib  = componentLib
     , indexLib      = indexLib
   }
+
+
+buildModuleRefLib :: forall h eff. (STRef h (SystemST h)) -> Pattern -> Epi (st :: ST h | eff) Unit
+buildModuleRefLib ssRef pattern = do
+  systemST <- lift $ readSTRef ssRef
+
+  mrl   <- handle (Tuple empty systemST) pattern.main
+  mrl'  <- handle mrl  pattern.disp
+  mrl'' <- handle mrl' pattern.vert
+
+  lift $ modifySTRef ssRef (\s -> s { moduleRefLib = (fst mrl'') })
+  return unit
+  where
+    handle :: forall h eff. (Tuple (StrMap (STRef h Module)) (SystemST h)) -> String -> Epi (st :: ST h | eff) (Tuple (StrMap (STRef h Module)) (SystemST h))
+    handle (Tuple dt systemST) n = do
+      return $ Tuple dt systemST
+      m <- loadLib n systemST.moduleLib
+      ref <- lift $ newSTRef m
+      let dt' = insert n ref dt
+      A.foldM handle (Tuple dt' systemST) (keys m.modules)
 
 
 buildLib :: forall a eff.  (StrMap LineVal -> Lib a) -> String -> Epi eff (StrMap a)

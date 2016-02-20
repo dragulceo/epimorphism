@@ -16,7 +16,7 @@ import Config
 import Engine (initEngineST, render)
 import UI (initUIST, showFps)
 import Pattern (updatePattern)
-import System (initSystemST, loadLib)
+import System (initSystemST, loadLib, buildModuleRefLib)
 import JSUtil (winLog, unsafeLog, requestAnimationFrame, now, Now)
 
 type State h = {
@@ -39,12 +39,15 @@ init = do
   uiConf     <- loadLib systemConf.initUIConf systemST.uiConfLib
   pattern    <- loadLib systemConf.initPattern systemST.patternLib
 
+  --buildModuleRefLib ssRef pattern
+  systemST' <- lift $ readSTRef ssRef
+
   ecRef <- lift $ newSTRef engineConf
   ucRef <- lift $ newSTRef uiConf
   pRef  <- lift $ newSTRef pattern
 
   -- init states
-  esRef <- initEngineST engineConf systemST pattern uiConf.canvasId
+  esRef <- initEngineST engineConf systemST' pattern uiConf.canvasId
   initUIST ucRef ecRef esRef pRef
 
   return { ucRef: ucRef, ssRef: ssRef, ecRef: ecRef, esRef: esRef, pRef: pRef }

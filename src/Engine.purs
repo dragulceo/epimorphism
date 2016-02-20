@@ -56,8 +56,6 @@ setShaders esRef sys pattern = do
 
   -- load & compile shaders
   {main: main, disp: disp, vert: vert} <- compileShaders pattern sys
-  let x = reallyUnsafeLog "asdfaefasdfasdfasdfa\n\n\n\n\n"
-  let x' = reallyUnsafeLog main
 
   Tuple main disp <- execGL es.ctx ( do
     -- creater programs
@@ -150,6 +148,10 @@ render engineConf engineST pattern frameNum = do
     mainUnif <- getUniformBindings main
     uniform1f mainUnif.time ((pattern.t - pattern.tPhase) / 1000.0)
     uniform1f mainUnif.kernel_dim (toNumber engineConf.kernelDim)
+
+    (Just par) <- liftEff $ GL.getUniformLocation ctx main "par"
+    uniform1fv (Uniform par) (T.asFloat32Array [0.4])
+
     drawArrays Triangles 0 6
 
     -- disp/post program

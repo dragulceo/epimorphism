@@ -81,11 +81,5 @@ loadModules mr lib = do
   foldM handle empty mr
   where
     handle dt k v = do
-      m <- loadModule v lib
+      m <- loadLib v lib
       return $ insert k m dt
-
-
-loadModule :: forall eff. ModRef -> (StrMap Module) -> Epi eff Module
-loadModule mr lib = do
-  let ms = mrAsSt mr
-  loadLib ms lib

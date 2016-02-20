@@ -5,11 +5,14 @@ import Data.Maybe (Maybe ())
 import Data.Tuple (Tuple ())
 import Data.StrMap (StrMap ())
 import Data.Complex
+import Control.Monad.ST (STRef)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (ExceptT ())
 import Graphics.WebGL.Types (WebGLProgram, WebGLTexture, WebGLFramebuffer, WebGLContext)
 import Graphics.Canvas (Canvas)
 import DOM (DOM)
+
+import Data.String
 
 type Epi eff a = ExceptT String (Eff (canvas :: Canvas, dom :: DOM | eff)) a
 
@@ -57,8 +60,6 @@ type UIConf = {
 
 -- Pattern
 type ModRef = String
-foreign import stAsMr :: String -> ModRef
-foreign import mrAsSt :: ModRef -> String
 
 type Module = {
     component :: String
@@ -76,6 +77,7 @@ type Pattern = {
   , disp :: ModRef
   , flags :: StrMap String
   , scripts :: Array String
+  , includes :: Array String
   -- , 3d shit
   , t :: Number
   , tPhase :: Number

@@ -18,7 +18,7 @@ data SHandle = SHandle String String
 
 parseHandle :: String -> SLib SHandle
 parseHandle group = do
-  let lines = filter ((/=) "") $ split "\n" group
+  let lines = split "\n" group
   {head: sig, tail: body} <- handleUn $ uncons lines
   ssig <- handleS $ stripSuffix "{{" sig
   return $ SHandle (trim ssig) (joinWith "\n" body)

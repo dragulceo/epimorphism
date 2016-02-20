@@ -32,9 +32,7 @@ flags default true
 flags family seed
 component seed_border
 par seed_w 0.4
-par seed_t 0.4
-par seed_g 0.4
-modules t t_wrap
+modules t t_id
 sub reduce z = torus_reduce(z)
 
 --seed_multi
@@ -53,3 +51,7 @@ zn 1.0 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i,
 sub t_inner z = zn[#0] * z + zn[#1]
 sub t_main  z = exp(z)
 sub t_outer z = zn[#2] * z + zn[#3]
+
+--t_id
+flags family t
+component t_id

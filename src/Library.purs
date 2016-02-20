@@ -146,12 +146,6 @@ parseCLst sl = A.foldM handle [] sl
       cv <- parseCX v
       return $ A.cons cv dt
 
-parseMMp :: StrMap String -> Lib (StrMap ModRef)
-parseMMp sm = foldM handle empty sm
-  where
-    handle dt k v = do
-      let mv = stAsMr v
-      return $ insert k mv dt
 
 -- BUILDERS - maybe move somewhere else?
 defaultSystemConf :: SystemConf
@@ -224,7 +218,7 @@ buildModule vals = do
       "component" -> (fromLAsgn "component" val) >>= (\x -> return $ dt {component = x})
       "flags" -> (fromLMp "flags" val) >>= (\x -> return $ dt {flags = x})
       "sub" -> (fromLMp "sub" val) >>= (\x -> return $ dt {sub = x})
-      "modules" -> (fromLMp "modules" val) >>= parseMMp >>= (\x -> return $ dt {modules = x})
+      "modules" -> (fromLMp "modules" val) >>= (\x -> return $ dt {modules = x})
       "par" -> (fromLMp "par" val) >>= parseNMp >>= (\x -> return $ dt {par = x})
       "zn" -> (fromLLst "zn" val) >>= parseCLst >>= (\x -> return $ dt {zn = x})
       "images" -> (fromLLst "images" val) >>= (\x -> return $ dt {images = x})
@@ -239,6 +233,7 @@ defaultPattern = {
   , disp: "disp"
   , flags: empty
   , scripts: []
+  , includes: []
   , t: 0.0
   , tPhase: 0.0
   , tSpd: 1.0
@@ -255,6 +250,7 @@ buildPattern vals = do
       "disp" -> (fromLAsgn "disp" val) >>= (\x -> return $ dt {disp = x})
       "flags" -> (fromLMp "flags" val) >>= (\x -> return $ dt {flags = x})
       "scripts" -> (fromLLst "scripts" val) >>= (\x -> return $ dt {scripts = x})
+      "includes" -> (fromLLst "includes" val) >>= (\x -> return $ dt {includes = x})
       "t" -> (fromLAsgn "t" val) >>= parseNum >>= (\x -> return $ dt {t = x})
       "tPhase" -> (fromLAsgn "tPhase" val) >>= parseNum >>= (\x -> return $ dt {tPhase = x})
       "tSpd" -> (fromLAsgn "tSpd" val) >>= parseNum >>= (\x -> return $ dt {tSpd = x})

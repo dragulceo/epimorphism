@@ -38,6 +38,7 @@ MISC
   - unit tests
   - website
 LATER
+  - par & zn lengths are fixed
   - save images
   - webcam input
   - benchmarking tools

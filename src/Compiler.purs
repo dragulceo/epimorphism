@@ -6,8 +6,10 @@ import Data.Complex
 import Data.Foldable (foldl)
 import Data.Int (fromNumber)
 import Data.Maybe.Unsafe (fromJust)
+import Data.String (joinWith)
 import Data.StrMap (StrMap(), fold, empty, keys, size, foldM, insert)
 import Data.Tuple (Tuple(..), snd)
+import Data.Traversable (traverse)
 
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
@@ -21,34 +23,34 @@ type CompRes = { component :: String, zOfs :: Int, parOfs :: Int }
 
 compileShaders :: forall eff. Pattern -> SystemST -> Epi eff Shaders
 compileShaders pattern sys = do
-  -- substitute includes
-  vertM   <- loadModule pattern.vert sys.moduleLib
+  vertM   <- loadLib pattern.vert sys.moduleLib
   vertRes <- compile vertM sys 0 0
 
-  dispM   <- loadModule pattern.disp sys.moduleLib
+  dispM   <- loadLib pattern.disp sys.moduleLib
   dispRes <- compile dispM sys 0 0
 
-  mainM   <- loadModule pattern.main sys.moduleLib
+  mainM   <- loadLib pattern.main sys.moduleLib
   mainRes <- compile mainM sys 0 0
 
-  return {vert: vertRes.component, main: mainRes.component, disp: dispRes.component}
+  -- substitute includes into frags
+  includes <- traverse (\x -> loadLib x sys.componentLib) pattern.includes
+  let allIncludes = (joinWith "\n\n" (map (\x -> x.body) includes)) ++ "\n\n"
+
+  return {vert: vertRes.component, main: (allIncludes ++ mainRes.component), disp: (allIncludes ++ dispRes.component)}
+
 
 compile :: forall eff. Module -> SystemST -> Int -> Int -> Epi eff CompRes
 compile mod sys zOfs parOfs = do
-  --let x = reallyUnsafeLog mod
   comp <- loadLib mod.component sys.componentLib
   let component' = fold handleSub comp.body mod.sub
   let k = (sort $ keys mod.par)
 
-  --let x = reallyUnsafeLog component'
   let component'' = snd $ foldl handlePar (Tuple parOfs component') k
   let parOfs' = parOfs + (fromJust $ fromNumber $ size mod.par)
 
-  --let x = reallyUnsafeLog component''
   let component''' = foldl handleZn component'' (0..((length mod.zn) - 1))
   let zOfs' = zOfs + length mod.zn
 
-  --let x = reallyUnsafeLog component'''
   mod <- loadModules mod.modules sys.moduleLib
   foldM handleChild { component: component''', zOfs: zOfs', parOfs: parOfs' } mod
   where

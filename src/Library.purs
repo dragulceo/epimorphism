@@ -109,7 +109,7 @@ parseGroup builder group = do
 
 parseLib :: forall a. (StrMap LineVal -> Lib a) -> String -> Lib (StrMap a)
 parseLib builder lib = do
-  let groups = split "\n\n" lib
+  let groups = A.filter ((/=) "") $ A.filter ((/=) "\n") $ split "\n\n" lib
   fromFoldable <$> traverse (parseGroup builder) groups
 
 -- PARSERS

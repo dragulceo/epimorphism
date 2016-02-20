@@ -1,0 +1,35 @@
+post post_id {{
+}}
+
+post post1 {{
+  frame = _gamma3(frame, 2.0 / 1.5);
+
+  frame = vec4(rgb2hsv(frame.rgb), frame.a);
+
+  vec3 c0 = hsv2rgb(vec3(0.0, 1.0, 0.5));
+  vec3 c1 = hsv2rgb(vec3(0.66 + 0.8 / 2.0, 1.0, 0.5));
+  vec3 c2 = hsv2rgb(vec3(0.66 - 0.8 / 2.0, 1.0, -1.0 * 0.5));
+
+  vec3 res, r0, r1;
+  float f;
+
+  if(frame.x < 1.0 / 3.0){
+    f = 3.0 * frame.x;
+    r0 = c0;
+    r1 = c1;
+  }else if(frame.x < 2.0 / 3.0){
+    f = 3.0 * frame.x - 1.0;
+    r0 = c1;
+    r1 = c2;
+  }else{
+    f = 3.0 * frame.x - 2.0;
+    r0 = c2;
+    r1 = c0;
+  }
+  res = (1.0 - f) * r0 + f * r1;
+
+  res = rgb2hsv(res.rgb);
+  frame.x = res.x;
+
+  post = vec4(hsv2rgb(frame.rgb), frame.a);
+}}

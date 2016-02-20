@@ -1,0 +1,15 @@
+disp_frag disp {{
+precision mediump float;
+uniform sampler2D fb;
+uniform float kernel_dim;
+
+void main() {
+  vec4 frame, post;
+  vec2 clipSpace = gl_FragCoord.xy / vec2(kernel_dim, kernel_dim);
+  frame = texture2D(fb, clipSpace);
+
+  @@post
+
+  gl_FragColor = frame;
+}
+}}

@@ -87,7 +87,7 @@ var compile = function (mod) {
                     return function (k) {
                         return function (v1) {
                             return Prelude.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(compile(v1)(sys)(v.zOfs)(v.parOfs))(function (v3) {
-                                var child = JSUtil.replaceAll("@@" + k)("{\n" + (v3.component + "\n}\n"))(v.component);
+                                var child = JSUtil.replaceAll("@@" + k)("{\n" + (v3.component + "\n  }\n"))(v.component);
                                 return Prelude["return"](Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.applicativeEff))((function () {
                                     var $20 = {};
                                     for (var $21 in v3) {
@@ -17747,7 +17747,7 @@ var parseGroup = function (builder) {
 };
 var parseLib = function (builder) {
     return function (lib) {
-        var groups = Data_String.split("\n\n")(lib);
+        var groups = Data_Array.filter(Prelude["/="](Prelude.eqString)(""))(Data_Array.filter(Prelude["/="](Prelude.eqString)("\n"))(Data_String.split("\n\n")(lib)));
         return Prelude["<$>"](Data_Either.functorEither)(Data_StrMap.fromFoldable(Data_Foldable.foldableArray))(Data_Traversable.traverse(Data_Traversable.traversableArray)(Data_Either.applicativeEither)(parseGroup(builder))(groups));
     };
 };

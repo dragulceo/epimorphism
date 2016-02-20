@@ -1,0 +1,6 @@
+color color_id {{
+}}
+
+color color_bgr {{
+  color = color.bgra;
+}}

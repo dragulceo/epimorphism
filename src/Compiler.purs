@@ -60,5 +60,5 @@ compile mod sys zOfs parOfs = do
     handleChild :: forall eff. CompRes -> String -> Module -> Epi eff CompRes
     handleChild { component: componentC, zOfs: zOfsC, parOfs: parOfsC } k v = do
       res <- compile v sys zOfsC parOfsC
-      let child = replaceAll ("@@" ++ k) ("{\n" ++ res.component ++ "\n}\n") componentC
+      let child = replaceAll ("@@" ++ k) ("{\n" ++ res.component ++ "\n  }\n") componentC
       return $ res { component = child }

@@ -1,0 +1,8 @@
+--post_id
+flags default true
+flags family post
+component post_id
+
+--post1
+flags family post
+component post1

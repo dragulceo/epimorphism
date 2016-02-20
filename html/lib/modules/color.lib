@@ -1,0 +1,9 @@
+--color_id
+flags default true
+flags family color
+component color_id
+
+--color_bgr
+flags default true
+flags family color
+component color_bgr

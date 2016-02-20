@@ -1,0 +1,5 @@
+--main
+flags default true
+flags family main
+component main
+modules main_body main_stc

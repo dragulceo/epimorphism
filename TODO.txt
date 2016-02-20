@@ -1,20 +1,19 @@
 CONFIG
   - cleanup/finish parsing of libs & slibs
     - comments
-    - info on engine, etc split across library, engine, config :/
+    - data on engine_conf/state, etc split across library, engine, config :/
     - general refactoring
     - better error messages
-    - split familes across multiple files
     - serializing / unifying with parsing
     - database support
 ENGINE
+  - passing pattern pars to kernel
+  - live module lib
+
+  - indent spliced components
   - stop @seed_w, @seed_wt etc overlapping replacements from happening!
   - work on compiler performance
-  - compiling patterns
-  - passing pattern pars to kernel
-
   - feedback isn't perfect/ misalligned square
-  - better kernel debug support
   - better error checking
   - webgl debug statements?
 UI
@@ -38,9 +37,11 @@ MISC
   - unit tests
   - website
 LATER
+  - better kernel debug support
   - par & zn lengths are fixed
   - save images
   - webcam input
   - benchmarking tools
   - image comparison testing
   - make pattern module?
+  - library duplicates & general library s

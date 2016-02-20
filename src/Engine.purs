@@ -149,7 +149,7 @@ render engineConf engineST pattern frameNum = do
     uniform1f mainUnif.time ((pattern.t - pattern.tPhase) / 1000.0)
     uniform1f mainUnif.kernel_dim (toNumber engineConf.kernelDim)
 
-    (Just par) <- liftEff $ GL.getUniformLocation ctx main "par"
+    (Just par) <- liftEff $ GL.getUniformLocation ctx main "par"  -- unsafe
     uniform1fv (Uniform par) (T.asFloat32Array [0.4])
 
     drawArrays Triangles 0 6

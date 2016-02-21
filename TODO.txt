@@ -8,10 +8,9 @@ CONFIG
     - database support
     - library duplicates, namespace colissions & general library integrity
 ENGINE
-  - live module lib
-  - passing pattern pars to kernel
-
+  - rebuild old main program
   - get complex numbers working right
+
   - indent spliced components
   - stop @@seed_w, @@seed_wt etc overlapping replacements from happening!
   - work on compiler performance

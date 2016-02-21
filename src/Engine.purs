@@ -8,6 +8,7 @@ import Data.Either
 import Data.Array
 import Data.TypedArray as T
 import Data.Int (toNumber)
+import Data.StrMap (StrMap(..))
 
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
@@ -134,7 +135,8 @@ render systemST engineConf engineST pattern frameNum = do
     otherwise -> throwError "Render: missing disp program"
 
   -- get par & zn
-  {lib, par, zn} <- flattenParZn {lib: systemST.moduleRefLib, par: [], zn: []} pattern.main
+  bindParZn systemST.moduleRefLib ctx main pattern.main
+  bindParZn systemST.moduleRefLib ctx disp pattern.disp
 
   execGL ctx ( do
     -- ping pong buffers
@@ -152,10 +154,7 @@ render systemST engineConf engineST pattern frameNum = do
     uniform1f mainUnif.time ((pattern.t - pattern.tPhase) / 1000.0)
     uniform1f mainUnif.kernel_dim (toNumber engineConf.kernelDim)
 
-    (Just parU) <- liftEff $ GL.getUniformLocation ctx main "par"  -- unsafe
---    (Just znU)  <- liftEff $ GL.getUniformLocation ctx main "zn"  -- unsafe
-    uniform1fv (Uniform parU) (T.asFloat32Array par)
-
+    -- draw
     drawArrays Triangles 0 6
 
     -- disp/post program
@@ -169,8 +168,25 @@ render systemST engineConf engineST pattern frameNum = do
     drawArrays Triangles 0 6
   )
 
+bindParZn :: forall h eff. (StrMap (STRef h Module)) -> WebGLContext -> WebGLProgram -> String -> Epi (st :: ST h | eff) Unit
+bindParZn lib ctx prog n = do
+  {lib: _, par, zn} <- flattenParZn {lib, par: [], zn: []} n
+  execGL ctx ( do
+    liftEff $ GL.useProgram ctx prog
+    unif <- getUniformBindings prog
+    mParU <- liftEff $ GL.getUniformLocation ctx prog "par"
+    case mParU of
+      (Just parU) -> uniform1fv (Uniform parU) (T.asFloat32Array par)
+      Nothing -> return unit -- is this safe?
 
--- PRIVATE
+--    mZnU <- liftEff $ GL.getUniformLocation ctx main "zn"
+--    case mZnU of
+--      (Just znU) -> uniform1fv (Uniform znU) (T.asFloat32Array zn)
+--      Nothing -> return unit -- is this safe?
+
+  )
+
+
 execGL :: forall eff a. WebGLContext -> (WebGL a) -> Epi eff a
 execGL ctx webGL = do
   res <- lift $ runWebgl webGL ctx

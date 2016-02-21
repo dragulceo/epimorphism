@@ -7,7 +7,7 @@ flags default true
 flags family seed
 component seed_border
 par seed_w 0.4
-modules t t_id
+modules t t_wrap_id
 sub reduce z = torus_reduce(z)
 
 --seed_multi

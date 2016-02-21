@@ -4,13 +4,13 @@ post post_id {{
 post post1 {{
   frame = _gamma3(frame, 2.0 / 1.5);
 
-  frame = vec4(rgb2hsv(frame.rgb), frame.a);
+  frame = rgb2hsv(frame);
 
-  vec3 c0 = hsv2rgb(vec3(0.0, 1.0, 0.5));
-  vec3 c1 = hsv2rgb(vec3(0.66 + 0.8 / 2.0, 1.0, 0.5));
-  vec3 c2 = hsv2rgb(vec3(0.66 - 0.8 / 2.0, 1.0, -1.0 * 0.5));
+  vec4 c0 = hsv2rgb(vec4(0.0, 1.0, 0.5, 1.0));
+  vec4 c1 = hsv2rgb(vec4(0.66 + @pc3_spread / 2.0, 1.0, @pc3_lgv, 1.0));
+  vec4 c2 = hsv2rgb(vec4(0.66 - @pc3_spread / 2.0, 1.0, -1.0 * @pc3_lgv, 1.0));
 
-  vec3 res, r0, r1;
+  vec4 res, r0, r1;
   float f;
 
   if(frame.x < 1.0 / 3.0){
@@ -28,8 +28,8 @@ post post1 {{
   }
   res = (1.0 - f) * r0 + f * r1;
 
-  res = rgb2hsv(res.rgb);
+  res = rgb2hsv(res);
   frame.x = res.x;
 
-  post = vec4(hsv2rgb(frame.rgb), frame.a);
+  post = hsv2rgb(frame);
 }}

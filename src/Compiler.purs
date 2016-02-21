@@ -44,9 +44,10 @@ compileShaders pattern sys = do
 compile :: forall eff h. Module -> (SystemST h) -> Int -> Int -> Epi eff CompRes
 compile mod sys zOfs parOfs = do
   comp <- loadLib mod.component sys.componentLib
+  let x = reallyUnsafeLog mod.sub
   let component' = fold handleSub comp.body mod.sub
-  let k = (A.sort $ keys mod.par)
 
+  let k = (A.sort $ keys mod.par)
   let component'' = snd $ foldl handlePar (Tuple parOfs component') k
   let parOfs' = parOfs + (fromJust $ fromNumber $ size mod.par)
 

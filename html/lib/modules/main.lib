@@ -3,3 +3,8 @@ flags default true
 flags family main
 component main
 modules main_body main_stc
+
+--main_cool
+flags family main
+component main
+modules main_body main_test

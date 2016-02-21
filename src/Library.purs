@@ -69,7 +69,7 @@ parseLibLine line = do
     _ -> do
       let lst = rem 1 tokens
       if (isLst lst) then
-        return $ Lst (fromJust at0) (map trim $ fromJust $ A.init (split "," lst)) else
+        return $ Lst (fromJust at0) (map trim $ fromJust $ A.init (split ".." lst)) else
         case (A.length tokens) of
           2 -> return $ Asgn (fromJust at0) (fromJust at1)
           _ -> return $ Mp (fromJust at0) (fromJust at1) (rem 2 tokens)
@@ -79,20 +79,24 @@ parseLibLine line = do
       (Just n) -> return (Name n)
       Nothing -> Left (LibError $ "expecting a name: " ++ line)
     rem n tokens = joinWith " " $ A.drop n tokens
-    isLst token = contains "," token
+    isLst token = contains ".." token
 
 
 aggregateLibLines :: Array LineResult -> Lib (Tuple (Maybe String) (StrMap LineVal))
-aggregateLibLines lines =
+aggregateLibLines lines = do
   A.foldM handle (Tuple Nothing empty) lines
   where
     handle (Tuple name dt) (Name n)   = return $ Tuple (Just n) dt
     handle (Tuple name dt) (Asgn n v) = return $ Tuple name (insert n (LAsgn v) dt)
     handle (Tuple name dt) (Lst n v)  = return $ Tuple name (insert n (LLst v) dt)
-    handle (Tuple name dt) (Mp n k v) = return $ Tuple name (insert n (LMp (insert k v (def $ lookup n dt))) dt)
+    handle (Tuple name dt) (Mp n k v) = do
+      res <- def n (lookup n dt)
+      return $ Tuple name (insert n (LMp (insert k v res)) dt)
     handle _ _ = Left (LibError "AggLibLines: wtf are you doing")
-    def (Just (LMp m)) = m
-    def _  = empty -- could have errors here
+    def :: String -> Maybe LineVal -> Lib (StrMap String)
+    def _ (Just (LMp m)) = return m
+    def _ Nothing = return empty
+    def n _ = Left $ LibError $ "Expected : " ++ n ++ " : to be a map"
 
 
 parseGroup :: forall a.  (StrMap LineVal -> Lib a) -> String -> Lib (Tuple String a)

@@ -11,6 +11,7 @@ ENGINE
   - rebuild old main program
   - get complex numbers working right
 
+  - fract
   - indent spliced components
   - stop @@seed_w, @@seed_wt etc overlapping replacements from happening!
   - work on compiler performance
@@ -28,17 +29,20 @@ PATTERN
   - pattern switching
   - build out library
 MISC
+  - module inheritence?
   - better use of type synonyms to clarify type annotations
   - test on ipad
   - test on android
   - complex numbers library?
   - detect system/perf profile
-  - logging system
   - only pass references when the function can mutate unless event handler or animator?
   - make unsafe code safe + catch more errors
+LATER
+  - subsitiutions of the same name cant be used to derive library
   - unit tests
   - website
-LATER
+  - logging system
+  - programming guidelines document - i.e make sure all tree modifications rebuild mod ref lib
   - better kernel debug support
   - par & zn lengths are fixed
   - save images

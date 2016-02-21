@@ -31,5 +31,5 @@ post post1 {{
   res = rgb2hsv(res);
   frame.x = res.x;
 
-  post = hsv2rgb(frame);
+  frame = hsv2rgb(frame);
 }}

@@ -7,6 +7,7 @@ CONFIG
     - serializing / unifying with parsing
     - database support
     - library duplicates, namespace colissions & general library integrity
+		- make sure library is immutable
 ENGINE
   - rebuild old main program
 

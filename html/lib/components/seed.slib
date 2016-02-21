@@ -4,7 +4,6 @@ seed seed_empty {{
 
 seed seed_border {{
   @@t
-  $reduce;
 
   float w = VOID_W;
   float wx = (z.x + @seed_w) / (2.0 * @seed_w);
@@ -24,7 +23,6 @@ seed seed_border {{
     wy = z.x / (0.5 * @seed_w) - 0.5;
   }
   wx = w;
-  vec4 frame_w = vec4(w, (abs(w-VOID_W) < 0.00001 ? 0.3 : 1.0), wx, wy);
+  vec4 frame_w = vec4(w, (abs(w-VOID_W) < 0.00001 ? 0.0 : 1.0), wx, wy);
   seed = vec4(frame_w.x, 0, 0, frame_w.y);
-  //seed = vec4(1.0,0.0,1.0,1.0);a
 }}

@@ -7,7 +7,7 @@ uniform float par[100];
 uniform vec2 zn[20];
 
 void main() {
-  vec4 frame, post;
+  vec4 frame;
   vec2 clipSpace = gl_FragCoord.xy / vec2(kernel_dim, kernel_dim);
   frame = texture2D(fb, clipSpace);
 

@@ -115,8 +115,8 @@ initEngineST engineConf sys pattern canvasId = do
   lift $ newSTRef res
 
 
-render :: forall h eff. EngineConf -> EngineST -> Pattern -> Int -> Epi (st :: ST h | eff) Unit
-render engineConf engineST pattern frameNum = do
+render :: forall h eff. (SystemST h) -> EngineConf -> EngineST -> Pattern -> Int -> Epi (st :: ST h | eff) Unit
+render systemST engineConf engineST pattern frameNum = do
   let ctx = engineST.ctx
 
   -- unpack
@@ -132,6 +132,9 @@ render engineConf engineST pattern frameNum = do
   disp <- case engineST.dispProg of
     (Just x) -> return x
     otherwise -> throwError "Render: missing disp program"
+
+  -- get par & zn
+  {lib, par, zn} <- flattenParZn {lib: systemST.moduleRefLib, par: [], zn: []} pattern.main
 
   execGL ctx ( do
     -- ping pong buffers
@@ -149,8 +152,9 @@ render engineConf engineST pattern frameNum = do
     uniform1f mainUnif.time ((pattern.t - pattern.tPhase) / 1000.0)
     uniform1f mainUnif.kernel_dim (toNumber engineConf.kernelDim)
 
-    (Just par) <- liftEff $ GL.getUniformLocation ctx main "par"  -- unsafe
-    uniform1fv (Uniform par) (T.asFloat32Array [0.4])
+    (Just parU) <- liftEff $ GL.getUniformLocation ctx main "par"  -- unsafe
+--    (Just znU)  <- liftEff $ GL.getUniformLocation ctx main "zn"  -- unsafe
+    uniform1fv (Uniform parU) (T.asFloat32Array par)
 
     drawArrays Triangles 0 6
 

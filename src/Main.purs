@@ -78,7 +78,7 @@ animate stateM = handleError do
   -- update pattern & render
   let pattern' = updatePattern pattern (pattern.t + delta)
   lift $ writeSTRef pRef pattern'
-  render engineConf engineST pattern' systemST.frameNum
+  render systemST engineConf engineST pattern' systemST.frameNum
 
   -- request next frame
   lift $ modifySTRef ssRef (\s -> s {frameNum = s.frameNum + 1})

@@ -1,18 +1,20 @@
 module Compiler where
 
 import Prelude
-import Data.Array (sort, length, (..))
+import Data.Array (sort, length, foldM, (..)) as A
 import Data.Complex
 import Data.Foldable (foldl)
 import Data.Int (fromNumber)
+import Data.List (fromList)
 import Data.Maybe.Unsafe (fromJust)
 import Data.String (joinWith)
-import Data.StrMap (StrMap(), fold, empty, keys, size, foldM, insert)
+import Data.StrMap (StrMap(), fold, empty, keys, size, foldM, insert, lookup, values)
 import Data.Tuple (Tuple(..), snd)
 import Data.Traversable (traverse)
 
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
+import Control.Monad.ST (ST, STRef, readSTRef)
 
 import Config
 import System
@@ -43,13 +45,13 @@ compile :: forall eff h. Module -> (SystemST h) -> Int -> Int -> Epi eff CompRes
 compile mod sys zOfs parOfs = do
   comp <- loadLib mod.component sys.componentLib
   let component' = fold handleSub comp.body mod.sub
-  let k = (sort $ keys mod.par)
+  let k = (A.sort $ keys mod.par)
 
   let component'' = snd $ foldl handlePar (Tuple parOfs component') k
   let parOfs' = parOfs + (fromJust $ fromNumber $ size mod.par)
 
-  let component''' = foldl handleZn component'' (0..((length mod.zn) - 1))
-  let zOfs' = zOfs + length mod.zn
+  let component''' = foldl handleZn component'' (A.(..) 0 ((A.length mod.zn) - 1))
+  let zOfs' = zOfs + A.length mod.zn
 
   mod <- loadModules mod.modules sys.moduleLib
   foldM handleChild { component: component''', zOfs: zOfs', parOfs: parOfs' } mod
@@ -62,3 +64,15 @@ compile mod sys zOfs parOfs = do
       res <- compile v sys zOfsC parOfsC
       let child = replaceAll ("@@" ++ k) ("{\n" ++ res.component ++ "\n  }\n") componentC
       return $ res { component = child }
+
+
+type LibParZn h = { lib :: StrMap (STRef h Module), par :: Array Number, zn :: Array Complex }
+flattenParZn :: forall h eff. LibParZn h -> String -> Epi (st :: ST h | eff) (LibParZn h)
+flattenParZn {lib, par, zn} n = do
+  mRef <- loadLib n lib
+  mod <- lift $ readSTRef mRef
+  let zn' = zn ++ mod.zn
+  let par' = par ++ map (get mod.par) (A.sort $ keys mod.par)
+  A.foldM flattenParZn {lib, par: par', zn: zn'} (fromList $ values mod.modules)
+  where
+    get dt n = fromJust $ (lookup n dt)

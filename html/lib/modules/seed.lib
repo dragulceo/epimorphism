@@ -6,7 +6,7 @@ component seed_empty
 flags default true
 flags family seed
 component seed_border
-par seed_w 0.4
+par seed_w 0.1
 modules t t_wrap_id
 sub reduce z = torus_reduce(z)
 

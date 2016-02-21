@@ -9,7 +9,6 @@ CONFIG
     - library duplicates, namespace colissions & general library integrity
 ENGINE
   - rebuild old main program
-  - get complex numbers working right
 
   - fract
   - indent spliced components

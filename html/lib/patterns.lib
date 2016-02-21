@@ -10,7 +10,7 @@ includes colorspace .. math ..
 --cool
 vert   vert
 main   main_cool
-disp   disp
+disp   disp_id
 t      0.0
 tPhase 0.0
 tSpd   1.0

@@ -1,7 +1,7 @@
 module Library where
 
 import Prelude
-import Data.Array (cons, foldM, length, index, drop, filter, init) as A
+import Data.Array (cons, foldM, length, index, drop, filter, init, reverse) as A
 import Data.Complex
 import Data.Either (Either(..))
 import Data.String (split, joinWith, stripPrefix, trim, contains)
@@ -144,7 +144,7 @@ parseNMp sm = foldM handle empty sm
       return $ insert k nv dt
 
 parseCLst :: Array String -> Lib (Array Complex)
-parseCLst sl = A.foldM handle [] sl
+parseCLst sl = A.reverse <$> A.foldM handle [] sl
   where
     handle dt v = do
       cv <- parseCX v

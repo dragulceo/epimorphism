@@ -41,8 +41,11 @@ exports.unsafeLog = function unsafeLog(x) {
   }
 }
 
+window.cnt = 0;
 exports.reallyUnsafeLog = function reallyUnsafeLog(x) {
-  console.log(x);
+	if(window.cnt < 10)
+		console.log(x);
+	window.cnt = window.cnt + 1;
 }
 
 

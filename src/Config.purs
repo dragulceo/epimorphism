@@ -34,6 +34,7 @@ type SystemST h = {
   , patternLib :: StrMap Pattern
   , moduleLib :: StrMap Module
   , moduleRefLib :: StrMap (STRef h Module)
+  , scriptLib :: StrMap Script
   , scriptRefLib :: StrMap (STRef h Script)
   , componentLib :: StrMap Component
   , indexLib :: StrMap Index

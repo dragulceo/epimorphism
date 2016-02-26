@@ -30,6 +30,7 @@ defaultSystemST = {
   , patternLib: empty
   , moduleLib: empty
   , moduleRefLib: empty
+  , scriptLib: empty
   , scriptRefLib: empty
   , componentLib: empty
   , indexLib: empty
@@ -42,6 +43,7 @@ initSystemST = do
   engineConfLib <- buildLib buildEngineConf "lib/engine_conf.lib"
   uiConfLib     <- buildLib buildUIConf "lib/ui_conf.lib"
   moduleLib     <- buildLib buildModule "lib/modules.lib"
+  scriptLib     <- buildLib buildScript "lib/scripts.lib"
   patternLib    <- buildLib buildPattern "lib/patterns.lib"
   componentLib  <- buildSLib buildComponent "lib/components.slib"
   indexLib      <- buildSLib buildIndex "lib/indexes.slib"
@@ -50,6 +52,7 @@ initSystemST = do
     , engineConfLib = engineConfLib
     , uiConfLib     = uiConfLib
     , moduleLib     = moduleLib
+    , scriptLib     = scriptLib
     , patternLib    = patternLib
     , componentLib  = componentLib
     , indexLib      = indexLib
@@ -62,21 +65,24 @@ buildRefLibs ssRef pattern = do
   systemST <- lift $ readSTRef ssRef
 
   let dt = {mdt: empty, sdt: empty, st: systemST}
-  mrl    <- handle dt pattern.main
-  mrl'   <- handle mrl  pattern.disp
-  mrl''  <- handle mrl' pattern.vert
+  mrl' <- A.foldM handle dt [pattern.main, pattern.disp, pattern.vert]
 
-  lift $ modifySTRef ssRef (\s -> s { moduleRefLib = mrl''.mdt })
+  lift $ modifySTRef ssRef (\s -> s { moduleRefLib = mrl'.mdt })
   return unit
   where
     handle :: forall h eff. (RData h) -> String -> Epi (st :: ST h | eff) (RData h)
     handle dt@{mdt, sdt, st} n = do
-      --return $ Tuple dt st
       m <- loadLib n st.moduleLib
       ref <- lift $ newSTRef m
       let mdt' = insert n ref mdt
-      let dt' = dt {mdt = mdt'}
+      sdt' <- A.foldM (handleS st) sdt m.scripts
+      let dt' = dt {mdt = mdt', sdt = sdt'}
       A.foldM handle dt' (fromList $ values m.modules)
+    handleS :: forall h eff. SystemST h -> (StrMap (STRef h Script)) -> String -> Epi (st :: ST h | eff) (StrMap (STRef h Script))
+    handleS st sdt n = do
+      s <- loadLib n st.scriptLib
+      ref <- lift $ newSTRef s
+      return $ insert n ref sdt
 
 
 buildLib :: forall a eff.  (StrMap LineVal -> Lib a) -> String -> Epi eff (StrMap a)

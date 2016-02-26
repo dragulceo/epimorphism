@@ -205,6 +205,7 @@ defaultModule :: Module
 defaultModule = {
     component: ""
   , flags: empty
+  , scripts: []
   , modules: empty
   , par: empty
   , zn: []
@@ -221,6 +222,7 @@ buildModule vals = do
     handle dt key val = case key of
       "component" -> (fromLAsgn "component" val) >>= (\x -> return $ dt {component = x})
       "flags" -> (fromLMp "flags" val) >>= (\x -> return $ dt {flags = x})
+      "scripts" -> (fromLLst "scripts" val) >>= (\x -> return $ dt {scripts = x})
       "sub" -> (fromLMp "sub" val) >>= (\x -> return $ dt {sub = x})
       "modules" -> (fromLMp "modules" val) >>= (\x -> return $ dt {modules = x})
       "par" -> (fromLMp "par" val) >>= parseNMp >>= (\x -> return $ dt {par = x})
@@ -236,7 +238,6 @@ defaultPattern = {
   , main: "main"
   , disp: "disp"
   , flags: empty
-  , scripts: []
   , includes: []
   , t: 0.0
   , tPhase: 0.0
@@ -253,9 +254,29 @@ buildPattern vals = do
       "main" -> (fromLAsgn "main" val) >>= (\x -> return $ dt {main = x})
       "disp" -> (fromLAsgn "disp" val) >>= (\x -> return $ dt {disp = x})
       "flags" -> (fromLMp "flags" val) >>= (\x -> return $ dt {flags = x})
-      "scripts" -> (fromLLst "scripts" val) >>= (\x -> return $ dt {scripts = x})
       "includes" -> (fromLLst "includes" val) >>= (\x -> return $ dt {includes = x})
       "t" -> (fromLAsgn "t" val) >>= parseNum >>= (\x -> return $ dt {t = x})
       "tPhase" -> (fromLAsgn "tPhase" val) >>= parseNum >>= (\x -> return $ dt {tPhase = x})
       "tSpd" -> (fromLAsgn "tSpd" val) >>= parseNum >>= (\x -> return $ dt {tSpd = x})
       _ -> Left (LibError $ "Pattern - unknown key - " ++ key)
+
+
+defaultScript :: Script
+defaultScript = {
+    fn: "null"
+  , dt: empty
+  , mod: ""
+  , flags: empty
+}
+
+
+buildScript :: StrMap LineVal -> Lib Script
+buildScript vals = do
+  foldM handle defaultScript vals
+  where
+    handle dt key val = case key of
+      "fn" -> (fromLAsgn "fn" val) >>= (\x -> return $ dt {fn = x})
+      "mod" -> (fromLAsgn "mod" val) >>= (\x -> return $ dt {mod = x})
+      "flags" -> (fromLMp "flags" val) >>= (\x -> return $ dt {flags = x})
+      "dt" -> (fromLMp "dt" val) >>= (\x -> return $ dt {dt = x})
+      _ -> Left (LibError $ "Script - unknown key - " ++ key)

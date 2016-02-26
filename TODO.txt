@@ -1,45 +1,61 @@
 CONFIG
+  - scripts & modules reference each other
+  - make sure modreflib & scriptreflib are current
+	- if you re-use a module in a pattern, it's the same module!
+	  - when creating modreflib, we could make new unique names.  the issue with that could be duplicate modules in the db.  but we could make a name from a hash of the values?
+
   - cleanup/finish parsing of libs & slibs
-    - comments
     - data on engine_conf/state, etc split across library, engine, config :/
     - general refactoring
-    - better error messages
+    - clean up error messages
     - serializing / unifying with parsing
     - database support
     - library duplicates, namespace colissions & general library integrity
-		- make sure library is immutable
+		- make sure library is immutable?
 ENGINE
   - rebuild old main program
 
   - fract
+  - image support
   - indent spliced components
   - stop @@seed_w, @@seed_wt etc overlapping replacements from happening!
+  - engine stability/lost context - https://www.khronos.org/registry/webgl/extensions/WEBGL_lose_context/
   - work on compiler performance
   - feedback isn't perfect/ misalligned square?
   - better error checking
   - webgl debug statements?
 UI
-  - figure out how to render UI
-  - build some kind of UI
+  - remote control
   - handle window resizing
   - fullscreen mode
 PATTERN
   - scripts
+  - image support
   - derive module families & use indices
   - pattern switching
-  - build out library
 MISC
-  - module inheritence?
+  - build out library
+  - feature parity with existing app
   - better use of type synonyms to clarify type annotations
-  - test on ipad
-  - test on android
   - complex numbers library?
-  - detect system/perf profile
   - only pass references when the function can mutate unless event handler or animator?
   - make unsafe code safe + catch more errors
 LATER
+  - scritps for patterns?
+  - module/submodule cycles??
+  - module inheritence?
+  - figure out how to render UI
+  - build some kind of UI
+  - video rendering
+	- old style (automation) scripts
+  - config/ lib file comments
+  - detect system/perf profile
+  - test on windows
+  - test on ipad
+  - test on android
+	- https://www.khronos.org/registry/webgl/extensions/WEBGL_debug_shaders/
   - subsitiutions of the same name cant be used to derive library
-  - unit tests
+	  - unit tests
   - website
   - logging system
   - programming guidelines document - i.e make sure all tree modifications rebuild mod ref lib

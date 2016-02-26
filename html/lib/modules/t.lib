@@ -10,6 +10,7 @@ sub reduce  z = z
 flags default true
 flags family t
 component t_wrap
+scripts seed_zn1_lin1 ..
 zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
 sub t_inner z = M(zn[#0], z) + zn[#1]
 sub t_main  z = z
@@ -28,7 +29,8 @@ sub reduce  z = torus_reduce(z)
 flags default true
 flags family t
 component t_wrap
-zn 1.1 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
+scripts cool_circle1 ..
 sub t_inner z = M(zn[#0], z) + zn[#1]
 sub t_main  z = sinhz(z)
 sub t_outer z = M(zn[#2], z) + zn[#3]

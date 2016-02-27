@@ -5,7 +5,8 @@
 /.psci*
 /src/.webpack.js
 /html/index.js
-
+/html/lib/modules.lib
+/html/lib/components.slib
 
 *~
 *.cache

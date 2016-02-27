@@ -6,7 +6,7 @@ modules main_body main_stc_cool
 --main_stc_cool
 flags family main_body
 component main_stc
-modules seed seed_border
+modules seed seed_border_cool
 modules t t_wrap_cool
 modules color rotate_hsv1
 
@@ -20,9 +20,18 @@ sub t_main  z = sinhz(z)
 sub t_outer z = M(zn[#2], z) + zn[#3]
 sub reduce  z = torus_reduce(z)
 
---cool_circle1
-fn zpath
-dt idx 0
-dt path circle
-dt spd 0.0000667
-mod t_wrap_cool
+--seed_border_cool
+flags family seed
+component seed_border
+par seed_w 0.4
+modules t t_wrap_id_cool
+
+--t_wrap_id_cool
+flags family t
+component t_wrap
+scripts seed_zn1_lin1 ..
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+sub t_inner z = M(zn[#0], z) + zn[#1]
+sub t_main  z = z
+sub t_outer z = M(zn[#2], z) + zn[#3]
+sub reduce  z = torus_reduce(z)

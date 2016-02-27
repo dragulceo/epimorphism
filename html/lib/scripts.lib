@@ -1,0 +1,13 @@
+--seed_zn1_lin1
+fn zpath
+dt idx 1
+dt path rlin
+dt spd 0.0001
+mod t_wrap_id_cool
+
+--cool_circle1
+fn zpath
+dt idx 0
+dt path circle
+dt spd 0.0000667
+mod t_wrap_cool

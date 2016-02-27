@@ -5,7 +5,7 @@ import Data.Complex
 import Data.Maybe (Maybe ())
 import Data.Tuple (Tuple ())
 import Data.StrMap (StrMap ())
-import Control.Monad.ST (STRef)
+import Control.Monad.ST (STRef, ST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (ExceptT ())
 import Graphics.WebGL.Types (WebGLProgram, WebGLTexture, WebGLFramebuffer, WebGLContext)
@@ -34,6 +34,8 @@ type SystemST h = {
   , patternLib :: StrMap Pattern
   , moduleLib :: StrMap Module
   , moduleRefLib :: StrMap (STRef h Module)
+  , scriptLib :: StrMap Script
+  , scriptRefLib :: StrMap (STRef h Script)
   , componentLib :: StrMap Component
   , indexLib :: StrMap Index
 }
@@ -65,6 +67,7 @@ type ModRef = String
 type Module = {
     component :: String
   , flags :: StrMap String
+  , scripts :: Array String
   , modules :: StrMap ModRef
   , par :: StrMap Number
   , zn :: Array Complex
@@ -77,7 +80,6 @@ type Pattern = {
   , main :: ModRef
   , disp :: ModRef
   , flags :: StrMap String
-  , scripts :: Array String
   , includes :: Array String
   -- , 3d shit
   , t :: Number
@@ -85,6 +87,13 @@ type Pattern = {
   , tSpd :: Number
 }
 
+type ScriptFn h eff = Number -> (StrMap String) -> String ->  StrMap (STRef h Script) -> StrMap (STRef h Module) -> Epi (st :: ST h | eff)  Unit
+type Script = {
+    fn :: String
+  , dt :: StrMap String
+  , mod :: String
+  , flags :: StrMap String
+}
 
 --SLib
 type Component = {

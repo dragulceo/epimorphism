@@ -1,5 +1,11 @@
---disp
-flags default true
+--disp_id
 flags family disp
 component disp
 modules post post_id
+
+
+--disp
+flags default true
+flags family disp_test
+component disp
+modules post post1

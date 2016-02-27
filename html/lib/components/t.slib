@@ -3,4 +3,5 @@ t t_wrap {{
   $t_inner;
   $t_main;
   $t_outer;
+  $reduce;
 }}

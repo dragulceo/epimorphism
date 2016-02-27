@@ -1,0 +1,305 @@
+color color_id {{
+}}
+
+color color_bgr {{
+	color = color.bgra;
+}}
+
+color rotate_hsv {{
+  color    = rgb2hsv(color);
+	color.r += @rot;
+  color    = hsv2rgb(color);
+}}
+
+
+
+disp_frag disp {{
+precision mediump float;
+uniform sampler2D fb;
+uniform float kernel_dim;
+
+uniform float par[100];
+uniform vec2 zn[20];
+
+void main() {
+  vec4 frame;
+  vec2 clipSpace = gl_FragCoord.xy / vec2(kernel_dim, kernel_dim);
+  frame = texture2D(fb, clipSpace);
+
+  @@post
+
+	frame.a = 1.0; // this value is used by webgl
+  gl_FragColor = frame;
+}
+}}
+
+
+
+library colorspace {{
+/* colorspace library */
+precision mediump float;
+vec4 rgb2hsv(vec4 c)
+{
+    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+    vec4 p = c.g < c.b ? vec4(c.bg, K.wz) : vec4(c.gb, K.xy);
+    vec4 q = c.r < p.x ? vec4(p.xyw, c.r) : vec4(c.r, p.yzx);
+
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return vec4(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x, c.w);
+}
+
+vec4 hsv2rgb(vec4 c)
+{
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return vec4(c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y), c.w);
+}
+
+}}
+
+
+library math {{
+/* math utility library */
+
+#define PI 3.1415926536
+
+#define i^ vec2(0.0, 1.0)
+#define l^ vec2(1.0, 0.0)
+
+precision mediump float;
+
+float sinh(float x){
+  return (exp(x) - exp(-1.0 * x)) / 2.0;
+}
+
+float cosh(float x){
+  return (exp(x) + exp(-1.0 * x)) / 2.0;
+}
+
+vec2 M(vec2 z0, vec2 z1){
+  return vec2(z0.x * z1.x - z0.y * z1.y, z0.x * z1.y + z0.y * z1.x);
+}
+
+vec2 D(vec2 z0, vec2 z1){
+  float r = dot(z1, z1);
+  return vec2((z0.x * z1.x + z0.y * z1.y) / r, (z0.y * z1.x - z0.x * z1.y) / r);
+}
+
+vec2 sqz(vec2 z0){
+  return M(z0, z0);
+}
+
+vec2 sinz(vec2 z0){
+  float s = sin(z0.x);
+  float c = cos(z0.x);
+  return vec2(s * cosh(z0.y), c * sinh(z0.y));
+}
+
+vec2 cosz(vec2 z0){
+  float s = sin(z0.x);
+  float c = cos(z0.x);
+  return vec2(c * cosh(z0.y), -1.0 * s * sinh(z0.y));
+}
+
+vec2 tanz(vec2 z0){
+  float s, c;
+  s = sin(2.0 * z0.x);
+	c = cos(2.0 * z0.x);
+  float r = c + cosh(2.0 * z0.y);
+  return vec2(s, sinh(2.0 * z0.y)) / r;
+}
+
+vec2 sinhz(vec2 z0){
+  float s, c;
+	s = sin(z0.y);
+	c = cos(z0.y);
+  return vec2(sinh(z0.x) * c, cosh(z0.x) * s);
+}
+
+vec2 coshz(vec2 z0){
+  float s, c;
+	s = sin(z0.y);
+	c = cos(z0.y);
+  return vec2(cosh(z0.x) * c, sinh(z0.x) * s);
+}
+
+vec2 tanhz(vec2 z0){
+  float s, c;
+  s = sin(2.0 * z0.x);
+	c = cos(2.0 * z0.x);
+  float r = cosh(2.0 * z0.x) + c;
+  return vec2(sinh(2.0 * z0.x), s) / r;
+}
+
+vec2 expz(vec2 z0){
+  float f = exp(z0.x);
+  float s, c;
+	s = sin(z0.y);
+	c = cos(z0.y);
+  return vec2(f * c, f * s);
+}
+
+
+vec2 torus_reduce(vec2 z){
+  z = z + vec2(1.0, 1.0);
+
+  z = mod(z, 4.0);
+  if(z.x >= 2.0)
+    z.x = 4.0 - z.x;
+  if(z.y >= 2.0)
+    z.y = 4.0 - z.y;
+
+  return z - vec2(1.0, 1.0);
+}
+
+vec4 _gamma3(vec4 v, float gamma){
+  return vec4(pow(v.xyz, vec3(gamma, gamma, gamma)), v.w);
+}
+
+}}
+
+
+
+main_frag main {{
+#define VOID_W -0.000001
+
+precision mediump float;
+uniform sampler2D fb;
+uniform float time;
+uniform float kernel_dim;
+uniform float par[100];
+uniform vec2 zn[20];
+
+void main() {
+  vec4 color;
+  vec2 z, z_in;
+
+  // into z coordinates
+  z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(kernel_dim, kernel_dim) - vec2(1.0, 1.0);
+  z_in = z;
+
+  @@main_body
+
+  gl_FragColor = color;
+}
+
+}}
+
+
+
+main_body main_test {{
+  z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+  color = vec4(z, 0.0, 1.0);
+}}
+
+main_body main_stc {{
+  vec4 seed, frame;
+  vec2 frame_z;
+
+  // seed
+  @@seed
+
+  // get frame
+  @@t
+  frame_z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+  frame = texture2D(fb, frame_z);
+
+  // blend
+  color = vec4(seed.a * seed.rgb + (1.0 - seed.a) * frame.rgb, seed.a);
+
+  // color
+  @@color
+}}
+
+
+
+post post_id {{
+}}
+
+post post1 {{
+  frame = _gamma3(frame, 2.0 / 1.5);
+
+  frame = rgb2hsv(frame);
+
+  vec4 c0 = hsv2rgb(vec4(0.0, 1.0, 0.5, 1.0));
+  vec4 c1 = hsv2rgb(vec4(0.66 + @pc3_spread / 2.0, 1.0, @pc3_lgv, 1.0));
+  vec4 c2 = hsv2rgb(vec4(0.66 - @pc3_spread / 2.0, 1.0, -1.0 * @pc3_lgv, 1.0));
+
+  vec4 res, r0, r1;
+  float f;
+
+  if(frame.x < 1.0 / 3.0){
+    f = 3.0 * frame.x;
+    r0 = c0;
+    r1 = c1;
+  }else if(frame.x < 2.0 / 3.0){
+    f = 3.0 * frame.x - 1.0;
+    r0 = c1;
+    r1 = c2;
+  }else{
+    f = 3.0 * frame.x - 2.0;
+    r0 = c2;
+    r1 = c0;
+  }
+  res = (1.0 - f) * r0 + f * r1;
+
+  res = rgb2hsv(res);
+  frame.x = res.x;
+
+  frame = hsv2rgb(frame);
+}}
+
+
+
+seed seed_empty {{
+  seed = vec4(0.0,0.0,0.0,0.0);
+}}
+
+seed seed_border {{
+  @@t
+
+  float w = VOID_W;
+  float wx = (z.x + @seed_w) / (2.0 * @seed_w);
+  float wy = (z.y + @seed_w) / (2.0 * @seed_w);
+
+  if(z.x >= z.y && z.x >= -1.0 * z.y && z.x > (1.0 - @seed_w)){
+    w = (z.x - (1.0 - @seed_w)) / @seed_w;
+    wy = z.y / (0.5 * @seed_w) - 0.5;
+  }else if(z.y >= z.x && z.y >= -1.0 * z.x && z.y > (1.0 - @seed_w)){
+    w = (z.y - (1.0 - @seed_w)) / @seed_w;
+    wy = z.x / (0.5 * @seed_w) - 0.5;
+  }else if(z.y >= z.x && z.y <= -1.0 * z.x && z.x < -1.0 * (1.0 - @seed_w)){
+    w = (-1.0 * (1.0 - @seed_w) - z.x) / @seed_w;
+    wy = z.y / (0.5 * @seed_w) - 0.5;
+  }else if(z.x >= z.y && z.x <= -1.0 * z.y && z.y < -1.0 * (1.0 - @seed_w)){
+    w = (-1.0 * (1.0 - @seed_w) - z.y) / @seed_w;
+    wy = z.x / (0.5 * @seed_w) - 0.5;
+  }
+  wx = w;
+  vec4 frame_w = vec4(w, (abs(w-VOID_W) < 0.00001 ? 0.0 : w * 0.7), wx, wy);
+  seed = vec4(frame_w.x, 0, 0, frame_w.y);
+}}
+
+
+
+t t_wrap {{
+  z = z_in;
+  $t_inner;
+  $t_main;
+  $t_outer;
+  $reduce;
+}}
+
+
+
+vert basic {{
+attribute vec2 a_position;
+
+void main() {
+  gl_Position = vec4(a_position, 0, 1);
+}
+}}
+
+
+

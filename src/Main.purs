@@ -1,6 +1,6 @@
 module Main where
 
-import Prelude (Unit, return, bind, ($), (*), (-), (+), (/), (==), id, mod)
+import Prelude
 import Data.Either (Either(Right, Left))
 import Data.Maybe (maybe, Maybe(Just))
 import Data.Int (round)
@@ -15,9 +15,9 @@ import DOM (DOM)
 import Config
 import Engine (initEngineST, render)
 import UI (initUIST, showFps)
-import Pattern (updatePattern)
-import System (initSystemST, loadLib, buildModuleRefLib)
-import JSUtil (winLog, unsafeLog, requestAnimationFrame, now, Now)
+import Script (runScripts)
+import System (initSystemST, loadLib, buildRefLibs)
+import JSUtil (winLog, reallyUnsafeLog, requestAnimationFrame, now, Now)
 
 type State h = {
     ucRef :: STRef h UIConf
@@ -39,7 +39,7 @@ init = do
   uiConf     <- loadLib systemConf.initUIConf systemST.uiConfLib
   pattern    <- loadLib systemConf.initPattern systemST.patternLib
 
-  buildModuleRefLib ssRef pattern
+  buildRefLibs ssRef pattern
   systemST' <- lift $ readSTRef ssRef
 
   ecRef <- lift $ newSTRef engineConf
@@ -76,8 +76,10 @@ animate stateM = handleError do
     showFps fps
 
   -- update pattern & render
-  let pattern' = updatePattern pattern (pattern.t + delta)
-  lift $ writeSTRef pRef pattern'
+  let t' = pattern.t + delta
+  lift $ modifySTRef pRef (\p -> p {t = t'})
+  pattern' <- lift $ readSTRef pRef
+  runScripts t' systemST.scriptRefLib systemST.moduleRefLib
   render systemST engineConf engineST pattern' systemST.frameNum
 
   -- request next frame

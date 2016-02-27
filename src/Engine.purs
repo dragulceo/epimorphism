@@ -1,9 +1,9 @@
 module Engine where
 
 import Prelude
+import Data.Complex(Cartesian(..), inCartesian)
 import Data.Tuple
 import Data.Maybe
-
 import Data.Either
 import Data.Array
 import Data.TypedArray as T
@@ -171,6 +171,8 @@ render systemST engineConf engineST pattern frameNum = do
 bindParZn :: forall h eff. (StrMap (STRef h Module)) -> WebGLContext -> WebGLProgram -> String -> Epi (st :: ST h | eff) Unit
 bindParZn lib ctx prog n = do
   {lib: _, par, zn} <- flattenParZn {lib, par: [], zn: []} n
+  let znC = map inCartesian zn
+  let znA = concatMap fn znC
   execGL ctx ( do
     liftEff $ GL.useProgram ctx prog
     unif <- getUniformBindings prog
@@ -179,12 +181,13 @@ bindParZn lib ctx prog n = do
       (Just parU) -> uniform1fv (Uniform parU) (T.asFloat32Array par)
       Nothing -> return unit -- is this safe?
 
---    mZnU <- liftEff $ GL.getUniformLocation ctx main "zn"
---    case mZnU of
---      (Just znU) -> uniform1fv (Uniform znU) (T.asFloat32Array zn)
---      Nothing -> return unit -- is this safe?
-
+    mZnU <- liftEff $ GL.getUniformLocation ctx prog "zn"
+    case mZnU of
+      (Just znU) -> uniform2fv (Uniform znU) (T.asFloat32Array znA)
+      Nothing -> return unit -- is this safe?
   )
+  where
+    fn (Cartesian r i) = [r, i]
 
 
 execGL :: forall eff a. WebGLContext -> (WebGL a) -> Epi eff a

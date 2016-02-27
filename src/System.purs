@@ -30,6 +30,8 @@ defaultSystemST = {
   , patternLib: empty
   , moduleLib: empty
   , moduleRefLib: empty
+  , scriptLib: empty
+  , scriptRefLib: empty
   , componentLib: empty
   , indexLib: empty
 }
@@ -41,6 +43,7 @@ initSystemST = do
   engineConfLib <- buildLib buildEngineConf "lib/engine_conf.lib"
   uiConfLib     <- buildLib buildUIConf "lib/ui_conf.lib"
   moduleLib     <- buildLib buildModule "lib/modules.lib"
+  scriptLib     <- buildLib buildScript "lib/scripts.lib"
   patternLib    <- buildLib buildPattern "lib/patterns.lib"
   componentLib  <- buildSLib buildComponent "lib/components.slib"
   indexLib      <- buildSLib buildIndex "lib/indexes.slib"
@@ -49,30 +52,37 @@ initSystemST = do
     , engineConfLib = engineConfLib
     , uiConfLib     = uiConfLib
     , moduleLib     = moduleLib
+    , scriptLib     = scriptLib
     , patternLib    = patternLib
     , componentLib  = componentLib
     , indexLib      = indexLib
   }
 
 
-buildModuleRefLib :: forall h eff. (STRef h (SystemST h)) -> Pattern -> Epi (st :: ST h | eff) Unit
-buildModuleRefLib ssRef pattern = do
+type RData h = {mdt :: (StrMap (STRef h Module)), sdt :: (StrMap (STRef h Script)), st :: SystemST h}
+buildRefLibs :: forall h eff. (STRef h (SystemST h)) -> Pattern -> Epi (st :: ST h | eff) Unit
+buildRefLibs ssRef pattern = do
   systemST <- lift $ readSTRef ssRef
 
-  mrl   <- handle (Tuple empty systemST) pattern.main
-  mrl'  <- handle mrl  pattern.disp
-  mrl'' <- handle mrl' pattern.vert
+  let dt = {mdt: empty, sdt: empty, st: systemST}
+  dt' <- A.foldM handle dt [pattern.main, pattern.disp, pattern.vert]
 
-  lift $ modifySTRef ssRef (\s -> s { moduleRefLib = (fst mrl'') })
+  lift $ modifySTRef ssRef (\s -> s { moduleRefLib = dt'.mdt, scriptRefLib = dt'.sdt })
   return unit
   where
-    handle :: forall h eff. (Tuple (StrMap (STRef h Module)) (SystemST h)) -> String -> Epi (st :: ST h | eff) (Tuple (StrMap (STRef h Module)) (SystemST h))
-    handle (Tuple dt systemST) n = do
-      return $ Tuple dt systemST
-      m <- loadLib n systemST.moduleLib
+    handle :: forall h eff. (RData h) -> String -> Epi (st :: ST h | eff) (RData h)
+    handle dt@{mdt, sdt, st} n = do
+      m <- loadLib n st.moduleLib
       ref <- lift $ newSTRef m
-      let dt' = insert n ref dt
-      A.foldM handle (Tuple dt' systemST) (fromList $ values m.modules)
+      let mdt' = insert n ref mdt
+      sdt' <- A.foldM (handleS st) sdt m.scripts
+      let dt' = dt {mdt = mdt', sdt = sdt'}
+      A.foldM handle dt' (fromList $ values m.modules)
+    handleS :: forall h eff. SystemST h -> (StrMap (STRef h Script)) -> String -> Epi (st :: ST h | eff) (StrMap (STRef h Script))
+    handleS st sdt n = do
+      s <- loadLib n st.scriptLib
+      ref <- lift $ newSTRef s
+      return $ insert n ref sdt
 
 
 buildLib :: forall a eff.  (StrMap LineVal -> Lib a) -> String -> Epi eff (StrMap a)

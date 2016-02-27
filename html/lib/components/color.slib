@@ -2,5 +2,11 @@ color color_id {{
 }}
 
 color color_bgr {{
-  color = color.bgra;
+	color = color.bgra;
+}}
+
+color rotate_hsv {{
+  color    = rgb2hsv(color);
+	color.r += @rot;
+  color    = hsv2rgb(color);
 }}

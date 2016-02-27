@@ -13,26 +13,7 @@ import Data.Traversable
 import Data.Int (fromString) as I
 
 import Config
-import JSUtil(reallyUnsafeLog)
-
-numFromString :: String -> Maybe Number
-numFromString = numFromStringImpl Just Nothing
-
-foreign import numFromStringImpl :: (forall a. a -> Maybe a)
-                              -> (forall a. Maybe a)
-                              -> String
-                              -> Maybe Number
-
-
-cxFromString :: String -> Maybe (Tuple Number Number)
-cxFromString = cxFromStringImpl Tuple Just Nothing
-
-foreign import cxFromStringImpl :: (Number -> Number -> (Tuple Number Number))
-                                -> (forall a. a -> Maybe a)
-                                -> (forall a. Maybe a)
-                                -> String
-                                -> Maybe (Tuple Number Number)
-
+import JSUtil(reallyUnsafeLog, numFromString, cxFromString)
 
 data LibError = LibError String
 type Lib = Either LibError

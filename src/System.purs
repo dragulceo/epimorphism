@@ -65,9 +65,9 @@ buildRefLibs ssRef pattern = do
   systemST <- lift $ readSTRef ssRef
 
   let dt = {mdt: empty, sdt: empty, st: systemST}
-  mrl' <- A.foldM handle dt [pattern.main, pattern.disp, pattern.vert]
+  dt' <- A.foldM handle dt [pattern.main, pattern.disp, pattern.vert]
 
-  lift $ modifySTRef ssRef (\s -> s { moduleRefLib = mrl'.mdt })
+  lift $ modifySTRef ssRef (\s -> s { moduleRefLib = dt'.mdt, scriptRefLib = dt'.sdt })
   return unit
   where
     handle :: forall h eff. (RData h) -> String -> Epi (st :: ST h | eff) (RData h)

@@ -87,7 +87,7 @@ type Pattern = {
   , tSpd :: Number
 }
 
-type ScriptFn h eff = Number -> (StrMap String) -> String -> StrMap (STRef h Module) -> StrMap (STRef h Script) -> Epi (st :: ST h | eff)  Unit
+type ScriptFn h eff = Number -> (StrMap String) -> String ->  StrMap (STRef h Script) -> StrMap (STRef h Module) -> Epi (st :: ST h | eff)  Unit
 type Script = {
     fn :: String
   , dt :: StrMap String

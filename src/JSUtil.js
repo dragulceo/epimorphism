@@ -42,10 +42,15 @@ exports.unsafeLog = function unsafeLog(x) {
 }
 
 window.cnt = 0;
-exports.reallyUnsafeLog = function reallyUnsafeLog(x) {
+exports.tLg = function tLg(x) {
 	if(window.cnt < 10)
 		console.log(x);
 	window.cnt = window.cnt + 1;
+}
+
+
+exports.reallyUnsafeLog = function reallyUnsafeLog(x) {
+	console.log(x);
 }
 
 
@@ -67,6 +72,44 @@ exports.replaceAll = function(search) {
   return function (replacement) {
     return function (target) {
       return target.replace(new RegExp(search, 'g'), replacement);
+    };
+  };
+};
+
+
+exports.numFromStringImpl = function (just) {
+  return function (nothing) {
+    return function (s) {
+      /* jshint bitwise: false */
+      var i = parseFloat(s);
+      return i != NaN ? just(i) : nothing;
+    };
+  };
+};
+
+
+exports.cxFromStringImpl = function (tuple) {
+  return function (just) {
+    return function (nothing) {
+      return function (s) {
+	var real, imag, regex, match, a, b, c;
+	// TODO: Make this work better-er
+	regex = /^([-+]?(\d+|\d*\.\d+))([-+](\d+|\d*\.\d+))[ij]$/i;
+	s = String(s).replace (/\s+/g, '');
+
+	match = s.match (regex);
+	if (!match) {
+	  return nothing;
+	}
+
+	a = match[1];
+	b = match[3];
+
+	real = parseFloat (a);
+	imag = parseFloat (b);
+	var tmp = tuple(real);
+	return just(tmp(imag));
+      };
     };
   };
 };

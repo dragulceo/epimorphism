@@ -1,6 +1,6 @@
 module Main where
 
-import Prelude (Unit, return, bind, ($), (*), (-), (+), (/), (==), id, mod)
+import Prelude
 import Data.Either (Either(Right, Left))
 import Data.Maybe (maybe, Maybe(Just))
 import Data.Int (round)
@@ -15,9 +15,9 @@ import DOM (DOM)
 import Config
 import Engine (initEngineST, render)
 import UI (initUIST, showFps)
-import Pattern (updatePattern)
+import Script (runScripts)
 import System (initSystemST, loadLib, buildRefLibs)
-import JSUtil (winLog, unsafeLog, requestAnimationFrame, now, Now)
+import JSUtil (winLog, reallyUnsafeLog, requestAnimationFrame, now, Now)
 
 type State h = {
     ucRef :: STRef h UIConf
@@ -79,6 +79,7 @@ animate stateM = handleError do
   let t' = pattern.t + delta
   lift $ modifySTRef pRef (\p -> p {t = t'})
   pattern' <- lift $ readSTRef pRef
+  runScripts t' systemST.scriptRefLib systemST.moduleRefLib
   render systemST engineConf engineST pattern' systemST.frameNum
 
   -- request next frame

@@ -1,5 +1,6 @@
 CONFIG
-  - scripts & modules reference each other
+  - better error checking in loadLib
+  - scripts & modules reference each other.  general referential integrity?
   - make sure modreflib & scriptreflib are current
 	- if you re-use a module in a pattern, it's the same module!
 	  - when creating modreflib, we could make new unique names.  the issue with that could be duplicate modules in the db.  but we could make a name from a hash of the values?
@@ -13,8 +14,6 @@ CONFIG
     - library duplicates, namespace colissions & general library integrity
 		- make sure library is immutable?
 ENGINE
-  - rebuild old main program
-
   - fract
   - image support
   - indent spliced components
@@ -30,10 +29,12 @@ UI
   - fullscreen mode
 PATTERN
   - scripts
+	-   what order are they executed in?  right now it's kind of top down
   - image support
   - derive module families & use indices
   - pattern switching
 MISC
+  - number parsing flakey
   - build out library
   - feature parity with existing app
   - better use of type synonyms to clarify type annotations
@@ -41,6 +42,8 @@ MISC
   - only pass references when the function can mutate unless event handler or animator?
   - make unsafe code safe + catch more errors
 LATER
+  - check out time vs requestAminFrame
+  - error messages need more context
   - scritps for patterns?
   - module/submodule cycles??
   - module inheritence?

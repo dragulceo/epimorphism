@@ -1,7 +1,7 @@
 t t_wrap {{
   z = z_in;
-  $t_inner;
-  $t_main;
-  $t_outer;
-  $reduce;
+  $t_inner$;
+  $t_main$;
+  $t_outer$;
+  $reduce$;
 }}

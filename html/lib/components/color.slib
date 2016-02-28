@@ -7,6 +7,6 @@ color color_bgr {{
 
 color rotate_hsv {{
   color    = rgb2hsv(color);
-	color.r += @rot;
+  color.r += @rot@;
   color    = hsv2rgb(color);
 }}

@@ -3,8 +3,8 @@ seed seed_empty {{
 }}
 
 seed seed_border {{
-  @@t
-
+  %t%
+a
   float w = VOID_W;
   float wx = (z.x + @seed_w) / (2.0 * @seed_w);
   float wy = (z.y + @seed_w) / (2.0 * @seed_w);

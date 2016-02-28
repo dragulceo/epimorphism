@@ -7,7 +7,7 @@ import Data.Foldable (foldl)
 import Data.Int (fromNumber)
 import Data.List (fromList)
 import Data.Maybe.Unsafe (fromJust)
-import Data.String (joinWith)
+import Data.String (joinWith, split)
 import Data.StrMap (StrMap(), fold, empty, keys, size, foldM, insert, lookup, values)
 import Data.Tuple (Tuple(..), snd)
 import Data.Traversable (traverse)
@@ -26,13 +26,13 @@ type CompRes = { component :: String, zOfs :: Int, parOfs :: Int }
 compileShaders :: forall eff h. Pattern -> (SystemST h) -> Epi eff Shaders
 compileShaders pattern sys = do
   vertM   <- loadLib pattern.vert sys.moduleLib
-  vertRes <- compile vertM sys 0 0
+  vertRes <- compile vertM sys 0 0 0
 
   dispM   <- loadLib pattern.disp sys.moduleLib
-  dispRes <- compile dispM sys 0 0
+  dispRes <- compile dispM sys 0 0 0
 
   mainM   <- loadLib pattern.main sys.moduleLib
-  mainRes <- compile mainM sys 0 0
+  mainRes <- compile mainM sys 0 0 2
 
   -- substitute includes into frags
   includes <- traverse (\x -> loadLib x sys.componentLib) pattern.includes
@@ -41,8 +41,8 @@ compileShaders pattern sys = do
   return {vert: vertRes.component, main: (allIncludes ++ mainRes.component), disp: (allIncludes ++ dispRes.component)}
 
 
-compile :: forall eff h. Module -> (SystemST h) -> Int -> Int -> Epi eff CompRes
-compile mod sys zOfs parOfs = do
+compile :: forall eff h. Module -> (SystemST h) -> Int -> Int -> Int -> Epi eff CompRes
+compile mod sys zOfs parOfs ind = do
   comp <- loadLib mod.component sys.componentLib
   let component' = fold handleSub comp.body mod.sub
 
@@ -56,15 +56,23 @@ compile mod sys zOfs parOfs = do
   mod <- loadModules mod.modules sys.moduleLib
   foldM handleChild { component: component''', zOfs: zOfs', parOfs: parOfs' } mod
   where
-    handleSub dt k v = replaceAll ("\\$" ++ k) v dt
-    handlePar (Tuple n dt) v = Tuple (n + 1) (replaceAll ("@" ++ v) ("par[" ++ show n ++ "]") dt)
+    handleSub dt k v = replaceAll ("\\$" ++ k ++ "\\$") v dt
+    handlePar (Tuple n dt) v = Tuple (n + 1) (replaceAll ("@" ++ v ++ "@") ("par[" ++ show n ++ "]") dt)
     handleZn dt v = replaceAll ("#" ++ show v) (show $ (v + zOfs)) dt
     handleChild :: forall eff. CompRes -> String -> Module -> Epi eff CompRes
     handleChild { component: componentC, zOfs: zOfsC, parOfs: parOfsC } k v = do
-      res <- compile v sys zOfsC parOfsC
-      let child = replaceAll ("@@" ++ k) ("{\n" ++ res.component ++ "\n  }\n") componentC
+      res <- compile v sys zOfsC parOfsC (ind + 2)
+      let iC = "//" ++ k ++ "\n  {\n" ++ (indentLines 2 res.component) ++ "\n  }"
+      let child = replaceAll ("%" ++ k ++ "%") iC componentC
       return $ res { component = child }
 
+spc :: Int -> String
+spc 0 = ""
+spc m = " " ++ spc (m - 1)
+
+
+indentLines :: Int -> String -> String
+indentLines n s = joinWith "\n" $ map (\x -> (spc n) ++ x) $ split "\n" s
 
 type LibParZn h = { lib :: StrMap (STRef h Module), par :: Array Number, zn :: Array Complex }
 flattenParZn :: forall h eff. LibParZn h -> String -> Epi (st :: ST h | eff) (LibParZn h)

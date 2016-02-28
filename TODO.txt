@@ -1,7 +1,7 @@
 CONFIG
   - better error checking in loadLib
   - scripts & modules reference each other.  general referential integrity?
-  - make sure modreflib & scriptreflib are current
+  - make sure modreflib & scriptreflib are are referntially integral
 	- if you re-use a module in a pattern, it's the same module!
 	  - when creating modreflib, we could make new unique names.  the issue with that could be duplicate modules in the db.  but we could make a name from a hash of the values?
 
@@ -14,34 +14,32 @@ CONFIG
     - library duplicates, namespace colissions & general library integrity
 		- make sure library is immutable?
 ENGINE
-  - fract
-  - image support
-  - indent spliced components
-  - stop @@seed_w, @@seed_wt etc overlapping replacements from happening!
-  - engine stability/lost context - https://www.khronos.org/registry/webgl/extensions/WEBGL_lose_context/
-  - work on compiler performance
   - feedback isn't perfect/ misalligned square?
+  - fract
   - better error checking
   - webgl debug statements?
 UI
-  - remote control
   - handle window resizing
   - fullscreen mode
+  - remote control
 PATTERN
-  - scripts
-	-   what order are they executed in?  right now it's kind of top down
-  - image support
-  - derive module families & use indices
   - pattern switching
+  - derive module families & use indices
+	- what order are scripts executed in?  right now it's kind of top down
 MISC
-  - number parsing flakey
-  - build out library
-  - feature parity with existing app
+  - only pass references when the function can mutate unless event handler or animator?
   - better use of type synonyms to clarify type annotations
   - complex numbers library?
-  - only pass references when the function can mutate unless event handler or animator?
   - make unsafe code safe + catch more errors
+
+  - image support
+  - build out library
+  - feature parity with existing app
 LATER
+  - number parsing flakey?
+  - engine stability/lost context - https://www.khronos.org/registry/webgl/extensions/WEBGL_lose_context/
+  - compiler performance
+  - compiler substitutions %XXXX%, etc can still cause errors
   - check out time vs requestAminFrame
   - error messages need more context
   - scritps for patterns?

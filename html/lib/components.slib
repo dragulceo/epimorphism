@@ -7,7 +7,7 @@ color color_bgr {{
 
 color rotate_hsv {{
   color    = rgb2hsv(color);
-	color.r += @rot;
+  color.r += @rot@;
   color    = hsv2rgb(color);
 }}
 
@@ -179,7 +179,7 @@ void main() {
   z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(kernel_dim, kernel_dim) - vec2(1.0, 1.0);
   z_in = z;
 
-  @@main_body
+  %main_body%
 
   gl_FragColor = color;
 }
@@ -197,19 +197,18 @@ main_body main_stc {{
   vec4 seed, frame;
   vec2 frame_z;
 
-  // seed
-  @@seed
+  %seed%
+
+  %t%
 
   // get frame
-  @@t
   frame_z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
   frame = texture2D(fb, frame_z);
 
   // blend
   color = vec4(seed.a * seed.rgb + (1.0 - seed.a) * frame.rgb, seed.a);
 
-  // color
-  @@color
+  %color%
 }}
 
 
@@ -257,8 +256,8 @@ seed seed_empty {{
 }}
 
 seed seed_border {{
-  @@t
-
+  %t%
+a
   float w = VOID_W;
   float wx = (z.x + @seed_w) / (2.0 * @seed_w);
   float wy = (z.y + @seed_w) / (2.0 * @seed_w);
@@ -285,10 +284,10 @@ seed seed_border {{
 
 t t_wrap {{
   z = z_in;
-  $t_inner;
-  $t_main;
-  $t_outer;
-  $reduce;
+  $t_inner$;
+  $t_main$;
+  $t_outer$;
+  $reduce$;
 }}
 
 

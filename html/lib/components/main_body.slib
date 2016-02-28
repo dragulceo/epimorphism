@@ -7,17 +7,16 @@ main_body main_stc {{
   vec4 seed, frame;
   vec2 frame_z;
 
-  // seed
-  @@seed
+  %seed%
+
+  %t%
 
   // get frame
-  @@t
   frame_z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
   frame = texture2D(fb, frame_z);
 
   // blend
   color = vec4(seed.a * seed.rgb + (1.0 - seed.a) * frame.rgb, seed.a);
 
-  // color
-  @@color
+  %color%
 }}

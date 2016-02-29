@@ -25,17 +25,17 @@ type CompRes = { component :: String, zOfs :: Int, parOfs :: Int }
 
 compileShaders :: forall eff h. Pattern -> (SystemST h) -> Epi eff Shaders
 compileShaders pattern sys = do
-  vertM   <- loadLib pattern.vert sys.moduleLib
+  vertM   <- loadLib pattern.vert sys.moduleLib "compileShaders vert"
   vertRes <- compile vertM sys 0 0 0
 
-  dispM   <- loadLib pattern.disp sys.moduleLib
+  dispM   <- loadLib pattern.disp sys.moduleLib "compileShaders disp"
   dispRes <- compile dispM sys 0 0 0
 
-  mainM   <- loadLib pattern.main sys.moduleLib
+  mainM   <- loadLib pattern.main sys.moduleLib "compileShaders main"
   mainRes <- compile mainM sys 0 0 2
 
   -- substitute includes into frags
-  includes <- traverse (\x -> loadLib x sys.componentLib) pattern.includes
+  includes <- traverse (\x -> loadLib x sys.componentLib "includes") pattern.includes
   let allIncludes = (joinWith "\n\n" (map (\x -> x.body) includes)) ++ "\n\n"
 
   return {vert: vertRes.component, main: (allIncludes ++ mainRes.component), disp: (allIncludes ++ dispRes.component)}
@@ -43,7 +43,7 @@ compileShaders pattern sys = do
 
 compile :: forall eff h. Module -> (SystemST h) -> Int -> Int -> Int -> Epi eff CompRes
 compile mod sys zOfs parOfs ind = do
-  comp <- loadLib mod.component sys.componentLib
+  comp <- loadLib mod.component sys.componentLib "compile component"
   let component' = fold handleSub comp.body mod.sub
 
   let k = (A.sort $ keys mod.par)
@@ -77,7 +77,7 @@ indentLines n s = joinWith "\n" $ map (\x -> (spc n) ++ x) $ split "\n" s
 type LibParZn h = { lib :: StrMap (STRef h Module), par :: Array Number, zn :: Array Complex }
 flattenParZn :: forall h eff. LibParZn h -> String -> Epi (st :: ST h | eff) (LibParZn h)
 flattenParZn {lib, par, zn} n = do
-  mRef <- loadLib n lib
+  mRef <- loadLib n lib "flattenParZn"
   mod <- lift $ readSTRef mRef
   let zn' = zn ++ mod.zn
   let par' = par ++ map (get mod.par) (A.sort $ keys mod.par)
@@ -91,5 +91,5 @@ loadModules mr lib = do
   foldM handle empty mr
   where
     handle dt k v = do
-      m <- loadLib v lib
+      m <- loadLib v lib "loadModules"
       return $ insert k m dt

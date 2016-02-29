@@ -33,7 +33,8 @@ import Compiler
 import Util (lg, unsafeNull, winLog)
 
 -- PUBLIC
--- this might throw an error
+
+-- initialize framebuffer/texture combo
 initTex :: Int -> WebGL (Tuple WebGLTexture WebGLFramebuffer)
 initTex dim = do
   ctx <- ask
@@ -47,11 +48,13 @@ initTex dim = do
   liftEff $ GL.texImage2D_ ctx GLE.texture2d 0 GLE.rgba dim dim 0 GLE.rgba GLE.unsignedByte (unsafeNull :: GLT.ArrayBufferView)
   liftEff $ GL.bindFramebuffer ctx GLE.framebuffer fb
   liftEff $ GL.framebufferTexture2D ctx GLE.framebuffer GLE.colorAttachment0 GLE.texture2d tex 0
+  debug
 
   return $ Tuple tex fb
 
--- this might throw an error
-setShaders :: forall eff h. (STRef h EngineST) -> (SystemST h) -> Pattern -> Epi (st :: ST h | eff) Unit
+
+-- compile shaders and load into systemST
+setShaders :: forall eff h. STRef h EngineST -> SystemST h -> Pattern -> EpiS eff h Unit
 setShaders esRef sys pattern = do
   es <- lift $ readSTRef esRef
 
@@ -59,48 +62,61 @@ setShaders esRef sys pattern = do
   {main: main, disp: disp, vert: vert} <- compileShaders pattern sys
 
   Tuple main disp <- execGL es.ctx ( do
-    -- creater programs
+    -- create programs
     mainProg <- compileShadersIntoProgram vert main
     dispProg <- compileShadersIntoProgram vert disp
-    dispAttr <- getAttrBindings dispProg
-    mainAttr <- getAttrBindings mainProg
 
     -- vertex coords
     pos <- createBuffer
     bindBuffer ArrayBuffer pos
-    bufferData ArrayBuffer (DataSource (T.asFloat32Array [-1.0,-1.0,1.0,-1.0,-1.0, 1.0, -1.0,1.0,1.0,-1.0,1.0,1.0])) StaticDraw
+    bufferData ArrayBuffer (DataSource (T.asFloat32Array [-1.0,-1.0,1.0,-1.0,-1.0,1.0,
+                                                          -1.0,1.0,1.0,-1.0,1.0,1.0])) StaticDraw
+
+    dispAttr <- getAttrBindings dispProg
+    mainAttr <- getAttrBindings mainProg
 
     enableVertexAttribArray mainAttr.a_position
     vertexAttribPointer mainAttr.a_position 2 Float false 0 0
     enableVertexAttribArray dispAttr.a_position
     vertexAttribPointer dispAttr.a_position 2 Float false 0 0
 
+    debug
+
     return $ Tuple mainProg dispProg
   )
 
-  lift $ modifySTRef esRef (\s -> s { dispProg = Just disp, mainProg = Just main })
+  lift $ modifySTRef esRef (\s -> s {dispProg = Just disp, mainProg = Just main})
   return unit
 
 
--- this might throw an error
-initEngineST :: forall h eff. EngineConf -> (SystemST h) -> Pattern -> String -> Epi (st :: ST h | eff) (STRef h EngineST)
+-- initialize the rendering engine & create state
+initEngineST :: forall eff h. EngineConf -> SystemST h -> Pattern -> String -> EpiS eff h (STRef h EngineST)
 initEngineST engineConf sys pattern canvasId = do
-  -- these are unsafe
-  Just canvas <- liftEff $ getCanvasElementById canvasId
-  Just ctx <- liftEff $ getWebglContext canvas
+  -- find canvas & create context
+  canvasM <- liftEff $ getCanvasElementById canvasId
+  canvas <- case canvasM of
+    Just c -> return c
+    Nothing -> throwError $ "init engine - canvas not found: " ++ canvasId
 
+  ctxM <- liftEff $ getWebglContext canvas
+  ctx <- case ctxM of
+    Just c -> return c
+    Nothing -> throwError "Unable to get a webgl context!!!"
+
+  -- default state
   let es = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, ctx: ctx}
   esRef <- lift $ newSTRef es
 
-  let dim = engineConf.kernelDim
-
   -- if we change kernel_dim we need to redo this
+  let dim = engineConf.kernelDim
   lift $ setCanvasWidth (toNumber dim) canvas
   lift $ setCanvasHeight (toNumber dim) canvas
 
+  -- set shaders
   setShaders esRef sys pattern
   es' <- lift $ readSTRef esRef
 
+  -- webgl initialization
   res <- execGL ctx ( do
     Tuple tex0 fb0 <- initTex dim
     Tuple tex1 fb1 <- initTex dim
@@ -108,6 +124,7 @@ initEngineST engineConf sys pattern canvasId = do
     clearColor 0.0 0.0 0.0 1.0
     liftEff $ GL.clear ctx GLE.colorBufferBit
     liftEff $ GL.viewport ctx 0 0 dim dim
+
     return $ es' {
         fb = (Just (Tuple fb0 fb1))
       , tex = (Just (Tuple tex0 tex1))
@@ -116,25 +133,26 @@ initEngineST engineConf sys pattern canvasId = do
   lift $ newSTRef res
 
 
-render :: forall h eff. (SystemST h) -> EngineConf -> EngineST -> Pattern -> Int -> Epi (st :: ST h | eff) Unit
+-- do the thing!
+render :: forall eff h. SystemST h -> EngineConf -> EngineST -> Pattern -> Int -> EpiS eff h Unit
 render systemST engineConf engineST pattern frameNum = do
   let ctx = engineST.ctx
 
   -- unpack
   tex <- case engineST.tex of
-    (Just x) -> return x
-    otherwise -> throwError "Render: missing textures"
+    Just x -> return x
+    Nothing -> throwError "Render: missing textures"
   fbs <- case engineST.fb of
-    (Just x) -> return x
-    otherwise -> throwError "Render: missing framebuffers"
+    Just x -> return x
+    Nothing -> throwError "Render: missing framebuffers"
   main <- case engineST.mainProg of
-    (Just x) -> return x
-    otherwise -> throwError "Render: missing main program"
+    Just x -> return x
+    Nothing -> throwError "Render: missing main program"
   disp <- case engineST.dispProg of
-    (Just x) -> return x
-    otherwise -> throwError "Render: missing disp program"
+    Just x -> return x
+    Nothing -> throwError "Render: missing disp program"
 
-  -- get par & zn
+  -- bind par & zn
   bindParZn systemST.moduleRefPool ctx main pattern.main
   bindParZn systemST.moduleRefPool ctx disp pattern.disp
 
@@ -151,11 +169,13 @@ render systemST engineConf engineST pattern frameNum = do
 
     -- bind main uniforms
     mainUnif <- getUniformBindings main
-    uniform1f mainUnif.time ((pattern.t - pattern.tPhase) / 1000.0)
+    uniform1f mainUnif.time ((pattern.t - pattern.tPhase) / 1000.0) -- ms or seconds here?
     uniform1f mainUnif.kernel_dim (toNumber engineConf.kernelDim)
 
     -- draw
     drawArrays Triangles 0 6
+
+    debug
 
     -- disp/post program
     liftEff $ GL.useProgram ctx disp
@@ -165,34 +185,40 @@ render systemST engineConf engineST pattern frameNum = do
     -- bind disp uniforms
     dispUnif <- getUniformBindings disp
     uniform1f dispUnif.kernel_dim (toNumber engineConf.kernelDim)
+
+    -- draw
     drawArrays Triangles 0 6
+
+    debug
   )
 
-bindParZn :: forall h eff. (StrMap (STRef h Module)) -> WebGLContext -> WebGLProgram -> String -> Epi (st :: ST h | eff) Unit
+-- bind parameters & zn values from pattern into program
+bindParZn :: forall h eff. StrMap (STRef h Module) -> WebGLContext -> WebGLProgram -> String -> EpiS eff h Unit
 bindParZn lib ctx prog n = do
   {lib: _, par, zn} <- flattenParZn {lib, par: [], zn: []} n
   let znC = map inCartesian zn
   let znA = concatMap fn znC
+
   execGL ctx ( do
     liftEff $ GL.useProgram ctx prog
     unif <- getUniformBindings prog
+
     mParU <- liftEff $ GL.getUniformLocation ctx prog "par"
     case mParU of
-      (Just parU) -> uniform1fv (Uniform parU) (T.asFloat32Array par)
-      Nothing -> return unit -- is this safe?
+      Just parU -> uniform1fv (Uniform parU) (T.asFloat32Array par)
+      Nothing   -> return unit -- is this safe?
 
     mZnU <- liftEff $ GL.getUniformLocation ctx prog "zn"
     case mZnU of
-      (Just znU) -> uniform2fv (Uniform znU) (T.asFloat32Array znA)
-      Nothing -> return unit -- is this safe?
+      Just znU -> uniform2fv (Uniform znU) (T.asFloat32Array znA)
+      Nothing  -> return unit -- is this safe?
   )
   where
     fn (Cartesian r i) = [r, i]
 
 
-execGL :: forall eff a. WebGLContext -> (WebGL a) -> Epi eff a
+-- execute a webgl action & wrap its error
+execGL :: forall eff a. WebGLContext -> WebGL a -> Epi eff a
 execGL ctx webGL = do
   res <- lift $ runWebgl webGL ctx
-  case res of
-    Left er -> throwError $ show er
-    Right ret -> return ret
+  either (throwError <<< show) return res

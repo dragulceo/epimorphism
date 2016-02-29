@@ -20,6 +20,8 @@ data DataSource = LocalHTTP | LocalStorage | RemoteDB
 
 initSystemST :: forall eff h . Epi eff (SystemST h)
 initSystemST = do
+  -- gather system data here
+
   systemConfLib <- buildLib buildSystemConf "lib/system_conf.lib"
   engineConfLib <- buildLib buildEngineConf "lib/engine_conf.lib"
   uiConfLib     <- buildLib buildUIConf "lib/ui_conf.lib"
@@ -59,7 +61,7 @@ buildRefPools ssRef pattern = do
   where
     handle :: forall h eff. SystemST h -> (RData h) -> String -> Epi (st :: ST h | eff) (RData h)
     handle st dt@{mdt, sdt} n = do
-      m <- loadLib n st.moduleLib
+      m <- loadLib n st.moduleLib "build ref module pool"
       ref <- lift $ newSTRef m
 
       -- scripts
@@ -72,12 +74,13 @@ buildRefPools ssRef pattern = do
 
     handleS :: forall h eff. SystemST h -> StrMap (STRef h Script) -> String -> EpiS eff h (StrMap (STRef h Script))
     handleS st sdt n = do
-      s <- loadLib n st.scriptLib
+      s <- loadLib n st.scriptLib "build ref script pool"
       ref <- lift $ newSTRef s
       return $ insert n ref sdt
 
 
-buildLib :: forall a eff.  (StrMap LineVal -> Lib a) -> String -> Epi eff (StrMap a)
+-- build a library from a location with a builder
+buildLib :: forall eff a.  (StrMap LineVal -> Lib a) -> String -> Epi eff (StrMap a)
 buildLib f loc = do
   dt <- lift $ urlGet loc
   case dt of
@@ -87,7 +90,8 @@ buildLib f loc = do
       (Left (LibError s)) -> throwError $ "Error building lib at : " ++ loc ++ " : " ++ s
 
 
-buildSLib :: forall a eff.  (SHandle -> SLib (Tuple String a)) -> String -> Epi eff (StrMap a)
+-- build a shader library from a location with a builder
+buildSLib :: forall eff a.  (SHandle -> SLib (Tuple String a)) -> String -> Epi eff (StrMap a)
 buildSLib f loc = do
   dt <- lift $ urlGet loc
   case dt of
@@ -96,8 +100,10 @@ buildSLib f loc = do
       (Right res') -> return res'
       (Left (SLibError s)) -> throwError $ "Error building slib at : " ++ loc ++ " : " ++ s
 
-loadLib :: forall a eff. String -> (StrMap a) -> Epi eff a
-loadLib name lib = do
+
+-- load from a map, throw error if not found. passed context for debugging purposes
+loadLib :: forall eff a. String -> (StrMap a) -> String -> Epi eff a
+loadLib name lib ctx = do
   case (lookup name lib) of
     (Just d) -> return d
-    Nothing  -> throwError ("Load from lib - can't find: " ++ name)
+    Nothing  -> throwError ("Load from lib - can't find: " ++ name ++ ": context :" ++ ctx)

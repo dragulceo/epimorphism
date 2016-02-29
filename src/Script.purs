@@ -26,7 +26,7 @@ runScripts t slib mlib = do
   where
     handle :: forall h eff. Number -> StrMap (STRef h Script) -> StrMap (STRef h Module) -> Unit -> String -> Epi (st :: ST h | eff) Unit
     handle t slib mlib _ n = do
-      sRef <- loadLib n slib
+      sRef <- loadLib n slib "script"
       scr <- lift $ readSTRef sRef
       fn <- lookupScriptFN scr.fn
       fn t scr.dt scr.mod slib mlib
@@ -50,11 +50,11 @@ lookupZPathFn n = case n of
 
 zpath :: forall h eff. ScriptFn h eff
 zpath t dt mod slib mlib = do
-  spd <- (loadLib "spd" dt) >>= numFromStringE
-  idx <- (loadLib "idx" dt) >>= intFromStringE
-  pathN <- loadLib "path" dt
+  spd <- (loadLib "spd" dt "zpath spd") >>= numFromStringE
+  idx <- (loadLib "idx" dt "zpath idx") >>= intFromStringE
+  pathN <- loadLib "path" dt "zpath path"
   fn <- lookupZPathFn pathN
-  mRef <- loadLib mod mlib
+  mRef <- loadLib mod mlib "zpath module"
   m <- lift $ readSTRef mRef
 
   let z' = fn (t * spd)

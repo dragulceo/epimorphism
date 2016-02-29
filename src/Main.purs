@@ -34,10 +34,10 @@ init = do
   ssRef <- lift $ newSTRef systemST
 
   -- init config
-  systemConf <- loadLib "default" systemST.systemConfLib
-  engineConf <- loadLib systemConf.initEngineConf systemST.engineConfLib
-  uiConf     <- loadLib systemConf.initUIConf systemST.uiConfLib
-  pattern    <- loadLib systemConf.initPattern systemST.patternLib
+  systemConf <- loadLib "default" systemST.systemConfLib "init system"
+  engineConf <- loadLib systemConf.initEngineConf systemST.engineConfLib "init engine"
+  uiConf     <- loadLib systemConf.initUIConf systemST.uiConfLib "init ui"
+  pattern    <- loadLib systemConf.initPattern systemST.patternLib "init pattern"
 
   -- build reference pools
   buildRefPools ssRef pattern

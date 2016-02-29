@@ -1,5 +1,4 @@
 CONFIG
-  - better error checking in loadLib
   - scripts & modules reference each other.  general referential integrity?
   - make sure modreflib & scriptreflib are are referntially integral
 	- if you re-use a module in a pattern, it's the same module!
@@ -68,3 +67,4 @@ LATER
   - benchmarking tools
   - image comparison testing
   - preprocesser malfunctions give weird errors
+  - passing context to loadLib is annoying

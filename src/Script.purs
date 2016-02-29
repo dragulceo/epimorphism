@@ -11,16 +11,16 @@ import Control.Monad.Except.Trans (lift)
 
 import Config
 import System (loadLib)
-import JSUtil (tLg, numFromStringE, intFromStringE)
+import Util (tLg, numFromStringE, intFromStringE)
 
-lookupScriptFN :: forall h eff. String -> Epi (st :: ST h | eff) (ScriptFn h eff)
+lookupScriptFN :: forall eff h. String -> Epi (st :: ST h | eff) (ScriptFn h eff)
 lookupScriptFN n = case n of
   "null" -> return nullS
   "zpath" -> return zpath
   _ -> throwError $ "script function not found: " ++ n
 
 
-runScripts :: forall h eff. Number -> StrMap (STRef h Script) -> StrMap (STRef h Module) -> Epi (st :: ST h | eff) Unit
+runScripts :: forall eff h. Number -> StrMap (STRef h Script) -> StrMap (STRef h Module) -> Epi (st :: ST h | eff) Unit
 runScripts t slib mlib = do
   A.foldM (handle t slib mlib) unit (keys slib)
   where

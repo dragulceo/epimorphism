@@ -7,8 +7,3 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (ExceptT ())
 
 import Config
-
--- PUBLIC
-updatePattern :: Pattern -> Number -> Pattern
-updatePattern pattern t' =
-  pattern {t = t'}

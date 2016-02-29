@@ -1,6 +1,6 @@
 "use strict";
 
-// module JSUtil
+// module Util
 
 exports.unsafeURLGet = function(url) {
   return function (){
@@ -35,21 +35,15 @@ exports.requestAnimationFrame = function(x){
 };
 
 
-exports.unsafeLog = function unsafeLog(x) {
-  return function () {
-    console.log(x);
-  }
-}
-
-window.cnt = 0;
+window.lgCnt = 0;
 exports.tLg = function tLg(x) {
-	if(window.cnt < 10)
+	if(window.lgCnt < 10)
 		console.log(x);
-	window.cnt = window.cnt + 1;
+	window.lgCnt = window.lgCnt + 1;
 }
 
 
-exports.reallyUnsafeLog = function reallyUnsafeLog(x) {
+exports.lg = function lg(x) {
 	console.log(x);
 }
 

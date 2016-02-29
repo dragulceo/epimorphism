@@ -2,7 +2,7 @@ module Main where
 
 import Prelude
 import Data.Either (Either(..), either)
-import Data.Maybe (maybe, Maybe(Just))
+import Data.Maybe (fromMaybe, Maybe(Just))
 import Data.Int (round, toNumber)
 
 import Control.Monad (when)
@@ -17,7 +17,7 @@ import Engine (initEngineST, render)
 import UI (initUIST, showFps)
 import Script (runScripts)
 import System (initSystemST, loadLib, buildRefPools)
-import JSUtil (winLog, reallyUnsafeLog, requestAnimationFrame, now, Now)
+import Util (winLog, lg, requestAnimationFrame, now, Now)
 
 type State h = {
     ucRef :: STRef h UIConf
@@ -39,7 +39,7 @@ init = do
   uiConf     <- loadLib systemConf.initUIConf systemST.uiConfLib
   pattern    <- loadLib systemConf.initPattern systemST.patternLib
 
-  -- build reference libs
+  -- build reference pools
   buildRefPools ssRef pattern
   systemST' <- lift $ readSTRef ssRef
 
@@ -51,7 +51,7 @@ init = do
   esRef <- initEngineST engineConf systemST' pattern uiConf.canvasId
   initUIST ucRef ecRef esRef pRef
 
-  return { ucRef: ucRef, ssRef: ssRef, ecRef: ecRef, esRef: esRef, pRef: pRef }
+  return {ucRef, ssRef, ecRef, esRef, pRef}
 
 
 animate :: forall h. EpiS (now :: Now) h (State h) -> Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
@@ -65,23 +65,25 @@ animate stateM = handleError do
 
   -- update time
   currentTimeMS <- lift $ now
-  let lastTimeMS = maybe currentTimeMS id systemST.lastTimeMS
+  let lastTimeMS = fromMaybe currentTimeMS systemST.lastTimeMS
   let delta = (currentTimeMS - lastTimeMS) * pattern.tSpd
   lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS})
 
   -- fps
   let freq = 10
   when (systemST.frameNum `mod` freq == 0) do
-    let lastFpsTimeMS = maybe currentTimeMS id systemST.lastFpsTimeMS
+    let lastFpsTimeMS = fromMaybe currentTimeMS systemST.lastFpsTimeMS
     let fps = round $ (toNumber freq) * 1000.0 / (currentTimeMS - lastFpsTimeMS)
     lift $ modifySTRef ssRef (\s -> s {lastFpsTimeMS = Just currentTimeMS, fps = Just fps})
     showFps fps
 
-  -- update pattern & render
+  -- update pattern
   let t' = pattern.t + delta
   lift $ modifySTRef pRef (\p -> p {t = t'})
   pattern' <- lift $ readSTRef pRef
   runScripts t' systemST.scriptRefPool systemST.moduleRefPool
+
+  -- render
   render systemST engineConf engineST pattern' systemST.frameNum
 
   -- request next frame

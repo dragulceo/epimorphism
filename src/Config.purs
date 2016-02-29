@@ -2,9 +2,9 @@ module Config where
 
 import Prelude
 import Data.Complex
-import Data.Maybe (Maybe ())
+import Data.Maybe (Maybe (..))
 import Data.Tuple (Tuple ())
-import Data.StrMap (StrMap ())
+import Data.StrMap (StrMap (), empty)
 import Control.Monad.ST (STRef, ST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (ExceptT ())
@@ -24,6 +24,13 @@ type SystemConf = {
   , initPattern :: String
 }
 
+defaultSystemConf :: SystemConf
+defaultSystemConf = {
+    initEngineConf: "default"
+  , initUIConf:     "default"
+  , initPattern:    "default"
+}
+
 type SystemST h = {
     lastTimeMS :: Maybe Number
   , frameNum :: Int
@@ -39,6 +46,24 @@ type SystemST h = {
   , scriptRefPool :: StrMap (STRef h Script)
   , componentLib :: StrMap Component
   , indexLib :: StrMap Index
+}
+
+defaultSystemST :: forall h. SystemST h
+defaultSystemST = {
+    lastTimeMS: Nothing
+  , frameNum: 0
+  , lastFpsTimeMS: Nothing
+  , fps: Nothing
+  , systemConfLib: empty
+  , uiConfLib: empty
+  , engineConfLib: empty
+  , patternLib: empty
+  , moduleLib: empty
+  , moduleRefPool: empty
+  , scriptLib: empty
+  , scriptRefPool: empty
+  , componentLib: empty
+  , indexLib: empty
 }
 
 -- Engine

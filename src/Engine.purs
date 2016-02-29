@@ -30,7 +30,7 @@ import Graphics.Canvas (Canvas, getCanvasElementById, setCanvasWidth, setCanvasH
 
 import Config
 import Compiler
-import JSUtil (reallyUnsafeLog, unsafeLog, unsafeNull, unsafeURLGet, winLog)
+import Util (lg, unsafeNull, unsafeURLGet, winLog)
 
 -- PUBLIC
 -- this might throw an error

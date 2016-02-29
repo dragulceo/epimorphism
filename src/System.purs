@@ -12,30 +12,11 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 
 import Config
-import JSUtil (unsafeURLGet, unsafeLog, reallyUnsafeLog)
+import Util (unsafeURLGet, lg)
 import Library
 import SLibrary
 
 data DataSource = LocalHTTP | LocalStorage | RemoteDB
-
-defaultSystemST :: forall h. SystemST h
-defaultSystemST = {
-    lastTimeMS: Nothing
-  , frameNum: 0
-  , lastFpsTimeMS: Nothing
-  , fps: Nothing
-  , systemConfLib: empty
-  , uiConfLib: empty
-  , engineConfLib: empty
-  , patternLib: empty
-  , moduleLib: empty
-  , moduleRefPool: empty
-  , scriptLib: empty
-  , scriptRefPool: empty
-  , componentLib: empty
-  , indexLib: empty
-}
-
 
 initSystemST :: forall eff h . Epi eff (SystemST h)
 initSystemST = do
@@ -45,8 +26,10 @@ initSystemST = do
   moduleLib     <- buildLib buildModule "lib/modules.lib"
   scriptLib     <- buildLib buildScript "lib/scripts.lib"
   patternLib    <- buildLib buildPattern "lib/patterns.lib"
+
   componentLib  <- buildSLib buildComponent "lib/components.slib"
   indexLib      <- buildSLib buildIndex "lib/indexes.slib"
+
   return $ defaultSystemST {
       systemConfLib = systemConfLib
     , engineConfLib = engineConfLib
@@ -59,26 +42,35 @@ initSystemST = do
   }
 
 
-type RData h = {mdt :: (StrMap (STRef h Module)), sdt :: (StrMap (STRef h Script)), st :: SystemST h}
-buildRefPools :: forall h eff. (STRef h (SystemST h)) -> Pattern -> Epi (st :: ST h | eff) Unit
+-- this method flattens the loaded module structure into a maps of StRefs for both modules &
+-- patterns.  the idea is that we only carry around names of these things anywhere
+-- and when we want one, we look it up in these pools.
+type RData h = {mdt :: StrMap (STRef h Module), sdt :: StrMap (STRef h Script)}
+buildRefPools :: forall h eff. STRef h (SystemST h) -> Pattern -> EpiS eff h Unit
 buildRefPools ssRef pattern = do
   systemST <- lift $ readSTRef ssRef
 
-  let dt = {mdt: empty, sdt: empty, st: systemST}
-  dt' <- A.foldM handle dt [pattern.main, pattern.disp, pattern.vert]
+  -- recursively load all modules
+  let dt = {mdt: empty, sdt: empty}
+  dt' <- A.foldM (handle systemST) dt [pattern.main, pattern.disp, pattern.vert]
 
-  lift $ modifySTRef ssRef (\s -> s { moduleRefPool = dt'.mdt, scriptRefPool = dt'.sdt })
+  lift $ modifySTRef ssRef (\s -> s {moduleRefPool = dt'.mdt, scriptRefPool = dt'.sdt})
   return unit
   where
-    handle :: forall h eff. (RData h) -> String -> Epi (st :: ST h | eff) (RData h)
-    handle dt@{mdt, sdt, st} n = do
+    handle :: forall h eff. SystemST h -> (RData h) -> String -> Epi (st :: ST h | eff) (RData h)
+    handle st dt@{mdt, sdt} n = do
       m <- loadLib n st.moduleLib
       ref <- lift $ newSTRef m
+
+      -- scripts
       let mdt' = insert n ref mdt
       sdt' <- A.foldM (handleS st) sdt m.scripts
+
+      -- recurse
       let dt' = dt {mdt = mdt', sdt = sdt'}
-      A.foldM handle dt' (fromList $ values m.modules)
-    handleS :: forall h eff. SystemST h -> (StrMap (STRef h Script)) -> String -> Epi (st :: ST h | eff) (StrMap (STRef h Script))
+      A.foldM (handle st) dt' (fromList $ values m.modules)
+
+    handleS :: forall h eff. SystemST h -> StrMap (STRef h Script) -> String -> EpiS eff h (StrMap (STRef h Script))
     handleS st sdt n = do
       s <- loadLib n st.scriptLib
       ref <- lift $ newSTRef s
@@ -106,13 +98,3 @@ loadLib name lib = do
   case (lookup name lib) of
     (Just d) -> return d
     Nothing  -> throwError ("Load from lib - can't find: " ++ name)
-
-
--- should this go here?
-loadModules :: forall eff. StrMap ModRef -> (StrMap Module) -> Epi eff (StrMap Module)
-loadModules mr lib = do
-  foldM handle empty mr
-  where
-    handle dt k v = do
-      m <- loadLib v lib
-      return $ insert k m dt

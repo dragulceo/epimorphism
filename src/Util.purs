@@ -1,4 +1,4 @@
-module JSUtil where
+module Util where
 
 import Prelude
 import Data.Either (Either(Right, Left))
@@ -14,19 +14,17 @@ import Config -- should we do this
 
 foreign import data Now :: !
 
+-- simple js functions
 foreign import unsafeURLGet :: forall eff. String -> Eff eff String
 foreign import unsafeNull :: forall a. a
-foreign import unsafeLog :: forall a eff. a -> Eff eff Unit
-foreign import reallyUnsafeLog :: forall a b. a -> b
+foreign import lg :: forall a b. a -> b
 foreign import tLg :: forall a b. a -> b
 foreign import unsafeEval :: forall eff. String -> Eff eff Unit
 foreign import winLog :: forall a eff. a -> Eff eff Unit
-
-foreign import requestAnimationFrame :: forall eff a. Eff ( | eff) Unit -> Eff ( | eff) Unit
-
+foreign import requestAnimationFrame :: forall eff a. Eff eff Unit -> Eff eff Unit
 foreign import now :: forall e. Eff (now :: Now | e) Number
-
 foreign import replaceAll :: String -> String -> String -> String
+
 
 
 numFromString :: String -> Maybe Number

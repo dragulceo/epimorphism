@@ -13,7 +13,7 @@ import Data.Traversable
 import Data.Int (fromString) as I
 
 import Config
-import JSUtil(reallyUnsafeLog, numFromString, cxFromString)
+import Util(lg, numFromString, cxFromString)
 
 data LibError = LibError String
 type Lib = Either LibError
@@ -133,13 +133,6 @@ parseCLst sl = A.reverse <$> A.foldM handle [] sl
 
 
 -- BUILDERS - maybe move somewhere else?
-defaultSystemConf :: SystemConf
-defaultSystemConf = {
-    initEngineConf: "default"
-  , initUIConf: "default"
-  , initPattern: "default"
-}
-
 buildSystemConf :: StrMap LineVal -> Lib SystemConf
 buildSystemConf vals = do
   foldM handle defaultSystemConf vals

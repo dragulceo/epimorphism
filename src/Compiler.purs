@@ -18,7 +18,7 @@ import Control.Monad.ST (ST, STRef, readSTRef)
 
 import Config
 import System
-import JSUtil (replaceAll, unsafeURLGet, reallyUnsafeLog)
+import Util (replaceAll, unsafeURLGet, lg)
 
 type Shaders = { vert :: String, main :: String, disp :: String }
 type CompRes = { component :: String, zOfs :: Int, parOfs :: Int }
@@ -84,3 +84,12 @@ flattenParZn {lib, par, zn} n = do
   A.foldM flattenParZn {lib, par: par', zn: zn'} (fromList $ values mod.modules)
   where
     get dt n = fromJust $ (lookup n dt)
+
+
+loadModules :: forall eff. StrMap ModRef -> (StrMap Module) -> Epi eff (StrMap Module)
+loadModules mr lib = do
+  foldM handle empty mr
+  where
+    handle dt k v = do
+      m <- loadLib v lib
+      return $ insert k m dt

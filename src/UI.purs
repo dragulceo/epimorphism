@@ -19,7 +19,7 @@ import Data.DOM.Simple.Element
 
 import Config
 import Command (command)
-import JSUtil (unsafeLog)
+--import Util
 
 foreign import registerEventHandler :: forall eff. (String -> Eff eff Unit) -> Eff eff Unit
 

@@ -18,7 +18,7 @@ import Control.Monad.ST (ST, STRef, readSTRef)
 
 import Config
 import System
-import Util (replaceAll, unsafeURLGet, lg)
+import Util (replaceAll, lg)
 
 type Shaders = { vert :: String, main :: String, disp :: String }
 type CompRes = { component :: String, zOfs :: Int, parOfs :: Int }

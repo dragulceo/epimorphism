@@ -1,7 +1,7 @@
 module Util where
 
 import Prelude
-import Data.Either (Either(Right, Left))
+import Data.Either (Either(..))
 import Data.Complex
 import Data.Tuple (Tuple(..))
 import Data.Int (fromString) as I
@@ -15,17 +15,22 @@ import Config -- should we do this
 foreign import data Now :: !
 
 -- simple js functions
-foreign import unsafeURLGet :: forall eff. String -> Eff eff String
 foreign import unsafeNull :: forall a. a
 foreign import lg :: forall a b. a -> b
 foreign import tLg :: forall a b. a -> b
 foreign import unsafeEval :: forall eff. String -> Eff eff Unit
 foreign import winLog :: forall a eff. a -> Eff eff Unit
 foreign import requestAnimationFrame :: forall eff a. Eff eff Unit -> Eff eff Unit
-foreign import now :: forall e. Eff (now :: Now | e) Number
+foreign import now :: forall eff. Eff (now :: Now | eff) Number
 foreign import replaceAll :: String -> String -> String -> String
 
+urlGet :: forall eff. String -> Eff eff (Either String String)
+urlGet = urlGetImpl Left Right
 
+foreign import urlGetImpl :: forall eff. (forall a. a -> Either a a)
+                          -> (forall a. a -> Either a a)
+                          -> String
+                          -> Eff eff (Either String String)
 
 numFromString :: String -> Maybe Number
 numFromString = numFromStringImpl Just Nothing

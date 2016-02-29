@@ -2,19 +2,6 @@
 
 // module Util
 
-exports.unsafeURLGet = function(url) {
-  return function (){
-    var result;
-    var request = new XMLHttpRequest();
-    request.open('GET', url, false);
-    request.addEventListener('load', function() {
-      result = request.responseText;
-    });
-    request.send();
-    return result;
-  }
-}
-
 exports.unsafeNull = null
 
 
@@ -80,6 +67,29 @@ exports.numFromStringImpl = function (just) {
     };
   };
 };
+
+
+exports.urlGetImpl = function (left) {
+  return function (right) {
+    return function (url) {
+			return function() {
+				var result;
+				var request = new XMLHttpRequest();
+				request.open('GET', url, false);
+				request.addEventListener('load', function() {
+					if (request.status == 200 || request.status == 304 )
+						result = right(request.responseText);
+					else
+						result = left(url + " : " + request.statusText);
+				});
+
+				request.send();
+				return result;
+			};
+    };
+  };
+};
+
 
 
 exports.cxFromStringImpl = function (tuple) {

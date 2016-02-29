@@ -12,7 +12,7 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 
 import Config
-import Util (unsafeURLGet, lg)
+import Util (urlGet, lg)
 import Library
 import SLibrary
 
@@ -79,19 +79,22 @@ buildRefPools ssRef pattern = do
 
 buildLib :: forall a eff.  (StrMap LineVal -> Lib a) -> String -> Epi eff (StrMap a)
 buildLib f loc = do
-  dta <- lift $ unsafeURLGet loc
-  case (parseLib f dta) of
-    (Right res) -> return res
-    (Left (LibError s)) -> throwError s
+  dt <- lift $ urlGet loc
+  case dt of
+    (Left er) -> throwError $ "Error loading lib : " ++ er
+    (Right res) -> case (parseLib f res) of
+      (Right res') -> return res'
+      (Left (LibError s)) -> throwError $ "Error building lib at : " ++ loc ++ " : " ++ s
 
 
 buildSLib :: forall a eff.  (SHandle -> SLib (Tuple String a)) -> String -> Epi eff (StrMap a)
 buildSLib f loc = do
-  dta <- lift $ unsafeURLGet loc
-  case (parseSLib f dta) of
-    (Right res) -> return res
-    (Left (SLibError s)) -> throwError s
-
+  dt <- lift $ urlGet loc
+  case dt of
+    (Left er) -> throwError $ "Error loading slib : " ++ er
+    (Right res) -> case (parseSLib f res) of
+      (Right res') -> return res'
+      (Left (SLibError s)) -> throwError $ "Error building slib at : " ++ loc ++ " : " ++ s
 
 loadLib :: forall a eff. String -> (StrMap a) -> Epi eff a
 loadLib name lib = do

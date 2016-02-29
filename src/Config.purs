@@ -20,8 +20,9 @@ type EpiS eff h a = Epi (st :: ST h | eff) a
 -- System
 type SystemConf = {
     initEngineConf :: String
-  , initUIConf :: String
-  , initPattern :: String
+  , initUIConf     :: String
+  , initPattern    :: String
+  , host           :: String
 }
 
 defaultSystemConf :: SystemConf
@@ -29,6 +30,7 @@ defaultSystemConf = {
     initEngineConf: "default"
   , initUIConf:     "default"
   , initPattern:    "default"
+  , host:           "http://localhost:8000"
 }
 
 type SystemST h = {
@@ -72,11 +74,19 @@ type EngineConf = {
   , fract :: Int
 }
 
+defaultEngineConf :: EngineConf
+defaultEngineConf = {
+    kernelDim: 1024
+  , fract: 3
+}
+
 type EngineST = {
     dispProg :: Maybe WebGLProgram
   , mainProg :: Maybe WebGLProgram
   , tex :: Maybe (Tuple WebGLTexture WebGLTexture)
   , fb :: Maybe (Tuple WebGLFramebuffer WebGLFramebuffer)
+  , aux :: Maybe (Array WebGLTexture)
+  , auxN :: Int
   , ctx :: WebGLContext
 }
 

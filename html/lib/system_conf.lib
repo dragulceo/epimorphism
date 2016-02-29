@@ -1,7 +1,7 @@
 --default
 initEngineConf default
 initUIConf default
-initPattern cool
+initPattern test_image
 
 --test
 initEngineConf default

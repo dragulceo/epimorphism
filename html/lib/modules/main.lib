@@ -8,3 +8,8 @@ modules main_body main_stc
 flags family main
 component main
 modules main_body main_test
+
+--test_image
+flags family main
+component main
+modules main_body main_test_image

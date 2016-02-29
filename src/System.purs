@@ -18,19 +18,19 @@ import SLibrary
 
 data DataSource = LocalHTTP | LocalStorage | RemoteDB
 
-initSystemST :: forall eff h . Epi eff (SystemST h)
-initSystemST = do
+initSystemST :: forall eff h. String -> Epi eff (SystemST h)
+initSystemST host = do
   -- gather system data here
 
-  systemConfLib <- buildLib buildSystemConf "lib/system_conf.lib"
-  engineConfLib <- buildLib buildEngineConf "lib/engine_conf.lib"
-  uiConfLib     <- buildLib buildUIConf "lib/ui_conf.lib"
-  moduleLib     <- buildLib buildModule "lib/modules.lib"
-  scriptLib     <- buildLib buildScript "lib/scripts.lib"
-  patternLib    <- buildLib buildPattern "lib/patterns.lib"
+  systemConfLib <- buildLib buildSystemConf $ host ++ "/lib/system_conf.lib"
+  engineConfLib <- buildLib buildEngineConf $ host ++ "/lib/engine_conf.lib"
+  uiConfLib     <- buildLib buildUIConf $ host ++ "/lib/ui_conf.lib"
+  moduleLib     <- buildLib buildModule $ host ++ "/lib/modules.lib"
+  scriptLib     <- buildLib buildScript $ host ++ "/lib/scripts.lib"
+  patternLib    <- buildLib buildPattern $ host ++ "/lib/patterns.lib"
 
-  componentLib  <- buildSLib buildComponent "lib/components.slib"
-  indexLib      <- buildSLib buildIndex "lib/indexes.slib"
+  componentLib  <- buildSLib buildComponent $ host ++ "/lib/components.slib"
+  indexLib      <- buildSLib buildIndex $ host ++ "/lib/indexes.slib"
 
   return $ defaultSystemST {
       systemConfLib = systemConfLib

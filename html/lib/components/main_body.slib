@@ -3,6 +3,13 @@ main_body main_test {{
   color = vec4(z, 0.0, 1.0);
 }}
 
+main_body main_test_image {{
+  z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+  color = 0.5 * texture2D(aux[#0], z);
+  color += 0.5 * texture2D(aux[#1], z);
+}}
+
+
 main_body main_stc {{
   vec4 seed, frame;
   vec2 frame_z;

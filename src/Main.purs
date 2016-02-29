@@ -19,6 +19,9 @@ import Script (runScripts)
 import System (initSystemST, loadLib, buildRefPools)
 import Util (winLog, lg, requestAnimationFrame, now, Now)
 
+host :: String
+host = "http://localhost:8000"
+
 type State h = {
     ucRef :: STRef h UIConf
   , ssRef :: STRef h (SystemST h)
@@ -30,14 +33,15 @@ type State h = {
 init :: forall eff h. EpiS eff h (State h)
 init = do
   -- init system
-  systemST <- initSystemST
+  systemST <- initSystemST host
   ssRef <- lift $ newSTRef systemST
 
   -- init config
   systemConf <- loadLib "default" systemST.systemConfLib "init system"
-  engineConf <- loadLib systemConf.initEngineConf systemST.engineConfLib "init engine"
-  uiConf     <- loadLib systemConf.initUIConf systemST.uiConfLib "init ui"
-  pattern    <- loadLib systemConf.initPattern systemST.patternLib "init pattern"
+  let systemConf' = systemConf {host = host}
+  engineConf <- loadLib systemConf'.initEngineConf systemST.engineConfLib "init engine"
+  uiConf     <- loadLib systemConf'.initUIConf systemST.uiConfLib "init ui"
+  pattern    <- loadLib systemConf'.initPattern systemST.patternLib "init pattern"
 
   -- build reference pools
   buildRefPools ssRef pattern
@@ -48,7 +52,7 @@ init = do
   pRef  <- lift $ newSTRef pattern
 
   -- init states
-  esRef <- initEngineST engineConf systemST' pattern uiConf.canvasId
+  esRef <- initEngineST systemConf engineConf systemST' pattern uiConf.canvasId
   initUIST ucRef ecRef esRef pRef
 
   return {ucRef, ssRef, ecRef, esRef, pRef}

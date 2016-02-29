@@ -20,30 +20,31 @@ import Config
 import System
 import Util (replaceAll, lg)
 
-type Shaders = {vert :: String, main :: String, disp :: String}
-type CompRes = {component :: String, zOfs :: Int, parOfs :: Int}
+type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}
+type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array String}
 
 -- compile vertex, disp & main shaders
 compileShaders :: forall eff h. Pattern -> (SystemST h) -> Epi eff Shaders
 compileShaders pattern sys = do
   vertM   <- loadLib pattern.vert sys.moduleLib "compileShaders vert"
-  vertRes <- compile vertM sys 0 0
+  vertRes <- compile vertM sys 0 0 []
 
   dispM   <- loadLib pattern.disp sys.moduleLib "compileShaders disp"
-  dispRes <- compile dispM sys 0 0
+  dispRes <- compile dispM sys 0 0 []
 
   mainM   <- loadLib pattern.main sys.moduleLib "compileShaders main"
-  mainRes <- compile mainM sys 0 0
+  mainRes <- compile mainM sys 0 0 []
 
   -- substitute includes
   includes <- traverse (\x -> loadLib x sys.componentLib "includes") pattern.includes
-  let allIncludes = (joinWith "\n//INCLUDES/n" (map (\x -> x.body) includes)) ++ "\n//END INCLUDES\n"
+  let allIncludes = "//INCLUDES\n" ++ (joinWith "\n\n" (map (\x -> x.body) includes)) ++ "\n//END INCLUDES\n"
 
-  return {vert: vertRes.component, main: (allIncludes ++ mainRes.component), disp: (allIncludes ++ dispRes.component)}
+  return {vert: vertRes.component, main: (allIncludes ++ mainRes.component), disp: (allIncludes ++ dispRes.component), aux: mainRes.images}
+
 
 -- compile a shader.  substitutions, submodules, par & zn
-compile :: forall eff h. Module -> SystemST h -> Int -> Int -> Epi eff CompRes
-compile mod sys zOfs parOfs = do
+compile :: forall eff h. Module -> SystemST h -> Int -> Int -> (Array String) -> Epi eff CompRes
+compile mod sys zOfs parOfs images = do
   -- substitutions
   comp <- loadLib mod.component sys.componentLib "compile component"
   let component' = fold handleSub comp.body mod.sub
@@ -57,16 +58,21 @@ compile mod sys zOfs parOfs = do
   let component''' = foldl handleZn component'' (A.(..) 0 ((A.length mod.zn) - 1))
   let zOfs' = zOfs + A.length mod.zn
 
+  -- images
+  let component'''' = foldl handleImg component''' (A.(..) 0 ((A.length mod.images) - 1))
+  let images' = images ++ mod.images
+
   -- submodules
   mod <- loadModules mod.modules sys.moduleLib
-  foldM handleChild { component: component''', zOfs: zOfs', parOfs: parOfs' } mod
+  foldM handleChild { component: component'''', zOfs: zOfs', parOfs: parOfs', images: images' } mod
   where
     handleSub dt k v = replaceAll ("\\$" ++ k ++ "\\$") v dt
     handlePar (Tuple n dt) v = Tuple (n + 1) (replaceAll ("@" ++ v ++ "@") ("par[" ++ show n ++ "]") dt)
-    handleZn dt v = replaceAll ("#" ++ show v) (show $ (v + zOfs)) dt
+    handleZn dt v = replaceAll ("zn\\[#" ++ show v ++ "\\]") ("zn[" ++ (show $ (v + zOfs)) ++ "]") dt
+    handleImg dt v = replaceAll ("aux\\[#" ++ show v ++ "\\]") ("aux[" ++ (show $ (v + (A.length images))) ++ "]") dt
     handleChild :: forall eff. CompRes -> String -> Module -> Epi eff CompRes
-    handleChild { component: componentC, zOfs: zOfsC, parOfs: parOfsC } k v = do
-      res <- compile v sys zOfsC parOfsC
+    handleChild { component: componentC, zOfs: zOfsC, parOfs: parOfsC, images: imagesC } k v = do
+      res <- compile v sys zOfsC parOfsC imagesC
       let iC = "//" ++ k ++ "\n  {\n" ++ (indentLines 2 res.component) ++ "\n  }"
       let child = replaceAll ("%" ++ k ++ "%") iC componentC
       return $ res { component = child }

@@ -144,12 +144,6 @@ buildSystemConf vals = do
       _ -> Left (LibError $ "SystemConf - unknown key - " ++ key)
 
 
-defaultEngineConf :: EngineConf
-defaultEngineConf = {
-    kernelDim: 1024
-  , fract: 3
-}
-
 buildEngineConf :: StrMap LineVal -> Lib EngineConf
 buildEngineConf vals = do
   foldM handle defaultEngineConf vals

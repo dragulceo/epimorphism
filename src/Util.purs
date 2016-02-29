@@ -24,6 +24,8 @@ foreign import requestAnimationFrame :: forall eff a. Eff eff Unit -> Eff eff Un
 foreign import now :: forall eff. Eff (now :: Now | eff) Number
 foreign import replaceAll :: String -> String -> String -> String
 
+
+
 urlGet :: forall eff. String -> Eff eff (Either String String)
 urlGet = urlGetImpl Left Right
 

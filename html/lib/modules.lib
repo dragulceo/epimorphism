@@ -40,11 +40,20 @@ flags family main
 component main
 modules main_body main_test
 
+--test_image
+flags family main
+component main
+modules main_body main_test_image
 
 
 --main_test
 flags family main_body
 component main_test
+
+--main_test_image
+flags family main_body
+component main_test_image
+images /textures/grid_1.png .. /textures/grid_2.png ..
 
 --main_stc
 flags default true

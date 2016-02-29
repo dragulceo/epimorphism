@@ -24,3 +24,12 @@ t      0.0
 tPhase 0.0
 tSpd   1.0
 includes colorspace .. math ..
+
+--test_image
+vert   vert
+main   test_image
+disp   disp
+t      0.0
+tPhase 0.0
+tSpd   1.0
+includes colorspace .. math ..

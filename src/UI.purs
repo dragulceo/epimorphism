@@ -24,7 +24,7 @@ import Command (command)
 foreign import registerEventHandler :: forall eff. (String -> Eff eff Unit) -> Eff eff Unit
 
 -- PUBLIC
-initUIST :: forall h eff. (STRef h UIConf) -> (STRef h EngineConf) -> (STRef h EngineST) -> (STRef h Pattern) -> Epi (st :: ST h | eff) Unit
+initUIST :: forall eff h. STRef h UIConf -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> EpiS eff h Unit
 initUIST ucRef ecRef esRef pRef = do
   uiConf <- lift $ readSTRef ucRef
   initLayout uiConf

@@ -13,53 +13,62 @@ import Config
 import System (loadLib)
 import Util (tLg, numFromStringE, intFromStringE)
 
-lookupScriptFN :: forall eff h. String -> Epi (st :: ST h | eff) (ScriptFn h eff)
-lookupScriptFN n = case n of
-  "null" -> return nullS
-  "zpath" -> return zpath
-  _ -> throwError $ "script function not found: " ++ n
+-- PUBLIC
 
-
-runScripts :: forall eff h. Number -> StrMap (STRef h Script) -> StrMap (STRef h Module) -> Epi (st :: ST h | eff) Unit
+-- execute all scripts & script pool
+runScripts :: forall eff h. Number -> StrMap (STRef h Script) -> StrMap (STRef h Module) -> EpiS eff h Unit
 runScripts t slib mlib = do
   A.foldM (handle t slib mlib) unit (keys slib)
   where
-    handle :: forall h eff. Number -> StrMap (STRef h Script) -> StrMap (STRef h Module) -> Unit -> String -> Epi (st :: ST h | eff) Unit
+    handle :: forall h eff. Number -> StrMap (STRef h Script) -> StrMap (STRef h Module) -> Unit -> String -> EpiS eff h Unit
     handle t slib mlib _ n = do
       sRef <- loadLib n slib "script"
       scr <- lift $ readSTRef sRef
       fn <- lookupScriptFN scr.fn
       fn t scr.dt scr.mod slib mlib
 
+-- SCRIPT FUNCTIONS
 
+-- dont do anything.  is this necessary?
 nullS :: forall h eff. ScriptFn h eff
 nullS t dt mod slib mlib = do
   return unit
 
 
--- inline this
-type ZPathFn = Number -> Complex
-lookupZPathFn :: forall eff. String -> Epi eff ZPathFn
-lookupZPathFn n = case n of
-  "rlin" -> return $ \t ->
-    outCartesian $ Cartesian t 0.0
-  "circle" -> return $ \t ->
-    outPolar $ Polar t 1.0
-  _ -> throwError $ "Unknown z path : " ++ n
-
-
+-- move zn[idx] around on a path
 zpath :: forall h eff. ScriptFn h eff
 zpath t dt mod slib mlib = do
+  -- get data
   spd <- (loadLib "spd" dt "zpath spd") >>= numFromStringE
   idx <- (loadLib "idx" dt "zpath idx") >>= intFromStringE
   pathN <- loadLib "path" dt "zpath path"
-  fn <- lookupZPathFn pathN
   mRef <- loadLib mod mlib "zpath module"
   m <- lift $ readSTRef mRef
 
+  -- lookup path function
+  fn <- case pathN of
+    "rlin" -> return $ \t ->
+      outCartesian $ Cartesian t 0.0
+    "circle" -> return $ \t ->
+      outPolar $ Polar t 1.0
+    _ -> throwError $ "Unknown z path : " ++ pathN
+
+  -- execute
   let z' = fn (t * spd)
+
+  -- modify data
   case (A.updateAt idx z' m.zn) of
     (Just zn') -> lift $ modifySTRef mRef (\m -> m {zn = zn'})
     _ -> throwError $ "zn idx out of bound : " ++ (show idx) ++ " : in zpath"
 
   return unit
+
+
+-- PRIVATE
+
+-- find script fuction given name
+lookupScriptFN :: forall eff h. String -> EpiS eff h (ScriptFn eff h)
+lookupScriptFN n = case n of
+  "null"  -> return nullS
+  "zpath" -> return zpath
+  _       -> throwError $ "script function not found: " ++ n

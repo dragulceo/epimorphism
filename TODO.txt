@@ -3,6 +3,7 @@ CONFIG
   - make sure modreflib & scriptreflib are are referntially integral
 	- if you re-use a module in a pattern, it's the same module!
 	  - when creating modreflib, we could make new unique names.  the issue with that could be duplicate modules in the db.  but we could make a name from a hash of the values?
+		- flattening pars is weird if names are identical, as there is no defined order then
 
   - cleanup/finish parsing of libs & slibs
     - data on engine_conf/state, etc split across library, engine, config :/
@@ -15,8 +16,6 @@ CONFIG
 ENGINE
   - feedback isn't perfect/ misalligned square?
   - fract
-  - better error checking
-  - webgl debug statements?
 UI
   - handle window resizing
   - fullscreen mode
@@ -26,13 +25,8 @@ PATTERN
   - derive module families & use indices
 	- what order are scripts executed in?  right now it's kind of top down
 MISC
-  - complex numbers library?
-  - comments
-  - only pass references when the function can mutate unless event handler or animator?
-  - better use of type synonyms to clarify type annotations
-  - make unsafe code safe + catch more errors
-
   - image support
+
   - build out library
   - feature parity with existing app
 LATER
@@ -68,3 +62,7 @@ LATER
   - image comparison testing
   - preprocesser malfunctions give weird errors
   - passing context to loadLib is annoying
+  - main & disp share includes
+  - complex numbers library?
+  - better engine error checking/handling
+	- framebuffer texturing

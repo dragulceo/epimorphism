@@ -113,22 +113,23 @@ type Pattern = {
   , tSpd :: Number
 }
 
-type ScriptFn h eff = Number -> (StrMap String) -> String ->  StrMap (STRef h Script) -> StrMap (STRef h Module) -> Epi (st :: ST h | eff)  Unit
+-- Script
+type ScriptFn eff h = Number -> StrMap String -> String ->  StrMap (STRef h Script) -> StrMap (STRef h Module) -> EpiS eff h  Unit
 type Script = {
-    fn :: String
-  , dt :: StrMap String
-  , mod :: String
+    fn    :: String
+  , dt    :: StrMap String
+  , mod   :: String
   , flags :: StrMap String
 }
 
 --SLib
 type Component = {
-    name :: String
+    name   :: String
   , family :: String
-  , body :: String
+  , body   :: String
 }
 
 type Index = {
     name :: String
-  , lib :: Array String
+  , lib  :: Array String
 }

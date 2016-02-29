@@ -1,4 +1,6 @@
 CONFIG
+  - PARSE THROUGH ALL OF THIS!
+  - subsitiutions of the same name cant be used to derive library
   - module/submodule cycles??
   - module inheritence?
   - scripts & modules reference each other.  general referential integrity?
@@ -27,11 +29,13 @@ PATTERN
   - derive module families & use indices
 	- what order are scripts executed in?  right now it's kind of top down
 MISC
-  - image/aux support
-
   - build out library
   - feature parity with existing app
+
+
+
 LATER
+  - ERROR HANDLING for createImage - missing images & sync issues & the unusable image issue
   - number parsing flakey?
   - engine stability/lost context - https://www.khronos.org/registry/webgl/extensions/WEBGL_lose_context/
   - compiler performance
@@ -48,13 +52,12 @@ LATER
   - test on ipad
   - test on android
 	- https://www.khronos.org/registry/webgl/extensions/WEBGL_debug_shaders/
-  - subsitiutions of the same name cant be used to derive library
-	  - unit tests
+	- unit tests
   - website
   - logging system
   - programming guidelines document - i.e make sure all tree modifications rebuild mod ref lib
   - better kernel debug support
-  - par & zn lengths are fixed
+  - par, zn, and aux lengths are fixed
   - save images
   - webcam input
   - benchmarking tools
@@ -65,6 +68,9 @@ LATER
   - complex numbers library?
   - better engine error checking/handling
 	- framebuffer texturing
-  - more than 10 zn will cause substitution errors - ie #1 & #10
-  - error handling for createImage - missing images & sync issues
   - texture organization
+  - better data organization
+	  - put configs in states?
+		- where do things go?
+		- put ref libs in pattern?
+		- some kind of reactive data tree?

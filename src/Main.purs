@@ -1,9 +1,9 @@
 module Main where
 
 import Prelude
-import Data.Either (Either(Right, Left))
+import Data.Either (Either(..), either)
 import Data.Maybe (maybe, Maybe(Just))
-import Data.Int (round)
+import Data.Int (round, toNumber)
 
 import Control.Monad (when)
 import Control.Monad.Eff (Eff)
@@ -16,7 +16,7 @@ import Config
 import Engine (initEngineST, render)
 import UI (initUIST, showFps)
 import Script (runScripts)
-import System (initSystemST, loadLib, buildRefLibs)
+import System (initSystemST, loadLib, buildRefPools)
 import JSUtil (winLog, reallyUnsafeLog, requestAnimationFrame, now, Now)
 
 type State h = {
@@ -27,7 +27,7 @@ type State h = {
   , pRef  :: STRef h Pattern
 }
 
-init :: forall h eff. Epi (st :: ST h | eff) (State h)
+init :: forall eff h. EpiS eff h (State h)
 init = do
   -- init system
   systemST <- initSystemST
@@ -39,7 +39,8 @@ init = do
   uiConf     <- loadLib systemConf.initUIConf systemST.uiConfLib
   pattern    <- loadLib systemConf.initPattern systemST.patternLib
 
-  buildRefLibs ssRef pattern
+  -- build reference libs
+  buildRefPools ssRef pattern
   systemST' <- lift $ readSTRef ssRef
 
   ecRef <- lift $ newSTRef engineConf
@@ -53,10 +54,10 @@ init = do
   return { ucRef: ucRef, ssRef: ssRef, ecRef: ecRef, esRef: esRef, pRef: pRef }
 
 
-animate :: forall h. (Epi (st :: ST h, now :: Now) (State h)) -> Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
+animate :: forall h. EpiS (now :: Now) h (State h) -> Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
 animate stateM = handleError do
   -- unpack state
-  state@{ucRef: ucRef, ssRef: ssRef, ecRef: ecRef, esRef: esRef, pRef: pRef} <- stateM
+  state@{ucRef, ssRef, ecRef, esRef, pRef} <- stateM
   systemST   <- lift $ readSTRef ssRef
   engineConf <- lift $ readSTRef ecRef
   engineST   <- lift $ readSTRef esRef
@@ -69,9 +70,10 @@ animate stateM = handleError do
   lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS})
 
   -- fps
-  when (systemST.frameNum `mod` 10 == 0) do
+  let freq = 10
+  when (systemST.frameNum `mod` freq == 0) do
     let lastFpsTimeMS = maybe currentTimeMS id systemST.lastFpsTimeMS
-    let fps = round $ 10.0 * 1000.0 / (currentTimeMS - lastFpsTimeMS)
+    let fps = round $ (toNumber freq) * 1000.0 / (currentTimeMS - lastFpsTimeMS)
     lift $ modifySTRef ssRef (\s -> s {lastFpsTimeMS = Just currentTimeMS, fps = Just fps})
     showFps fps
 
@@ -79,7 +81,7 @@ animate stateM = handleError do
   let t' = pattern.t + delta
   lift $ modifySTRef pRef (\p -> p {t = t'})
   pattern' <- lift $ readSTRef pRef
-  runScripts t' systemST.scriptRefLib systemST.moduleRefLib
+  runScripts t' systemST.scriptRefPool systemST.moduleRefPool
   render systemST engineConf engineST pattern' systemST.frameNum
 
   -- request next frame
@@ -87,12 +89,10 @@ animate stateM = handleError do
   lift $ requestAnimationFrame $ animate $ return state
 
 
-handleError :: forall eff. (Epi eff Unit) -> (Eff (canvas :: Canvas, dom :: DOM | eff)) Unit
+handleError :: forall eff. Epi eff Unit -> Eff (canvas :: Canvas, dom :: DOM | eff) Unit
 handleError epi = do
   res <- runExceptT epi
-  case res of
-    Left er -> winLog er -- unsafeLog er
-    Right ret -> return ret
+  either winLog return res
 
 
 main :: Eff (canvas :: Canvas, dom :: DOM, now :: Now) Unit

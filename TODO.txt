@@ -27,9 +27,10 @@ PATTERN
   - derive module families & use indices
 	- what order are scripts executed in?  right now it's kind of top down
 MISC
+  - complex numbers library?
+  - comments
   - only pass references when the function can mutate unless event handler or animator?
   - better use of type synonyms to clarify type annotations
-  - complex numbers library?
   - make unsafe code safe + catch more errors
 
   - image support
@@ -66,3 +67,4 @@ LATER
   - webcam input
   - benchmarking tools
   - image comparison testing
+  - preprocesser malfunctions give weird errors

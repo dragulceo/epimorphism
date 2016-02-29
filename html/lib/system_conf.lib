@@ -2,3 +2,8 @@
 initEngineConf default
 initUIConf default
 initPattern cool
+
+--test
+initEngineConf default
+initUIConf default
+initPattern test

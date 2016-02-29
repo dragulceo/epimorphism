@@ -135,8 +135,8 @@ render systemST engineConf engineST pattern frameNum = do
     otherwise -> throwError "Render: missing disp program"
 
   -- get par & zn
-  bindParZn systemST.moduleRefLib ctx main pattern.main
-  bindParZn systemST.moduleRefLib ctx disp pattern.disp
+  bindParZn systemST.moduleRefPool ctx main pattern.main
+  bindParZn systemST.moduleRefPool ctx disp pattern.disp
 
   execGL ctx ( do
     -- ping pong buffers

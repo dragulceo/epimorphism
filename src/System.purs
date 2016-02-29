@@ -29,9 +29,9 @@ defaultSystemST = {
   , engineConfLib: empty
   , patternLib: empty
   , moduleLib: empty
-  , moduleRefLib: empty
+  , moduleRefPool: empty
   , scriptLib: empty
-  , scriptRefLib: empty
+  , scriptRefPool: empty
   , componentLib: empty
   , indexLib: empty
 }
@@ -60,14 +60,14 @@ initSystemST = do
 
 
 type RData h = {mdt :: (StrMap (STRef h Module)), sdt :: (StrMap (STRef h Script)), st :: SystemST h}
-buildRefLibs :: forall h eff. (STRef h (SystemST h)) -> Pattern -> Epi (st :: ST h | eff) Unit
-buildRefLibs ssRef pattern = do
+buildRefPools :: forall h eff. (STRef h (SystemST h)) -> Pattern -> Epi (st :: ST h | eff) Unit
+buildRefPools ssRef pattern = do
   systemST <- lift $ readSTRef ssRef
 
   let dt = {mdt: empty, sdt: empty, st: systemST}
   dt' <- A.foldM handle dt [pattern.main, pattern.disp, pattern.vert]
 
-  lift $ modifySTRef ssRef (\s -> s { moduleRefLib = dt'.mdt, scriptRefLib = dt'.sdt })
+  lift $ modifySTRef ssRef (\s -> s { moduleRefPool = dt'.mdt, scriptRefPool = dt'.sdt })
   return unit
   where
     handle :: forall h eff. (RData h) -> String -> Epi (st :: ST h | eff) (RData h)

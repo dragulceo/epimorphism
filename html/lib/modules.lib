@@ -35,6 +35,11 @@ flags family main
 component main
 modules main_body main_stc
 
+--test
+flags family main
+component main
+modules main_body main_test
+
 
 
 --main_test

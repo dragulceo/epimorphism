@@ -11,7 +11,7 @@ void main() {
   vec2 clipSpace = gl_FragCoord.xy / vec2(kernel_dim, kernel_dim);
   frame = texture2D(fb, clipSpace);
 
-  @@post
+  %post%
 
 	frame.a = 1.0; // this value is used by webgl
   gl_FragColor = frame;

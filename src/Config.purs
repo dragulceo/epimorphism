@@ -15,6 +15,7 @@ import DOM (DOM)
 import Data.String
 
 type Epi eff a = ExceptT String (Eff (canvas :: Canvas, dom :: DOM | eff)) a
+type EpiS eff h a = Epi (st :: ST h | eff) a
 
 -- System
 type SystemConf = {
@@ -33,9 +34,9 @@ type SystemST h = {
   , engineConfLib :: StrMap EngineConf
   , patternLib :: StrMap Pattern
   , moduleLib :: StrMap Module
-  , moduleRefLib :: StrMap (STRef h Module)
+  , moduleRefPool :: StrMap (STRef h Module)
   , scriptLib :: StrMap Script
-  , scriptRefLib :: StrMap (STRef h Script)
+  , scriptRefPool :: StrMap (STRef h Script)
   , componentLib :: StrMap Component
   , indexLib :: StrMap Index
 }

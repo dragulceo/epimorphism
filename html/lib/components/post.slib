@@ -7,8 +7,8 @@ post post1 {{
   frame = rgb2hsv(frame);
 
   vec4 c0 = hsv2rgb(vec4(0.0, 1.0, 0.5, 1.0));
-  vec4 c1 = hsv2rgb(vec4(0.66 + @pc3_spread / 2.0, 1.0, @pc3_lgv, 1.0));
-  vec4 c2 = hsv2rgb(vec4(0.66 - @pc3_spread / 2.0, 1.0, -1.0 * @pc3_lgv, 1.0));
+  vec4 c1 = hsv2rgb(vec4(0.66 + @pc3_spread@ / 2.0, 1.0, @pc3_lgv@, 1.0));
+  vec4 c2 = hsv2rgb(vec4(0.66 - @pc3_spread@ / 2.0, 1.0, -1.0 * @pc3_lgv@, 1.0));
 
   vec4 res, r0, r1;
   float f;

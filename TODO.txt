@@ -1,9 +1,13 @@
+ALPHA:
+
 PROJ
-  - saving
-	- module inheritence?
+  - pattern switching
 	- indexes
-	- deriving family - @seed:0 @seed:1, etc?
+	  - deriving family - @seed:0 @seed:1, etc?
+
+  - saving
   - data on engine_conf/state, etc split across library, engine, config :/
+	- module inheritence?
 
 CONFIG
   - cleanup/finish parsing of libs & slibs
@@ -15,13 +19,14 @@ ENGINE
 UI
   - remote control
 PATTERN
-  - pattern switching
 
 MISC
   - build out library
   - feature parity with existing app
 
 LATER
+  - use fb as texture source
+  - enforce integrity of pools & module references
   - should pools live in state or pattern
 	- scripts conflicting with each other
   - module/submodule cycles??

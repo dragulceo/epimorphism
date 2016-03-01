@@ -17,7 +17,7 @@ import Engine (initEngineST, render)
 import UI (initUIST, showFps)
 import Script (runScripts)
 import System (initSystemST, loadLib)
-import Util (winLog, lg, requestAnimationFrame, now, Now)
+import Util (winLog, lg, requestAnimationFrame, now, Now, handleError)
 import Pattern (importPattern)
 
 host :: String
@@ -89,7 +89,7 @@ animate stateM = handleError do
   let t' = pattern.t + delta
   lift $ modifySTRef pRef (\p -> p {t = t'})
   pattern' <- lift $ readSTRef pRef
-  runScripts t' systemST.scriptRefPool systemST.moduleRefPool
+  runScripts ssRef t'
 
   -- render
   render systemST engineConf engineST pattern' systemST.frameNum
@@ -97,12 +97,6 @@ animate stateM = handleError do
   -- request next frame
   lift $ modifySTRef ssRef (\s -> s {frameNum = s.frameNum + 1})
   lift $ requestAnimationFrame $ animate $ return state
-
-
-handleError :: forall eff. Epi eff Unit -> Eff (canvas :: Canvas, dom :: DOM | eff) Unit
-handleError epi = do
-  res <- runExceptT epi
-  either winLog return res
 
 
 main :: Eff (canvas :: Canvas, dom :: DOM, now :: Now) Unit

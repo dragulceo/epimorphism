@@ -12,6 +12,13 @@ import Control.Monad.Error.Class (throwError)
 
 import Config -- should we do this
 
+
+-- can remove with a less lazy type synonym
+import Graphics.Canvas (Canvas)
+import DOM (DOM)
+import Control.Monad.Except.Trans (runExceptT)
+import Data.Either (Either(..), either)
+
 foreign import data Now :: !
 
 -- simple js functions
@@ -64,3 +71,9 @@ intFromStringE :: forall eff. String -> Epi eff Int
 intFromStringE s = case (I.fromString s) of
   (Just i) -> return i
   _ -> throwError $ "Expected : " ++ s ++ " : to be an int"
+
+
+handleError :: forall eff. Epi eff Unit -> Eff (canvas :: Canvas, dom :: DOM | eff) Unit
+handleError epi = do
+  res <- runExceptT epi
+  either winLog return res

@@ -4,6 +4,7 @@ import Prelude
 import Data.Array (foldM, updateAt) as A
 import Data.Maybe
 import Data.StrMap (StrMap, keys, lookup)
+import Data.Traversable (traverse)
 import Data.Complex
 import Control.Monad.ST
 import Control.Monad.Error.Class (throwError)
@@ -16,35 +17,40 @@ import Util (tLg, numFromStringE, intFromStringE)
 -- PUBLIC
 
 -- execute all scripts & script pool
-runScripts :: forall eff h. Number -> StrMap (STRef h Script) -> StrMap (STRef h Module) -> EpiS eff h Unit
-runScripts t slib mlib = do
-  A.foldM (handle t slib mlib) unit (keys slib)
+runScripts :: forall eff h. STRef h (SystemST h) -> Number -> EpiS eff h Unit
+runScripts ssRef t = do
+  systemST <- lift $ readSTRef ssRef
+  traverse (handle ssRef t) (keys systemST.scriptRefPool)
+  return unit
   where
-    handle :: forall h eff. Number -> StrMap (STRef h Script) -> StrMap (STRef h Module) -> Unit -> String -> EpiS eff h Unit
-    handle t slib mlib _ n = do
-      sRef <- loadLib n slib "script"
+    handle :: forall h eff. STRef h (SystemST h) -> Number -> String -> EpiS eff h Unit
+    handle ssRef t n = do
+      systemST <- lift $ readSTRef ssRef
+      sRef <- loadLib n systemST.scriptRefPool "script"
       scr <- lift $ readSTRef sRef
       fn <- lookupScriptFN scr.fn
       case scr.mod of
         Nothing -> throwError $ "No module when running script: " ++ scr.fn
-        Just mod -> fn t scr.dt mod slib mlib
+        Just mod -> fn ssRef t scr.dt mod
+      return unit
 
 -- SCRIPT FUNCTIONS
 
 -- dont do anything.  is this necessary?
 nullS :: forall h eff. ScriptFn h eff
-nullS t dt mod slib mlib = do
+nullS ssRef t dt mod = do
   return unit
 
 
 -- move zn[idx] around on a path
 zpath :: forall h eff. ScriptFn h eff
-zpath t dt mod slib mlib = do
+zpath ssRef t dt mod = do
+  systemST <- lift $ readSTRef ssRef
   -- get data
   spd <- (loadLib "spd" dt "zpath spd") >>= numFromStringE
   idx <- (loadLib "idx" dt "zpath idx") >>= intFromStringE
   pathN <- loadLib "path" dt "zpath path"
-  mRef <- loadLib mod mlib "zpath module"
+  mRef <- loadLib mod systemST.moduleRefPool "zpath module"
   m <- lift $ readSTRef mRef
 
   -- lookup path function

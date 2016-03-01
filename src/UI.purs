@@ -23,6 +23,7 @@ import Command (command)
 import Util (lg)
 
 foreign import registerEventHandler :: forall eff. (String -> Eff eff Unit) -> Eff eff Unit
+foreign import registerKeyHandler :: forall eff. (String -> String) -> Eff eff Unit
 foreign import requestFullScreen :: forall eff. String -> Eff eff Unit
 
 -- PUBLIC
@@ -31,6 +32,15 @@ initUIST ucRef ecRef esRef pRef scRef ssRef = do
   uiConf <- lift $ readSTRef ucRef
   initLayout uiConf
   lift $ registerEventHandler (command ucRef ecRef esRef pRef scRef ssRef)
+  lift $ registerKeyHandler keyHandler
+
+
+keyHandler :: String -> String
+keyHandler char =
+  case char of
+    "1" -> "scr incIdx main.%main_body.%t $t_main 1"
+    "Q" -> "scr incIdx main.%main_body.%t $t_main -1"
+    _ -> "null"
 
 
 initLayout :: forall eff. UIConf -> Epi eff Unit

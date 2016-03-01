@@ -1,6 +1,8 @@
 module Pattern where
 
 import Prelude
+import Data.Either (Either(..))
+import Data.Either.Unsafe (fromRight)
 import Data.Maybe (Maybe(..))
 import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (member, empty, lookup, insert, foldM, values, delete, StrMap())
@@ -27,22 +29,24 @@ importPattern ssRef pRef =  do
   pattern  <- lift $ readSTRef pRef
 
   -- import all modules
-  main <- importModule ssRef pattern.main
-  disp <- importModule ssRef pattern.disp
-  vert <- importModule ssRef pattern.vert
+  main <- importModule ssRef (Right pattern.main)
+  disp <- importModule ssRef (Right pattern.disp)
+  vert <- importModule ssRef (Right pattern.vert)
   lift $ modifySTRef pRef (\p -> p {main = main, disp = disp, vert = vert})
 
   return unit
 
 
 -- import a module into the ref pool
-importModule :: forall eff h. STRef h (SystemST h) -> String -> EpiS eff h String
-importModule ssRef n = do
+importModule :: forall eff h. STRef h (SystemST h) -> (Either Module String) -> EpiS eff h String
+importModule ssRef md = do
   systemST <- lift $ readSTRef ssRef
-  m <- loadLib n systemST.moduleLib "import module"
+  m <- case md of
+    Left m -> if (checkFlag m "pool") then throwError "fuck you" else return m
+    Right m -> loadLib m systemST.moduleLib "import module"
 
   case (checkFlag m "pool") of
-    true -> return n
+    true -> return $ fromRight md
     false -> do  -- module comes from lib
       id <- lift $ uuid
 
@@ -51,7 +55,7 @@ importModule ssRef n = do
       systemST' <- lift $ readSTRef ssRef
 
       -- update scripts
-      scripts' <- traverse (importScript ssRef id) m.scripts
+      scripts' <- traverse (\x -> importScript ssRef (Right x) id) m.scripts
       let m'' = m' {scripts = scripts'}
 
       -- update pool
@@ -65,7 +69,7 @@ importModule ssRef n = do
   where
     importChild :: STRef h (SystemST h) -> Module -> String -> String -> EpiS eff h Module
     importChild ssRef m k v = do
-      child <- importModule ssRef v
+      child <- importModule ssRef (Right v)
       let modules' = insert k child m.modules
       return $ m {modules = modules'}
 
@@ -85,20 +89,20 @@ purgeModule ssRef mid = do
   lift $ modifySTRef ssRef (\s -> s {moduleRefPool = mp})
 
   -- purge children
-
   traverse (purgeModule ssRef) (values mod.modules)
+
   return unit
 
 
 -- replace child mn:cid(in ref pool) with child mn:c'n(in lib)
-replaceModule :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> String -> EpiS eff h Unit
-replaceModule ssRef mid mn cid c'n = do
+replaceModule :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> (Either Module String) -> EpiS eff h Unit
+replaceModule ssRef mid mn cid c' = do
   systemST <- lift $ readSTRef ssRef
   mRef <- loadLib mid systemST.moduleRefPool "replace module"
   m <- lift $ readSTRef mRef
 
-  -- import & perge
-  n' <- importModule ssRef c'n
+  -- import & purge
+  n' <- importModule ssRef c'
   purgeModule ssRef cid
 
   -- update
@@ -109,10 +113,12 @@ replaceModule ssRef mid mn cid c'n = do
 
 
 -- import a script into the ref pool
-importScript :: forall eff h. STRef h (SystemST h) -> String -> String -> EpiS eff h String
-importScript ssRef mid sn = do
+importScript :: forall eff h. STRef h (SystemST h) -> (Either Script String) -> String -> EpiS eff h String
+importScript ssRef sc mid = do
   systemST <- lift $ readSTRef ssRef
-  s <- loadLib sn systemST.scriptLib "import script"
+  s <- case sc of
+    Left s -> return s
+    Right s -> loadLib s systemST.scriptLib "import script"
   id <- lift $ uuid
 
   -- add module

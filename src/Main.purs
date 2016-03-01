@@ -16,8 +16,9 @@ import Config
 import Engine (initEngineST, render)
 import UI (initUIST, showFps)
 import Script (runScripts)
-import System (initSystemST, loadLib, importPattern)
+import System (initSystemST, loadLib)
 import Util (winLog, lg, requestAnimationFrame, now, Now)
+import Pattern (importPattern)
 
 host :: String
 host = "http://localhost:8000"

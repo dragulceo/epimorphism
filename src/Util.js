@@ -58,6 +58,10 @@ exports.replaceAll = function(search) {
 };
 
 
+exports.boolFromString = function(s) {
+	return (s == "true");
+}
+
 exports.numFromStringImpl = function (just) {
   return function (nothing) {
     return function (s) {

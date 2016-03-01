@@ -13,7 +13,7 @@ import Data.Traversable
 import Data.Int (fromString) as I
 
 import Config
-import Util(lg, numFromString, cxFromString)
+import Util(lg, numFromString, cxFromString, boolFromString)
 
 data LibError = LibError String
 type Lib = Either LibError
@@ -111,6 +111,10 @@ parseInt s = do
     (Just i) -> return i
     _ -> Left $ LibError $ "Expected " ++ s ++ " to be a int"
 
+parseBool :: String -> Lib Boolean
+parseBool s = do
+  return $ boolFromString s
+
 parseCX :: String -> Lib Complex
 parseCX s = do
   case (cxFromString s) of
@@ -153,11 +157,6 @@ buildEngineConf vals = do
       "fract" -> (fromLAsgn "fract" val) >>= parseInt >>= (\x -> return $ dt {fract = x})
       _ -> Left (LibError $ "EngineConf - unknown key - " ++ key)
 
-defaultUIConf :: UIConf
-defaultUIConf = {
-    canvasId: "glcanvas"
-  , consoleId: "console"
-}
 
 buildUIConf :: StrMap LineVal -> Lib UIConf
 buildUIConf vals = do
@@ -166,6 +165,7 @@ buildUIConf vals = do
     handle dt key val = case key of
       "canvasId" -> (fromLAsgn "canvasId" val) >>= (\x -> return $ dt {canvasId = x})
       "consoleId" -> (fromLAsgn "consoleId" val) >>= (\x -> return $ dt {consoleId = x})
+      "fullScreen" -> (fromLAsgn "fullScreen" val) >>= parseBool >>= (\x -> return $ dt {fullScreen = x})
       _ -> Left (LibError $ "UIConf - unknown key - " ++ key)
 
 

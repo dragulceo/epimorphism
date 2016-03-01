@@ -8,8 +8,8 @@ import Control.Monad.ST
 import Config
 import Util (lg)
 
-command :: forall h eff. STRef h UIConf -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> String -> Eff (st :: ST h | eff) Unit
-command ucRef ecRef esRef pRef msg = do
+command :: forall h eff. STRef h UIConf -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h SystemConf -> STRef h (SystemST h) -> String -> Eff (st :: ST h | eff) Unit
+command ucRef ecRef esRef pRef scRef ssRef msg = do
   uiConf     <- readSTRef ucRef
   engineConf <- readSTRef ecRef
   engineST   <- readSTRef esRef

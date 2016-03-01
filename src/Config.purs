@@ -92,10 +92,19 @@ type EngineST = {
 
 -- UI
 type UIConf = {
-    canvasId :: String
-  , consoleId :: String
+    canvasId   :: String
+  , consoleId  :: String
+  , fullScreen :: Boolean
   -- , showFps :: Boolean
 }
+
+defaultUIConf :: UIConf
+defaultUIConf = {
+    canvasId:   "glcanvas"
+  , consoleId:  "console"
+  , fullScreen: false
+}
+
 
 -- Pattern
 type ModRef = String

@@ -21,8 +21,6 @@ ENGINE
   - feedback isn't perfect/ misalligned square?
   - fract
 UI
-  - handle window resizing
-  - fullscreen mode
   - remote control
 PATTERN
   - pattern switching
@@ -33,8 +31,9 @@ MISC
   - feature parity with existing app
 
 
-
 LATER
+  - real fullscreen mode
+  - handle window resizing
   - ERROR HANDLING for createImage - missing images & sync issues & the unusable image issue
   - number parsing flakey?
   - engine stability/lost context - https://www.khronos.org/registry/webgl/extensions/WEBGL_lose_context/

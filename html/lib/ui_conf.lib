@@ -1,3 +1,9 @@
 --default
 canvasId glcanvas
 consoleId console
+fullScreen false
+
+--full
+canvasId glcanvas
+consoleId console
+fullScreen true

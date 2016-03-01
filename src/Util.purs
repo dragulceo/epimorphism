@@ -24,8 +24,6 @@ foreign import requestAnimationFrame :: forall eff a. Eff eff Unit -> Eff eff Un
 foreign import now :: forall eff. Eff (now :: Now | eff) Number
 foreign import replaceAll :: String -> String -> String -> String
 
-
-
 urlGet :: forall eff. String -> Eff eff (Either String String)
 urlGet = urlGetImpl Left Right
 
@@ -52,7 +50,8 @@ foreign import cxFromStringImpl :: (Number -> Number -> (Tuple Number Number))
                                 -> String
                                 -> Maybe (Tuple Number Number)
 
--- should these be here?
+foreign import boolFromString :: String -> Boolean
+
 numFromStringE :: forall eff. String -> Epi eff Number
 numFromStringE s = case (numFromString s) of
   (Just n) -> return n

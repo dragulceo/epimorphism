@@ -47,13 +47,15 @@ init = do
   buildRefPools ssRef pattern
   systemST' <- lift $ readSTRef ssRef
 
+  -- build strefs
+  scRef <- lift $ newSTRef systemConf
   ecRef <- lift $ newSTRef engineConf
   ucRef <- lift $ newSTRef uiConf
   pRef  <- lift $ newSTRef pattern
 
   -- init states
   esRef <- initEngineST systemConf engineConf systemST' pattern uiConf.canvasId
-  initUIST ucRef ecRef esRef pRef
+  initUIST ucRef ecRef esRef pRef scRef ssRef
 
   return {ucRef, ssRef, ecRef, esRef, pRef}
 

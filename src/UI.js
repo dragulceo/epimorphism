@@ -7,3 +7,19 @@ exports.registerEventHandler = function(handler) {
     window.eventHandler = function(msg){handler(msg)()};
   }
 };
+
+
+exports.requestFullScreen = function(id) {
+  return function() {
+    var elem = document.getElementById(id);
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.msRequestFullscreen) {
+      elem.msRequestFullscreen();
+    } else if (elem.mozRequestFullScreen) {
+      elem.mozRequestFullScreen();
+    } else if (elem.webkitRequestFullscreen) {
+      elem.webkitRequestFullscreen();
+    }
+	};
+};

@@ -137,8 +137,16 @@ type ScriptFn eff h = Number -> StrMap String -> String ->  StrMap (STRef h Scri
 type Script = {
     fn    :: String
   , dt    :: StrMap String
-  , mod   :: String
+  , mod   :: Maybe String
   , flags :: StrMap String
+}
+
+defaultScript :: Script
+defaultScript = {
+    fn: "null"
+  , dt: empty
+  , mod: Nothing
+  , flags: empty
 }
 
 --SLib

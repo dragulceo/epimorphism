@@ -66,16 +66,17 @@ buildRefPools ssRef pattern = do
 
       -- scripts
       let mdt' = insert n ref mdt
-      sdt' <- A.foldM (handleS st) sdt m.scripts
+      sdt' <- A.foldM (handleS st n) sdt m.scripts
 
       -- recurse
       let dt' = dt {mdt = mdt', sdt = sdt'}
       A.foldM (handle st) dt' (fromList $ values m.modules)
 
-    handleS :: forall h eff. SystemST h -> StrMap (STRef h Script) -> String -> EpiS eff h (StrMap (STRef h Script))
-    handleS st sdt n = do
+    handleS :: forall h eff. SystemST h -> String -> StrMap (STRef h Script) -> String -> EpiS eff h (StrMap (STRef h Script))
+    handleS st modN sdt n = do
       s <- loadLib n st.scriptLib "build ref script pool"
-      ref <- lift $ newSTRef s
+      let s' = s {mod = Just modN}
+      ref <- lift $ newSTRef s'
       return $ insert n ref sdt
 
 

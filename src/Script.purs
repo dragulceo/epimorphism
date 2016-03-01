@@ -25,7 +25,9 @@ runScripts t slib mlib = do
       sRef <- loadLib n slib "script"
       scr <- lift $ readSTRef sRef
       fn <- lookupScriptFN scr.fn
-      fn t scr.dt scr.mod slib mlib
+      case scr.mod of
+        Nothing -> throwError $ "No module when running script: " ++ scr.fn
+        Just mod -> fn t scr.dt mod slib mlib
 
 -- SCRIPT FUNCTIONS
 

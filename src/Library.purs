@@ -115,6 +115,11 @@ parseBool :: String -> Lib Boolean
 parseBool s = do
   return $ boolFromString s
 
+parseMString :: String -> Lib (Maybe String)
+parseMString s = do
+  return $ if (s == "Nothing") then Nothing else Just s
+
+
 parseCX :: String -> Lib Complex
 parseCX s = do
   case (cxFromString s) of
@@ -229,22 +234,13 @@ buildPattern vals = do
       _ -> Left (LibError $ "Pattern - unknown key - " ++ key)
 
 
-defaultScript :: Script
-defaultScript = {
-    fn: "null"
-  , dt: empty
-  , mod: ""
-  , flags: empty
-}
-
-
 buildScript :: StrMap LineVal -> Lib Script
 buildScript vals = do
   foldM handle defaultScript vals
   where
     handle dt key val = case key of
       "fn" -> (fromLAsgn "fn" val) >>= (\x -> return $ dt {fn = x})
-      "mod" -> (fromLAsgn "mod" val) >>= (\x -> return $ dt {mod = x})
+      "mod" -> (fromLAsgn "mod" val) >>= parseMString >>= (\x -> return $ dt {mod = x})
       "flags" -> (fromLMp "flags" val) >>= (\x -> return $ dt {flags = x})
       "dt" -> (fromLMp "dt" val) >>= (\x -> return $ dt {dt = x})
       _ -> Left (LibError $ "Script - unknown key - " ++ key)

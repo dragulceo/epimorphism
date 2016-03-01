@@ -16,7 +16,7 @@ import Config
 import Engine (initEngineST, render)
 import UI (initUIST, showFps)
 import Script (runScripts)
-import System (initSystemST, loadLib, buildRefPools)
+import System (initSystemST, loadLib, importPattern)
 import Util (winLog, lg, requestAnimationFrame, now, Now)
 
 host :: String
@@ -43,15 +43,16 @@ init = do
   uiConf     <- loadLib systemConf'.initUIConf systemST.uiConfLib "init ui"
   pattern    <- loadLib systemConf'.initPattern systemST.patternLib "init pattern"
 
-  -- build reference pools
-  buildRefPools ssRef pattern
-  systemST' <- lift $ readSTRef ssRef
-
   -- build strefs
   scRef <- lift $ newSTRef systemConf
   ecRef <- lift $ newSTRef engineConf
   ucRef <- lift $ newSTRef uiConf
   pRef  <- lift $ newSTRef pattern
+
+  -- import pattern
+  importPattern ssRef pRef
+  systemST' <- lift $ readSTRef ssRef
+  let x = lg systemST'
 
   -- init states
   esRef <- initEngineST systemConf engineConf systemST' pattern uiConf.canvasId

@@ -7,12 +7,13 @@ import Data.List (fromList)
 import Data.Maybe (Maybe(..))
 import Data.StrMap (empty, lookup, insert, foldM, values, StrMap())
 import Data.Tuple (Tuple(..), fst)
+import Data.Traversable (traverse)
 import Control.Monad.ST (ST, STRef, modifySTRef, newSTRef, readSTRef)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 
 import Config
-import Util (urlGet, lg)
+import Util (urlGet, lg, uuid)
 import Library
 import SLibrary
 
@@ -47,37 +48,65 @@ initSystemST host = do
 -- this method flattens the loaded module structure into a maps of StRefs for both modules &
 -- patterns.  the idea is that we only carry around names of these things anywhere
 -- and when we want one, we look it up in these pools.
-type RData h = {mdt :: StrMap (STRef h Module), sdt :: StrMap (STRef h Script)}
-buildRefPools :: forall h eff. STRef h (SystemST h) -> Pattern -> EpiS eff h Unit
-buildRefPools ssRef pattern = do
+type RData h = {mdt :: StrMap (STRef h Module), sdt :: StrMap (STRef h Script), name :: String}
+
+importPattern :: forall h eff. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Unit
+importPattern ssRef pRef =  do
   systemST <- lift $ readSTRef ssRef
+  pattern  <- lift $ readSTRef pRef
 
-  -- recursively load all modules
-  let dt = {mdt: empty, sdt: empty}
-  dt' <- A.foldM (handle systemST) dt [pattern.main, pattern.disp, pattern.vert]
+  -- import all modules
+  main <- importModule ssRef pattern.main
+  disp <- importModule ssRef pattern.disp
+  vert <- importModule ssRef pattern.vert
+  lift $ modifySTRef pRef (\p -> p {main = main, disp = disp, vert = vert})
 
-  lift $ modifySTRef ssRef (\s -> s {moduleRefPool = dt'.mdt, scriptRefPool = dt'.sdt})
   return unit
+
+
+importModule :: forall h eff. STRef h (SystemST h) -> String -> EpiS eff h String
+importModule ssRef n = do
+  systemST <- lift $ readSTRef ssRef
+  m <- loadLib n systemST.moduleLib "import module"
+  id <- lift $ uuid
+
+  -- import children
+  m' <- foldM (importChild ssRef) m m.modules
+  systemST' <- lift $ readSTRef ssRef
+
+  -- update scripts
+  scripts' <- traverse (importScript ssRef id) m.scripts
+  let m'' = m' {scripts = scripts'}
+
+  -- update pool
+  ref <- lift $ newSTRef m''
+  let mp = insert id ref systemST'.moduleRefPool
+  lift $ modifySTRef ssRef (\s -> s {moduleRefPool = mp})
+
+  return id
   where
-    handle :: forall h eff. SystemST h -> (RData h) -> String -> Epi (st :: ST h | eff) (RData h)
-    handle st dt@{mdt, sdt} n = do
-      m <- loadLib n st.moduleLib "build ref module pool"
-      ref <- lift $ newSTRef m
+    importChild :: STRef h (SystemST h) -> Module -> String -> String -> EpiS eff h Module
+    importChild ssRef m k v = do
+      child <- importModule ssRef v
+      let modules' = insert k child m.modules
+      return $ m {modules = modules'}
 
-      -- scripts
-      let mdt' = insert n ref mdt
-      sdt' <- A.foldM (handleS st n) sdt m.scripts
 
-      -- recurse
-      let dt' = dt {mdt = mdt', sdt = sdt'}
-      A.foldM (handle st) dt' (fromList $ values m.modules)
+importScript :: forall h eff. STRef h (SystemST h) -> String -> String -> EpiS eff h String
+importScript ssRef mid sn = do
+  systemST <- lift $ readSTRef ssRef
+  s <- loadLib sn systemST.scriptLib "import script"
+  id <- lift $ uuid
 
-    handleS :: forall h eff. SystemST h -> String -> StrMap (STRef h Script) -> String -> EpiS eff h (StrMap (STRef h Script))
-    handleS st modN sdt n = do
-      s <- loadLib n st.scriptLib "build ref script pool"
-      let s' = s {mod = Just modN}
-      ref <- lift $ newSTRef s'
-      return $ insert n ref sdt
+  -- add module
+  let s' = s {mod = Just mid}
+  ref <- lift $ newSTRef s'
+
+  --update pool
+  let sp = insert id ref systemST.scriptRefPool
+  lift $ modifySTRef ssRef (\s -> s {scriptRefPool = sp})
+
+  return id
 
 
 -- build a library from a location with a builder

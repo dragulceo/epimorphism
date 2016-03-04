@@ -1,7 +1,10 @@
-t t_wrap {{
+t t_id {{
   z = z_in;
-  z = $t_inner$;
-  z = $t_main$;
-  z = $t_outer$;
-  z = $reduce$;
+}}
+
+
+t t_linear {{
+  z = z_in;
+  z = M(zn[#0], z) + zn[#1]
+  z = %reduce%
 }}

@@ -133,22 +133,14 @@ modules seed1 seed_border
 
 --t_id
 flags family t
-component t_wrap
-sub t_inner z
-sub t_main  z
-sub t_outer z
-sub reduce  z
+component t_id
 
---t_wrap_id
+--t_linear
 flags default true
 flags family t
-component t_wrap
+component t_linear
 scripts seed_zn1_lin1 ..
 zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-sub t_inner M(zn[#0], z) + zn[#1]
-sub t_main  z
-sub t_outer M(zn[#2], z) + zn[#3]
-sub reduce  torus_reduce(z)
 
 --t_wrap2
 flags family t

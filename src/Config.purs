@@ -117,7 +117,6 @@ type Module = {
   , par :: StrMap Number
   , zn :: Array Complex
   , images :: Array String
-  , sub :: StrMap String
 }
 
 type Pattern = {

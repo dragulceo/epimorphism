@@ -183,7 +183,6 @@ defaultModule = {
   , par: empty
   , zn: []
   , images: []
-  , sub: empty
 }
 
 
@@ -196,7 +195,6 @@ buildModule vals = do
       "component" -> (fromLAsgn "component" val) >>= (\x -> return $ dt {component = x})
       "flags" -> (fromLMp "flags" val) >>= (\x -> return $ dt {flags = x})
       "scripts" -> (fromLLst "scripts" val) >>= (\x -> return $ dt {scripts = x})
-      "sub" -> (fromLMp "sub" val) >>= (\x -> return $ dt {sub = x})
       "modules" -> (fromLMp "modules" val) >>= (\x -> return $ dt {modules = x})
       "par" -> (fromLMp "par" val) >>= parseNMp >>= (\x -> return $ dt {par = x})
       "zn" -> (fromLLst "zn" val) >>= parseCLst >>= (\x -> return $ dt {zn = x})

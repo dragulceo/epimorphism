@@ -130,7 +130,7 @@ importScript ssRef sc mid = do
   id <- lift $ uuid
 
   --update pool
-  ref <- lift $ newSTRef s {mod = Just mid}
+  ref <- lift $ newSTRef s {mid = Just mid}
   let sp = insert id ref systemST.scriptRefPool
   lift $ modifySTRef ssRef (\s -> s {scriptRefPool = sp})
 
@@ -155,7 +155,7 @@ purgeScript ssRef sid = do
   lift $ modifySTRef ssRef (\s -> s {scriptRefPool = sp})
 
   -- remove from module
-  case sc.mod of
+  case sc.mid of
     Nothing -> throwError $ "wtf didn't this script have a module: " ++ sid
     Just mid -> do
       mRef <- loadLib mid systemST.moduleRefPool "purge script - find module"

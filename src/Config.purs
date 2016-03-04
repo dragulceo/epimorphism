@@ -133,11 +133,12 @@ type Pattern = {
 }
 
 -- Script
-type ScriptFn eff h = STRef h (SystemST h) -> String -> Number -> StrMap String -> String -> EpiS eff h Boolean
+-- sys -> self(name) -> time -> module -> self(ref)
+type ScriptFn eff h = STRef h (SystemST h) -> String -> Number -> String -> STRef h Script -> EpiS eff h Boolean
 type Script = {
     fn    :: String
   , dt    :: StrMap String
-  , mod   :: Maybe String
+  , mid   :: Maybe String
   , flags :: StrMap String
 }
 
@@ -145,7 +146,7 @@ defaultScript :: Script
 defaultScript = {
     fn: "null"
   , dt: empty
-  , mod: Nothing
+  , mid: Nothing
   , flags: empty
 }
 

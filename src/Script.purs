@@ -32,28 +32,30 @@ runScripts ssRef t = do
       sRef <- loadLib n systemST.scriptRefPool "script"
       scr <- lift $ readSTRef sRef
       fn <- lookupScriptFN scr.fn
-      case scr.mod of
+      case scr.mid of
         Nothing -> throwError $ "No module when running script: " ++ scr.fn
-        Just mod -> fn ssRef n t scr.dt mod
+        Just mid -> fn ssRef n t mid sRef
 
 -- SCRIPT FUNCTIONS
 
 -- dont do anything.  is this necessary?
 nullS :: forall h eff. ScriptFn h eff
-nullS ssRef self t dt mod = do
+nullS ssRef self t mid sRef = do
   return false
 
 
 -- move zn[idx] around on a path
 zpath :: forall h eff. ScriptFn h eff
-zpath ssRef self t dt mod = do
+zpath ssRef self t mid sRef = do
   systemST <- lift $ readSTRef ssRef
+  scr <- lift $ readSTRef sRef
+  let dt = scr.dt
 
   -- get data
   spd <- (loadLib "spd" dt "zpath spd") >>= numFromStringE
   idx <- (loadLib "idx" dt "zpath idx") >>= intFromStringE
   pathN <- loadLib "path" dt "zpath path"
-  mRef <- loadLib mod systemST.moduleRefPool "zpath module"
+  mRef <- loadLib mid systemST.moduleRefPool "zpath module"
   m <- lift $ readSTRef mRef
 
   -- lookup path function
@@ -77,8 +79,10 @@ zpath ssRef self t dt mod = do
 
 -- increment a substitution by looking through the index
 incIdx :: forall h eff. ScriptFn h eff
-incIdx ssRef self t dt mid = do
+incIdx ssRef self t mid sRef = do
   systemST <- lift $ readSTRef ssRef
+  scr <- lift $ readSTRef sRef
+  let dt = scr.dt
 
   -- get data
   inc <- (loadLib "inc" dt "incIdx inc") >>= intFromStringE

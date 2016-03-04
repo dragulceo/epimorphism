@@ -105,6 +105,7 @@ foreign import createImageImpl :: forall eff. String ->
 -- compile shaders and load into systemST
 setShaders :: forall eff h. SystemConf -> STRef h EngineST -> SystemST h -> Pattern -> EpiS eff h Unit
 setShaders sysConf esRef sys pattern = do
+  let t = lg "setShaders"
   es <- lift $ readSTRef esRef
 
   -- load & compile shaders

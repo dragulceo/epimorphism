@@ -4,7 +4,10 @@ PROJ
   - pattern switching
 	- indexes
 	  - deriving family - @seed:0 @seed:1, etc?
-  - compile shaders when modules are imported?
+		- do I even want to use indexes?
+  - what do i think about how modules are compiled?  boolean from scripts?
+	- what do i think about how scripts are created dymanically?
+	- blending speed?
 
   - saving
   - data on engine_conf/state, etc split across library, engine, config :/

@@ -54,7 +54,7 @@ init = do
   -- import pattern
   importPattern ssRef pRef
   systemST' <- lift $ readSTRef ssRef
-  pattern' <- lift $ readSTRef pRef
+  pattern'  <- lift $ readSTRef pRef
 
   -- init states
   esRef <- initEngineST systemConf engineConf systemST' pattern' uiConf.canvasId
@@ -92,11 +92,16 @@ animate stateM = handleError do
   lift $ modifySTRef pRef (\p -> p {t = t'})
   pattern' <- lift $ readSTRef pRef
   recompile <- runScripts ssRef t'
-  when recompile do
-    setShaders systemConf esRef systemST pattern
+  systemST'   <- lift $ readSTRef ssRef
 
+  case recompile of -- when doesnt work here for some godforsaken reason
+    true -> do
+      setShaders systemConf esRef systemST' pattern
+    false -> return unit
+
+  engineST'   <- lift $ readSTRef esRef
   -- render
-  render systemST engineConf engineST pattern' systemST.frameNum
+  render systemST' engineConf engineST' pattern' systemST'.frameNum
 
   -- request next frame
   lift $ modifySTRef ssRef (\s -> s {frameNum = s.frameNum + 1})

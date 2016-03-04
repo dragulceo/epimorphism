@@ -52,7 +52,7 @@ command ucRef ecRef esRef pRef scRef ssRef msg = handleError do
 
         -- import
         mid <- return $ fromJust scr'.mid
-        sid <- importScript ssRef (Left scr') mid
+        importScript ssRef (Left scr') mid
 
         return unit
       _ -> throwError $ "Unknown command: " ++ msg

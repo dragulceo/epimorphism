@@ -290,10 +290,10 @@ seed seed_border {{
 
 t t_wrap {{
   z = z_in;
-  $t_inner$;
-  $t_main$;
-  $t_outer$;
-  $reduce$;
+  z = $t_inner$;
+  z = $t_main$;
+  z = $t_outer$;
+  z = $reduce$;
 }}
 
 

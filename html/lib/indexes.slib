@@ -1,22 +1,22 @@
 reduce {{
-  z = torus_reduce(z)
-  z = grid_reduce(z)
+  torus_reduce(z)
+  grid_reduce(z)
 }}
 
 t_inner {{
-  z = zn[#0] * z + zn[#1]
+  zn[#0] * z + zn[#1]
 }}
 
 t_outer {{
-  z = zn[#2] * z + zn[#3]
+  zn[#2] * z + zn[#3]
 }}
 
 t_main {{
-  z = z
-  z = expz(z)
-  z = cosz(z)
-  z = sinz(z)
-  z = tanz(z)
-  z = sinhz(z)
-  z = coshz(z)
+  z
+  expz(z)
+  cosz(z)
+  sinz(z)
+  tanz(z)
+  sinhz(z)
+  coshz(z)
 }}

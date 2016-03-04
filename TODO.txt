@@ -6,8 +6,13 @@ PROJ
 	  - deriving family - @seed:0 @seed:1, etc?
 		- do I even want to use indexes?
   - what do i think about how modules are compiled?  boolean from scripts?
-	- what do i think about how scripts are created dymanically?
-	- blending speed?
+	- smooth interpolation
+
+  - blending speed? where is this variable stored?
+	- time phases
+	- time & rate units
+
+  - simultaneous blending
 
   - saving
   - data on engine_conf/state, etc split across library, engine, config :/

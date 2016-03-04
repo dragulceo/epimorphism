@@ -17,7 +17,7 @@ import Control.Monad.Except.Trans (lift)
 
 import Config
 import System (loadLib)
-import Util (lg, tLg, numFromStringE, intFromStringE, gmod)
+import Util (lg, tLg, numFromStringE, intFromStringE, gmod, rndstr)
 import Pattern (purgeScript, replaceModule, importScript)
 
 -- PUBLIC
@@ -126,7 +126,6 @@ incIdx ssRef self t mid sRef = do
   -- get data
   inc  <- (loadLib "inc" dt "incIdx inc") >>= intFromStringE
   subN  <- loadLib "sub" dt "incIdx sub"
-  dim   <- loadLib "dim" dt "incIdx dim"
   mRef  <- loadLib mid systemST.moduleRefPool "incIdx module"
   m <- lift $ readSTRef mRef
 
@@ -143,10 +142,7 @@ incIdx ssRef self t mid sRef = do
     Just v -> return v
 
   -- create & import blending script
-  sw <- loadLib "default" systemST.scriptLib "incIdx building script"
-  let dt' = fromFoldable $ [(Tuple "dim" dim), (Tuple "subN" subN), (Tuple "sub0" sub), (Tuple "sub1" nxtVal)]
-  let sw' = sw {fn = "blendSub", dt = union dt' sw.dt}
-  importScript ssRef (Left sw') mid
+  createScript ssRef mid "default" "blendSub" $ fromFoldable [(Tuple "subN" subN), (Tuple "sub0" sub), (Tuple "sub1" nxtVal)]
 
   -- remove self
   purgeScript ssRef self
@@ -166,6 +162,7 @@ blendSub ssRef self t mid sRef = do
   sub0 <- loadLib "sub0" dt "blendSub sub0"
   sub1 <- loadLib "sub1" dt "blendSub sub1"
 
+  -- initialize state
   unless (member "st" dt) do
     let new = fromFoldable [(Tuple "st" "init"), (Tuple "tinit" (show t))]
     let dt' = union new dt
@@ -187,21 +184,19 @@ blendSub ssRef self t mid sRef = do
   case st of
     "init" -> do
       let g = lg "initializing intrp"
-      let intrp = "(1.0 - @intrp@ / 1000.0) * " ++ sub0 ++ " + @intrp@ / 1000.0 * " ++ sub1
+      pid <- lift $ rndstr
+      let intrp = "(1.0 - @" ++ pid ++ "@ / 1000.0) * " ++ sub0 ++ " + @" ++ pid ++ "@ / 1000.0 * " ++ sub1  -- man is this messy
       let sub' = insert subN intrp sub
       lift $ modifySTRef mRef (\m -> m {sub = sub'})
 
       -- add & automate intrp var
-      let par' = insert "intrp" 0.0 par
+      let par' = insert pid 0.0 par
       lift $ modifySTRef mRef (\m -> m {par = par'})
 
-      intS <- loadLib "default" systemST.scriptLib "blendSub building intrp script"
-      let intdt = fromFoldable $ [(Tuple "par" "intrp"), (Tuple "path" "linear"), (Tuple "spd" "1.0"), (Tuple "phase" (show tinit))]
-      let intS' = intS {fn = "ppath", dt = union intdt intS.dt}
-      sid <- importScript ssRef (Left intS') mid
+      sid <- createScript ssRef mid "default" "ppath" $ fromFoldable [(Tuple "par" pid), (Tuple "path" "linear"), (Tuple "spd" "1.0"), (Tuple "phase" (show tinit))]
 
       -- update script
-      let new = fromFoldable [(Tuple "st" "intrp"), (Tuple "intrpid" sid)]
+      let new = fromFoldable [(Tuple "st" "intrp"), (Tuple "intrpid" sid), (Tuple "intrppar" pid)]
       let dt'' = union new dt'
       lift $ modifySTRef sRef (\s -> s {dt = dt''})
 
@@ -210,22 +205,22 @@ blendSub ssRef self t mid sRef = do
     "intrp" -> do
       case (t - tinit) of
         x | x >= 1000.0 -> do
-
           let g = lg "done intrp"
+
           -- remove intrp script
-          sid <- loadLib "intrpid" dt' "blendSub finished intrp"
+          sid <- loadLib "intrpid" dt' "blendSub finished intrpid"
           purgeScript ssRef sid
 
           -- remove intrp var & replace with sub1
+          pid <- loadLib "intrppar" dt' "blendSub finished intrppar"
           let sub' = insert subN sub1 sub
-          let par' = delete "intrp" par
+          let par' = delete pid par
           lift $ modifySTRef mRef (\m -> m {par = par', sub = sub'})
 
           -- remove self
           purgeScript ssRef self
           return true
         _ -> do
-          --let g = lg "intrp"
           return false
     _ -> throwError "you fucked something up"
 
@@ -254,3 +249,13 @@ lookupScriptFN n = case n of
   "blendSub" -> return blendSub
   "blendModule" -> return blendModule
   _       -> throwError $ "script function not found: " ++ n
+
+
+-- create a script dynamically
+createScript :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> StrMap String -> EpiS eff h String
+createScript ssRef mid parent fn dt = do
+  systemST <- lift $ readSTRef ssRef
+  scr <- loadLib parent systemST.scriptLib "create script"
+
+  let scr' = scr {fn = fn, dt = union dt scr.dt}
+  importScript ssRef (Left scr') mid

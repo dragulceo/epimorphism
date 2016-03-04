@@ -90,16 +90,17 @@ animate stateM = handleError do
   -- update pattern
   let t' = pattern.t + delta
   lift $ modifySTRef pRef (\p -> p {t = t'})
-  pattern' <- lift $ readSTRef pRef
+  pattern'  <- lift $ readSTRef pRef
+
   recompile <- runScripts ssRef t'
-  systemST'   <- lift $ readSTRef ssRef
+  systemST' <- lift $ readSTRef ssRef
 
   case recompile of -- when doesnt work here for some godforsaken reason
     true -> do
       setShaders systemConf esRef systemST' pattern
     false -> return unit
-
   engineST'   <- lift $ readSTRef esRef
+
   -- render
   render systemST' engineConf engineST' pattern' systemST'.frameNum
 

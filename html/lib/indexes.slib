@@ -13,9 +13,10 @@ t_outer {{
 
 t_main {{
   z = z
-  z = exp(z)
-  z = cos(z)
-  z = sin(z)
-  z = tan(z)
-  z = cosh(z)
+  z = expz(z)
+  z = cosz(z)
+  z = sinz(z)
+  z = tanz(z)
+  z = sinhz(z)
+  z = coshz(z)
 }}

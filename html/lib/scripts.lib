@@ -1,3 +1,7 @@
+--default
+fn nullS
+mod Nothing
+
 --seed_zn1_lin1
 fn zpath
 dt idx 1

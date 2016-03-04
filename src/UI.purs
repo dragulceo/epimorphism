@@ -38,8 +38,8 @@ initUIST ucRef ecRef esRef pRef scRef ssRef = do
 keyHandler :: String -> String
 keyHandler char =
   case char of
-    "1" -> "scr incIdx main.%main_body.%t $t_main 1"
-    "Q" -> "scr incIdx main.%main_body.%t $t_main -1"
+    "1" -> "scr incIdx main.main_body.t sub:t_main inc:1"
+    "Q" -> "scr incIdx main.main_body.t sub:t_main inc:-1"
     _ -> "null"
 
 

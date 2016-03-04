@@ -13,7 +13,7 @@ import Graphics.Canvas (Canvas)
 import DOM (DOM)
 
 import Config
-import Engine (initEngineST, render)
+import Engine (initEngineST, render, setShaders)
 import UI (initUIST, showFps)
 import Script (runScripts)
 import System (initSystemST, loadLib)
@@ -25,6 +25,7 @@ host = "http://localhost:8000"
 
 type State h = {
     ucRef :: STRef h UIConf
+  , scRef :: STRef h SystemConf
   , ssRef :: STRef h (SystemST h)
   , ecRef :: STRef h EngineConf
   , esRef :: STRef h EngineST
@@ -53,20 +54,21 @@ init = do
   -- import pattern
   importPattern ssRef pRef
   systemST' <- lift $ readSTRef ssRef
-  let x = lg systemST'
+  pattern' <- lift $ readSTRef pRef
 
   -- init states
-  esRef <- initEngineST systemConf engineConf systemST' pattern uiConf.canvasId
+  esRef <- initEngineST systemConf engineConf systemST' pattern' uiConf.canvasId
   initUIST ucRef ecRef esRef pRef scRef ssRef
 
-  return {ucRef, ssRef, ecRef, esRef, pRef}
+  return {ucRef, ssRef, scRef, ecRef, esRef, pRef}
 
 
 animate :: forall h. EpiS (now :: Now) h (State h) -> Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
 animate stateM = handleError do
   -- unpack state
-  state@{ucRef, ssRef, ecRef, esRef, pRef} <- stateM
+  state@{ucRef, ssRef, scRef, ecRef, esRef, pRef} <- stateM
   systemST   <- lift $ readSTRef ssRef
+  systemConf <- lift $ readSTRef scRef
   engineConf <- lift $ readSTRef ecRef
   engineST   <- lift $ readSTRef esRef
   pattern    <- lift $ readSTRef pRef
@@ -89,7 +91,9 @@ animate stateM = handleError do
   let t' = pattern.t + delta
   lift $ modifySTRef pRef (\p -> p {t = t'})
   pattern' <- lift $ readSTRef pRef
-  runScripts ssRef t'
+  recompile <- runScripts ssRef t'
+  when recompile do
+    setShaders systemConf esRef systemST pattern
 
   -- render
   render systemST engineConf engineST pattern' systemST.frameNum

@@ -1,13 +1,15 @@
 module Pattern where
 
 import Prelude
+import Data.Array (snoc, delete, length, head, tail) as A
 import Data.Either (Either(..))
-import Data.Either.Unsafe (fromRight)
-import Data.Maybe (Maybe(..))
+import Data.Either.Unsafe
+import Data.Maybe (Maybe(..), isNothing, maybe)
 import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (member, empty, lookup, insert, foldM, values, delete, StrMap())
+import Data.String (split)
 import Data.Traversable (traverse)
-import Control.Monad (unless)
+import Control.Monad (unless, when)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (ExceptT (), lift)
@@ -50,28 +52,34 @@ importModule ssRef md = do
     false -> do  -- module comes from lib
       id <- lift $ uuid
 
+      -- update pool
+      let flags' = insert "pool" "true" m.flags
+      ref <- lift $ newSTRef m {flags = flags'}
+      let mp' = insert id ref systemST.moduleRefPool  -- maybe check for duplicates here?
+      lift $ modifySTRef ssRef (\s -> s {moduleRefPool = mp'})
+
       -- import children
-      m' <- foldM (importChild ssRef) m m.modules
-      systemST' <- lift $ readSTRef ssRef
+      foldM (importChild ssRef) id m.modules
 
       -- update scripts
-      scripts' <- traverse (\x -> importScript ssRef (Right x) id) m.scripts
-      let m'' = m' {scripts = scripts'}
-
-      -- update pool
-      let flags' = insert "pool" "true" m''.flags
-      ref <- lift $ newSTRef m'' {flags = flags'}
-      let mp = insert id ref systemST'.moduleRefPool  -- maybe check for duplicates here?
-      lift $ modifySTRef ssRef (\s -> s {moduleRefPool = mp})
+      traverse (\x -> importScript ssRef (Right x) id) m.scripts
 
       return id
 
   where
-    importChild :: STRef h (SystemST h) -> Module -> String -> String -> EpiS eff h Module
-    importChild ssRef m k v = do
+    importChild :: STRef h (SystemST h) -> String -> String -> String -> EpiS eff h String
+    importChild ssRef mid k v = do
+      systemST <- lift $ readSTRef ssRef
+      -- import child
       child <- importModule ssRef (Right v)
+
+      -- update parent
+      mRef <- loadLib mid systemST.moduleRefPool "import module - update parent"
+      m <- lift $ readSTRef mRef
       let modules' = insert k child m.modules
-      return $ m {modules = modules'}
+      lift $ modifySTRef mRef (\m -> m {modules = modules'})
+
+      return mid
 
 
 -- remove a module from the ref pool
@@ -94,7 +102,7 @@ purgeModule ssRef mid = do
   return unit
 
 
--- replace child mn:cid(in ref pool) with child mn:c'n(in lib)
+-- replace child mn:cid(in ref pool) with child mn:c'(in lib)
 replaceModule :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> (Either Module String) -> EpiS eff h Unit
 replaceModule ssRef mid mn cid c' = do
   systemST <- lift $ readSTRef ssRef
@@ -121,13 +129,16 @@ importScript ssRef sc mid = do
     Right s -> loadLib s systemST.scriptLib "import script"
   id <- lift $ uuid
 
-  -- add module
-  let s' = s {mod = Just mid}
-  ref <- lift $ newSTRef s'
-
   --update pool
+  ref <- lift $ newSTRef s {mod = Just mid}
   let sp = insert id ref systemST.scriptRefPool
   lift $ modifySTRef ssRef (\s -> s {scriptRefPool = sp})
+
+  -- update module
+  mRef <- loadLib mid systemST.moduleRefPool "import script - find module"
+  m <- lift $ readSTRef mRef
+  let scripts' = A.snoc m.scripts id
+  lift $ modifySTRef mRef (\m -> m {scripts = scripts'})
 
   return id
 
@@ -136,9 +147,41 @@ importScript ssRef sc mid = do
 purgeScript :: forall eff h. STRef h (SystemST h) -> String -> EpiS eff h Unit
 purgeScript ssRef sid = do
   systemST <- lift $ readSTRef ssRef
-  sRef <- loadLib sid systemST.scriptRefPool "purge script"
+  sRef <- loadLib sid systemST.scriptRefPool "purge script - find script"
+  sc <- lift $ readSTRef sRef
 
   -- delete self
   let sp = delete sid systemST.scriptRefPool
   lift $ modifySTRef ssRef (\s -> s {scriptRefPool = sp})
+
+  -- remove from module
+  case sc.mod of
+    Nothing -> throwError $ "wtf didn't this script have a module: " ++ sid
+    Just mid -> do
+      mRef <- loadLib mid systemST.moduleRefPool "purge script - find module"
+      mod <- lift $ readSTRef mRef
+      lift $ modifySTRef mRef (\m -> m {scripts = A.delete sid mod.scripts})
+
   return unit
+
+
+-- find a module given an address - ie main.main_body.t
+findModule :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> EpiS eff h String
+findModule mpool pattern dt = do
+  let addr = split "." dt
+  case (A.head addr) of
+    Nothing -> throwError "we need data doofus"
+    Just "vert" -> findModule' mpool pattern.vert $ fromJust $ A.tail addr
+    Just "disp" -> findModule' mpool pattern.disp $ fromJust $ A.tail addr
+    Just "main" -> findModule' mpool pattern.main $ fromJust $ A.tail addr
+    Just x -> throwError $ "value should be main, vert, or disp : " ++ x
+  where
+    findModule' :: StrMap (STRef h Module) -> String -> Array String -> EpiS eff h String
+    findModule' mpool mid addr = do
+      maybe (return $ mid) handle (A.head addr)
+      where
+        handle mid' = do
+          mRef <- loadLib mid mpool "findModule'"
+          mod <- lift $ readSTRef mRef
+          c <- loadLib mid' mod.modules "findModule' find child"
+          findModule' mpool c $ fromJust $ A.tail addr

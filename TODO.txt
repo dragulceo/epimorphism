@@ -4,6 +4,7 @@ PROJ
   - pattern switching
 	- indexes
 	  - deriving family - @seed:0 @seed:1, etc?
+  - compile shaders when modules are imported?
 
   - saving
   - data on engine_conf/state, etc split across library, engine, config :/
@@ -25,6 +26,8 @@ MISC
   - feature parity with existing app
 
 LATER
+  - ModRef used inconsistiently
+  - investigate dsl for scripts
   - use fb as texture source
   - enforce integrity of pools & module references
   - should pools live in state or pattern

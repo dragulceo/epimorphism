@@ -59,7 +59,7 @@ buildIndex :: SHandle -> SLib (Tuple String Index)
 buildIndex (SHandle sig body) = do
   let tokens = filter ((/=) "") $ split " " sig
   name <- getName tokens
-  return $ Tuple name {name, lib: (split "\n" body)}
+  return $ Tuple name {name, lib: (map trim $ split "\n" body)}
   where
     getName [x] = return x
     getName _ = Left $ SLibError $ "expecting only a name in: " ++ sig

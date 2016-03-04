@@ -133,7 +133,7 @@ type Pattern = {
 }
 
 -- Script
-type ScriptFn eff h = STRef h (SystemST h) -> Number -> StrMap String -> String -> EpiS eff h  Unit
+type ScriptFn eff h = STRef h (SystemST h) -> String -> Number -> StrMap String -> String -> EpiS eff h Boolean
 type Script = {
     fn    :: String
   , dt    :: StrMap String

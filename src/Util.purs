@@ -32,6 +32,7 @@ foreign import now :: forall eff. Eff (now :: Now | eff) Number
 foreign import replaceAll :: String -> String -> String -> String
 
 foreign import uuid :: forall eff. Eff eff String
+foreign import gmod :: Int -> Int -> Int
 
 urlGet :: forall eff. String -> Eff eff (Either String String)
 urlGet = urlGetImpl Left Right

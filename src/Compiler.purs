@@ -24,29 +24,32 @@ type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array Str
 type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array String}
 
 -- compile vertex, disp & main shaders
-compileShaders :: forall eff h. Pattern -> (SystemST h) -> Epi eff Shaders
-compileShaders pattern sys = do
-  vertM   <- loadLib pattern.vert sys.moduleLib "compileShaders vert"
-  vertRes <- compile vertM sys 0 0 []
+compileShaders :: forall eff h. Pattern -> (SystemST h) -> EpiS eff h Shaders
+compileShaders pattern systemST = do
+  vertRef <- loadLib pattern.vert systemST.moduleRefPool "compileShaders vert"
+  vert    <- lift $ readSTRef vertRef
+  vertRes <- compile vert systemST 0 0 []
 
-  dispM   <- loadLib pattern.disp sys.moduleLib "compileShaders disp"
-  dispRes <- compile dispM sys 0 0 []
+  dispRef <- loadLib pattern.disp systemST.moduleRefPool "compileShaders disp"
+  disp    <- lift $ readSTRef dispRef
+  dispRes <- compile disp systemST 0 0 []
 
-  mainM   <- loadLib pattern.main sys.moduleLib "compileShaders main"
-  mainRes <- compile mainM sys 0 0 []
+  mainRef <- loadLib pattern.main systemST.moduleRefPool "compileShaders main"
+  main    <- lift $ readSTRef mainRef
+  mainRes <- compile main systemST 0 0 []
 
   -- substitute includes
-  includes <- traverse (\x -> loadLib x sys.componentLib "includes") pattern.includes
+  includes <- traverse (\x -> loadLib x systemST.componentLib "includes") pattern.includes
   let allIncludes = "//INCLUDES\n" ++ (joinWith "\n\n" (map (\x -> x.body) includes)) ++ "\n//END INCLUDES\n"
 
   return {vert: vertRes.component, main: (allIncludes ++ mainRes.component), disp: (allIncludes ++ dispRes.component), aux: mainRes.images}
 
 
 -- compile a shader.  substitutions, submodules, par & zn
-compile :: forall eff h. Module -> SystemST h -> Int -> Int -> (Array String) -> Epi eff CompRes
-compile mod sys zOfs parOfs images = do
+compile :: forall eff h. Module -> SystemST h -> Int -> Int -> (Array String) -> EpiS eff h CompRes
+compile mod systemST zOfs parOfs images = do
   -- substitutions
-  comp <- loadLib mod.component sys.componentLib "compile component"
+  comp <- loadLib mod.component systemST.componentLib "compile component"
   let component' = fold handleSub comp.body mod.sub
 
   -- pars
@@ -63,18 +66,17 @@ compile mod sys zOfs parOfs images = do
   let images' = images ++ mod.images
 
   -- submodules
-  mod <- loadModules mod.modules sys.moduleLib
-  foldM handleChild { component: component'''', zOfs: zOfs', parOfs: parOfs', images: images' } mod
+  mod <- loadModules mod.modules systemST.moduleRefPool
+  foldM (handleChild systemST) { component: component'''', zOfs: zOfs', parOfs: parOfs', images: images' } mod
   where
     handleSub dt k v = replaceAll ("\\$" ++ k ++ "\\$") v dt
     handlePar (Tuple n dt) v = Tuple (n + 1) (replaceAll ("@" ++ v ++ "@") ("par[" ++ show n ++ "]") dt)
     handleZn dt v = replaceAll ("zn\\[#" ++ show v ++ "\\]") ("zn[" ++ (show $ (v + zOfs)) ++ "]") dt
     handleImg dt v = replaceAll ("aux\\[#" ++ show v ++ "\\]") ("aux[" ++ (show $ (v + (A.length images))) ++ "]") dt
-    handleChild :: forall eff. CompRes -> String -> Module -> Epi eff CompRes
-    handleChild { component: componentC, zOfs: zOfsC, parOfs: parOfsC, images: imagesC } k v = do
-      res <- compile v sys zOfsC parOfsC imagesC
+    handleChild systemST {component, zOfs, parOfs, images} k v = do
+      res <- compile v systemST zOfs parOfs images
       let iC = "//" ++ k ++ "\n  {\n" ++ (indentLines 2 res.component) ++ "\n  }"
-      let child = replaceAll ("%" ++ k ++ "%") iC componentC
+      let child = replaceAll ("%" ++ k ++ "%") iC component
       return $ res { component = child }
 
 
@@ -93,12 +95,13 @@ flattenParZn {lib, par, zn} n = do
 
 
 -- bulk load a list of modules
-loadModules :: forall eff. StrMap ModRef -> (StrMap Module) -> Epi eff (StrMap Module)
+loadModules :: forall eff h. StrMap ModRef -> (StrMap (STRef h Module)) -> EpiS eff h (StrMap Module)
 loadModules mr lib = do
   foldM handle empty mr
   where
     handle dt k v = do
-      m <- loadLib v lib "loadModules"
+      mRef <- loadLib v lib "loadModules"
+      m    <- lift $ readSTRef mRef
       return $ insert k m dt
 
 

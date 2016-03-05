@@ -76,7 +76,7 @@ animate stateM = handleError do
   -- update time
   currentTimeMS <- lift $ now
   let lastTimeMS = fromMaybe currentTimeMS systemST.lastTimeMS
-  let delta = (currentTimeMS - lastTimeMS) * pattern.tSpd
+  let delta = (currentTimeMS - lastTimeMS) * pattern.tSpd / 1000.0
   lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS})
 
   -- fps

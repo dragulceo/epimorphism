@@ -300,7 +300,7 @@ switch switch{{
 	%m1%
 	v1 = $var$;
 
-	$var$ = (1.0 - @intrp@ / 1000.0) * v0 + @intrp@ / 1000.0 * v1;
+	$var$ = (1.0 - @intrp@) * v0 + @intrp@ * v1;
 }}
 
 
@@ -312,7 +312,7 @@ switch smooth_switch{{
 	%m1%
 	v1 = $var$;
 
-	float x = @intrp@ / 1000.0;
+	float x = @intrp@;
 	if(x <= 0.0)
 		x = 0.0;
 	else if(x >= 1.0)

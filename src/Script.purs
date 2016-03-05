@@ -73,7 +73,7 @@ ppath ssRef self t mid sRef = do
     _ -> throwError $ "Unknown par path : " ++ pathN
 
   -- execute
-  let val = fn ((t - phs) * spd)
+  let val = fn ((t - phs) / spd)
 
   -- modify data
   let par' = insert par val m.par
@@ -105,7 +105,7 @@ zpath ssRef self t mid sRef = do
     _ -> throwError $ "Unknown z path : " ++ pathN
 
   -- execute
-  let z' = fn (t * spd)
+  let z' = fn (t / spd)
 
   -- modify data
   case (A.updateAt idx z' m.zn) of

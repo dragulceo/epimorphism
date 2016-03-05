@@ -34,6 +34,7 @@ MISC
   - feature parity with existing app
 
 LATER
+  - add dimension to component family (vec2, vec4, etc)
   - ModRef used inconsistiently
   - investigate dsl for scripts
   - use fb as texture source

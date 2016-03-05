@@ -18,7 +18,7 @@ import Control.Monad.Except.Trans (lift)
 import Config
 import System (loadLib)
 import Util (lg, tLg, numFromStringE, intFromStringE, gmod, rndstr)
-import Pattern (purgeScript, replaceModule, importScript)
+import Pattern (purgeScript, replaceModule, importScript, flagFamily)
 
 -- PUBLIC
 
@@ -115,7 +115,41 @@ zpath ssRef self t mid sRef = do
 
   return false
 
+-- increment a substitution by looking through the index
+incStd :: forall eff h. ScriptFn eff h
+incStd ssRef self t mid sRef = do
+  systemST <- lift $ readSTRef ssRef
+  scr <- lift $ readSTRef sRef
+  let dt = scr.dt
 
+  -- get data
+  inc  <- (loadLib "inc" dt "incStd inc") >>= intFromStringE
+  subN  <- loadLib "sub" dt "incStd sub"
+  dim  <- (loadLib "dim" dt "incStd dim") >>= intFromStringE
+  mRef  <- loadLib mid systemST.moduleRefPool "incStd module"
+  m <- lift $ readSTRef mRef
+
+  sub <- loadLib subN m.modules "incStd find sub"
+
+  -- index
+  let index = flagFamily systemST.moduleLib $ fromFoldable [(Tuple "family" subN), (Tuple "stdlib" "true")]
+  let g = lg index
+
+  nxtPos <- case (A.elemIndex sub index) of
+    Nothing -> return 0
+    Just i -> return $ (i + inc) `gmod` (A.length index)
+
+  nxtVal <- case (A.index index nxtPos) of
+    Nothing -> throwError $ "your index doesnt exist"
+    Just v -> return v
+
+  -- create & import blending script
+  --createScript ssRef mid "default" "blendSub" $ fromFoldable [(Tuple "subN" subN), (Tuple "sub0" sub), (Tuple "sub1" nxtVal)]
+
+  -- remove self
+  purgeScript ssRef self
+
+  return false
 
 
 -- interpolate between two modules
@@ -134,10 +168,10 @@ blendModule ssRef self t mid sRef = do
 -- find script fuction given name
 lookupScriptFN :: forall eff h. String -> EpiS eff h (ScriptFn eff h)
 lookupScriptFN n = case n of
-  "null"  -> return nullS
-  "ppath" -> return ppath
-  "zpath" -> return zpath
---  "incIdx" -> return incIdx
+  "null"   -> return nullS
+  "ppath"  -> return ppath
+  "zpath"  -> return zpath
+  "incStd" -> return incStd
 -- "blendSub" -> return blendSub
   "blendModule" -> return blendModule
   _       -> throwError $ "script function not found: " ++ n

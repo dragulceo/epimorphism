@@ -1,12 +1,13 @@
 module Pattern where
 
 import Prelude
-import Data.Array (snoc, delete, length, head, tail) as A
+import Data.Array (snoc, delete, length, head, tail, sort, filter) as A
 import Data.Either (Either(..))
 import Data.Either.Unsafe
+import Data.Foldable (all)
 import Data.Maybe (Maybe(..), isNothing, maybe)
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (member, empty, lookup, insert, foldM, values, delete, StrMap())
+import Data.StrMap (member, empty, lookup, insert, foldM, values, delete, keys, fold, StrMap())
 import Data.String (split)
 import Data.Traversable (traverse)
 import Control.Monad (unless, when)
@@ -20,8 +21,22 @@ import System (loadLib)
 import Util (uuid, lg)
 
 -- PUBLIC
-checkFlag :: forall eff r. {flags :: StrMap String | r}  -> String -> Boolean
-checkFlag {flags} flag = (member flag flags) && (fromJust (lookup flag flags) == "true")
+-- check if an object has a flag
+checkFlag :: forall r. {flags :: StrMap String | r} -> String -> String -> Boolean
+checkFlag {flags} flag val = (member flag flags) && (fromJust (lookup flag flags) == val)
+
+checkFlags :: forall r. {flags :: StrMap String | r} -> StrMap String -> Boolean
+checkFlags col flags = fold handle true flags
+  where handle dt k v = dt && checkFlag col k v
+
+-- filter a family by specific flags, return the keys, sorted alphabetically
+flagFamily :: forall eff r. StrMap {flags :: StrMap String | r} -> StrMap String -> Array String
+flagFamily family flags = A.sort $ fold handle [] family
+  where
+    handle dt k v = case (checkFlags v flags) of
+      true -> A.snoc dt k
+      false -> dt
+
 
 -- import the modules of a pattern into the ref pool
 type RData h = {mdt :: StrMap (STRef h Module), sdt :: StrMap (STRef h Script), name :: String}
@@ -44,10 +59,10 @@ importModule :: forall eff h. STRef h (SystemST h) -> (Either Module String) -> 
 importModule ssRef md = do
   systemST <- lift $ readSTRef ssRef
   m <- case md of
-    Left m -> if (checkFlag m "pool") then throwError "fuck you" else return m
+    Left m -> if (checkFlag m "pool" "true") then throwError "fuck you" else return m
     Right m -> loadLib m systemST.moduleLib "import module"
 
-  case (checkFlag m "pool") of
+  case (checkFlag m "pool" "true") of
     true -> return $ fromRight md
     false -> do  -- module comes from lib
       id <- lift $ uuid

@@ -71,12 +71,10 @@ importModule ssRef md = do
         false -> do
           loadLib m systemST.moduleLib "import module lib"
 
-  systemST' <- lift $ readSTRef ssRef
-
   -- update pool
   let flags' = insert "pool" "true" m.flags
   ref <- lift $ newSTRef m {flags = flags'}
-  let mp' = insert id ref systemST'.moduleRefPool  -- maybe check for duplicates here?
+  let mp' = insert id ref systemST.moduleRefPool  -- maybe check for duplicates here?
   lift $ modifySTRef ssRef (\s -> s {moduleRefPool = mp'})
 
   -- import children

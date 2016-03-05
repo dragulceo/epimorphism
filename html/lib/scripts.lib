@@ -6,12 +6,12 @@ mid Nothing
 fn zpath
 dt idx 1
 dt path rlin
-dt spd 10
+dt spd 0.1
 mid Nothing
 
 --cool_circle1
 fn zpath
 dt idx 0
 dt path circle
-dt spd 15
+dt spd 0.067
 mid Nothing

@@ -73,7 +73,7 @@ ppath ssRef self t mid sRef = do
     _ -> throwError $ "Unknown par path : " ++ pathN
 
   -- execute
-  let val = fn ((t - phs) / spd)
+  let val = fn ((t - phs) * spd)
 
   -- modify data
   let par' = insert par val m.par
@@ -105,7 +105,7 @@ zpath ssRef self t mid sRef = do
     _ -> throwError $ "Unknown z path : " ++ pathN
 
   -- execute
-  let z' = fn (t / spd)
+  let z' = fn (t * spd)
 
   -- modify data
   case (A.updateAt idx z' m.zn) of
@@ -124,6 +124,7 @@ incStd ssRef self t mid sRef = do
 
   -- get data
   idx   <- (loadLib "idx" dt "incStd idx") >>= intFromStringE
+  spd   <- loadLib "spd" dt "incStd spd"
   subN  <- loadLib "sub" dt "incStd sub"
   dim   <- loadLib "dim" dt "incStd dim"
   mRef  <- loadLib mid systemST.moduleRefPool "incStd module"
@@ -140,7 +141,7 @@ incStd ssRef self t mid sRef = do
     Just v -> return v
 
   -- create & import blending script
-  createScript ssRef mid "default" "blendModule" $ fromFoldable [(Tuple "subN" subN), (Tuple "sub0" sub), (Tuple "sub1" nxtVal), (Tuple "dim" dim)]
+  createScript ssRef mid "default" "blendModule" $ fromFoldable [(Tuple "subN" subN), (Tuple "sub0" sub), (Tuple "sub1" nxtVal), (Tuple "dim" dim), (Tuple "spd" spd)]
 
   -- remove self
   purgeScript ssRef self
@@ -156,6 +157,7 @@ blendModule ssRef self t mid sRef = do
   let dt = scr.dt
 
   -- get data
+  spd  <- (loadLib "spd" dt "blendSub spd") >>= numFromStringE
   subN <- loadLib "subN" dt "blendSub subN"
   sub0 <- loadLib "sub0" dt "blendSub sub0"
   sub1 <- loadLib "sub1" dt "blendSub sub1"
@@ -193,6 +195,9 @@ blendModule ssRef self t mid sRef = do
 
       -- replace existing module with switch
       swid      <- replaceModule ssRef mid subN subid (Left switch')
+      let g = lg $ "SWITCHING TO: " ++ swid
+      let g = lg $ "WITH m0: " ++ sub0
+      let g = lg $ "WITH m1: " ++ sub1
       systemST' <- lift $ readSTRef ssRef
       m'        <- lift $ readSTRef mRef
 
@@ -207,16 +212,22 @@ blendModule ssRef self t mid sRef = do
       return true
 
     "intrp" -> do
-      case (t - tinit) of
+      case (t - tinit) / spd of
         -- we're done
-        x | x >= 1000.0 -> do
+        x | x >= 1.0 -> do
           -- replace switch module with m1
-          swid     <- loadLib "swid" dt' "blendModule finished swid"
-          swmodRef <- loadLib swid systemST.moduleRefPool "blendModule finishd swmod"
-          swmod    <- lift $ readSTRef swmodRef
-          m1       <- loadLib "m1" swmod.modules "blendModule finishd m1"
+          --swid     <- loadLib "swid" dt' "blendModule finished swid"
+          --swmodRef <- loadLib swid systemST.moduleRefPool "blendModule finishd swmod"
+          --swmod    <- lift $ readSTRef swmodRef
+          let h = lg "DONE INTRP"
+          let h = lg $ "SWITCHING SUBN: " ++ subN
+          let h = lg "OF"
+          let h = lg m
+          let h = lg "WHERE SUBN = "
+          let h = lg subM
 
-          replaceModule ssRef mid subN swid (Right m1)
+          m1       <- loadLib "m1" subM.modules "blendModule finished m1"
+          replaceModule ssRef mid subN subid (Right m1)
           systemST' <- lift $ readSTRef ssRef
 
           -- remove self

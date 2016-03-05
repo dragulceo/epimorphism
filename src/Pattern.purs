@@ -159,12 +159,12 @@ importScript ssRef sc mid = do
   systemST <- lift $ readSTRef ssRef
   id <- lift $ uuid
   mRef <- loadLib mid systemST.moduleRefPool "import script - find module"
-  m <- lift $ readSTRef mRef
 
   s <- case sc of
     Left s -> return s
     Right s -> do
-      let scripts' = map (\x -> if (x == s) then id else x) m.scripts
+      m <- lift $ readSTRef mRef
+      let scripts' = A.delete s m.scripts
       lift $ modifySTRef mRef (\m -> m {scripts = scripts'})
 
       case (member s systemST.scriptRefPool) of
@@ -177,6 +177,11 @@ importScript ssRef sc mid = do
   ref <- lift $ newSTRef s {mid = Just mid}
   let sp = insert id ref systemST.scriptRefPool
   lift $ modifySTRef ssRef (\s -> s {scriptRefPool = sp})
+
+  -- add script
+  m <- lift $ readSTRef mRef
+  let scripts' = A.snoc m.scripts id
+  lift $ modifySTRef mRef (\m -> m {scripts = scripts'})
 
   return id
 

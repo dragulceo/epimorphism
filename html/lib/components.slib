@@ -304,6 +304,26 @@ switch switch{{
 }}
 
 
+switch smooth_switch{{
+	$dim$ v0, v1;
+	%m0%
+	v0 = $var$;
+
+	%m1%
+	v1 = $var$;
+
+	float x = @intrp@ / 1000.0;
+	if(x <= 0.0)
+		x = 0.0;
+	else if(x >= 1.0)
+		x = 1.0;
+	else
+		x = x * x * (3.0 - 2.0 * x);
+
+	$var$ = (1.0 - x) * v0 + x * v1;
+}}
+
+
 
 t t_id {{
   z = z_in;

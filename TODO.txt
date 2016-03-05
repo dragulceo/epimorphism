@@ -4,6 +4,7 @@ PROJ
   - pattern switching
 	  - clean up this bullshit
     - simultaneous blending
+
 	- indexes
 	  - deriving family - @seed:0 @seed:1, etc?
 

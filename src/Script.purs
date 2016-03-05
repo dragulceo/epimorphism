@@ -178,18 +178,18 @@ blendModule ssRef self t mid sRef = do
   tinit <- (loadLib "tinit" dt' "blendSub tinit") >>= numFromStringE
 
   mRef  <- loadLib mid systemST.moduleRefPool "incStd module"
-  m <- lift $ readSTRef mRef
+  m     <- lift $ readSTRef mRef
 
-  subid <- loadLib subN m.modules "incStd subid"
+  subid    <- loadLib subN m.modules "incStd subid"
   subMRef  <- loadLib subid systemST.moduleRefPool "incStd sub"
-  subM <- lift $ readSTRef subMRef
+  subM     <- lift $ readSTRef subMRef
 
   -- do stuff
   case st of
     -- initialize state
     "init" -> do
       -- create switch module
-      switch <- loadLib "switch" systemST.moduleLib "blendModule"
+      switch <- loadLib "smooth_switch" systemST.moduleLib "blendModule"
       let modules = fromFoldable [(Tuple "m0" sub0), (Tuple "m1" sub1)]
       let sub'    = union (fromFoldable [(Tuple "dim" dim), (Tuple "var" subM.var)]) m.sub
       let switch' = switch {sub = sub', modules = modules, var = subM.var}
@@ -218,7 +218,9 @@ blendModule ssRef self t mid sRef = do
           swmodRef <- loadLib swid systemST.moduleRefPool "blendModule finishd swmod"
           swmod    <- lift $ readSTRef swmodRef
           m1       <- loadLib "m1" swmod.modules "blendModule finishd m1"
+
           replaceModule ssRef mid subN swid (Right m1)
+          systemST' <- lift $ readSTRef ssRef
 
           -- remove self
           purgeScript ssRef self

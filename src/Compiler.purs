@@ -45,27 +45,29 @@ compileShaders pattern systemST = do
   return {vert: vertRes.component, main: (allIncludes ++ mainRes.component), disp: (allIncludes ++ dispRes.component), aux: mainRes.images}
 
 
--- compile a shader.  submodules, par & zn
+-- compile a shader.  substitutions, submodules, par & zn
 compile :: forall eff h. Module -> SystemST h -> Int -> Int -> (Array String) -> EpiS eff h CompRes
 compile mod systemST zOfs parOfs images = do
+  -- substitutions
   comp <- loadLib mod.component systemST.componentLib "compile component"
+  let component' = fold handleSub comp.body mod.sub
 
   -- pars
   let k = (A.sort $ keys mod.par)
-  let component' = snd $ foldl handlePar (Tuple parOfs comp.body) k
+  let component'' = snd $ foldl handlePar (Tuple parOfs component') k
   let parOfs' = parOfs + (fromJust $ fromNumber $ size mod.par)
 
   -- zn
-  let component'' = foldl handleZn component' (A.(..) 0 ((A.length mod.zn) - 1))
+  let component''' = foldl handleZn component'' (A.(..) 0 ((A.length mod.zn) - 1))
   let zOfs' = zOfs + A.length mod.zn
 
   -- images
-  let component''' = foldl handleImg component'' (A.(..) 0 ((A.length mod.images) - 1))
+  let component'''' = foldl handleImg component''' (A.(..) 0 ((A.length mod.images) - 1))
   let images' = images ++ mod.images
 
   -- submodules
   mod <- loadModules mod.modules systemST.moduleRefPool
-  foldM (handleChild systemST) { component: component''', zOfs: zOfs', parOfs: parOfs', images: images' } mod
+  foldM (handleChild systemST) { component: component'''', zOfs: zOfs', parOfs: parOfs', images: images' } mod
   where
     handlePar (Tuple n dt) v = Tuple (n + 1) (replaceAll ("@" ++ v ++ "@") ("par[" ++ show n ++ "]") dt)
     handleZn dt v = replaceAll ("zn\\[#" ++ show v ++ "\\]") ("zn[" ++ (show $ (v + zOfs)) ++ "]") dt

@@ -2,9 +2,11 @@
 flags default true
 flags family post
 component post_id
+var frame
 
 --post1
 flags family post
 component post1
 par pc3_spread 0.8
 par pc3_lgv 0.5
+var frame

@@ -1,6 +1,7 @@
 --seed_empty
 flags family seed
 component seed_empty
+var seed
 
 --seed_multi
 flags default true
@@ -8,3 +9,4 @@ flags family seed
 component seed_multi
 modules seed0 seed_border
 modules seed1 seed_border
+var seed

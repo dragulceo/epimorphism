@@ -2,21 +2,20 @@ ALPHA:
 
 PROJ
   - pattern switching
+	  - clean up this bullshit
+    - simultaneous blending
 	- indexes
 	  - deriving family - @seed:0 @seed:1, etc?
-		- do I even want to use indexes?
-  - what do i think about how modules are compiled?  boolean from scripts?
+
 	- smooth interpolation
 
   - blending speed? where is this variable stored?
 	- time phases
 	- time & rate units
 
-  - simultaneous blending
-
   - saving
   - data on engine_conf/state, etc split across library, engine, config :/
-	- module inheritence?
+	- module inheritence? this stuff is mildly out of control
 
 CONFIG
   - cleanup/finish parsing of libs & slibs
@@ -34,6 +33,7 @@ MISC
   - feature parity with existing app
 
 LATER
+  - ugh moduleLibRefs
   - add dimension to component family (vec2, vec4, etc)
   - ModRef used inconsistiently
   - investigate dsl for scripts

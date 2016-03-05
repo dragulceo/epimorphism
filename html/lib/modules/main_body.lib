@@ -1,11 +1,13 @@
 --main_test
 flags family main_body
 component main_test
+var color
 
 --main_test_image
 flags family main_body
 component main_test_image
 images /textures/grid_1.png .. /textures/grid_2.png ..
+var color
 
 --main_stc
 flags default true
@@ -14,3 +16,4 @@ component main_stc
 modules seed seed_border
 modules t t_wrap2
 modules color color_bgr
+var color

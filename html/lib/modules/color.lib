@@ -2,13 +2,16 @@
 flags default true
 flags family color
 component color_id
+var color
 
 --color_bgr
 flags default true
 flags family color
 component color_bgr
+var color
 
 --rotate_hsv1
 flags family color
 component rotate_hsv
 par rot 0.17
+var color

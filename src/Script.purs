@@ -73,7 +73,6 @@ ppath ssRef self t mid sRef = do
     _ -> throwError $ "Unknown par path : " ++ pathN
 
   -- execute
---  let g = lg (t - phs)
   let val = fn ((t - phs) * spd)
 
   -- modify data
@@ -126,18 +125,18 @@ incStd ssRef self t mid sRef = do
   -- get data
   inc  <- (loadLib "inc" dt "incStd inc") >>= intFromStringE
   subN  <- loadLib "sub" dt "incStd sub"
-  dim  <-  loadLib "dim" dt "incStd dim"
+  dim   <- loadLib "dim" dt "incStd dim"
   mRef  <- loadLib mid systemST.moduleRefPool "incStd module"
   m <- lift $ readSTRef mRef
 
-  --sub <- loadLib subN m.modules "incStd find sub"
-  let sub = "t_coshz"
+  sub <- loadLib subN m.modules "incStd find sub"
 
   -- index
   let index = flagFamily systemST.moduleLib $ fromFoldable [(Tuple "family" subN), (Tuple "stdlib" "true")]
-  let g = lg index
 
-  nxtPos <- case (A.elemIndex sub index) of
+  subI <- loadLib sub systemST.moduleLibRefs "incStd modlibref"
+
+  nxtPos <- case (A.elemIndex subI index) of
     Nothing -> return 3
     Just i -> return $ (i + inc) `gmod` (A.length index)
 
@@ -165,10 +164,7 @@ blendModule ssRef self t mid sRef = do
   subN <- loadLib "subN" dt "blendSub subN"
   sub0 <- loadLib "sub0" dt "blendSub sub0"
   sub1 <- loadLib "sub1" dt "blendSub sub1"
-  dim  <- (loadLib "dim" dt "incStd dim") >>= intFromStringE
-
-  let g = lg sub0
-  let ga = lg sub1
+  dim  <- loadLib "dim" dt "incStd dim"
 
   -- initialize state
   unless (member "st" dt) do
@@ -185,11 +181,57 @@ blendModule ssRef self t mid sRef = do
 
   mRef  <- loadLib mid systemST.moduleRefPool "incStd module"
   m <- lift $ readSTRef mRef
-  let par = m.par
 
-  purgeScript ssRef self
+  subid <- loadLib subN m.modules "incStd subid"
+  subMRef  <- loadLib subid systemST.moduleRefPool "incStd sub"
+  subM <- lift $ readSTRef subMRef
 
-  return false
+  -- do stuff
+  case st of
+    "init" -> do
+      switch <- loadLib "switch" systemST.moduleLib "blendModule"
+      let modules = fromFoldable [(Tuple "m0" sub0), (Tuple "m1" sub1)]
+      let sub' = union (fromFoldable [(Tuple "dim" dim), (Tuple "var" subM.var)]) m.sub
+      let switch' = switch {sub = sub', modules = modules, var = subM.var}
+
+      swid <- replaceModule ssRef mid subN subid (Left switch')
+
+      systemST' <- lift $ readSTRef ssRef
+      m' <- lift $ readSTRef mRef
+
+      -- automate intrp var
+      sid <- createScript ssRef swid "default" "ppath" $ fromFoldable [(Tuple "par" "intrp"), (Tuple "path" "linear"), (Tuple "spd" "1.0"), (Tuple "phase" (show tinit))]
+
+      -- update self
+      let new = fromFoldable [(Tuple "st" "intrp"), (Tuple "sid" sid), (Tuple "swid" swid)]
+      let dt'' = union new dt'
+      lift $ modifySTRef sRef (\s -> s {dt = dt''})
+
+      return true
+
+    "intrp" -> do
+      case (t - tinit) of
+        x | x >= 1000.0 -> do
+          -- remove intrp script
+          sid <- loadLib "sid" dt' "blendModule finished sid"
+          purgeScript ssRef sid
+
+          -- remove intrp var & replace with sub1
+          swid <- loadLib "swid" dt' "blendModule finished swid"
+          swmodRef <- loadLib swid systemST.moduleRefPool "blendModule finishd swmod"
+          swmod <- lift $ readSTRef swmodRef
+          m1 <- loadLib "m1" swmod.modules "blendModule finishd m1"
+
+          -- replace
+          replaceModule ssRef mid subN swid (Right m1)
+
+          -- remove self
+          purgeScript ssRef self
+
+          return true
+        _ -> do
+          return false
+    _ -> throwError "you fucked something up"
 
 
 -- PRIVATE

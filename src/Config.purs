@@ -44,6 +44,7 @@ type SystemST h = {
   , patternLib :: StrMap Pattern
   , moduleLib :: StrMap Module
   , moduleRefPool :: StrMap (STRef h Module)
+  , moduleLibRefs :: StrMap String
   , scriptLib :: StrMap Script
   , scriptRefPool :: StrMap (STRef h Script)
   , componentLib :: StrMap Component
@@ -62,6 +63,7 @@ defaultSystemST = {
   , patternLib: empty
   , moduleLib: empty
   , moduleRefPool: empty
+  , moduleLibRefs: empty
   , scriptLib: empty
   , scriptRefPool: empty
   , componentLib: empty
@@ -111,13 +113,14 @@ type ModRef = String
 
 type Module = {
     component :: String
-  , flags :: StrMap String
-  , scripts :: Array String
-  , modules :: StrMap ModRef
-  , par :: StrMap Number
-  , zn :: Array Complex
-  , images :: Array String
-  , sub :: StrMap String
+  , flags     :: StrMap String
+  , scripts   :: Array String
+  , modules   :: StrMap ModRef
+  , par       :: StrMap Number
+  , zn        :: Array Complex
+  , images    :: Array String
+  , sub       :: StrMap String
+  , var       :: String
 }
 
 type Pattern = {

@@ -184,6 +184,7 @@ defaultModule = {
   , zn: []
   , images: []
   , sub: empty
+  , var: ""
 }
 
 
@@ -201,6 +202,7 @@ buildModule vals = do
       "par" -> (fromLMp "par" val) >>= parseNMp >>= (\x -> return $ dt {par = x})
       "zn" -> (fromLLst "zn" val) >>= parseCLst >>= (\x -> return $ dt {zn = x})
       "images" -> (fromLLst "images" val) >>= (\x -> return $ dt {images = x})
+      "var" -> (fromLAsgn "var" val) >>= (\x -> return $ dt {var = x})
       _ -> Left (LibError $ "Module - unknown key - " ++ key)
 
 

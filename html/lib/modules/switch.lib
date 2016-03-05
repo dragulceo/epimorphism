@@ -1,0 +1,12 @@
+--id
+flags family id
+component id
+
+--switch
+flags family switch
+component switch
+sub var v0
+sub dim float
+par intrp 0.0
+modules m0 id
+modules m1 id

@@ -58,38 +58,52 @@ importPattern ssRef pRef =  do
 importModule :: forall eff h. STRef h (SystemST h) -> (Either Module String) -> EpiS eff h String
 importModule ssRef md = do
   systemST <- lift $ readSTRef ssRef
+  id <- lift $ uuid
+
   m <- case md of
-    Left m -> if (checkFlag m "pool" "true") then throwError "fuck you" else return m
-    Right m -> loadLib m systemST.moduleLib "import module"
+    Left m -> do
+      if (checkFlag m "pool" "true") then throwError "fuck you" else return m
+    Right m -> do
+      case (member m systemST.moduleRefPool) of
+        true -> do
+          ref <- loadLib m systemST.moduleRefPool "import module pool"
 
-  case (checkFlag m "pool" "true") of
-    true -> return $ fromRight md
-    false -> do  -- module comes from lib
-      id <- lift $ uuid
+          lr <- loadLib m systemST.moduleLibRefs "import pool mlr"
+          let mlr = insert id lr systemST.moduleLibRefs
 
-      -- update pool
-      let flags' = insert "pool" "true" m.flags
-      ref <- lift $ newSTRef m {flags = flags'}
-      let mp' = insert id ref systemST.moduleRefPool  -- maybe check for duplicates here?
-      lift $ modifySTRef ssRef (\s -> s {moduleRefPool = mp'})
+          lift $ modifySTRef ssRef (\s -> s {moduleLibRefs = mlr})
+          lift $ readSTRef ref
+        false -> do
+          let mlr = insert id m systemST.moduleLibRefs
 
-      -- import children
-      foldM (importChild ssRef) id m.modules
+          lift $ modifySTRef ssRef (\s -> s {moduleLibRefs = mlr})
+          loadLib m systemST.moduleLib "import module lib"
 
-      -- update scripts
-      traverse (\x -> importScript ssRef (Right x) id) m.scripts
+  systemST' <- lift $ readSTRef ssRef
 
-      return id
+  -- update pool
+  let flags' = insert "pool" "true" m.flags
+  ref <- lift $ newSTRef m {flags = flags'}
+  let mp' = insert id ref systemST'.moduleRefPool  -- maybe check for duplicates here?
+  lift $ modifySTRef ssRef (\s -> s {moduleRefPool = mp'})
+
+  -- import children
+  foldM (importChild ssRef) id m.modules
+
+  -- update scripts
+  traverse (\x -> importScript ssRef (Right x) id) m.scripts
+
+  return id
 
   where
     importChild :: STRef h (SystemST h) -> String -> String -> String -> EpiS eff h String
     importChild ssRef mid k v = do
-      systemST <- lift $ readSTRef ssRef
+      systemSTC <- lift $ readSTRef ssRef
       -- import child
       child <- importModule ssRef (Right v)
 
       -- update parent
-      mRef <- loadLib mid systemST.moduleRefPool "import module - update parent"
+      mRef <- loadLib mid systemSTC.moduleRefPool "import module - update parent"
       m <- lift $ readSTRef mRef
       let modules' = insert k child m.modules
       lift $ modifySTRef mRef (\m -> m {modules = modules'})
@@ -111,6 +125,10 @@ purgeModule ssRef mid = do
   let mp = delete mid systemST.moduleRefPool
   lift $ modifySTRef ssRef (\s -> s {moduleRefPool = mp})
 
+  -- remove lib ref
+  let mlr = delete mid systemST.moduleLibRefs
+  lift $ modifySTRef ssRef (\s -> s {moduleLibRefs = mlr})
+
   -- purge children
   traverse (purgeModule ssRef) (values mod.modules)
 
@@ -118,7 +136,7 @@ purgeModule ssRef mid = do
 
 
 -- replace child mn:cid(in ref pool) with child mn:c'(in lib)
-replaceModule :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> (Either Module String) -> EpiS eff h Unit
+replaceModule :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> (Either Module String) -> EpiS eff h String
 replaceModule ssRef mid mn cid c' = do
   systemST <- lift $ readSTRef ssRef
   mRef <- loadLib mid systemST.moduleRefPool "replace module"
@@ -132,28 +150,33 @@ replaceModule ssRef mid mn cid c' = do
   let mod' = insert mn n' m.modules
   lift $ modifySTRef mRef (\m -> m {modules = mod'})
 
-  return unit
+  return n'
 
 
 -- import a script into the ref pool
 importScript :: forall eff h. STRef h (SystemST h) -> (Either Script String) -> String -> EpiS eff h String
 importScript ssRef sc mid = do
   systemST <- lift $ readSTRef ssRef
+  id <- lift $ uuid
+  mRef <- loadLib mid systemST.moduleRefPool "import script - find module"
+  m <- lift $ readSTRef mRef
+
   s <- case sc of
     Left s -> return s
-    Right s -> loadLib s systemST.scriptLib "import script"
-  id <- lift $ uuid
+    Right s -> do
+      let scripts' = map (\x -> if (x == s) then id else x) m.scripts
+      lift $ modifySTRef mRef (\m -> m {scripts = scripts'})
+
+      case (member s systemST.scriptRefPool) of
+        true -> do
+          ref <- loadLib s systemST.scriptRefPool "import script pool"
+          lift $ readSTRef ref
+        false -> loadLib s systemST.scriptLib "import script"
 
   --update pool
   ref <- lift $ newSTRef s {mid = Just mid}
   let sp = insert id ref systemST.scriptRefPool
   lift $ modifySTRef ssRef (\s -> s {scriptRefPool = sp})
-
-  -- update module
-  mRef <- loadLib mid systemST.moduleRefPool "import script - find module"
-  m <- lift $ readSTRef mRef
-  let scripts' = A.snoc m.scripts id
-  lift $ modifySTRef mRef (\m -> m {scripts = scripts'})
 
   return id
 

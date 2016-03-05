@@ -289,6 +289,22 @@ seed seed_border {{
 
 
 
+id id{{
+}}
+
+switch switch{{
+	$dim$ v0, v1;
+	%m0%
+	v0 = $var$;
+
+	%m1%
+	v1 = $var$;
+
+	$var$ = (1.0 - @intrp@ / 1000.0) * v0 + @intrp@ / 1000.0 * v1;
+}}
+
+
+
 t t_id {{
   z = z_in;
 }}

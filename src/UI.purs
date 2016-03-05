@@ -38,8 +38,8 @@ initUIST ucRef ecRef esRef pRef scRef ssRef = do
 keyHandler :: String -> String
 keyHandler char =
   case char of
-    "1" -> "scr incStd main.main_body sub:t dim:2 inc:1"
-    "Q" -> "scr incStd main.main_body sub:t dim:2 inc:-1"
+    "1" -> "scr incStd main.main_body sub:t dim:vec2 inc:1"
+    "Q" -> "scr incStd main.main_body sub:t dim:vec2 inc:-1"
     _ -> "null"
 
 

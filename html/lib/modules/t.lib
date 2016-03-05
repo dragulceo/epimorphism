@@ -6,24 +6,5 @@ component t_id
 flags default true
 flags family t
 component t_linear
-scripts seed_zn1_lin1 ..
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-
---t_wrap2
-flags family t
-component t_wrap
-sub t_inner z
-sub t_main  2.0 * z
-sub t_outer z
-sub reduce  torus_reduce(z)
-
---t_wrap_cool
-flags default true
-flags family t
-component t_wrap
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
-scripts cool_circle1 ..
-sub t_inner M(zn[#0], z) + zn[#1]
-sub t_main  sinhz(z)
-sub t_outer M(zn[#2], z) + zn[#3]
-sub reduce  torus_reduce(z)
+zn 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce

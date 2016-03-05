@@ -5,6 +5,15 @@ t t_id {{
 
 t t_linear {{
   z = z_in;
-  z = M(zn[#0], z) + zn[#1]
+  z = M(zn[#0], z) + zn[#1];
   z = %reduce%
+}}
+
+
+t t_sinhz {{
+  z = z_in;
+  z = M(zn[#0], z) + zn[#1];
+	z = sinhz(z);
+  z = M(zn[#2], z) + zn[#3];
+	%reduce%
 }}

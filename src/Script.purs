@@ -116,114 +116,6 @@ zpath ssRef self t mid sRef = do
   return false
 
 
--- increment a substitution by looking through the index
-incIdx :: forall eff h. ScriptFn eff h
-incIdx ssRef self t mid sRef = do
-  systemST <- lift $ readSTRef ssRef
-  scr <- lift $ readSTRef sRef
-  let dt = scr.dt
-
-  -- get data
-  inc  <- (loadLib "inc" dt "incIdx inc") >>= intFromStringE
-  subN  <- loadLib "sub" dt "incIdx sub"
-  mRef  <- loadLib mid systemST.moduleRefPool "incIdx module"
-  m <- lift $ readSTRef mRef
-
-  sub <- loadLib subN m.sub "incIdx find sub"
-
-  -- index
-  index <- loadLib subN systemST.indexLib "incIdx index"
-  nxtPos <- case (A.elemIndex sub index.lib) of
-    Nothing -> return 3
-    Just i -> return $ (i + inc) `gmod` (A.length index.lib)
-
-  nxtVal <- case (A.index index.lib nxtPos) of
-    Nothing -> throwError $ "elem out of bound : " ++ (show nxtPos) ++ " : " ++ subN
-    Just v -> return v
-
-  -- create & import blending script
-  createScript ssRef mid "default" "blendSub" $ fromFoldable [(Tuple "subN" subN), (Tuple "sub0" sub), (Tuple "sub1" nxtVal)]
-
-  -- remove self
-  purgeScript ssRef self
-
-  return false
-
-
--- interpolate between two substitutions
-blendSub :: forall eff h. ScriptFn eff h
-blendSub ssRef self t mid sRef = do
-  systemST <- lift $ readSTRef ssRef
-  scr <- lift $ readSTRef sRef
-  let dt = scr.dt
-
-  -- get data
-  subN <- loadLib "subN" dt "blendSub subN"
-  sub0 <- loadLib "sub0" dt "blendSub sub0"
-  sub1 <- loadLib "sub1" dt "blendSub sub1"
-
-  -- initialize state
-  unless (member "st" dt) do
-    let new = fromFoldable [(Tuple "st" "init"), (Tuple "tinit" (show t))]
-    let dt' = union new dt
-    lift $ modifySTRef sRef (\s -> s {dt = dt'})
-    return unit
-
-  scr' <- lift $ readSTRef sRef
-  let dt' = scr'.dt
-
-  st    <- loadLib "st" dt' "blendSub st"
-  tinit <- (loadLib "tinit" dt' "blendSub tinit") >>= numFromStringE
-
-  mRef  <- loadLib mid systemST.moduleRefPool "incIdx module"
-  m <- lift $ readSTRef mRef
-  let sub = m.sub
-  let par = m.par
-
-  -- do stuff
-  case st of
-    "init" -> do
-      let g = lg "initializing intrp"
-      pid <- lift $ rndstr
-      let intrp = "(1.0 - @" ++ pid ++ "@ / 1000.0) * " ++ sub0 ++ " + @" ++ pid ++ "@ / 1000.0 * " ++ sub1  -- man is this messy
-      let sub' = insert subN intrp sub
-      lift $ modifySTRef mRef (\m -> m {sub = sub'})
-
-      -- add & automate intrp var
-      let par' = insert pid 0.0 par
-      lift $ modifySTRef mRef (\m -> m {par = par'})
-
-      sid <- createScript ssRef mid "default" "ppath" $ fromFoldable [(Tuple "par" pid), (Tuple "path" "linear"), (Tuple "spd" "1.0"), (Tuple "phase" (show tinit))]
-
-      -- update script
-      let new = fromFoldable [(Tuple "st" "intrp"), (Tuple "intrpid" sid), (Tuple "intrppar" pid)]
-      let dt'' = union new dt'
-      lift $ modifySTRef sRef (\s -> s {dt = dt''})
-
-      return true
-
-    "intrp" -> do
-      case (t - tinit) of
-        x | x >= 1000.0 -> do
-          let g = lg "done intrp"
-
-          -- remove intrp script
-          sid <- loadLib "intrpid" dt' "blendSub finished intrpid"
-          purgeScript ssRef sid
-
-          -- remove intrp var & replace with sub1
-          pid <- loadLib "intrppar" dt' "blendSub finished intrppar"
-          let sub' = insert subN sub1 sub
-          let par' = delete pid par
-          lift $ modifySTRef mRef (\m -> m {par = par', sub = sub'})
-
-          -- remove self
-          purgeScript ssRef self
-          return true
-        _ -> do
-          return false
-    _ -> throwError "you fucked something up"
-
 
 
 -- interpolate between two modules
@@ -245,8 +137,8 @@ lookupScriptFN n = case n of
   "null"  -> return nullS
   "ppath" -> return ppath
   "zpath" -> return zpath
-  "incIdx" -> return incIdx
-  "blendSub" -> return blendSub
+--  "incIdx" -> return incIdx
+-- "blendSub" -> return blendSub
   "blendModule" -> return blendModule
   _       -> throwError $ "script function not found: " ++ n
 

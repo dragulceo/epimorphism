@@ -115,6 +115,7 @@ zpath ssRef self t mid sRef = do
 
   return false
 
+
 -- increment a substitution by looking through the index
 incStd :: forall eff h. ScriptFn eff h
 incStd ssRef self t mid sRef = do
@@ -125,18 +126,19 @@ incStd ssRef self t mid sRef = do
   -- get data
   inc  <- (loadLib "inc" dt "incStd inc") >>= intFromStringE
   subN  <- loadLib "sub" dt "incStd sub"
-  dim  <- (loadLib "dim" dt "incStd dim") >>= intFromStringE
+  dim  <-  loadLib "dim" dt "incStd dim"
   mRef  <- loadLib mid systemST.moduleRefPool "incStd module"
   m <- lift $ readSTRef mRef
 
-  sub <- loadLib subN m.modules "incStd find sub"
+  --sub <- loadLib subN m.modules "incStd find sub"
+  let sub = "t_coshz"
 
   -- index
   let index = flagFamily systemST.moduleLib $ fromFoldable [(Tuple "family" subN), (Tuple "stdlib" "true")]
   let g = lg index
 
   nxtPos <- case (A.elemIndex sub index) of
-    Nothing -> return 0
+    Nothing -> return 3
     Just i -> return $ (i + inc) `gmod` (A.length index)
 
   nxtVal <- case (A.index index nxtPos) of
@@ -144,7 +146,7 @@ incStd ssRef self t mid sRef = do
     Just v -> return v
 
   -- create & import blending script
-  --createScript ssRef mid "default" "blendSub" $ fromFoldable [(Tuple "subN" subN), (Tuple "sub0" sub), (Tuple "sub1" nxtVal)]
+  createScript ssRef mid "default" "blendModule" $ fromFoldable [(Tuple "subN" subN), (Tuple "sub0" sub), (Tuple "sub1" nxtVal), (Tuple "dim" dim)]
 
   -- remove self
   purgeScript ssRef self
@@ -155,10 +157,37 @@ incStd ssRef self t mid sRef = do
 -- interpolate between two modules
 blendModule :: forall eff h. ScriptFn eff h
 blendModule ssRef self t mid sRef = do
+  systemST <- lift $ readSTRef ssRef
+  scr <- lift $ readSTRef sRef
+  let dt = scr.dt
 
-    -- do thing
---  let sub' = insert subN nxtVal m.sub
-  --lift $ modifySTRef mRef (\m -> m {sub = sub'})
+  -- get data
+  subN <- loadLib "subN" dt "blendSub subN"
+  sub0 <- loadLib "sub0" dt "blendSub sub0"
+  sub1 <- loadLib "sub1" dt "blendSub sub1"
+  dim  <- (loadLib "dim" dt "incStd dim") >>= intFromStringE
+
+  let g = lg sub0
+  let ga = lg sub1
+
+  -- initialize state
+  unless (member "st" dt) do
+    let new = fromFoldable [(Tuple "st" "init"), (Tuple "tinit" (show t))]
+    let dt' = union new dt
+    lift $ modifySTRef sRef (\s -> s {dt = dt'})
+    return unit
+
+  scr' <- lift $ readSTRef sRef
+  let dt' = scr'.dt
+
+  st    <- loadLib "st" dt' "blendSub st"
+  tinit <- (loadLib "tinit" dt' "blendSub tinit") >>= numFromStringE
+
+  mRef  <- loadLib mid systemST.moduleRefPool "incStd module"
+  m <- lift $ readSTRef mRef
+  let par = m.par
+
+  purgeScript ssRef self
 
   return false
 
@@ -172,7 +201,6 @@ lookupScriptFN n = case n of
   "ppath"  -> return ppath
   "zpath"  -> return zpath
   "incStd" -> return incStd
--- "blendSub" -> return blendSub
   "blendModule" -> return blendModule
   _       -> throwError $ "script function not found: " ++ n
 

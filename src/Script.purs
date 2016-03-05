@@ -123,17 +123,15 @@ incStd ssRef self t mid sRef = do
   let dt = scr.dt
 
   -- get data
-  inc  <- (loadLib "inc" dt "incStd inc") >>= intFromStringE
+  inc   <- (loadLib "inc" dt "incStd inc") >>= intFromStringE
   subN  <- loadLib "sub" dt "incStd sub"
   dim   <- loadLib "dim" dt "incStd dim"
   mRef  <- loadLib mid systemST.moduleRefPool "incStd module"
-  m <- lift $ readSTRef mRef
+  m     <- lift $ readSTRef mRef
+  sub   <- loadLib subN m.modules "incStd find sub"
 
-  sub <- loadLib subN m.modules "incStd find sub"
-
-  -- index
+  -- index & next data
   let index = flagFamily systemST.moduleLib $ fromFoldable [(Tuple "family" subN), (Tuple "stdlib" "true")]
-
   subI <- loadLib sub systemST.moduleLibRefs "incStd modlibref"
 
   nxtPos <- case (A.elemIndex subI index) of
@@ -188,21 +186,23 @@ blendModule ssRef self t mid sRef = do
 
   -- do stuff
   case st of
+    -- initialize state
     "init" -> do
+      -- create switch module
       switch <- loadLib "switch" systemST.moduleLib "blendModule"
       let modules = fromFoldable [(Tuple "m0" sub0), (Tuple "m1" sub1)]
-      let sub' = union (fromFoldable [(Tuple "dim" dim), (Tuple "var" subM.var)]) m.sub
+      let sub'    = union (fromFoldable [(Tuple "dim" dim), (Tuple "var" subM.var)]) m.sub
       let switch' = switch {sub = sub', modules = modules, var = subM.var}
 
-      swid <- replaceModule ssRef mid subN subid (Left switch')
-
+      -- replace existing module with switch
+      swid      <- replaceModule ssRef mid subN subid (Left switch')
       systemST' <- lift $ readSTRef ssRef
-      m' <- lift $ readSTRef mRef
+      m'        <- lift $ readSTRef mRef
 
       -- automate intrp var
       sid <- createScript ssRef swid "default" "ppath" $ fromFoldable [(Tuple "par" "intrp"), (Tuple "path" "linear"), (Tuple "spd" "1.0"), (Tuple "phase" (show tinit))]
 
-      -- update self
+      -- update state
       let new = fromFoldable [(Tuple "st" "intrp"), (Tuple "sid" sid), (Tuple "swid" swid)]
       let dt'' = union new dt'
       lift $ modifySTRef sRef (\s -> s {dt = dt''})
@@ -211,24 +211,20 @@ blendModule ssRef self t mid sRef = do
 
     "intrp" -> do
       case (t - tinit) of
+        -- we're done
         x | x >= 1000.0 -> do
-          -- remove intrp script
-          sid <- loadLib "sid" dt' "blendModule finished sid"
-          purgeScript ssRef sid
-
-          -- remove intrp var & replace with sub1
-          swid <- loadLib "swid" dt' "blendModule finished swid"
+          -- replace switch module with m1
+          swid     <- loadLib "swid" dt' "blendModule finished swid"
           swmodRef <- loadLib swid systemST.moduleRefPool "blendModule finishd swmod"
-          swmod <- lift $ readSTRef swmodRef
-          m1 <- loadLib "m1" swmod.modules "blendModule finishd m1"
-
-          -- replace
+          swmod    <- lift $ readSTRef swmodRef
+          m1       <- loadLib "m1" swmod.modules "blendModule finishd m1"
           replaceModule ssRef mid subN swid (Right m1)
 
           -- remove self
           purgeScript ssRef self
 
           return true
+
         _ -> do
           return false
     _ -> throwError "you fucked something up"
@@ -247,11 +243,11 @@ lookupScriptFN n = case n of
   _       -> throwError $ "script function not found: " ++ n
 
 
--- create a script dynamically
+-- create a script dynamically & import it
 createScript :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> StrMap String -> EpiS eff h String
 createScript ssRef mid parent fn dt = do
   systemST <- lift $ readSTRef ssRef
-  scr <- loadLib parent systemST.scriptLib "create script"
+  scr      <- loadLib parent systemST.scriptLib "create script"
 
   let scr' = scr {fn = fn, dt = union dt scr.dt}
   importScript ssRef (Left scr') mid

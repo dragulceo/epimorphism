@@ -1,0 +1,4 @@
+--torus_reduce
+flags default true
+flags family reduce
+component torus_reduce

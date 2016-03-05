@@ -123,7 +123,7 @@ incStd ssRef self t mid sRef = do
   let dt = scr.dt
 
   -- get data
-  inc   <- (loadLib "inc" dt "incStd inc") >>= intFromStringE
+  idx   <- (loadLib "idx" dt "incStd idx") >>= intFromStringE
   subN  <- loadLib "sub" dt "incStd sub"
   dim   <- loadLib "dim" dt "incStd dim"
   mRef  <- loadLib mid systemST.moduleRefPool "incStd module"
@@ -132,11 +132,8 @@ incStd ssRef self t mid sRef = do
 
   -- index & next data
   let index = flagFamily systemST.moduleLib $ fromFoldable [(Tuple "family" subN), (Tuple "stdlib" "true")]
-  subI <- loadLib sub systemST.moduleLibRefs "incStd modlibref"
 
-  nxtPos <- case (A.elemIndex subI index) of
-    Nothing -> return 3
-    Just i -> return $ (i + inc) `gmod` (A.length index)
+  let nxtPos = idx `gmod` (A.length index)
 
   nxtVal <- case (A.index index nxtPos) of
     Nothing -> throwError $ "your index doesnt exist"

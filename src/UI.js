@@ -29,7 +29,7 @@ exports.registerKeyHandler = function(handler) {
   return function(){
 		document.onkeydown = function(event) {
 			var code = String.fromCharCode(event.keyCode);
-			var cmd = handler(code);
+			var cmd = handler(code)();
 			window.eventHandler(cmd);
 		};
 	};

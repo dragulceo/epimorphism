@@ -24,10 +24,11 @@ import System (loadLib)
 import Pattern (importScript, findModule)
 import Util (winLog, lg, handleError)
 
-command :: forall eff h. STRef h UIConf -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h SystemConf -> STRef h (SystemST h) -> String -> Eff (canvas :: Canvas, dom :: DOM, st :: ST h | eff) Unit
-command ucRef ecRef esRef pRef scRef ssRef msg = handleError do
+command :: forall eff h. STRef h UIConf -> STRef h UIST -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h SystemConf -> STRef h (SystemST h) -> String -> Eff (canvas :: Canvas, dom :: DOM, st :: ST h | eff) Unit
+command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
   systemST   <- lift $ readSTRef ssRef
   uiConf     <- lift $ readSTRef ucRef
+  usConf     <- lift $ readSTRef usRef
   engineConf <- lift $ readSTRef ecRef
   engineST   <- lift $ readSTRef esRef
   pattern    <- lift $ readSTRef pRef

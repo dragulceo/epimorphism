@@ -44,7 +44,6 @@ type SystemST h = {
   , patternLib :: StrMap Pattern
   , moduleLib :: StrMap Module
   , moduleRefPool :: StrMap (STRef h Module)
-  , moduleLibRefs :: StrMap String
   , scriptLib :: StrMap Script
   , scriptRefPool :: StrMap (STRef h Script)
   , componentLib :: StrMap Component
@@ -63,7 +62,6 @@ defaultSystemST = {
   , patternLib: empty
   , moduleLib: empty
   , moduleRefPool: empty
-  , moduleLibRefs: empty
   , scriptLib: empty
   , scriptRefPool: empty
   , componentLib: empty
@@ -94,9 +92,10 @@ type EngineST = {
 
 -- UI
 type UIConf = {
-    canvasId   :: String
-  , consoleId  :: String
-  , fullScreen :: Boolean
+    canvasId          :: String
+  , consoleId         :: String
+  , fullScreen        :: Boolean
+  , keyboardSwitchSpd :: Number
   -- , showFps :: Boolean
 }
 
@@ -105,6 +104,16 @@ defaultUIConf = {
     canvasId:   "glcanvas"
   , consoleId:  "console"
   , fullScreen: false
+  , keyboardSwitchSpd: 1.0
+}
+
+type UIST = {
+    incIdx :: StrMap Int
+}
+
+defaultUIST :: UIST
+defaultUIST = {
+    incIdx: empty
 }
 
 

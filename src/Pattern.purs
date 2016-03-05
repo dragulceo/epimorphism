@@ -67,16 +67,8 @@ importModule ssRef md = do
       case (member m systemST.moduleRefPool) of
         true -> do
           ref <- loadLib m systemST.moduleRefPool "import module pool"
-
-          lr <- loadLib m systemST.moduleLibRefs "import pool mlr"
-          let mlr = insert id lr systemST.moduleLibRefs
-
-          lift $ modifySTRef ssRef (\s -> s {moduleLibRefs = mlr})
           lift $ readSTRef ref
         false -> do
-          let mlr = insert id m systemST.moduleLibRefs
-
-          lift $ modifySTRef ssRef (\s -> s {moduleLibRefs = mlr})
           loadLib m systemST.moduleLib "import module lib"
 
   systemST' <- lift $ readSTRef ssRef
@@ -124,10 +116,6 @@ purgeModule ssRef mid = do
   -- delete self
   let mp = delete mid systemST.moduleRefPool
   lift $ modifySTRef ssRef (\s -> s {moduleRefPool = mp})
-
-  -- remove lib ref
-  let mlr = delete mid systemST.moduleLibRefs
-  lift $ modifySTRef ssRef (\s -> s {moduleLibRefs = mlr})
 
   -- purge children
   traverse (purgeModule ssRef) (values mod.modules)

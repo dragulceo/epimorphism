@@ -5,23 +5,20 @@ PROJ
 	  - clean up this bullshit
     - simultaneous blending
 
-	- indexes
-	  - deriving family - @seed:0 @seed:1, etc?
-
-	- smooth interpolation
-
-  - blending speed? where is this variable stored?
 	- time phases
 	- time & rate units
-
-  - saving
-  - data on engine_conf/state, etc split across library, engine, config :/
-	- module inheritence? this stuff is mildly out of control
 
 CONFIG
   - cleanup/finish parsing of libs & slibs
     - general refactoring
     - clean up error messages
+  - saving
+  - data on engine_conf/state, etc split across library, engine, config :/
+	- module inheritence? this stuff is mildly out of control
+	- indexes
+	  - deriving family - @seed:0 @seed:1, etc?
+
+
 ENGINE
   - feedback isn't perfect/ misalligned square?
   - fract
@@ -34,7 +31,6 @@ MISC
   - feature parity with existing app
 
 LATER
-  - ugh moduleLibRefs
   - add dimension to component family (vec2, vec4, etc)
   - ModRef used inconsistiently
   - investigate dsl for scripts

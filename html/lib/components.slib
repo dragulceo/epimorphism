@@ -297,7 +297,43 @@ t t_id {{
 t t_linear {{
   z = z_in;
   z = M(zn[#0], z) + zn[#1];
-  z = %reduce%
+  %reduce%
+}}
+
+
+t t_expz {{
+  z = z_in;
+  z = M(zn[#0], z) + zn[#1];
+	z = expz(z);
+  z = M(zn[#2], z) + zn[#3];
+  %reduce%
+}}
+
+
+t t_cosz {{
+  z = z_in;
+  z = M(zn[#0], z) + zn[#1];
+	z = cosz(z);
+  z = M(zn[#2], z) + zn[#3];
+  %reduce%
+}}
+
+
+t t_sinz {{
+  z = z_in;
+  z = M(zn[#0], z) + zn[#1];
+	z = sinz(z);
+  z = M(zn[#2], z) + zn[#3];
+  %reduce%
+}}
+
+
+t t_tanz {{
+  z = z_in;
+  z = M(zn[#0], z) + zn[#1];
+	z = tanz(z);
+  z = M(zn[#2], z) + zn[#3];
+  %reduce%
 }}
 
 
@@ -306,7 +342,16 @@ t t_sinhz {{
   z = M(zn[#0], z) + zn[#1];
 	z = sinhz(z);
   z = M(zn[#2], z) + zn[#3];
-	%reduce%
+  %reduce%
+}}
+
+
+t t_coshz {{
+  z = z_in;
+  z = M(zn[#0], z) + zn[#1];
+	z = coshz(z);
+  z = M(zn[#2], z) + zn[#3];
+  %reduce%
 }}
 
 

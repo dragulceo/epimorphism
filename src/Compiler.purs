@@ -48,9 +48,11 @@ compileShaders pattern systemST = do
 -- compile a shader.  submodules, par & zn
 compile :: forall eff h. Module -> SystemST h -> Int -> Int -> (Array String) -> EpiS eff h CompRes
 compile mod systemST zOfs parOfs images = do
+  comp <- loadLib mod.component systemST.componentLib "compile component"
+
   -- pars
   let k = (A.sort $ keys mod.par)
-  let component' = snd $ foldl handlePar (Tuple parOfs mod.component) k
+  let component' = snd $ foldl handlePar (Tuple parOfs comp.body) k
   let parOfs' = parOfs + (fromJust $ fromNumber $ size mod.par)
 
   -- zn

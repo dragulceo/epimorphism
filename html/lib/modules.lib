@@ -102,6 +102,7 @@ flags family t
 component t_sinhz
 zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
 scripts cool_circle1 ..
+modules reduce torus_reduce
 
 --seed_border_cool
 flags family seed
@@ -137,8 +138,51 @@ component t_id
 --t_linear
 flags default true
 flags family t
+flags stdlib true
 component t_linear
 zn 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+
+--t_expz
+flags family t
+flags stdlib true
+component t_expz
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+
+--t_cosz
+flags family t
+flags stdlib true
+component t_cosz
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+
+--t_sinz
+flags family t
+flags stdlib true
+component t_sinz
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+
+--t_tanz
+flags family t
+flags stdlib true
+component t_tanz
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+
+--t_coshz
+flags family t
+flags stdlib true
+component t_coshz
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+
+--t_sinhz
+flags family t
+flags stdlib true
+component t_sinhz
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
 modules reduce torus_reduce
 
 

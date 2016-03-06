@@ -3,66 +3,66 @@ flags family t
 component t_id
 var z
 
---t_linear_tst
+--t_zo
 flags default true
 flags family t
-flags incTest true
+component t_linear
+zn 1.1 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+
+--t_linear
+flags family t
+flags basic true
 component t_linear
 zn 1.0 + 0.0i .. 0.0 + 0.0i ..
 modules reduce torus_reduce
 var z
-scripts cool_circle1 ..
 
---t_expz_tst
+--t_expz
 flags family t
-flags incTest true
+flags basic true
 component t_expz
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
 modules reduce torus_reduce
 var z
-scripts cool_circle1 ..
 
---t_cosz_tst
+--t_cosz
 flags family t
-flags incTest true
+flags basic true
 component t_cosz
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
 modules reduce torus_reduce
 var z
-scripts cool_circle1 ..
 
---t_sinz_tst
+--t_sinz
 flags family t
-flags incTest true
+flags basic true
 component t_sinz
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
 modules reduce torus_reduce
 var z
-scripts cool_circle1 ..
 
---t_tanz_tst
+--t_tanz
 flags family t
-flags incTest true
+flags basic true
 component t_tanz
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
 modules reduce torus_reduce
 var z
-scripts cool_circle1 ..
 
---t_coshz_tst
+--t_coshz
 flags family t
-flags incTest true
+flags basic true
 component t_coshz
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
 modules reduce torus_reduce
 var z
-scripts cool_circle1 ..
 
---t_sinhz_tst
+--t_sinhz
 flags family t
-flags incTest true
+flags basic true
 component t_sinhz
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
 modules reduce torus_reduce
 var z
-scripts cool_circle1 ..

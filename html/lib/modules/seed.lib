@@ -3,6 +3,13 @@ flags family seed
 component seed_empty
 var seed
 
+--seed_border
+flags family seed
+component seed_border
+par seed_w 0.2
+modules t t_linear
+var seed
+
 --seed_multi
 flags default true
 flags family seed

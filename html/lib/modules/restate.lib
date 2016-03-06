@@ -13,7 +13,7 @@ var color
 
 --seed_border_cool
 flags family seed
-component seed_border
+component seed_border_cool
 par seed_w 0.4
 modules t t_linear_cool
 var seed
@@ -25,3 +25,67 @@ scripts seed_zn1_lin1 ..
 zn 1.0 + 0.0i .. 0.0 + 0.0i ..
 modules reduce torus_reduce
 var z
+
+--t_linear_tst
+flags default true
+flags family t
+flags incTest true
+component t_linear
+zn 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+scripts cool_circle1 ..
+
+--t_expz_tst
+flags family t
+flags incTest true
+component t_expz
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+scripts cool_circle1 ..
+
+--t_cosz_tst
+flags family t
+flags incTest true
+component t_cosz
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+scripts cool_circle1 ..
+
+--t_sinz_tst
+flags family t
+flags incTest true
+component t_sinz
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+scripts cool_circle1 ..
+
+--t_tanz_tst
+flags family t
+flags incTest true
+component t_tanz
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+scripts cool_circle1 ..
+
+--t_coshz_tst
+flags family t
+flags incTest true
+component t_coshz
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+scripts cool_circle1 ..
+
+--t_sinhz_tst
+flags family t
+flags incTest true
+component t_sinhz
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+scripts cool_circle1 ..

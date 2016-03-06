@@ -1,7 +1,7 @@
 --default
 vert   vert
 main   main
-disp   disp
+disp   disp_id
 tPhase 0.0
 tSpd   1.0
 includes colorspace .. math ..
@@ -9,7 +9,7 @@ includes colorspace .. math ..
 --cool
 vert   vert
 main   main_cool
-disp   disp
+disp   disp_cool
 tPhase 0.0
 tSpd   1.0
 includes colorspace .. math ..

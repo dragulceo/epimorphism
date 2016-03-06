@@ -16,6 +16,7 @@ ENGINE
 UI
   - remote control
 PATTERN
+  - should we be distorting seed?
   - keep scripts when switching modules?
 MISC
   - build out library

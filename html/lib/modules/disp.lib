@@ -3,8 +3,7 @@ flags family disp
 component disp
 modules post post_id
 
-
---disp
+--disp_cool
 flags default true
 flags family disp_test
 component disp

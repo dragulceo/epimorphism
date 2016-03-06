@@ -50,17 +50,17 @@ keyHandler ucRef usRef char = do
   let spd = show uiConf.keyboardSwitchSpd
   case char of
     "1" -> do
-      let idx = if (member "t+" uiST.incIdx) then ((fromJust $ lookup "t+" uiST.incIdx) + 1) else 0
-      let dt = insert "t+" idx uiST.incIdx
-      modifySTRef usRef (\s -> s {incIdx = dt})
-      return $ "scr incStd main.main_body sub:t lib:incTest dim:vec2 idx:" ++ (show idx) ++ " spd:" ++ spd
+      incStr uiST "main.main_body" "t" 1 spd
     "Q" -> do
-      let idx = if (member "t+" uiST.incIdx) then ((fromJust $ lookup "t+" uiST.incIdx) - 1) else 0
-      let dt = insert "t+" idx uiST.incIdx
-      modifySTRef usRef (\s -> s {incIdx = dt})
-      return $ "scr incStd main.main_body sub:t lib:incTest dim:vec2 idx:" ++ (show idx) ++ " spd:" ++ spd
+      incStr uiST "main.main_body" "t" (-1) spd
     _   -> return $ "null"
-
+  where
+    incStr uiST bdy idn inc spd = do
+      let idn' = bdy ++ idn
+      let idx = if (member idn' uiST.incIdx) then ((fromJust $ lookup idn' uiST.incIdx) + inc) else 0
+      let dt = insert idn' idx uiST.incIdx
+      modifySTRef usRef (\s -> s {incIdx = dt})
+      return $ "scr incStd " ++  bdy ++ " sub:" ++ idn ++ " lib:basic dim:vec2 idx:" ++ (show idx) ++ " spd:" ++ spd
 
 
 initLayout :: forall eff. UIConf -> Epi eff Unit

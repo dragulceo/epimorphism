@@ -53,12 +53,12 @@ keyHandler ucRef usRef char = do
       let idx = if (member "t+" uiST.incIdx) then ((fromJust $ lookup "t+" uiST.incIdx) + 1) else 0
       let dt = insert "t+" idx uiST.incIdx
       modifySTRef usRef (\s -> s {incIdx = dt})
-      return $ "scr incStd main.main_body sub:t dim:vec2 idx:" ++ (show idx) ++ " spd:" ++ spd
+      return $ "scr incStd main.main_body sub:t lib:incTest dim:vec2 idx:" ++ (show idx) ++ " spd:" ++ spd
     "Q" -> do
       let idx = if (member "t+" uiST.incIdx) then ((fromJust $ lookup "t+" uiST.incIdx) - 1) else 0
       let dt = insert "t+" idx uiST.incIdx
       modifySTRef usRef (\s -> s {incIdx = dt})
-      return $ "scr incStd main.main_body sub:t dim:vec2 idx:" ++ (show idx) ++ " spd:" ++ spd
+      return $ "scr incStd main.main_body sub:t lib:incTest dim:vec2 idx:" ++ (show idx) ++ " spd:" ++ spd
     _   -> return $ "null"
 
 

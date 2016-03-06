@@ -127,9 +127,10 @@ incStd ssRef self t mid sRef = do
   spd   <- (loadLib "spd" dt "incStd spd") >>= numFromStringE
   subN  <- loadLib "sub" dt "incStd sub"
   dim   <- loadLib "dim" dt "incStd dim"
+  lib   <- loadLib "lib" dt "incStd lib"
 
   -- index & next data
-  let index = flagFamily systemST.moduleLib $ fromFoldable [(Tuple "family" subN), (Tuple "stdlib" "true")]
+  let index = flagFamily systemST.moduleLib $ fromFoldable [(Tuple "family" subN), (Tuple lib "true")]
 
   let nxtPos = idx `gmod` (A.length index)
 

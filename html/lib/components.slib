@@ -154,7 +154,7 @@ uniform sampler2D fb;
 uniform float time;
 uniform float kernel_dim;
 uniform float par[100];
-uniform vec2 zn[20];
+uniform vec2 zn[100];
 uniform sampler2D aux[10];
 
 void main() {

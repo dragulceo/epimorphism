@@ -26,6 +26,8 @@ MISC
   - feature parity with existing app
 
 LATER
+  - too many switches can cause par & zn overflow
+	- clean up Pattern.purs & Script.purs
   - findParent is kind of ghetto
   - add dimension to component family (vec2, vec4, etc)
   - ModRef used inconsistiently

@@ -12,12 +12,11 @@ CONFIG
 
 
 ENGINE
-  - feedback isn't perfect/ misalligned square?
   - fract
 UI
   - remote control
 PATTERN
-
+  - keep scripts when switching modules?
 MISC
   - build out library
   - feature parity with existing app
@@ -31,7 +30,6 @@ LATER
   - investigate dsl for scripts
   - use fb as texture source
   - enforce integrity of pools & module references
-  - should pools live in state or pattern
 	- scripts conflicting with each other
   - module/submodule cycles??
   - real fullscreen mode
@@ -69,10 +67,9 @@ LATER
   - main & disp share includes
   - complex numbers library?
   - better engine error checking/handling
-	- framebuffer texturing
   - texture organization
   - better data organization
 	  - put configs in states?
 		- where do things go?
-		- put ref libs in pattern?
+		- put ref pools in pattern?
 		- some kind of reactive data tree?

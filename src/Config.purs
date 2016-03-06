@@ -149,18 +149,20 @@ type Pattern = {
 -- sys -> self(name) -> time -> module -> self(ref)
 type ScriptFn eff h = STRef h (SystemST h) -> String -> Number -> String -> STRef h Script -> EpiS eff h Boolean
 type Script = {
-    fn    :: String
-  , dt    :: StrMap String
-  , mid   :: Maybe String
-  , flags :: StrMap String
+    fn     :: String
+  , dt     :: StrMap String
+  , mid    :: Maybe String
+  , flags  :: StrMap String
+  , tPhase :: Number
 }
 
 defaultScript :: Script
 defaultScript = {
-    fn: "null"
-  , dt: empty
-  , mid: Nothing
-  , flags: empty
+    fn:     "null"
+  , dt:     empty
+  , mid:    Nothing
+  , flags:  empty
+  , tPhase: 0.0
 }
 
 --SLib

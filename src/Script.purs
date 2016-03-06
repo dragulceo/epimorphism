@@ -23,23 +23,24 @@ import Pattern (purgeScript, replaceModule, importScript, flagFamily, findParent
 -- PUBLIC
 
 -- execute all scripts & script pool
-runScripts :: forall eff h. STRef h (SystemST h) -> Number -> EpiS eff h Boolean
-runScripts ssRef t = do
+runScripts :: forall eff h. STRef h (SystemST h) -> EpiS eff h Boolean
+runScripts ssRef = do
   systemST <- lift $ readSTRef ssRef
-  res <- traverse (handle ssRef t) (keys systemST.scriptRefPool)
+  res <- traverse (handle ssRef) (keys systemST.scriptRefPool)
   return $ or res
   where
-    handle :: forall eff h. STRef h (SystemST h) -> Number -> String -> EpiS eff h Boolean
-    handle ssRef t n = do
+    handle :: forall eff h. STRef h (SystemST h) -> String -> EpiS eff h Boolean
+    handle ssRef n = do
       systemST <- lift $ readSTRef ssRef
       case (member n systemST.scriptRefPool) of
         true -> do
           sRef <- loadLib n systemST.scriptRefPool "runScripts"
           scr <- lift $ readSTRef sRef
           fn <- lookupScriptFN scr.fn
+          let t' = systemST.t - scr.tPhase
           case scr.mid of
             Nothing -> throwError $ "No module when running script: " ++ scr.fn
-            Just mid -> fn ssRef n t mid sRef
+            Just mid -> fn ssRef n t' mid sRef
         false -> do
           let g = lg "script removed" -- ghetto
           return false
@@ -62,7 +63,6 @@ ppath ssRef self t mid sRef = do
   -- get data
   spd <- (loadLib "spd" dt "ppath spd") >>= numFromStringE
   par <-  loadLib "par" dt "ppath par"
-  phs <- (loadLib "phase" dt "ppath phase") >>= numFromStringE
   pathN <- loadLib "path" dt "ppath path"
   mRef <- loadLib mid systemST.moduleRefPool "ppath module"
   m <- lift $ readSTRef mRef
@@ -73,7 +73,7 @@ ppath ssRef self t mid sRef = do
     _ -> throwError $ "Unknown par path : " ++ pathN
 
   -- execute
-  let val = fn ((t - phs) * spd)
+  let val = fn (t * spd)
 
   -- modify data
   let par' = insert par val m.par
@@ -164,8 +164,8 @@ switchModules ssRef mid subN m1 dim spd t = do
   swid <- replaceModule ssRef mid subN m0 (Left switch')
 
   -- create & import blending script
-  createScript ssRef swid "default" "finishSwitch" $ fromFoldable [(Tuple "spd" (show spd)), (Tuple "phase" (show t))]
-  createScript ssRef swid "default" "ppath" $ fromFoldable [(Tuple "par" "intrp"), (Tuple "path" "linear"), (Tuple "spd" (show spd)), (Tuple "phase" (show t))]
+  createScript ssRef swid "default" "finishSwitch" $ fromFoldable [(Tuple "spd" (show spd))]
+  createScript ssRef swid "default" "ppath" $ fromFoldable [(Tuple "par" "intrp"), (Tuple "path" "linear"), (Tuple "spd" (show spd))]
 
   return unit
 
@@ -177,12 +177,13 @@ finishSwitch ssRef self t mid sRef = do
   let dt = scr.dt
 
   -- get data
-  spd    <- (loadLib "spd" dt "finishSwitch spd") >>= numFromStringE
-  phase  <- (loadLib "phase" dt "finishSwitch phase") >>= numFromStringE
+  spd  <- (loadLib "spd" dt "finishSwitch spd") >>= numFromStringE
 
-  case (t - phase) / spd of
+  case t * spd of
     -- we're done
     x | x >= 1.0 -> do
+      let a = lg "DONE SWITCHING"
+
       -- find parent & m1
       (Tuple parent subN) <- findParent systemST.moduleRefPool mid
       mRef   <- loadLib mid systemST.moduleRefPool "finishSwitch module"

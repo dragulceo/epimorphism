@@ -1,8 +1,5 @@
 ALPHA:
 
-PROJ
-	- time phases
-
 CONFIG
   - cleanup/finish parsing of libs & slibs
     - general refactoring

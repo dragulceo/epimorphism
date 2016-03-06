@@ -148,7 +148,10 @@ importScript ssRef sc mid = do
   mRef <- loadLib mid systemST.moduleRefPool "import script - find module"
 
   s <- case sc of
-    Left s -> return s
+    Left s -> do
+      let tPhase' = systemST.t - s.tPhase
+      let x = lg $ "R SETTING PHASE: " ++ (show tPhase')
+      return $ s {tPhase = tPhase'}
     Right s -> do
       m <- lift $ readSTRef mRef
       let scripts' = A.delete s m.scripts
@@ -158,7 +161,11 @@ importScript ssRef sc mid = do
         true -> do
           ref <- loadLib s systemST.scriptRefPool "import script pool"
           lift $ readSTRef ref
-        false -> loadLib s systemST.scriptLib "import script"
+        false -> do
+          scr <- loadLib s systemST.scriptLib "import script"
+          let tPhase' = systemST.t - scr.tPhase
+          let x = lg $ "SETTING PHASE: " ++ (show tPhase')
+          return $ scr {tPhase = tPhase'}
 
   --update pool
   ref <- lift $ newSTRef s {mid = Just mid}
@@ -232,7 +239,6 @@ findParent mpool mid = do
       case (fold handle2 Nothing mod.modules) of
         Nothing -> return Nothing
         Just x -> do
-          let g = lg $ Tuple pid x
           return $ Just $ Tuple pid x
     handle2 :: forall eff h. Maybe String -> String -> String -> Maybe String
     handle2 (Just x) _ _ = Just x

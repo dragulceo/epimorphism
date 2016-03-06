@@ -2,7 +2,6 @@
 vert   vert
 main   main
 disp   disp
-t      0.0
 tPhase 0.0
 tSpd   1.0
 includes colorspace .. math ..
@@ -11,7 +10,6 @@ includes colorspace .. math ..
 vert   vert
 main   main_cool
 disp   disp
-t      0.0
 tPhase 0.0
 tSpd   1.0
 includes colorspace .. math ..
@@ -20,7 +18,6 @@ includes colorspace .. math ..
 vert   vert
 main   test
 disp   disp
-t      0.0
 tPhase 0.0
 tSpd   1.0
 includes colorspace .. math ..
@@ -29,7 +26,6 @@ includes colorspace .. math ..
 vert   vert
 main   test_image
 disp   disp
-t      0.0
 tPhase 0.0
 tSpd   1.0
 includes colorspace .. math ..

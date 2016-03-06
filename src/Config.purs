@@ -38,6 +38,7 @@ type SystemST h = {
   , frameNum :: Int
   , lastFpsTimeMS :: Maybe Number
   , fps :: Maybe Int
+  , t :: Number
   , systemConfLib :: StrMap SystemConf
   , uiConfLib :: StrMap UIConf
   , engineConfLib :: StrMap EngineConf
@@ -56,6 +57,7 @@ defaultSystemST = {
   , frameNum: 0
   , lastFpsTimeMS: Nothing
   , fps: Nothing
+  , t: 0.0
   , systemConfLib: empty
   , uiConfLib: empty
   , engineConfLib: empty
@@ -139,7 +141,6 @@ type Pattern = {
   , flags :: StrMap String
   , includes :: Array String
   -- , 3d shit
-  , t :: Number
   , tPhase :: Number
   , tSpd :: Number
 }

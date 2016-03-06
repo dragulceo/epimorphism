@@ -214,7 +214,6 @@ defaultPattern = {
   , disp: "disp"
   , flags: empty
   , includes: []
-  , t: 0.0
   , tPhase: 0.0
   , tSpd: 1.0
 }
@@ -230,7 +229,6 @@ buildPattern vals = do
       "disp" -> (fromLAsgn "disp" val) >>= (\x -> return $ dt {disp = x})
       "flags" -> (fromLMp "flags" val) >>= (\x -> return $ dt {flags = x})
       "includes" -> (fromLLst "includes" val) >>= (\x -> return $ dt {includes = x})
-      "t" -> (fromLAsgn "t" val) >>= parseNum >>= (\x -> return $ dt {t = x})
       "tPhase" -> (fromLAsgn "tPhase" val) >>= parseNum >>= (\x -> return $ dt {tPhase = x})
       "tSpd" -> (fromLAsgn "tSpd" val) >>= parseNum >>= (\x -> return $ dt {tSpd = x})
       _ -> Left (LibError $ "Pattern - unknown key - " ++ key)

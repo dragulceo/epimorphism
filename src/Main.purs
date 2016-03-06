@@ -78,6 +78,8 @@ animate stateM = handleError do
   let lastTimeMS = fromMaybe currentTimeMS systemST.lastTimeMS
   let delta = (currentTimeMS - lastTimeMS) * pattern.tSpd / 1000.0
   lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS})
+  let t' = systemST.t + delta
+  lift $ modifySTRef ssRef (\s -> s {t = t'})
 
   -- fps
   let freq = 10
@@ -88,9 +90,6 @@ animate stateM = handleError do
     showFps fps
 
   -- update pattern
-  let t' = pattern.t + delta
-  lift $ modifySTRef pRef (\p -> p {t = t'})
-  pattern'  <- lift $ readSTRef pRef
 
   recompile <- runScripts ssRef t'
   systemST' <- lift $ readSTRef ssRef
@@ -102,7 +101,7 @@ animate stateM = handleError do
   engineST'   <- lift $ readSTRef esRef
 
   -- render
-  render systemST' engineConf engineST' pattern' systemST'.frameNum
+  render systemST' engineConf engineST' pattern systemST'.frameNum
 
   -- request next frame
   lift $ modifySTRef ssRef (\s -> s {frameNum = s.frameNum + 1})

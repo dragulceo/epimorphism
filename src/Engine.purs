@@ -225,7 +225,7 @@ render systemST engineConf engineST pattern frameNum = do
 
     -- bind main uniforms
     mainUnif <- getUniformBindings main
-    uniform1f mainUnif.time ((pattern.t - pattern.tPhase) / 1000.0) -- ms or seconds here?
+    uniform1f mainUnif.time (systemST.t - pattern.tPhase)
     uniform1f mainUnif.kernel_dim (toNumber engineConf.kernelDim)
 
     -- aux

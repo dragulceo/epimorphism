@@ -53,6 +53,14 @@ keyHandler ucRef usRef char = do
       incStr uiST "main.main_body" "t" 1 spd
     "Q" -> do
       incStr uiST "main.main_body" "t" (-1) spd
+    "2" -> do
+      incStr uiST "main.main_body.seed" "t" 1 spd
+    "W" -> do
+      incStr uiST "main.main_body.seed" "t" (-1) spd
+    "3" -> do
+      incStr uiST "main.main_body" "color" 1 spd
+    "E" -> do
+      incStr uiST "main.main_body" "color" (-1) spd
     _   -> return $ "null"
   where
     incStr uiST bdy idn inc spd = do

@@ -1,12 +1,7 @@
 ALPHA:
 
 PROJ
-  - pattern switching
-	  - clean up this bullshit
-    - simultaneous blending
-
 	- time phases
-	- time & rate units
 
 CONFIG
   - cleanup/finish parsing of libs & slibs
@@ -31,6 +26,7 @@ MISC
   - feature parity with existing app
 
 LATER
+  - findParent is kind of ghetto
   - add dimension to component family (vec2, vec4, etc)
   - ModRef used inconsistiently
   - investigate dsl for scripts

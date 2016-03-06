@@ -9,6 +9,7 @@ import Data.Maybe (Maybe(..), isNothing, maybe)
 import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (member, empty, lookup, insert, foldM, values, delete, keys, fold, StrMap())
 import Data.String (split)
+import Data.Tuple (Tuple(..))
 import Data.Traversable (traverse)
 import Control.Monad (unless, when)
 import Control.Monad.Eff (Eff)
@@ -121,9 +122,9 @@ purgeModule ssRef mid = do
   return unit
 
 
--- replace child mn:cid(in ref pool) with child mn:c'(in lib)
+-- replace child subN:cid(in ref pool) with child subN:c'(in lib)
 replaceModule :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> (Either Module String) -> EpiS eff h String
-replaceModule ssRef mid mn cid c' = do
+replaceModule ssRef mid subN cid c' = do
   systemST <- lift $ readSTRef ssRef
   mRef <- loadLib mid systemST.moduleRefPool "replace module"
   m <- lift $ readSTRef mRef
@@ -133,7 +134,7 @@ replaceModule ssRef mid mn cid c' = do
   purgeModule ssRef cid
 
   -- update
-  let mod' = insert mn n' m.modules
+  let mod' = insert subN n' m.modules
   lift $ modifySTRef mRef (\m -> m {modules = mod'})
 
   return n'
@@ -214,3 +215,26 @@ findModule mpool pattern dt = do
           mod <- lift $ readSTRef mRef
           c <- loadLib mid' mod.modules "findModule' find child"
           findModule' mpool c $ fromJust $ A.tail addr
+
+
+-- find parent module id & submodule that a module is binded to. kind of ghetto
+findParent :: forall eff h. StrMap (STRef h Module) -> String -> EpiS eff h (Tuple String String)
+findParent mpool mid = do
+  res <- foldM handle Nothing mpool
+  case res of
+    Nothing -> throwError $ "module has no parent: " ++ mid
+    Just x -> return x
+  where
+    handle :: forall eff h. Maybe (Tuple String String) -> String -> STRef h Module -> EpiS eff h (Maybe (Tuple String String))
+    handle (Just x) _ _ = return $ Just x
+    handle _ pid ref = do
+      mod <- lift $ readSTRef ref
+      case (fold handle2 Nothing mod.modules) of
+        Nothing -> return Nothing
+        Just x -> do
+          let g = lg $ Tuple pid x
+          return $ Just $ Tuple pid x
+    handle2 :: forall eff h. Maybe String -> String -> String -> Maybe String
+    handle2 (Just x) _ _ = Just x
+    handle2 _ k cid | cid == mid = Just k
+    handle2 _ _ _ = Nothing

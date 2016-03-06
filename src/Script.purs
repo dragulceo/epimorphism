@@ -18,7 +18,7 @@ import Control.Monad.Except.Trans (lift)
 import Config
 import System (loadLib)
 import Util (lg, tLg, numFromStringE, intFromStringE, gmod, rndstr)
-import Pattern (purgeScript, replaceModule, importScript, flagFamily)
+import Pattern (purgeScript, replaceModule, importScript, flagFamily, findParent)
 
 -- PUBLIC
 
@@ -124,120 +124,76 @@ incStd ssRef self t mid sRef = do
 
   -- get data
   idx   <- (loadLib "idx" dt "incStd idx") >>= intFromStringE
-  spd   <- loadLib "spd" dt "incStd spd"
+  spd   <- (loadLib "spd" dt "incStd spd") >>= numFromStringE
   subN  <- loadLib "sub" dt "incStd sub"
   dim   <- loadLib "dim" dt "incStd dim"
-  mRef  <- loadLib mid systemST.moduleRefPool "incStd module"
-  m     <- lift $ readSTRef mRef
-  sub   <- loadLib subN m.modules "incStd find sub"
 
   -- index & next data
   let index = flagFamily systemST.moduleLib $ fromFoldable [(Tuple "family" subN), (Tuple "stdlib" "true")]
 
   let nxtPos = idx `gmod` (A.length index)
 
-  nxtVal <- case (A.index index nxtPos) of
+  m1 <- case (A.index index nxtPos) of
     Nothing -> throwError $ "your index doesnt exist"
     Just v -> return v
 
-  -- create & import blending script
-  createScript ssRef mid "default" "blendModule" $ fromFoldable [(Tuple "subN" subN), (Tuple "sub0" sub), (Tuple "sub1" nxtVal), (Tuple "dim" dim), (Tuple "spd" spd)]
+  switchModules ssRef mid subN m1 dim spd t
 
   -- remove self
   purgeScript ssRef self
 
-  return false
+  return true
 
 
--- interpolate between two modules
-blendModule :: forall eff h. ScriptFn eff h
-blendModule ssRef self t mid sRef = do
+switchModules :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> String -> Number -> Number -> EpiS eff h Unit
+switchModules ssRef mid subN m1 dim spd t = do
+  systemST <- lift $ readSTRef ssRef
+  mRef  <- loadLib mid systemST.moduleRefPool "incStd module"
+  m     <- lift $ readSTRef mRef
+  m0    <- loadLib subN m.modules "incStd find sub"
+  m0Ref <- loadLib m0 systemST.moduleRefPool "incStd m0"
+  m0M   <- lift $ readSTRef m0Ref
+
+  -- create switch module
+  switch <- loadLib "smooth_switch" systemST.moduleLib "switchModules"
+  let modules = fromFoldable [(Tuple "m0" m0), (Tuple "m1" m1)]
+  let sub'    = union (fromFoldable [(Tuple "dim" dim), (Tuple "var" m0M.var)]) switch.sub
+  let switch' = switch {sub = sub', modules = modules, var = m0M.var}
+
+  swid <- replaceModule ssRef mid subN m0 (Left switch')
+
+  -- create & import blending script
+  createScript ssRef swid "default" "finishSwitch" $ fromFoldable [(Tuple "spd" (show spd)), (Tuple "phase" (show t))]
+  createScript ssRef swid "default" "ppath" $ fromFoldable [(Tuple "par" "intrp"), (Tuple "path" "linear"), (Tuple "spd" (show spd)), (Tuple "phase" (show t))]
+
+  return unit
+
+
+finishSwitch :: forall eff h. ScriptFn eff h
+finishSwitch ssRef self t mid sRef = do
   systemST <- lift $ readSTRef ssRef
   scr <- lift $ readSTRef sRef
   let dt = scr.dt
 
   -- get data
-  spd  <- (loadLib "spd" dt "blendSub spd") >>= numFromStringE
-  subN <- loadLib "subN" dt "blendSub subN"
-  sub0 <- loadLib "sub0" dt "blendSub sub0"
-  sub1 <- loadLib "sub1" dt "blendSub sub1"
-  dim  <- loadLib "dim" dt "incStd dim"
+  spd    <- (loadLib "spd" dt "finishSwitch spd") >>= numFromStringE
+  phase  <- (loadLib "phase" dt "finishSwitch phase") >>= numFromStringE
 
-  -- initialize state
-  unless (member "st" dt) do
-    let new = fromFoldable [(Tuple "st" "init"), (Tuple "tinit" (show t))]
-    let dt' = union new dt
-    lift $ modifySTRef sRef (\s -> s {dt = dt'})
-    return unit
+  case (t - phase) / spd of
+    -- we're done
+    x | x >= 1.0 -> do
+      -- find parent & m1
+      (Tuple parent subN) <- findParent systemST.moduleRefPool mid
+      mRef   <- loadLib mid systemST.moduleRefPool "finishSwitch module"
+      m      <- lift $ readSTRef mRef
+      m1     <- loadLib "m1" m.modules "finishSwitch module"
 
-  scr' <- lift $ readSTRef sRef
-  let dt' = scr'.dt
-
-  st    <- loadLib "st" dt' "blendSub st"
-  tinit <- (loadLib "tinit" dt' "blendSub tinit") >>= numFromStringE
-
-  mRef  <- loadLib mid systemST.moduleRefPool "incStd module"
-  m     <- lift $ readSTRef mRef
-
-  subid    <- loadLib subN m.modules "incStd subid"
-  subMRef  <- loadLib subid systemST.moduleRefPool "incStd sub"
-  subM     <- lift $ readSTRef subMRef
-
-  -- do stuff
-  case st of
-    -- initialize state
-    "init" -> do
-      -- create switch module
-      switch <- loadLib "smooth_switch" systemST.moduleLib "blendModule"
-      let modules = fromFoldable [(Tuple "m0" sub0), (Tuple "m1" sub1)]
-      let sub'    = union (fromFoldable [(Tuple "dim" dim), (Tuple "var" subM.var)]) m.sub
-      let switch' = switch {sub = sub', modules = modules, var = subM.var}
-
-      -- replace existing module with switch
-      swid      <- replaceModule ssRef mid subN subid (Left switch')
-      let g = lg $ "SWITCHING TO: " ++ swid
-      let g = lg $ "WITH m0: " ++ sub0
-      let g = lg $ "WITH m1: " ++ sub1
-      systemST' <- lift $ readSTRef ssRef
-      m'        <- lift $ readSTRef mRef
-
-      -- automate intrp var
-      sid <- createScript ssRef swid "default" "ppath" $ fromFoldable [(Tuple "par" "intrp"), (Tuple "path" "linear"), (Tuple "spd" "1.0"), (Tuple "phase" (show tinit))]
-
-      -- update state
-      let new = fromFoldable [(Tuple "st" "intrp"), (Tuple "sid" sid), (Tuple "swid" swid)]
-      let dt'' = union new dt'
-      lift $ modifySTRef sRef (\s -> s {dt = dt''})
+      -- replace.  this removes all scripts wrt this as well
+      replaceModule ssRef parent subN mid (Right m1)
 
       return true
-
-    "intrp" -> do
-      case (t - tinit) / spd of
-        -- we're done
-        x | x >= 1.0 -> do
-          -- replace switch module with m1
-          --swid     <- loadLib "swid" dt' "blendModule finished swid"
-          --swmodRef <- loadLib swid systemST.moduleRefPool "blendModule finishd swmod"
-          --swmod    <- lift $ readSTRef swmodRef
-          let h = lg "DONE INTRP"
-          let h = lg $ "SWITCHING SUBN: " ++ subN
-          let h = lg "OF"
-          let h = lg m
-          let h = lg "WHERE SUBN = "
-          let h = lg subM
-
-          m1       <- loadLib "m1" subM.modules "blendModule finished m1"
-          replaceModule ssRef mid subN subid (Right m1)
-          systemST' <- lift $ readSTRef ssRef
-
-          -- remove self
-          purgeScript ssRef self
-
-          return true
-
-        _ -> do
-          return false
-    _ -> throwError "you fucked something up"
+    _ -> do
+      return false
 
 
 -- PRIVATE
@@ -249,7 +205,7 @@ lookupScriptFN n = case n of
   "ppath"  -> return ppath
   "zpath"  -> return zpath
   "incStd" -> return incStd
-  "blendModule" -> return blendModule
+  "finishSwitch" -> return finishSwitch
   _       -> throwError $ "script function not found: " ++ n
 
 

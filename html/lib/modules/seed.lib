@@ -8,7 +8,7 @@ flags family seed
 flags basic true
 component seed_border
 par seed_w 0.2
-modules t t_linear
+modules t t_wrap
 var seed
 
 --seed_border_tst
@@ -16,7 +16,7 @@ flags family seed
 flags basic true
 component seed_border_cool
 par seed_w 0.4
-modules t t_linear
+modules t t_wrap
 var seed
 
 --seed_multi

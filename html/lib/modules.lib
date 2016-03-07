@@ -72,7 +72,7 @@ flags default true
 flags family main_body
 component main_stc
 modules seed seed_border
-modules t t_zo
+modules t t_wrap
 modules color color_id
 var color
 
@@ -141,73 +141,20 @@ var seed
 
 --t_linear_cool
 flags family t
-component t_linear
+component t_wrap
 scripts seed_zn1_lin1 ..
-zn 1.0 + 0.0i .. 0.0 + 0.0i ..
+zn 1.1 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
 modules reduce torus_reduce
+sub t_inner z
 var z
-
---t_linear_tst
-flags default true
-flags family t
-flags incTest true
-component t_linear
-zn 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-scripts cool_circle1 ..
-
---t_expz_tst
-flags family t
-flags incTest true
-component t_expz
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-scripts cool_circle1 ..
-
---t_cosz_tst
-flags family t
-flags incTest true
-component t_cosz
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-scripts cool_circle1 ..
-
---t_sinz_tst
-flags family t
-flags incTest true
-component t_sinz
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-scripts cool_circle1 ..
-
---t_tanz_tst
-flags family t
-flags incTest true
-component t_tanz
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-scripts cool_circle1 ..
-
---t_coshz_tst
-flags family t
-flags incTest true
-component t_coshz
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-scripts cool_circle1 ..
 
 --t_sinhz_tst
 flags family t
 flags incTest true
-component t_sinhz
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
+component t_wrap
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
 modules reduce torus_reduce
+sub t_inner sinhz(z)
 var z
 scripts cool_circle1 ..
 
@@ -223,7 +170,7 @@ flags family seed
 flags basic true
 component seed_border
 par seed_w 0.2
-modules t t_linear
+modules t t_wrap
 var seed
 
 --seed_border_tst
@@ -231,7 +178,7 @@ flags family seed
 flags basic true
 component seed_border_cool
 par seed_w 0.4
-modules t t_linear
+modules t t_wrap
 var seed
 
 --seed_multi
@@ -274,156 +221,14 @@ flags family t
 component t_id
 var z
 
---t_zo
+--t_wrap
+flags family t
+flags incTest true
 flags default true
-flags family t
-component t_linear
-zn 1.1 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-
---t_linear
-flags family t
-flags basic true
-component t_linear
-zn 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-
---t_expz
-flags family t
-flags basic true
-component t_expz
 zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+component t_wrap
 modules reduce torus_reduce
-var z
-
---t_cosz
-flags family t
-flags basic true
-component t_cosz
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-
---t_sinz
-flags family t
-flags basic true
-component t_sinz
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-
---t_tanz
-flags family t
-flags basic true
-component t_tanz
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-
---t_coshz
-flags family t
-flags basic true
-component t_coshz
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-
---t_lsq
-flags family t
-flags basic true
-component t_lsq
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-
---t_lsqt
-flags family t
-flags basic true
-component t_lsqt
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-
---t_cth
-flags family t
-flags basic true
-component t_cth
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-
---t_zexp
-flags family t
-flags basic true
-component t_zexp
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-
---t_zsq
-flags family t
-flags basic true
-component t_zsq
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-
---t_st
-flags family t
-flags basic true
-component t_st
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-
---t_st2
-flags family t
-flags basic true
-component t_st2
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-
---t_sq
-flags family t
-flags basic true
-component t_sq
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-
---t_shs
-flags family t
-flags basic true
-component t_shs
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-
---t_che
-flags family t
-flags basic true
-component t_che
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-
---t_mzc
-flags family t
-flags basic true
-component t_mzc
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-var z
-
---t_chsh
-flags family t
-flags basic true
-component t_chsh
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
+sub t_inner z
 var z
 
 

@@ -21,6 +21,7 @@
     "purescript-console" : "*",
     "purescript-jquery" : "*",
     "purescript-simple-dom" : "*",
+	  "purescript-math" : "*",
     "purescript-complex": "*"
   }
 }

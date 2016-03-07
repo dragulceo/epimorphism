@@ -8,7 +8,7 @@ flags family seed
 flags basic true
 component seed_border
 par seed_w 0.2
-modules t t_wrap
+modules t ts_wrap_zo
 var seed
 
 --seed_border_tst

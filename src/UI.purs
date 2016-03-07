@@ -50,20 +50,28 @@ keyHandler ucRef usRef char = do
   let spd = show uiConf.keyboardSwitchSpd
   case char of
     "1" -> do
-      incM uiST "main.main_body" "t" "basic" "vec2" 1 spd
+      incM uiST "main.main_body" "t" "basic_t" "vec2" 1 spd
     "Q" -> do
-      incM uiST "main.main_body" "t" "basic" "vec2" (-1) spd
+      incM uiST "main.main_body" "t" "basic_t" "vec2" (-1) spd
     "2" -> do
       incI uiST "main.main_body.t" "t_inner" "t_inner" "vec2" 1 spd
     "W" -> do
       incI uiST "main.main_body.t" "t_inner" "t_inner" "vec2" (-1) spd
     "3" -> do
-      incM uiST "main.main_body" "color" "basic" "vec4" 1 spd
+      incM uiST "main.main_body.seed" "t" "basic_seed" "vec2" 1 spd
     "E" -> do
-      incM uiST "main.main_body" "color" "basic" "vec4" (-1) spd
+      incM uiST "main.main_body.seed" "t" "basic_seed" "vec2" (-1) spd
     "4" -> do
-      incM uiST "disp" "post" "basic" "vec4" 1 spd
+      incI uiST "main.main_body.seed.t" "t_inner" "t_inner" "vec2" 1 spd
     "R" -> do
+      incI uiST "main.main_body.seed.t" "t_inner" "t_inner" "vec2" (-1) spd
+    "5" -> do
+      incM uiST "main.main_body" "color" "basic" "vec4" 1 spd
+    "T" -> do
+      incM uiST "main.main_body" "color" "basic" "vec4" (-1) spd
+    "6" -> do
+      incM uiST "disp" "post" "basic" "vec4" 1 spd
+    "Y" -> do
       incM uiST "disp" "post" "basic" "vec4" (-1) spd
     _   -> return $ "null"
   where

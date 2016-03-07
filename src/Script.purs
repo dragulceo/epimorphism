@@ -15,6 +15,8 @@ import Control.Monad.ST
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 
+import Math (pi, cos)
+
 import Config
 import System (loadLib)
 import Util (lg, tLg, numFromStringE, intFromStringE, gmod, rndstr)
@@ -98,10 +100,20 @@ zpath ssRef self t mid sRef = do
 
   -- lookup path function
   fn <- case pathN of
-    "rlin" -> return $ \t ->
+    "linx" -> return $ \t ->
       outCartesian $ Cartesian t 0.0
-    "circle" -> return $ \t ->
-      outPolar $ Polar t 1.0
+    "liny" -> return $ \t ->
+      outCartesian $ Cartesian 0.0 t
+    "circle" -> do
+      r <- (loadLib "r" dt "zpath r") >>= numFromStringE
+      return $ \t ->
+        outPolar $ Polar (2.0 * pi * t) r
+    "rose" -> do
+      a <- (loadLib "a" dt "zpath rose a") >>= numFromStringE
+      b <- (loadLib "b" dt "zpath rose b") >>= numFromStringE
+      c <- (loadLib "c" dt "zpath rose c") >>= numFromStringE
+      return $ \t ->
+        outPolar $ Polar (2.0 * pi * t) (a * cos(b * t) + c)
     _ -> throwError $ "Unknown z path : " ++ pathN
 
   -- execute
@@ -210,6 +222,7 @@ switchModules ssRef mid subN m1 dim spd t = do
 
   -- create switch module
   switch <- loadLib "smooth_switch" systemST.moduleLib "switchModules"
+
   let modules = fromFoldable [(Tuple "m0" m0), (Tuple "m1" m1)]
   let sub'    = union (fromFoldable [(Tuple "dim" dim), (Tuple "var" m0M.var)]) switch.sub
   let switch' = switch {sub = sub', modules = modules, var = m0M.var}

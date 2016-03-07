@@ -136,7 +136,7 @@ var color
 flags family seed
 component seed_border_cool
 par seed_w 0.4
-modules t t_linear_scr
+modules t ts_wrap_linx3
 var seed
 
 --t_sinhz_tst
@@ -147,7 +147,7 @@ zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
 modules reduce torus_reduce
 sub t_inner sinhz(z)
 var z
-scripts cool_circle1 ..
+scripts circle_0 ..
 
 
 
@@ -161,7 +161,7 @@ flags family seed
 flags basic true
 component seed_border
 par seed_w 0.2
-modules t t_wrap
+modules t ts_wrap_zo
 var seed
 
 --seed_border_tst
@@ -214,7 +214,6 @@ var z
 
 --t_wrap
 flags family t
-flags basic true
 flags default true
 zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
 component t_wrap
@@ -222,34 +221,116 @@ modules reduce torus_reduce
 sub t_inner z
 var z
 
+
 --t_wrap_zo
 flags family t
-flags basic true
+flags basic_t true
+zn 1.1 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+component t_wrap
+modules reduce torus_reduce
+sub t_inner sinhz(z)
+var z
+
+--t_wrap_linx3
+flags family t
+flags basic_t true
+zn 1.1 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+component t_wrap
+modules reduce torus_reduce
+sub t_inner z
+var z
+scripts linx_3 ..
+
+--t_wrap_liny3
+flags family t
+flags basic_t true
+zn 1.1 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+component t_wrap
+modules reduce torus_reduce
+sub t_inner z
+var z
+scripts liny_3 ..
+
+--t_wrap_circle3
+flags family t
+flags basic_t true
+zn 1.1 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+component t_wrap
+modules reduce torus_reduce
+sub t_inner z
+var z
+scripts circle_3 ..
+
+
+
+--ts_wrap_zo
+flags family t
+flags basic_seed true
 zn 1.1 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
 component t_wrap
 modules reduce torus_reduce
 sub t_inner z
 var z
 
---t_linear_scr
+--ts_wrap_linx3'
 flags family t
-flags basic true
-component t_wrap
-scripts seed_zn1_lin1 ..
+flags basic_seed true
 zn 1.1 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-modules reduce torus_reduce
-sub t_inner z
-var z
-
---t_linear_cir
-flags family t
-flags basic true
 component t_wrap
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
 modules reduce torus_reduce
 sub t_inner z
 var z
-scripts cool_circle1 ..
+scripts linx_3' ..
+
+--ts_wrap_liny3'
+flags family t
+flags basic_seed true
+zn 1.1 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+component t_wrap
+modules reduce torus_reduce
+sub t_inner z
+var z
+scripts liny_3' ..
+
+--ts_wrap_circle3
+flags family t
+flags basic_seed true
+zn 1.1 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+component t_wrap
+modules reduce torus_reduce
+sub t_inner z
+var z
+scripts circle_3 ..
+
+--ts_wrap_circle2
+flags family t
+flags basic_seed true
+zn 1.1 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+component t_wrap
+modules reduce torus_reduce
+sub t_inner z
+var z
+scripts circle_2 ..
+
+--ts_wrap_circle1
+flags family t
+flags basic_seed true
+zn 1.1 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+component t_wrap
+modules reduce torus_reduce
+sub t_inner z
+var z
+scripts circle_1 ..
+
+--ts_wrap_circle0
+flags family t
+flags basic_seed true
+zn 1.1 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+component t_wrap
+modules reduce torus_reduce
+sub t_inner z
+var z
+scripts circle_0 ..
 
 
 

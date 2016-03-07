@@ -15,7 +15,7 @@ var color
 flags family seed
 component seed_border_cool
 par seed_w 0.4
-modules t t_linear_scr
+modules t ts_wrap_linx3
 var seed
 
 --t_sinhz_tst
@@ -26,4 +26,4 @@ zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
 modules reduce torus_reduce
 sub t_inner sinhz(z)
 var z
-scripts cool_circle1 ..
+scripts circle_0 ..

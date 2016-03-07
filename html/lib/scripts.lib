@@ -2,16 +2,112 @@
 fn nullS
 mid Nothing
 
---seed_zn1_lin1
+--test
 fn zpath
 dt idx 1
-dt path rlin
+dt path linx
+dt spd 0.1
+dt r 1.0
+mid Nothing
+
+--linx_0
+fn zpath
+dt idx 0
+dt path linx
 dt spd 0.1
 mid Nothing
 
---cool_circle1
+--liny_0
+fn zpath
+dt idx 0
+dt path liny
+dt spd 0.1
+mid Nothing
+
+--linx_1
+fn zpath
+dt idx 1
+dt path linx
+dt spd 0.1
+mid Nothing
+
+--liny_1
+fn zpath
+dt idx 1
+dt path liny
+dt spd 0.1
+mid Nothing
+
+--linx_2
+fn zpath
+dt idx 2
+dt path linx
+dt spd 0.1
+mid Nothing
+
+--liny_2
+fn zpath
+dt idx 2
+dt path liny
+dt spd 0.1
+mid Nothing
+
+--linx_3
+fn zpath
+dt idx 3
+dt path linx
+dt spd 0.1
+mid Nothing
+
+--liny_3
+fn zpath
+dt idx 1
+dt path liny
+dt spd 0.1
+mid Nothing
+
+--linx_3'
+fn zpath
+dt idx 3
+dt path linx
+dt spd -0.1
+mid Nothing
+
+--liny_3'
+fn zpath
+dt idx 1
+dt path liny
+dt spd -0.1
+mid Nothing
+
+--circle_0
 fn zpath
 dt idx 0
 dt path circle
-dt spd 0.067
+dt spd 0.01
+dt r 1.0
+mid Nothing
+
+--circle_1
+fn zpath
+dt idx 1
+dt path circle
+dt spd 0.01
+dt r 1.0
+mid Nothing
+
+--circle_2
+fn zpath
+dt idx 2
+dt path circle
+dt spd 0.01
+dt r 1.0
+mid Nothing
+
+--circle_3
+fn zpath
+dt idx 3
+dt path circle
+dt spd 0.01
+dt r 1.0
 mid Nothing

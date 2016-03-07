@@ -5,9 +5,18 @@ var z
 
 --t_wrap
 flags family t
-flags incTest true
+flags basic true
 flags default true
 zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+component t_wrap
+modules reduce torus_reduce
+sub t_inner z
+var z
+
+--t_wrap_zo
+flags family t
+flags basic true
+zn 1.1 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
 component t_wrap
 modules reduce torus_reduce
 sub t_inner z

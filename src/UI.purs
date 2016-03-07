@@ -50,29 +50,35 @@ keyHandler ucRef usRef char = do
   let spd = show uiConf.keyboardSwitchSpd
   case char of
     "1" -> do
-      incStr uiST "main.main_body" "t" "vec2" 1 spd
+      incM uiST "main.main_body" "t" "basic" "vec2" 1 spd
     "Q" -> do
-      incStr uiST "main.main_body" "t" "vec2" (-1) spd
+      incM uiST "main.main_body" "t" "basic" "vec2" (-1) spd
     "2" -> do
-      incStr uiST "main.main_body.seed" "t" "vec2" 1 spd
+      incI uiST "main.main_body.t" "t_inner" "t_inner" "vec2" 1 spd
     "W" -> do
-      incStr uiST "main.main_body.seed" "t" "vec2" (-1) spd
+      incI uiST "main.main_body.t" "t_inner" "t_inner" "vec2" (-1) spd
     "3" -> do
-      incStr uiST "main.main_body" "color" "vec4" 1 spd
+      incM uiST "main.main_body" "color" "basic" "vec4" 1 spd
     "E" -> do
-      incStr uiST "main.main_body" "color" "vec4" (-1) spd
+      incM uiST "main.main_body" "color" "basic" "vec4" (-1) spd
     "4" -> do
-      incStr uiST "disp" "post" "vec4" 1 spd
+      incM uiST "disp" "post" "basic" "vec4" 1 spd
     "R" -> do
-      incStr uiST "disp" "post" "vec4" (-1) spd
+      incM uiST "disp" "post" "basic" "vec4" (-1) spd
     _   -> return $ "null"
   where
-    incStr uiST bdy idn dim inc spd = do
+    incM uiST bdy idn lib dim inc spd = do
       let idn' = bdy ++ idn
       let idx = if (member idn' uiST.incIdx) then ((fromJust $ lookup idn' uiST.incIdx) + inc) else 0
       let dt = insert idn' idx uiST.incIdx
       modifySTRef usRef (\s -> s {incIdx = dt})
-      return $ "scr incStd " ++  bdy ++ " sub:" ++ idn ++ " lib:basic dim:" ++ dim ++ " idx:" ++ (show idx) ++ " spd:" ++ spd
+      return $ "scr incMod " ++  bdy ++ " sub:" ++ idn ++ " lib:" ++ lib ++ " dim:" ++ dim ++ " idx:" ++ (show idx) ++ " spd:" ++ spd
+    incI uiST addr sub lib dim inc spd = do
+      let idn' = addr ++ sub
+      let idx = if (member idn' uiST.incIdx) then ((fromJust $ lookup idn' uiST.incIdx) + inc) else 0
+      let dt = insert idn' idx uiST.incIdx
+      modifySTRef usRef (\s -> s {incIdx = dt})
+      return $ "scr incSub " ++  addr ++ " sub:" ++ sub ++ " lib:" ++ lib ++ " dim:" ++ dim ++ " idx:" ++ (show idx) ++ " spd:" ++ spd
 
 
 initLayout :: forall eff. UIConf -> Epi eff Unit

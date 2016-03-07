@@ -1,0 +1,7 @@
+t_inner {{
+  z
+	cosz(z)
+	sinhz(z)
+	sinz(z)
+	expz(z)
+}}

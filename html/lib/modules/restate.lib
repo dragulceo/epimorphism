@@ -31,7 +31,7 @@ var z
 flags family t
 flags incTest true
 component t_wrap
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.1 + 0.0i .. 0.0 + 0.0i ..
 modules reduce torus_reduce
 sub t_inner sinhz(z)
 var z

@@ -1,7 +1,7 @@
 module Script where
 
 import Prelude
-import Data.Array (index, length, elemIndex, foldM, updateAt) as A
+import Data.Array (index, length, elemIndex, foldM, updateAt, null) as A
 import Data.Complex
 import Data.Either (Either(..))
 import Data.Foldable (or)
@@ -10,7 +10,7 @@ import Data.StrMap (StrMap, keys, lookup, insert, fromFoldable, union, member, d
 import Data.String (trim)
 import Data.Tuple (Tuple(..))
 import Data.Traversable (traverse)
-import Control.Monad (unless)
+import Control.Monad (unless, when)
 import Control.Monad.ST
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
@@ -18,7 +18,7 @@ import Control.Monad.Except.Trans (lift)
 import Config
 import System (loadLib)
 import Util (lg, tLg, numFromStringE, intFromStringE, gmod, rndstr)
-import Pattern (purgeScript, replaceModule, importScript, flagFamily, findParent)
+import Pattern (purgeScript, replaceModule, importScript, flagFamily, findParent, importModule)
 
 -- PUBLIC
 
@@ -115,27 +115,30 @@ zpath ssRef self t mid sRef = do
   return false
 
 
--- increment a substitution by looking through the index
-incStd :: forall eff h. ScriptFn eff h
-incStd ssRef self t mid sRef = do
+-- increment a module within the specified families
+incMod :: forall eff h. ScriptFn eff h
+incMod ssRef self t mid sRef = do
   systemST <- lift $ readSTRef ssRef
   scr <- lift $ readSTRef sRef
   let dt = scr.dt
 
   -- get data
-  idx   <- (loadLib "idx" dt "incStd idx") >>= intFromStringE
-  spd   <- (loadLib "spd" dt "incStd spd") >>= numFromStringE
-  subN  <- loadLib "sub" dt "incStd sub"
-  dim   <- loadLib "dim" dt "incStd dim"
-  lib   <- loadLib "lib" dt "incStd lib"
+  idx   <- (loadLib "idx" dt "incMod idx") >>= intFromStringE
+  spd   <- (loadLib "spd" dt "incMod spd") >>= numFromStringE
+  subN  <- loadLib "sub" dt "incMod sub"
+  dim   <- loadLib "dim" dt "incMod dim"
+  lib   <- loadLib "lib" dt "incMod lib"
 
   -- index & next data
   let index = flagFamily systemST.moduleLib $ fromFoldable [(Tuple "family" subN), (Tuple lib "true")]
 
+  when (A.null index) do
+    throwError $ "your index doesnt exist"
+
   let nxtPos = idx `gmod` (A.length index)
 
   m1 <- case (A.index index nxtPos) of
-    Nothing -> throwError $ "your index doesnt exist"
+    Nothing -> throwError $ "your index doesnt exist" -- doesn't look like this works
     Just v -> return v
 
   let nul = lg $ "SWITCHING : " ++ mid ++ ":" ++ subN ++ " to : " ++ m1
@@ -146,6 +149,54 @@ incStd ssRef self t mid sRef = do
   purgeScript ssRef self
 
   return true
+
+
+-- increment a substitution through an index
+incSub :: forall eff h. ScriptFn eff h
+incSub ssRef self t mid sRef = do
+  systemST <- lift $ readSTRef ssRef
+  scr <- lift $ readSTRef sRef
+  let dt = scr.dt
+
+  -- get data
+  idx   <- (loadLib "idx" dt "incSub idx") >>= intFromStringE
+  spd   <- (loadLib "spd" dt "incSub spd") >>= numFromStringE
+  subN  <- loadLib "sub" dt "incSub sub"
+  dim   <- loadLib "dim" dt "incMod dim"
+  lib   <- loadLib "lib" dt "incSub ind"
+
+  index <- loadLib lib systemST.indexLib "incSub index"
+
+  when (A.null index.lib) do
+    throwError $ "your index doesnt exist"
+
+  let nxtPos = idx `gmod` (A.length index.lib)
+
+  sub <- case (A.index index.lib nxtPos) of
+    Nothing -> throwError $ "your index doesnt exist" -- doesn't look like this works
+    Just v -> return v
+
+  let nul = lg $ "SWITCHING : " ++ mid ++ ":" ++ subN ++ " to : " ++ sub
+
+  -- remove self (do this before duplicating module)
+  purgeScript ssRef self
+
+  -- duplicate & switch
+  mRef  <- loadLib mid systemST.moduleRefPool "incSub module"
+  m     <- lift $ readSTRef mRef
+  case (member subN m.sub) of
+    true -> do
+      let sub' = insert subN sub m.sub
+      let flags' = insert "pool" "false" m.flags
+      let m' = m {sub = sub', flags = flags'}
+      m'id <- importModule ssRef (Left m') -- this is kind of hackish, as its reimported
+
+      (Tuple parent subN') <- findParent systemST.moduleRefPool mid
+      switchModules ssRef parent subN' m'id dim spd t
+      return true
+    false -> do
+      let nul = lg "TEMP: can't find sub!"
+      return false
 
 
 switchModules :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> String -> Number -> Number -> EpiS eff h Unit
@@ -208,7 +259,8 @@ lookupScriptFN n = case n of
   "null"   -> return nullS
   "ppath"  -> return ppath
   "zpath"  -> return zpath
-  "incStd" -> return incStd
+  "incMod" -> return incMod
+  "incSub" -> return incSub
   "finishSwitch" -> return finishSwitch
   _       -> throwError $ "script function not found: " ++ n
 

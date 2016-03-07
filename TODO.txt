@@ -23,6 +23,7 @@ MISC
   - feature parity with existing app
 
 LATER
+  - ABSOLUTE ADDRESSING FOR IDX & MOD SWITCHING??
   - indentation issues with switching
   - too many switches can cause par & zn overflow
 	- clean up Pattern.purs & Script.purs

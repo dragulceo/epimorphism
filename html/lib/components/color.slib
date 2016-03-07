@@ -5,6 +5,10 @@ color color_bgr {{
 	color = color.bgra;
 }}
 
+color color_gbr {{
+	color = color.gbra;
+}}
+
 color rotate_hsv {{
   color    = rgb2hsv(color);
   color.r += @rot@;

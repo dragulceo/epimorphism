@@ -1,17 +1,25 @@
 --color_id
 flags default true
 flags family color
+flags basic true
 component color_id
 var color
 
 --color_bgr
-flags default true
 flags family color
+flags basic true
 component color_bgr
+var color
+
+--color_gbr
+flags family color
+flags basic true
+component color_gbr
 var color
 
 --rotate_hsv1
 flags family color
+flags basic true
 component rotate_hsv
 par rot 0.17
 var color
@@ -73,14 +81,32 @@ var color
 --post_id
 flags default true
 flags family post
+flags basic true
 component post_id
 var frame
 
 --post1
 flags family post
+flags basic true
 component post1
 par pc3_spread 0.8
 par pc3_lgv 0.5
+var frame
+
+--post2
+flags family post
+flags basic true
+component post1
+par pc3_spread 0.5
+par pc3_lgv 0.5
+var frame
+
+--post3
+flags family post
+flags basic true
+component post1
+par pc3_spread 0.2
+par pc3_lgv 0.2
 var frame
 
 
@@ -194,8 +220,17 @@ var seed
 
 --seed_border
 flags family seed
+flags basic true
 component seed_border
 par seed_w 0.2
+modules t t_linear
+var seed
+
+--seed_border_tst
+flags family seed
+flags basic true
+component seed_border_cool
+par seed_w 0.4
 modules t t_linear
 var seed
 

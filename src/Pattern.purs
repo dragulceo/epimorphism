@@ -150,7 +150,6 @@ importScript ssRef sc mid = do
   s <- case sc of
     Left s -> do
       let tPhase' = systemST.t - s.tPhase
-      let x = lg $ "R SETTING PHASE: " ++ (show tPhase')
       return $ s {tPhase = tPhase'}
     Right s -> do
       m <- lift $ readSTRef mRef
@@ -164,7 +163,6 @@ importScript ssRef sc mid = do
         false -> do
           scr <- loadLib s systemST.scriptLib "import script"
           let tPhase' = systemST.t - scr.tPhase
-          let x = lg $ "SETTING PHASE: " ++ (show tPhase')
           return $ scr {tPhase = tPhase'}
 
   --update pool

@@ -5,6 +5,10 @@ color color_bgr {{
 	color = color.bgra;
 }}
 
+color color_gbr {{
+	color = color.gbra;
+}}
+
 color rotate_hsv {{
   color    = rgb2hsv(color);
   color.r += @rot@;
@@ -192,6 +196,7 @@ main_body main_stc {{
 
   %seed%
 
+	z = z_in;
   %t%
 
   // get frame
@@ -331,10 +336,13 @@ switch switch{{
 
 
 switch smooth_switch{{
-	$dim$ v0, v1;
+	$dim$ v0, v1, init;
+
+	init = $var$;
 	%m0%
 	v0 = $var$;
 
+	$var$ = init;
 	%m1%
 	v1 = $var$;
 
@@ -352,19 +360,16 @@ switch smooth_switch{{
 
 
 t t_id {{
-  z = z_in;
 }}
 
 
 t t_linear {{
-  z = z_in;
   z = M(zn[#0], z) + zn[#1];
   %reduce%
 }}
 
 
 t t_expz {{
-  z = z_in;
   z = M(zn[#0], z) + zn[#1];
 	z = expz(z);
   z = M(zn[#2], z) + zn[#3];
@@ -373,7 +378,6 @@ t t_expz {{
 
 
 t t_cosz {{
-  z = z_in;
   z = M(zn[#0], z) + zn[#1];
 	z = cosz(z);
   z = M(zn[#2], z) + zn[#3];
@@ -382,7 +386,6 @@ t t_cosz {{
 
 
 t t_sinz {{
-  z = z_in;
   z = M(zn[#0], z) + zn[#1];
 	z = sinz(z);
   z = M(zn[#2], z) + zn[#3];
@@ -391,7 +394,6 @@ t t_sinz {{
 
 
 t t_tanz {{
-  z = z_in;
   z = M(zn[#0], z) + zn[#1];
 	z = tanz(z);
   z = M(zn[#2], z) + zn[#3];
@@ -400,7 +402,6 @@ t t_tanz {{
 
 
 t t_sinhz {{
-  z = z_in;
   z = M(zn[#0], z) + zn[#1];
 	z = sinhz(z);
   z = M(zn[#2], z) + zn[#3];
@@ -409,7 +410,6 @@ t t_sinhz {{
 
 
 t t_coshz {{
-  z = z_in;
   z = M(zn[#0], z) + zn[#1];
 	z = coshz(z);
   z = M(zn[#2], z) + zn[#3];

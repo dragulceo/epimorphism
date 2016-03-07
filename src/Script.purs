@@ -155,6 +155,8 @@ switchModules ssRef mid subN m1 dim spd t = do
   m0Ref <- loadLib m0 systemST.moduleRefPool "incStd m0"
   m0M   <- lift $ readSTRef m0Ref
 
+  let x = lg m0
+
   -- create switch module
   switch <- loadLib "smooth_switch" systemST.moduleLib "switchModules"
   let modules = fromFoldable [(Tuple "m0" m0), (Tuple "m1" m1)]

@@ -65,6 +65,8 @@ library math {{
 /* math utility library */
 
 #define PI 3.1415926536
+#define __1 vec2(1.0, 0.0)
+#define __I vec2(1.0, 0.0)
 
 precision mediump float;
 
@@ -125,8 +127,8 @@ vec2 coshz(vec2 z0){
 
 vec2 tanhz(vec2 z0){
   float s, c;
-  s = sin(2.0 * z0.x);
-	c = cos(2.0 * z0.x);
+  s = sin(2.0 * z0.y);
+	c = cos(2.0 * z0.y);
   float r = cosh(2.0 * z0.x) + c;
   return vec2(sinh(2.0 * z0.x), s) / r;
 }

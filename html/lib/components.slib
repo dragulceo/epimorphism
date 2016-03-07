@@ -66,9 +66,6 @@ library math {{
 
 #define PI 3.1415926536
 
-#define i^ vec2(0.0, 1.0)
-#define l^ vec2(1.0, 0.0)
-
 precision mediump float;
 
 float sinh(float x){
@@ -412,6 +409,91 @@ t t_sinhz {{
 t t_coshz {{
   z = M(zn[#0], z) + zn[#1];
 	z = coshz(z);
+  z = M(zn[#2], z) + zn[#3];
+  %reduce%
+}}
+
+
+t t_lsq {{
+  z = M(zn[#0], z) + zn[#1];
+	z = vec2(1.0, 0.0) - sqz(z);
+  z = M(zn[#2], z) + zn[#3];
+  %reduce%
+}}
+
+t t_lsqt {{
+  z = M(zn[#0], z) + zn[#1];
+	z = vec2(1.0, 0.0) - 0.5 * (sqz(z) + tanhz(z));
+  z = M(zn[#2], z) + zn[#3];
+  %reduce%
+}}
+
+t t_cth {{
+  z = M(zn[#0], z) + zn[#1];
+	z = sqz(z) - sqz(2.0 * z);
+  z = M(zn[#2], z) + zn[#3];
+  %reduce%
+}}
+
+t t_zexp {{
+  z = M(zn[#0], z) + zn[#1];
+	z = 0.5 * (z + expz(z));
+  z = M(zn[#2], z) + zn[#3];
+  %reduce%
+}}
+
+t t_zsq {{
+  z = M(zn[#0], z) + zn[#1];
+	z = 0.5 * (z + sqz(z));
+  z = M(zn[#2], z) + zn[#3];
+  %reduce%
+}}
+
+t t_st {{
+  z = M(zn[#0], z) + zn[#1];
+	z = sinz(tanz(z));
+  z = M(zn[#2], z) + zn[#3];
+  %reduce%
+}}
+
+t t_st2 {{
+  z = M(zn[#0], z) + zn[#1];
+	z = 0.5 * (sinz(z) + tanz(z));
+  z = M(zn[#2], z) + zn[#3];
+  %reduce%
+}}
+
+t t_sq {{
+  z = M(zn[#0], z) + zn[#1];
+	z = sqz(z);
+  z = M(zn[#2], z) + zn[#3];
+  %reduce%
+}}
+
+t t_shs {{
+  z = M(zn[#0], z) + zn[#1];
+	z = sinhz(z) - sinz(z);
+  z = M(zn[#2], z) + zn[#3];
+  %reduce%
+}}
+
+t t_che {{
+  z = M(zn[#0], z) + zn[#1];
+	z = coshz(z) + expz(z);
+  z = M(zn[#2], z) + zn[#3];
+  %reduce%
+}}
+
+t t_mzc {{
+  z = M(zn[#0], z) + zn[#1];
+	z = M(z, cosz(z));
+  z = M(zn[#2], z) + zn[#3];
+  %reduce%
+}}
+
+t t_chsh {{
+  z = M(zn[#0], z) + zn[#1];
+	z = 0.5 * (coshz(z) + sinhz(z));
   z = M(zn[#2], z) + zn[#3];
   %reduce%
 }}

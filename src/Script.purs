@@ -138,6 +138,8 @@ incStd ssRef self t mid sRef = do
     Nothing -> throwError $ "your index doesnt exist"
     Just v -> return v
 
+  let nul = lg $ "SWITCHING : " ++ mid ++ ":" ++ subN ++ " to : " ++ m1
+
   switchModules ssRef mid subN m1 dim spd t
 
   -- remove self
@@ -154,8 +156,6 @@ switchModules ssRef mid subN m1 dim spd t = do
   m0    <- loadLib subN m.modules "incStd find sub"
   m0Ref <- loadLib m0 systemST.moduleRefPool "incStd m0"
   m0M   <- lift $ readSTRef m0Ref
-
-  let x = lg m0
 
   -- create switch module
   switch <- loadLib "smooth_switch" systemST.moduleLib "switchModules"

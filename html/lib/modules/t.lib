@@ -59,10 +59,98 @@ zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
 modules reduce torus_reduce
 var z
 
---t_sinhz
+--t_lsq
 flags family t
 flags basic true
-component t_sinhz
+component t_lsq
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+
+--t_lsqt
+flags family t
+flags basic true
+component t_lsqt
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+
+--t_cth
+flags family t
+flags basic true
+component t_cth
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+
+--t_zexp
+flags family t
+flags basic true
+component t_zexp
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+
+--t_zsq
+flags family t
+flags basic true
+component t_zsq
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+
+--t_st
+flags family t
+flags basic true
+component t_st
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+
+--t_st2
+flags family t
+flags basic true
+component t_st2
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+
+--t_sq
+flags family t
+flags basic true
+component t_sq
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+
+--t_shs
+flags family t
+flags basic true
+component t_shs
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+
+--t_che
+flags family t
+flags basic true
+component t_che
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+
+--t_mzc
+flags family t
+flags basic true
+component t_mzc
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+modules reduce torus_reduce
+var z
+
+--t_chsh
+flags family t
+flags basic true
+component t_chsh
 zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
 modules reduce torus_reduce
 var z

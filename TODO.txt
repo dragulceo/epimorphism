@@ -10,19 +10,21 @@ CONFIG
 	- indexes
 	  - deriving family - @seed:0 @seed:1, etc?
 
-
 ENGINE
   - fract
+	- clear
 UI
-  - remote control
+
 PATTERN
-  - should we be distorting seed?
   - keep scripts when switching modules?
 MISC
   - build out library
   - feature parity with existing app
 
 LATER
+  - rethink flags
+  - remote control
+  - currently manually implementing GL.repeat for aux
   - ABSOLUTE ADDRESSING FOR IDX & MOD SWITCHING??
   - indentation issues with switching
   - too many switches can cause par & zn overflow

@@ -64,7 +64,7 @@ ppath ssRef self t mid sRef = do
 
   -- get data
   spd <- (loadLib "spd" dt "ppath spd") >>= numFromStringE
-  par <-  loadLib "par" dt "ppath par"
+  par <- loadLib "par" dt "ppath par"
   pathN <- loadLib "path" dt "ppath path"
   mRef <- loadLib mid systemST.moduleRefPool "ppath module"
   m <- lift $ readSTRef mRef

@@ -6,16 +6,16 @@ modules main_body main_stc_cool
 --main_stc_cool
 flags family main_body
 component main_stc
-modules seed seed_border_cool
+modules seed seed_simple_cool
 modules t t_sinhz_tst
 modules color rotate_hsv1
 var color
 
---seed_border_cool
+--seed_simple_cool
 flags family seed
-component seed_border_cool
+component seed_simple_cool
 par seed_w 0.4
-modules t ts_wrap_linx3
+modules t ts_wrap_linx3'
 var seed
 
 --t_sinhz_tst

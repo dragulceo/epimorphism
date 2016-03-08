@@ -345,8 +345,8 @@ main_body main_stc {{
   frame_z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
   frame = texture2D(fb, frame_z);
 
-	//z = z_in;
-	%seed%
+  //z = z_in;
+  %seed%
 
   // blend
   color = vec4(seed.a * seed.rgb + (1.0 - seed.a) * frame.rgb, seed.a);
@@ -413,7 +413,7 @@ seed seed_empty {{
   seed = vec4(0.0,0.0,0.0,0.0);
 }}
 
-seed seed_border_cool {{
+seed seed_simple_cool {{
   %t%
 
   float w = VOID_W;
@@ -439,7 +439,7 @@ seed seed_border_cool {{
 }}
 
 
-seed seed_border {{
+seed seed_simple {{
   %t%
 
   float w = VOID_W;
@@ -462,6 +462,122 @@ seed seed_border {{
   wx = w;
   vec4 frame_w = vec4(w, (abs(w-VOID_W) < 0.00001 ? 0.0 : 1.0), wx, wy);
   seed = vec4(frame_w.x, 0, 0, frame_w.y);
+}}
+
+
+seed seed_wca {{
+  vec4 wdt, color;
+  float w = VOID_W;
+	float a, wx, wy;
+  %t%
+
+  // wdt = (w, a, wx, wy)
+  %seed_w%
+
+  w = min(wdt.x, 1.0);
+	if (w > 0.0)
+    %seed_wt%
+
+	a = wdt.y;
+  %alpha%
+
+  %seed_color%
+}}
+
+
+
+seed_color simple_color {{
+  seed = hsv2rgb(vec4(time * @spd@ + @rot@, @sat@, w * @val@, a));
+}}
+
+seed_color tex_color {{
+	vec2 ofs = mod(@tex_sc@ * wdt.zw, 1.0);
+  seed = texture2D(aux[#0], ofs);
+
+  seed = rgb2hsv(seed);
+  seed = hsv2rgb(vec4(time * @spd@ + @rot@ + seed.x, @sat@ * seed.y, @val@ * seed.z, a * seed.w));
+}}
+
+seed_wt wt_id {{
+}}
+
+seed_wt_inv wt_inv {{
+	w = 1.0 - w;
+}}
+
+seed_wt_circ wt_circ {{
+	w = sqrt(1.0 - (1.0 - w) * (1.0 - w));
+}}
+
+seed_wt_inv_circ wt_inv_circ {{
+	w = 1.0 - sqrt(1.0 - (1.0 - w) * (1.0 - w));
+}}
+
+alpha alpha_id {{
+}}
+
+alpha alpha_no {{
+	a = 1.0;
+}}
+
+alpha alpha_solid {{
+	a *= @alpha@;
+}}
+
+alpha alpha_linear {{
+	a *= w * @alpha@;
+}}
+
+
+
+
+seed_w lines_box {{
+  wx = (z.x + @seed_w@) / (2.0 * @seed_w@);
+  wy = (z.y + @seed_w@) / (2.0 * @seed_w@);
+
+  if(z.x >= z.y && z.x >= -1.0 * z.y && z.x > (1.0 - @seed_w@)){
+    w = (z.x - (1.0 - @seed_w@)) / @seed_w@;
+    wy = z.y / (0.5 * @seed_w@) - 0.5;
+  }else if(z.y >= z.x && z.y >= -1.0 * z.x && z.y > (1.0 - @seed_w@)){
+    w = (z.y - (1.0 - @seed_w@)) / @seed_w@;
+    wy = z.x / (0.5 * @seed_w@) - 0.5;
+  }else if(z.y >= z.x && z.y <= -1.0 * z.x && z.x < -1.0 * (1.0 - @seed_w@)){
+    w = (-1.0 * (1.0 - @seed_w@) - z.x) / @seed_w@;
+    wy = z.y / (0.5 * @seed_w@) - 0.5;
+  }else if(z.x >= z.y && z.x <= -1.0 * z.y && z.y < -1.0 * (1.0 - @seed_w@)){
+    w = (-1.0 * (1.0 - @seed_w@) - z.y) / @seed_w@;
+    wy = z.x / (0.5 * @seed_w@) - 0.5;
+  }
+  wx = w;
+  wdt = vec4(w, (w < 0.0 ? 0.0 : 1.0), wx, wy);
+}}
+
+
+seed_w lines_lr {{
+  wx = 0.0;
+  wy = z.y / (0.5 * @seed_w@) - 0.5;
+
+  if(z.x > (1.0 - @seed_w@)){
+    w = (z.x - (1.0 - @seed_w@)) / @seed_w@;
+  }
+  else if(z.x < -1.0 * (1.0 - @seed_w@)){
+    w = (-1.0 * (1.0 - @seed_w@) - z.x) / @seed_w@;
+  }
+  wx = w;
+  wdt = vec4(w, (w < 0.0 ? 0.0 : 1.0), wx, wy);
+}}
+
+
+seed_w square {{
+	wx = 0.0;
+	wy = 0.0;
+  if(z.x < @seed_w@ && z.x > -1.0 * @seed_w@ && z.y < @seed_w@ && z.y > -1.0 * @seed_w@){
+    w = min((1.0 - abs(z.x) / @seed_w@), (1.0 - abs(z.y) / @seed_w@));
+		wx = (z.x + @seed_w@) / (2.0 * @seed_w@);
+		wy = (z.y + @seed_w@) / (2.0 * @seed_w@);
+  }
+
+  wdt = vec4(w, (w < 0.0 ? 0.0 : 1.0), wx, -1.0 * wy);
 }}
 
 
@@ -510,7 +626,7 @@ t t_id {{
 
 t t_wrap {{
   z = M(zn[#0], z) + zn[#1];
-	z = $t_inner$;
+  z = $t_inner$;
   z = M(zn[#2], z) + zn[#3];
   %reduce%
 }}

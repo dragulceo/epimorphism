@@ -73,6 +73,10 @@ keyHandler ucRef usRef char = do
       incM uiST "disp" "post" "basic" "vec4" 1 spd
     "Y" -> do
       incM uiST "disp" "post" "basic" "vec4" (-1) spd
+    "0" -> do
+      incM uiST "main.main_body.seed" "seed_color" "basic" "vec4" 1 spd
+    "P" -> do
+      incM uiST "main.main_body.seed" "seed_color" "basic" "vec4" (-1) spd
     _   -> return $ "null"
   where
     incM uiST bdy idn lib dim inc spd = do

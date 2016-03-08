@@ -2,7 +2,7 @@ seed seed_empty {{
   seed = vec4(0.0,0.0,0.0,0.0);
 }}
 
-seed seed_border_cool {{
+seed seed_simple_cool {{
   %t%
 
   float w = VOID_W;
@@ -28,7 +28,7 @@ seed seed_border_cool {{
 }}
 
 
-seed seed_border {{
+seed seed_simple {{
   %t%
 
   float w = VOID_W;
@@ -51,4 +51,24 @@ seed seed_border {{
   wx = w;
   vec4 frame_w = vec4(w, (abs(w-VOID_W) < 0.00001 ? 0.0 : 1.0), wx, wy);
   seed = vec4(frame_w.x, 0, 0, frame_w.y);
+}}
+
+
+seed seed_wca {{
+  vec4 wdt, color;
+  float w = VOID_W;
+	float a, wx, wy;
+  %t%
+
+  // wdt = (w, a, wx, wy)
+  %seed_w%
+
+  w = min(wdt.x, 1.0);
+	if (w > 0.0)
+    %seed_wt%
+
+	a = wdt.y;
+  %alpha%
+
+  %seed_color%
 }}

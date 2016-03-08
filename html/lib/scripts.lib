@@ -75,7 +75,7 @@ mid Nothing
 
 --liny_3'
 fn zpath
-dt idx 1
+dt idx 3
 dt path liny
 dt spd -0.1
 mid Nothing

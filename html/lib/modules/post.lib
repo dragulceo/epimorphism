@@ -9,22 +9,39 @@ var frame
 flags family post
 flags basic true
 component post1
-par pc3_spread 0.8
-par pc3_lgv 0.5
+par gamma 1.33
+par hue 0.0
+par spread 0.5
+par lgv 0.5
 var frame
 
 --post2
 flags family post
 flags basic true
 component post1
-par pc3_spread 0.5
-par pc3_lgv 0.5
+par gamma 1.33
+par hue 0.33
+par spread 0.5
+par lgv 0.5
 var frame
 
 --post3
 flags family post
 flags basic true
 component post1
-par pc3_spread 0.2
-par pc3_lgv 0.2
+par gamma 1.33
+par hue 0.66
+par spread 0.5
+par lgv 0.5
 var frame
+
+--post4
+flags family post
+flags basic true
+component post1
+par gamma 1.33
+par hue 0.66
+par spread 0.5
+par lgv 0.5
+var frame
+scripts p4_h1 .. p4_s1 .. p4_l1 ..

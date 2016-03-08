@@ -15,7 +15,7 @@ import Control.Monad.ST
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 
-import Math (pi, cos)
+import Math (pi, cos, floor)
 
 import Config
 import System (loadLib)
@@ -71,7 +71,14 @@ ppath ssRef self t mid sRef = do
 
   -- lookup path function
   fn <- case pathN of
-    "linear" -> return $ \t -> t
+    "linear" -> do
+      return $ \t -> t
+    "loop" -> do
+      return $ \t -> t - floor(t)
+    "wave" -> do
+      a <- (loadLib "a" dt "ppath linear a") >>= numFromStringE
+      b <- (loadLib "b" dt "ppath linear b") >>= numFromStringE
+      return $ \t -> a * cos(b * t)
     _ -> throwError $ "Unknown par path : " ++ pathN
 
   -- execute
@@ -105,7 +112,7 @@ zpath ssRef self t mid sRef = do
     "liny" -> return $ \t ->
       outCartesian $ Cartesian 0.0 t
     "circle" -> do
-      r <- (loadLib "r" dt "zpath r") >>= numFromStringE
+      r <- (loadLib "r" dt "zpath circle r") >>= numFromStringE
       return $ \t ->
         outPolar $ Polar (2.0 * pi * t) r
     "rose" -> do

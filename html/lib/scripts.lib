@@ -111,3 +111,28 @@ dt path circle
 dt spd 0.01
 dt r 1.0
 mid Nothing
+
+--p4_h1
+fn ppath
+dt path loop
+dt par hue
+dt spd 0.1
+mid Nothing
+
+--p4_s1
+fn ppath
+dt path wave
+dt par spread
+dt a 0.35
+dt b 0.5
+dt spd 0.06
+mid Nothing
+
+--p4_l1
+fn ppath
+dt path wave
+dt par lgv
+dt a 0.125
+dt b 0.5
+dt spd 0.045
+mid Nothing

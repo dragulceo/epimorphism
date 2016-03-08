@@ -2,13 +2,14 @@ post post_id {{
 }}
 
 post post1 {{
-  frame = _gamma3(frame, 2.0 / 1.5);
+	// optomize me!
+  frame = _gamma3(frame, @gamma@);
 
   frame = rgb2hsv(frame);
 
-  vec4 c0 = hsv2rgb(vec4(0.0, 1.0, 0.5, 1.0));
-  vec4 c1 = hsv2rgb(vec4(0.66 + @pc3_spread@ / 2.0, 1.0, @pc3_lgv@, 1.0));
-  vec4 c2 = hsv2rgb(vec4(0.66 - @pc3_spread@ / 2.0, 1.0, -1.0 * @pc3_lgv@, 1.0));
+  vec4 c0 = hsv2rgb(vec4(@hue@, 1.0, 0.5, 1.0));
+  vec4 c1 = hsv2rgb(vec4(@hue@ + @spread@ / 2.0, 1.0, @lgv@, 1.0));
+  vec4 c2 = hsv2rgb(vec4(@hue@ - @spread@ / 2.0, 1.0, -1.0 * @lgv@, 1.0));
 
   vec4 res, r0, r1;
   float f;

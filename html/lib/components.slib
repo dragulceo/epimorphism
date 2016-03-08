@@ -13,14 +13,44 @@ color rotate_hsv {{
   color = rgb2hsv(color);
 
 	float l = sqrt(z_in.x * z_in.x + z_in.y * z_in.y);
-
 	l = (4.0 * @len_sc@ + 1.0) * l / (l + 4.0 * @len_sc@);
   l = @len_sc_amt@ * log(l + 1.0);
 
-	float th = (@rot@ + l + time * @spd_th@);
+	float th = (@rot@ + l + time * @th_spd@);
   color.x += th;
 
   color = hsv2rgb(color);
+}}
+
+
+color rotate_hsls {{
+  // complex hsls rotation
+  // FULL, LIVE, DEV
+  color = rgb2hsls(color);
+
+  // compute l
+	float l = sqrt(z_in.x * z_in.x + z_in.y * z_in.y);
+	l = (4.0 * @len_sc@ + 1.0) * l / (l + 4.0 * @len_sc@);
+  l = @len_sc_amt@ * log(l + 1.0);
+
+  // compute rotation axis
+  float phi = 2.0 * PI * @phi_1@;
+  float psi = 2.0 * PI * @psi_1@;
+  vec3 axis = vec3(cos(psi) * cos(phi), cos(psi) * sin(phi), sin(psi));
+
+  // compute rotation 1
+  float th = 2.0 * PI * (l + time * @th_spd@);
+  //th = remf(CX(th, 0.0), 2.0 * PI).x;
+	vec3 tmp = rotate3D(color.xyz, axis, th);
+
+  // compute rotation 2
+  th = 2.0 * PI * @rot@;
+  phi += 2.0 * PI * @phi_2@;
+  psi += 2.0 * PI * @psi_2@;
+  axis = vec3(cos(psi) * cos(phi), cos(psi) * sin(phi), sin(psi));
+  tmp = rotate3D(tmp, axis, th);
+
+  color = hsls2rgb(vec4(tmp, color.w));
 }}
 
 
@@ -239,6 +269,28 @@ vec4 _gamma3(vec4 v, float gamma){
   return vec4(pow(v.xyz, vec3(gamma, gamma, gamma)), v.w);
 }
 
+vec3 rotate3D(vec3 v, vec3 axis, float th){
+  // compute constants
+  float c = cos(th);
+  float s = sin(th);
+
+  // compute rotation
+  vec3 res;
+  res.x = (1.0 + (1.0 - c) * (axis.x * axis.x - 1.0)) * v.x +
+          (axis.z * s + (1.0 - c) * axis.x * axis.y) * v.y +
+          (-1.0 * axis.y * s + (1.0 - c) * axis.x * axis.z) * v.z;
+
+  res.y = (-1.0 * axis.z * s + (1.0 - c) * axis.x * axis.y) * v.x +
+          (1.0 + (1.0 - c) * (axis.y * axis.y - 1.0)) * v.y +
+          (axis.x * s + (1.0 - c) * axis.y * axis.z) * v.z;
+
+  res.z = (axis.y * s + (1.0 - c) * axis.x * axis.z) * v.x +
+          (-1.0 * axis.x * s + (1.0 - c) * axis.y * axis.z) * v.y +
+          (1.0 + (1.0 - c) * (axis.z * axis.z - 1.0)) * v.z;
+
+  return res;
+}
+
 }}
 
 
@@ -308,13 +360,14 @@ post post_id {{
 }}
 
 post post1 {{
-  frame = _gamma3(frame, 2.0 / 1.5);
+	// optomize me!
+  frame = _gamma3(frame, @gamma@);
 
   frame = rgb2hsv(frame);
 
-  vec4 c0 = hsv2rgb(vec4(0.0, 1.0, 0.5, 1.0));
-  vec4 c1 = hsv2rgb(vec4(0.66 + @pc3_spread@ / 2.0, 1.0, @pc3_lgv@, 1.0));
-  vec4 c2 = hsv2rgb(vec4(0.66 - @pc3_spread@ / 2.0, 1.0, -1.0 * @pc3_lgv@, 1.0));
+  vec4 c0 = hsv2rgb(vec4(@hue@, 1.0, 0.5, 1.0));
+  vec4 c1 = hsv2rgb(vec4(@hue@ + @spread@ / 2.0, 1.0, @lgv@, 1.0));
+  vec4 c2 = hsv2rgb(vec4(@hue@ - @spread@ / 2.0, 1.0, -1.0 * @lgv@, 1.0));
 
   vec4 res, r0, r1;
   float f;

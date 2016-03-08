@@ -24,7 +24,7 @@ component rotate_hsv
 par rot 0.17
 par len_sc 0.0
 par len_sc_amt 0.0
-par spd_th 0.0
+par th_spd 0.0
 var color
 
 --rotate_hsv2
@@ -34,7 +34,7 @@ component rotate_hsv
 par rot 0.04
 par len_sc 0.0
 par len_sc_amt 0.0
-par spd_th 0.0
+par th_spd 0.0
 var color
 
 --rotate_hsv3
@@ -44,7 +44,7 @@ component rotate_hsv
 par rot 0.01
 par len_sc 0.0
 par len_sc_amt 0.0
-par spd_th 0.0
+par th_spd 0.0
 var color
 
 --rotate_hsv4
@@ -54,7 +54,21 @@ component rotate_hsv
 par rot 0.01
 par len_sc 1.0
 par len_sc_amt 0.5
-par spd_th 0.0
+par th_spd 0.0
+var color
+
+--rotate_hsls1
+flags family color
+flags basic true
+component rotate_hsls
+par rot 0.10
+par len_sc 0.0
+par len_sc_amt 0.0
+par th_spd 0.0
+par phi_1 0.5
+par psi_1 0.8
+par phi_2 0.3
+par psi_2 0.8
 var color
 
 
@@ -106,7 +120,7 @@ flags family main_body
 component main_stc
 modules seed seed_border
 modules t t_wrap_zo
-modules color rotate_hsv4
+modules color rotate_hsls1
 var color
 
 
@@ -122,25 +136,42 @@ var frame
 flags family post
 flags basic true
 component post1
-par pc3_spread 0.8
-par pc3_lgv 0.5
+par gamma 1.33
+par hue 0.0
+par spread 0.5
+par lgv 0.5
 var frame
 
 --post2
 flags family post
 flags basic true
 component post1
-par pc3_spread 0.5
-par pc3_lgv 0.5
+par gamma 1.33
+par hue 0.33
+par spread 0.5
+par lgv 0.5
 var frame
 
 --post3
 flags family post
 flags basic true
 component post1
-par pc3_spread 0.2
-par pc3_lgv 0.2
+par gamma 1.33
+par hue 0.66
+par spread 0.5
+par lgv 0.5
 var frame
+
+--post4
+flags family post
+flags basic true
+component post1
+par gamma 1.33
+par hue 0.66
+par spread 0.5
+par lgv 0.5
+var frame
+scripts p4_h1 .. p4_s1 .. p4_l1 ..
 
 
 

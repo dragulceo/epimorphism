@@ -1,4 +1,6 @@
 library colorspace {{
+#define PI 3.1415926535 // unfortunately have to do this here.  hackish
+
 /* colorspace library */
 precision mediump float;
 vec4 rgb2hsv(vec4 c){
@@ -17,13 +19,97 @@ vec4 hsv2rgb(vec4 c){
   return vec4(c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y), c.w);
 }
 
+// can probably optimize all hsl functions
+vec4 hsl2rgb(vec4 c){
+  float h = c.x;
+	float s = c.y;
+  float l = c.z;
+
+  if(s == 0.0)
+    return vec4((l + 1.0) / 2.0, (l + 1.0) / 2.0, (l + 1.0) /  2.0, c.w);
+
+  float delta = s / sqrt(1.0 - l * l);
+
+  if(l > 0.0)
+    delta *= (2.0 - l - 1.0);
+  else
+    delta *= (l + 1.0);
+
+  float v = (l + 1.0 + delta) / 2.0;
+  float min = v - delta;
+  s = 1.0 - min / v;
+
+  return hsv2rgb(vec4(h, s, v, c.w));
+}
+
+vec4 hsls2rgb(vec4 c){
+
+  float s = sqrt(c.x * c.x + c.y * c.y);
+  float h;
+
+  if(s == 0.0){
+    h = 0.0;
+  }else{
+    h = atan(c.y, c.x);
+  }
+
+  if(h <= 0.0)
+    h += 2.0 * PI;
+  h /= (2.0 * PI);
+
+	c.x = h;
+	c.y = s;
+
+	return hsl2rgb(c);
+}
+
+
+vec4 rgb2hsls(vec4 c){
+  float h, s, l;
+  float vmin = min(min(c.x, c.y), c.z);
+  float vmax = max(max(c.x, c.y), c.z);
+
+  float delta = vmax - vmin;
+
+  l = (vmax + vmin) - 1.0;
+
+  s = delta * sqrt(1.0 - l * l);
+
+  if(l == -1.0 || l == 1.0)
+    s = 0.0;
+  else if(l > 0.0)
+    s = s / (2.0 - l - 1.0);
+  else if(l <= 0.0)
+    s = s / (l + 1.0);
+
+  if(s == 0.0){
+    h = 0.0;
+  }else {
+    if(c.x == vmax)
+      h = (c.y - c.z) / delta;            // between yellow & magenta
+    else if(c.y == vmax)
+      h = 2.0 + (c.z - c.x) / delta;     // between cyan & yellow
+    else
+      h = 4.0 + (c.x - c.y) / delta;
+    h *= PI / 3.0;
+  }
+
+	// l was *= 0.9999999 brfore import?
+  vec4 r = vec4(s * cos(h), s * sin(h), l, c.w);
+
+  return r;
+
+}
+
+
+
+
 }}
 
 
 library math {{
 /* math utility library */
 
-#define PI 3.1415926536
 #define __1 vec2(1.0, 0.0)
 #define __I vec2(1.0, 0.0)
 

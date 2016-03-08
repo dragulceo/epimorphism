@@ -19,7 +19,7 @@ flags basic_t true
 zn 1.1 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
 component t_wrap
 modules reduce torus_reduce
-sub t_inner sinhz(z)
+sub t_inner z
 var z
 
 --t_wrap_linx3
@@ -57,7 +57,7 @@ scripts circle_3 ..
 --ts_wrap_zo
 flags family t
 flags basic_seed true
-zn 1.1 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
 component t_wrap
 modules reduce torus_reduce
 sub t_inner z

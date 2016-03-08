@@ -22,4 +22,37 @@ flags family color
 flags basic true
 component rotate_hsv
 par rot 0.17
+par len_sc 0.0
+par len_sc_amt 0.0
+par spd_th 0.0
+var color
+
+--rotate_hsv2
+flags family color
+flags basic true
+component rotate_hsv
+par rot 0.04
+par len_sc 0.0
+par len_sc_amt 0.0
+par spd_th 0.0
+var color
+
+--rotate_hsv3
+flags family color
+flags basic true
+component rotate_hsv
+par rot 0.01
+par len_sc 0.0
+par len_sc_amt 0.0
+par spd_th 0.0
+var color
+
+--rotate_hsv4
+flags family color
+flags basic true
+component rotate_hsv
+par rot 0.01
+par len_sc 1.0
+par len_sc_amt 0.5
+par spd_th 0.0
 var color

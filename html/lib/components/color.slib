@@ -10,7 +10,15 @@ color color_gbr {{
 }}
 
 color rotate_hsv {{
-  color    = rgb2hsv(color);
-  color.r += @rot@;
-  color    = hsv2rgb(color);
+  color = rgb2hsv(color);
+
+	float l = sqrt(z_in.x * z_in.x + z_in.y * z_in.y);
+
+	l = (4.0 * @len_sc@ + 1.0) * l / (l + 4.0 * @len_sc@);
+  l = @len_sc_amt@ * log(l + 1.0);
+
+	float th = (@rot@ + l + time * @spd_th@);
+  color.x += th;
+
+  color = hsv2rgb(color);
 }}

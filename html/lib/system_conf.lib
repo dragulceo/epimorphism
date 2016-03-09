@@ -1,5 +1,5 @@
 --default
-initEngineConf high_res
+initEngineConf default
 initUIConf default
 initPattern default
 

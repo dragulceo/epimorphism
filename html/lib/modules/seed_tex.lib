@@ -4,7 +4,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/grid_1.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -17,7 +17,7 @@ flags basic true
 component tex_color
 flags geom true
 images /textures/simplegeom/grid_2.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -30,7 +30,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/tile_grid1.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -43,7 +43,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/tile_grid2.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -56,7 +56,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/tile_grid3.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -69,7 +69,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/tile_grid6.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -82,7 +82,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/tile_hexagons1.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -95,7 +95,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/tile_psych1.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -108,7 +108,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/tile_rainbow1.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -121,7 +121,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/tile_rainbow2.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -134,7 +134,7 @@ flags basic true
 flags psych true
 component tex_color
 images /textures/psych/psych_12.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -147,7 +147,7 @@ flags basic true
 flags psych true
 component tex_color
 images /textures/psych/psych_13.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -160,7 +160,7 @@ flags basic true
 flags psych true
 component tex_color
 images /textures/psych/psych_5.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -173,7 +173,7 @@ flags basic true
 flags psych true
 component tex_color
 images /textures/psych/psych_6.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -186,7 +186,7 @@ flags basic true
 flags psych true
 component tex_color
 images /textures/psych/psych_7.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -199,7 +199,7 @@ flags basic true
 flags vector true
 component tex_color
 images /textures/misc/tile_vector1.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -212,7 +212,7 @@ flags basic true
 flags vector true
 component tex_color
 images /textures/misc/tile_vector2.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -225,7 +225,7 @@ flags basic true
 flags vector true
 component tex_color
 images /textures/misc/tile_vector3.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -238,7 +238,7 @@ flags basic true
 flags vector true
 component tex_color
 images /textures/misc/tile_vector4.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -251,7 +251,7 @@ flags basic true
 flags flowers true
 component tex_color
 images /textures/nontile/flowers3.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -264,7 +264,7 @@ flags basic true
 flags misc true
 component tex_color
 images /textures/misc/tile_floral1.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -277,7 +277,7 @@ flags basic true
 flags misc true
 component tex_color
 images /textures/misc/tile_islamic1.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -290,7 +290,7 @@ flags basic true
 flags misc true
 component tex_color
 images /textures/misc/tile_oct1.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -303,7 +303,7 @@ flags basic true
 component tex_color
 flags vas true
 images /textures/Vasarely/tile_vasarely2.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -316,7 +316,7 @@ flags basic true
 flags vas true
 component tex_color
 images /textures/Vasarely/tile_vasarely4.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -329,7 +329,7 @@ flags basic true
 flags vas true
 component tex_color
 images /textures/Vasarely/tile_vasarely7.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -342,7 +342,7 @@ flags basic true
 component tex_color
 flags vas true
 images /textures/Vasarely/tile_vasarely8.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -355,7 +355,7 @@ flags basic true
 flags psych true
 component tex_color
 images /textures/Alexgrey/grey1.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -368,7 +368,7 @@ flags basic true
 flags misc true
 component tex_color
 images /textures/nontile/tile_dodec.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -381,7 +381,7 @@ flags basic true
 flags misc true
 component tex_color
 images /textures/nontile/tile_spidro.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -394,7 +394,7 @@ flags basic true
 flags flower true
 component tex_color
 images /textures/flowers/flowers3.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -407,7 +407,7 @@ flags basic true
 flags flower true
 component tex_color
 images /textures/flowers/flowers5.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -420,7 +420,7 @@ flags basic true
 flags flower true
 component tex_color
 images /textures/flowers/flowers6.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -433,7 +433,7 @@ flags basic true
 flags flower true
 component tex_color
 images /textures/flowers/flowers7.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -446,7 +446,7 @@ flags basic true
 flags flower true
 component tex_color
 images /textures/flowers/lines1.png ..
-par tex_sc 1.0
+par tex_sc 0.25
 par spd 0.0
 par rot 0.0
 par sat 1.0

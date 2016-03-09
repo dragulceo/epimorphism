@@ -47,6 +47,7 @@ keyHandler ucRef usRef char = do
   uiConf <- readSTRef ucRef
   uiST   <- readSTRef usRef
 
+  let x = lg char
   let spd = show uiConf.keyboardSwitchSpd
   case char of
     "1" -> do
@@ -58,13 +59,13 @@ keyHandler ucRef usRef char = do
     "W" -> do
       incI uiST "main.main_body.t" "t_inner" "t_inner" "vec2" (-1) spd
     "3" -> do
-      incM uiST "main.main_body.seed" "t" "basic_seed" "vec2" 1 spd
+      incM uiST "main.main_body.seed.seed0" "t" "basic_seed" "vec2" 1 spd
     "E" -> do
-      incM uiST "main.main_body.seed" "t" "basic_seed" "vec2" (-1) spd
+      incM uiST "main.main_body.seed.seed0" "t" "basic_seed" "vec2" (-1) spd
     "4" -> do
-      incI uiST "main.main_body.seed.t" "t_inner" "t_inner" "vec2" 1 spd
+      incI uiST "main.main_body.seed.seed0.t" "t_inner" "t_inner" "vec2" 1 spd
     "R" -> do
-      incI uiST "main.main_body.seed.t" "t_inner" "t_inner" "vec2" (-1) spd
+      incI uiST "main.main_body.seed.seed0.t" "t_inner" "t_inner" "vec2" (-1) spd
     "5" -> do
       incM uiST "main.main_body" "color" "basic" "vec4" 1 spd
     "T" -> do
@@ -74,9 +75,13 @@ keyHandler ucRef usRef char = do
     "Y" -> do
       incM uiST "disp" "post" "basic" "vec4" (-1) spd
     "0" -> do
-      incM uiST "main.main_body.seed" "seed_color" "basic" "vec4" 1 spd
+      incM uiST "main.main_body.seed.seed0" "seed_color" "basic" "vec4" 1 spd
     "P" -> do
-      incM uiST "main.main_body.seed" "seed_color" "basic" "vec4" (-1) spd
+      incM uiST "main.main_body.seed.seed0" "seed_color" "basic" "vec4" (-1) spd
+    "½" -> do
+      incM uiST "main.main_body.seed.seed1" "seed_color" "basic" "vec4" 1 spd
+    "Û" -> do
+      incM uiST "main.main_body.seed.seed1" "seed_color" "basic" "vec4" (-1) spd
     _   -> return $ "null"
   where
     incM uiST bdy idn lib dim inc spd = do

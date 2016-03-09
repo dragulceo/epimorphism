@@ -14,12 +14,18 @@ var seed
 --seed_multi
 flags default true
 flags family seed
+modules t t_wrap
 component seed_multi
-modules seed0 seed_border
-modules seed1 seed_border
+modules seed0 seed_wca
+modules seed1 seed_wca2
+modules seed2 seed_wca3
 var seed
 
-
+--seed_nothing
+flags family seed
+flags basic true
+component seed_nothing
+var seed
 
 --seed_wca
 flags family seed
@@ -31,6 +37,29 @@ modules seed_wt wt_id
 modules seed_color tex_color8
 modules alpha alpha_id
 var seed
+
+--seed_wca2
+flags family seed
+flags basic true
+component seed_wca
+modules t t_wrap
+modules seed_w lines_box
+modules seed_wt wt_id
+modules seed_color tex_color12
+modules alpha alpha_id
+var seed
+
+--seed_wca3
+flags family seed
+flags basic true
+component seed_wca
+modules t t_wrap
+modules seed_w circle
+modules seed_wt wt_id
+modules seed_color tex_color28
+modules alpha alpha_id
+var seed
+
 
 --lines_lr
 flags family seed_w
@@ -50,7 +79,45 @@ var wdt
 flags family seed_w
 flags basic true
 component lines_box
-par seed_w 0.5
+par seed_w 0.3
+var wdt
+
+--circle
+flags family seed_w
+flags basic true
+component circle
+par seed_w 0.3
+par r 0.2
+var wdt
+
+--lines_inner
+flags family seed_w
+flags basic true
+component lines_inner
+par seed_w 0.3
+var wdt
+
+--lines_box_stag
+flags family seed_w
+flags basic true
+component lines_box_stag
+par seed_w 0.3
+var wdt
+
+--anti_grid_fade
+flags family seed_w
+flags basic true
+component anti_grid_fade
+par seed_w 0.3
+par n 0.5
+var wdt
+
+--grid_fade
+flags family seed_w
+flags basic true
+component grid_fade
+par seed_w 0.3
+par n 0.5
 var wdt
 
 --wt_id

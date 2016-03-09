@@ -4,6 +4,7 @@ CONFIG
   - cleanup/finish parsing of libs & slibs
     - general refactoring
     - clean up error messages
+	- rethink flags
   - saving
   - data on engine_conf/state, etc split across library, engine, config :/
 	- module inheritence? this stuff is mildly out of control
@@ -22,7 +23,8 @@ MISC
   - feature parity with existing app
 
 LATER
-  - rethink flags
+  - maybe pixel alignment issues with images
+  - initAuxImages is ghetto
   - remote control
   - currently manually implementing GL.repeat for aux
   - ABSOLUTE ADDRESSING FOR IDX & MOD SWITCHING??

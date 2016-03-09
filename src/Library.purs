@@ -171,6 +171,7 @@ buildUIConf vals = do
       "canvasId" -> (fromLAsgn "canvasId" val) >>= (\x -> return $ dt {canvasId = x})
       "consoleId" -> (fromLAsgn "consoleId" val) >>= (\x -> return $ dt {consoleId = x})
       "fullScreen" -> (fromLAsgn "fullScreen" val) >>= parseBool >>= (\x -> return $ dt {fullScreen = x})
+      "keyboardSwitchSpd" -> (fromLAsgn "keyboardSwitchSpd" val) >>= parseNum >>= (\x -> return $ dt {keyboardSwitchSpd = x})
       _ -> Left (LibError $ "UIConf - unknown key - " ++ key)
 
 

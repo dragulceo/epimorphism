@@ -11,6 +11,7 @@ import Control.Monad.Except.Trans (ExceptT ())
 import Graphics.WebGL.Types (WebGLProgram, WebGLTexture, WebGLFramebuffer, WebGLContext)
 import Graphics.Canvas (Canvas)
 import DOM (DOM)
+import Graphics.WebGL.Raw.Types as GLT
 
 import Data.String
 
@@ -90,6 +91,7 @@ type EngineST = {
   , aux :: Maybe (Array WebGLTexture)
   , auxN :: Int
   , ctx :: WebGLContext
+  , empty :: GLT.TexImageSource
 }
 
 -- UI

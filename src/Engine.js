@@ -66,3 +66,19 @@ exports.initAuxImages = function(){
 		window.images[img].src = img;
 	});
 };
+
+
+exports.emptyImage = function(dim){
+	return function(){
+		var canvas = document.createElement("canvas");
+		canvas.width = dim;
+		canvas.height = dim;
+    var context = canvas.getContext("2d");
+		context.fillStyle = "#000000";
+		context.fill();
+
+		var img = new Image();
+		img.src = canvas.toDataURL("image/png");
+		return img;
+	};
+};

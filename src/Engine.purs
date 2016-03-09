@@ -104,6 +104,18 @@ foreign import createImageImpl :: forall eff. String ->
 
 foreign import initAuxImages :: forall eff. Eff eff Unit
 
+clearFB :: forall eff h. EngineConf -> EngineST -> EpiS eff h Unit
+clearFB engineConf engineST = do
+  let ctx = engineST.ctx
+  execGL ctx do
+    liftEff $ GL.bindTexture ctx GLE.texture2d $ fst $ fromJust engineST.tex
+    liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte engineST.empty
+    liftEff $ GL.bindTexture ctx GLE.texture2d $ snd $ fromJust engineST.tex
+    liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte engineST.empty
+  return unit
+
+foreign import emptyImage :: forall eff. Int -> Eff eff GLT.TexImageSource
+
 -- compile shaders and load into systemST
 setShaders :: forall eff h. SystemConf -> STRef h EngineST -> SystemST h -> Pattern -> EpiS eff h Unit
 setShaders sysConf esRef sys pattern = do
@@ -157,7 +169,8 @@ initEngineST sysConf engineConf sys pattern canvasId = do
     Nothing -> throwError "Unable to get a webgl context!!!"
 
   -- default state
-  let es = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, auxN: 0, ctx: ctx}
+  empty <- lift $ emptyImage engineConf.kernelDim
+  let es = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, auxN: 0, ctx: ctx, empty}
   esRef <- lift $ newSTRef es
 
   -- if we change kernel_dim we need to redo this

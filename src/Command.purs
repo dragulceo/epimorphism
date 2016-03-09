@@ -23,6 +23,7 @@ import Config
 import System (loadLib)
 import Pattern (importScript, findModule)
 import Util (winLog, lg, handleError)
+import Engine (clearFB)
 
 command :: forall eff h. STRef h UIConf -> STRef h UIST -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h SystemConf -> STRef h (SystemST h) -> String -> Eff (canvas :: Canvas, dom :: DOM, st :: ST h | eff) Unit
 command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
@@ -56,6 +57,8 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         importScript ssRef (Left scr') mid
 
         return unit
+      "clear" -> do
+        clearFB engineConf engineST
       _ -> throwError $ "Unknown command: " ++ msg
 
 

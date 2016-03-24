@@ -149,7 +149,7 @@ importScript ssRef sc mid = do
 
   s <- case sc of
     Left s -> do
-      let tPhase' = systemST.t - s.tPhase
+      let tPhase' = systemST.t -- - s.tPhase
       return $ s {tPhase = tPhase'}
     Right s -> do
       m <- lift $ readSTRef mRef
@@ -210,16 +210,16 @@ findModule mpool pattern dt = do
     Just "disp" -> findModule' mpool pattern.disp $ fromJust $ A.tail addr
     Just "main" -> findModule' mpool pattern.main $ fromJust $ A.tail addr
     Just x -> throwError $ "value should be main, vert, or disp : " ++ x
+
+findModule' :: forall eff h. StrMap (STRef h Module) -> String -> Array String -> EpiS eff h String
+findModule' mpool mid addr = do
+  maybe (return $ mid) handle (A.head addr)
   where
-    findModule' :: StrMap (STRef h Module) -> String -> Array String -> EpiS eff h String
-    findModule' mpool mid addr = do
-      maybe (return $ mid) handle (A.head addr)
-      where
-        handle mid' = do
-          mRef <- loadLib mid mpool "findModule'"
-          mod <- lift $ readSTRef mRef
-          c <- loadLib mid' mod.modules "findModule' find child"
-          findModule' mpool c $ fromJust $ A.tail addr
+    handle mid' = do
+      mRef <- loadLib mid mpool "findModule'"
+      mod <- lift $ readSTRef mRef
+      c <- loadLib mid' mod.modules "findModule' find child"
+      findModule' mpool c $ fromJust $ A.tail addr
 
 
 -- find parent module id & submodule that a module is binded to. kind of ghetto

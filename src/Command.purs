@@ -34,7 +34,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
   engineST   <- lift $ readSTRef esRef
   pattern    <- lift $ readSTRef pRef
 
-  let x = lg (show msg)
+  let x = lg $ "EXECUTE: " ++ (show msg)
 
   let dt = split " " msg
 

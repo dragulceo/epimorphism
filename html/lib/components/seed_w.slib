@@ -1,3 +1,6 @@
+seed_w w_nul {{
+	wdt = vec4(0.0, 0.0, 0.0, 0.0);
+}}
 seed_w circle {{
 	float r = sqrt(z.x * z.x + z.y * z.y);
 	wx = atan(z.y, z.x) * 3.0 / (2.0 * PI);

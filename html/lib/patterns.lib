@@ -1,6 +1,6 @@
 --default
 vert   vert
-main   main
+main   default
 disp   disp_id
 tPhase 0.0
 tSpd   1.0
@@ -26,6 +26,15 @@ includes colorspace .. math ..
 vert   vert
 main   test_image
 disp   disp
+tPhase 0.0
+tSpd   1.0
+includes colorspace .. math ..
+
+
+--main
+vert   vert
+main   main
+disp   disp_main
 tPhase 0.0
 tSpd   1.0
 includes colorspace .. math ..

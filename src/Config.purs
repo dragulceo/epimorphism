@@ -50,6 +50,7 @@ type SystemST h = {
   , scriptRefPool :: StrMap (STRef h Script)
   , componentLib :: StrMap Component
   , indexLib :: StrMap Index
+  , mainRef :: String
 }
 
 defaultSystemST :: forall h. SystemST h
@@ -69,6 +70,7 @@ defaultSystemST = {
   , scriptRefPool: empty
   , componentLib: empty
   , indexLib: empty
+  , mainRef: ""
 }
 
 -- Engine

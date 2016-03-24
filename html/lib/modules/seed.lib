@@ -11,14 +11,14 @@ par seed_w 0.2
 modules t t_wrap
 var seed
 
---seed_multi
+--seed_multi_default
 flags default true
 flags family seed
 modules t t_wrap
 component seed_multi
 modules seed0 seed_wca
-modules seed1 seed_wca2
-modules seed2 seed_wca3
+modules seed1 seed_nothing
+modules seed2 seed_nothing
 var seed
 
 --seed_nothing
@@ -32,9 +32,9 @@ flags family seed
 flags basic true
 component seed_wca
 modules t t_wrap
-modules seed_w square
+modules seed_w lines_box
 modules seed_wt wt_id
-modules seed_color tex_color8
+modules seed_color simple_color
 modules alpha alpha_id
 var seed
 
@@ -60,6 +60,10 @@ modules seed_color tex_color28
 modules alpha alpha_id
 var seed
 
+--w_nul
+flags family seed_w
+component w_nul
+var wdt
 
 --lines_lr
 flags family seed_w
@@ -79,14 +83,15 @@ var wdt
 flags family seed_w
 flags basic true
 component lines_box
-par seed_w 0.3
+par seed_w 0.4
 var wdt
+scripts main_w0 ..
 
 --circle
 flags family seed_w
 flags basic true
 component circle
-par seed_w 0.3
+par seed_w 0.4
 par r 0.2
 var wdt
 
@@ -94,21 +99,22 @@ var wdt
 flags family seed_w
 flags basic true
 component lines_inner
-par seed_w 0.3
+par seed_w 0.4
 var wdt
+scripts main_w0 ..
 
 --lines_box_stag
 flags family seed_w
 flags basic true
 component lines_box_stag
-par seed_w 0.3
+par seed_w 0.4
 var wdt
 
 --anti_grid_fade
 flags family seed_w
 flags basic true
 component anti_grid_fade
-par seed_w 0.3
+par seed_w 0.4
 par n 0.5
 var wdt
 
@@ -116,7 +122,7 @@ var wdt
 flags family seed_w
 flags basic true
 component grid_fade
-par seed_w 0.3
+par seed_w 0.4
 par n 0.5
 var wdt
 
@@ -144,6 +150,7 @@ flags basic true
 component alpha_solid
 par alpha 0.5
 var a
+scripts main_a0 ..
 
 --alpha_linear
 flags family alpha
@@ -155,8 +162,49 @@ var a
 --simple_color
 flags family seed_color
 component simple_color
-par spd 0.1
+par spd 0.0
 par rot 0.0
 par sat 1.0
 par val 1.0
+var seed
+
+
+--seed_multi_main
+flags default true
+flags family seed
+modules t t_wrap
+component seed_multi
+modules seed0 seed_wca_main0
+modules seed1 seed_wca_main1
+modules seed2 seed_wca_main2
+var seed
+
+--seed_wca_main0
+flags family seed
+component seed_wca
+modules t ts_wrap_main0
+modules seed_w lines_inner
+modules seed_wt wt_id
+modules seed_color tex_color3
+modules alpha alpha_solid
+var seed
+
+--seed_wca_main1
+flags family seed
+component seed_wca
+modules t ts_wrap_main1
+modules seed_w w_nul
+modules seed_wt wt_id
+modules seed_color tex_color3
+modules alpha alpha_solid
+var seed
+
+--seed_wca_main2
+flags family seed
+component seed_wca
+modules t ts_wrap_main2
+modules seed_w w_nul
+modules seed_wt wt_id
+modules seed_color tex_color3
+modules alpha alpha_solid
 var seed

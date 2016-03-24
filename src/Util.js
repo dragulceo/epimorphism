@@ -151,3 +151,15 @@ exports.gmod = function(n) {
     return ((n%m)+m)%m;
 	};
 };
+
+
+exports.random = function() {
+	return Math.random();
+};
+
+
+exports.randInt = function(n) {
+	return function() {
+		return Math.floor(n * Math.random());
+	};
+};

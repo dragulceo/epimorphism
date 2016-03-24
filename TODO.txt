@@ -1,5 +1,25 @@
 ALPHA:
 
+
+FIX IT!
+	- modules/scripts/etc are out of control.  too damn many of them or something
+	  - inheritence?
+		- inline scripts?
+		- dynamic creation
+  - weird divide by zero issue
+	- switching states causes the system to glitch out for a second.  because of image uploading?
+  - initAuxImages is mad ghetto
+	- library isn't thought out well enough
+	- too many debug statements going on
+	- debugging is kind of obnoxious
+	- script level patterns
+	- way of switching modules while keeping phase
+	- clean up flags
+	- make patterns modules?
+	- clean up scripts
+  - ABSOLUTE ADDRESSING FOR IDX & MOD SWITCHING??	not necessary if we stop using sub for t
+
+
 CONFIG
   - cleanup/finish parsing of libs & slibs
     - general refactoring
@@ -13,7 +33,6 @@ CONFIG
 
 ENGINE
   - fract
-	- clear
 UI
 
 PATTERN
@@ -23,12 +42,11 @@ MISC
   - feature parity with existing app
 
 LATER
+  - remove mid from scripts?
   - maybe pixel alignment issues with images
-  - initAuxImages is ghetto
   - remote control
   - currently manually implementing GL.repeat for aux
-  - ABSOLUTE ADDRESSING FOR IDX & MOD SWITCHING??
-  - indentation issues with switching
+  - shader indentation issues with switching
   - too many switches can cause par & zn overflow
 	- clean up Pattern.purs & Script.purs
   - findParent is kind of ghetto
@@ -47,8 +65,7 @@ LATER
   - compiler performance
   - database support
   - compiler substitutions %XXXX%, etc can still cause errors?  dont remember what kind
-  - check out time vs requestAminFrame
-  - scritps for patterns?
+  - check out setTimeout vs requestAminFrame
   - figure out how to render UI
   - build some kind of UI
   - video rendering

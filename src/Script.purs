@@ -19,8 +19,8 @@ import Math (pi, cos, floor)
 
 import Config
 import System (loadLib)
-import Util (lg, tLg, numFromStringE, intFromStringE, gmod, rndstr)
-import Pattern (purgeScript, replaceModule, importScript, flagFamily, findParent, importModule)
+import Util (lg, tLg, numFromStringE, intFromStringE, gmod, rndstr, randInt)
+import Pattern (purgeScript, replaceModule, importScript, flagFamily, findParent, importModule, findModule')
 
 -- PUBLIC
 
@@ -78,7 +78,7 @@ ppath ssRef self t mid sRef = do
     "wave" -> do
       a <- (loadLib "a" dt "ppath linear a") >>= numFromStringE
       b <- (loadLib "b" dt "ppath linear b") >>= numFromStringE
-      return $ \t -> a * cos(b * t)
+      return $ \t -> a * cos(t) + b
     _ -> throwError $ "Unknown par path : " ++ pathN
 
   -- execute
@@ -271,6 +271,36 @@ finishSwitch ssRef self t mid sRef = do
       return false
 
 
+randomMain :: forall eff h. ScriptFn eff h
+randomMain ssRef self t mid sRef = do
+  systemST <- lift $ readSTRef ssRef
+  scr' <- lift $ readSTRef sRef
+
+  unless(member "nxt" scr'.dt) do
+    let dt' = insert "nxt" (show (t + 5.0)) scr'.dt
+    lift $ modifySTRef sRef (\s -> s {dt = dt'})
+    return unit
+
+  scr <- lift $ readSTRef sRef
+  let dt = scr.dt
+
+  nxt <- (loadLib "nxt" dt "randomMain nxt") >>= numFromStringE
+
+  case t of
+    t | t > nxt -> do
+      let a = lg "do thing"
+      let dt' = insert "nxt" (show (t + 5.0)) dt
+      lift $ modifySTRef sRef (\s -> s {dt = dt'})
+
+      idx <- lift $ randInt 100
+      tmid <- findModule' systemST.moduleRefPool systemST.mainRef ["main_body", "t"]
+
+      createScript ssRef tmid "default" "incSub" $ fromFoldable [(Tuple "sub" "t_inner"), (Tuple "idx" (show idx)), (Tuple "spd" "0.15"), (Tuple "lib" "t_inner"), (Tuple "dim" "vec2")]
+
+      return false
+    _ -> return false
+
+
 -- PRIVATE
 
 -- find script fuction given name
@@ -282,6 +312,7 @@ lookupScriptFN n = case n of
   "incMod" -> return incMod
   "incSub" -> return incSub
   "finishSwitch" -> return finishSwitch
+  "randomMain" -> return randomMain
   _       -> throwError $ "script function not found: " ++ n
 
 

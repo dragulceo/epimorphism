@@ -8,3 +8,8 @@ flags default true
 flags family disp_test
 component disp
 modules post post1
+
+--disp_main
+flags family disp
+component disp
+modules post post_main

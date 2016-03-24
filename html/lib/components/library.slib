@@ -212,4 +212,10 @@ vec3 rotate3D(vec3 v, vec3 axis, float th){
   return res;
 }
 
+bool isNan(float val)
+{
+  return ( val < 0.0 || 0.0 < val || val == 0.0 ) ? false : true;
+}
+
+
 }}

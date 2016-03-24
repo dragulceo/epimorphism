@@ -53,8 +53,10 @@ init = do
 
   -- import pattern
   importPattern ssRef pRef
-  systemST' <- lift $ readSTRef ssRef
   pattern'  <- lift $ readSTRef pRef
+
+  lift $ modifySTRef ssRef (\s -> s {mainRef = pattern'.main})
+  systemST' <- lift $ readSTRef ssRef
 
   -- init states
   esRef <- initEngineST systemConf engineConf systemST' pattern' uiConf.canvasId

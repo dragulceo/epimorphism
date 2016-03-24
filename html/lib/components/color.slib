@@ -30,7 +30,7 @@ color rotate_hsls {{
 
   // compute l
 	float l = sqrt(z_in.x * z_in.x + z_in.y * z_in.y);
-	l = (4.0 * @len_sc@ + 1.0) * l / (l + 4.0 * @len_sc@);
+	l = (4.0 * @len_sc@ + 1.0) * l / (1.0 + 4.0 * @len_sc@ *l);
   l = @len_sc_amt@ * log(l + 1.0);
 
   // compute rotation axis
@@ -40,6 +40,7 @@ color rotate_hsls {{
 
   // compute rotation 1
   float th = 2.0 * PI * (l + time * @th_spd@);
+
   //th = remf(CX(th, 0.0), 2.0 * PI).x;
 	vec3 tmp = rotate3D(color.xyz, axis, th);
 

@@ -72,6 +72,22 @@ par psi_2 0.8
 var color
 
 
+--rotate_hsls_main
+flags family color
+flags basic true
+component rotate_hsls
+par rot 0.5
+par len_sc 0.5
+par len_sc_amt 1.0
+par th_spd 0.0
+par phi_1 1.0
+par psi_1 0.0
+par phi_2 0.0
+par psi_2 0.0
+var color
+scripts main_phi1 .. main_psi1 .. main_phi2 .. main_psi2 ..
+
+
 
 --disp_id
 flags family disp
@@ -84,13 +100,18 @@ flags family disp_test
 component disp
 modules post post1
 
+--disp_main
+flags family disp
+component disp
+modules post post_main
 
 
---main
+
+--default
 flags default true
 flags family main
 component main
-modules main_body main_stc
+modules main_body main_default
 
 --test
 flags family main
@@ -101,6 +122,12 @@ modules main_body main_test
 flags family main
 component main
 modules main_body main_test_image
+
+--main
+flags family main
+component main
+modules main_body main_body
+
 
 
 --main_test
@@ -114,15 +141,25 @@ component main_test_image
 images /textures/grid_1.png .. /textures/grid_2.png ..
 var color
 
---main_stc
+--main_default
 flags default true
 flags family main_body
 component main_stc
-modules seed seed_multi
+modules seed seed_multi_default
 modules t t_wrap_zo
 modules color color_id
 var color
 
+
+--main_body
+flags default true
+flags family main_body
+component main_stc
+modules seed seed_multi_main
+modules t t_wrap_main
+modules color rotate_hsls_main
+var color
+scripts main ..
 
 
 --post_id
@@ -172,6 +209,17 @@ par spread 0.5
 par lgv 0.5
 var frame
 scripts p4_h1 .. p4_s1 .. p4_l1 ..
+
+
+--post_main
+flags family post
+component post1
+par gamma 2.0
+par hue 0.33
+par spread 0.5
+par lgv 0.5
+var frame
+scripts main_pc3_hue .. main_pc3_spread .. main_pc3_lgv ..
 
 
 
@@ -228,14 +276,14 @@ par seed_w 0.2
 modules t t_wrap
 var seed
 
---seed_multi
+--seed_multi_default
 flags default true
 flags family seed
 modules t t_wrap
 component seed_multi
 modules seed0 seed_wca
-modules seed1 seed_wca2
-modules seed2 seed_wca3
+modules seed1 seed_nothing
+modules seed2 seed_nothing
 var seed
 
 --seed_nothing
@@ -249,9 +297,9 @@ flags family seed
 flags basic true
 component seed_wca
 modules t t_wrap
-modules seed_w square
+modules seed_w lines_box
 modules seed_wt wt_id
-modules seed_color tex_color8
+modules seed_color simple_color
 modules alpha alpha_id
 var seed
 
@@ -277,6 +325,10 @@ modules seed_color tex_color28
 modules alpha alpha_id
 var seed
 
+--w_nul
+flags family seed_w
+component w_nul
+var wdt
 
 --lines_lr
 flags family seed_w
@@ -296,14 +348,15 @@ var wdt
 flags family seed_w
 flags basic true
 component lines_box
-par seed_w 0.3
+par seed_w 0.4
 var wdt
+scripts main_w0 ..
 
 --circle
 flags family seed_w
 flags basic true
 component circle
-par seed_w 0.3
+par seed_w 0.4
 par r 0.2
 var wdt
 
@@ -311,21 +364,22 @@ var wdt
 flags family seed_w
 flags basic true
 component lines_inner
-par seed_w 0.3
+par seed_w 0.4
 var wdt
+scripts main_w0 ..
 
 --lines_box_stag
 flags family seed_w
 flags basic true
 component lines_box_stag
-par seed_w 0.3
+par seed_w 0.4
 var wdt
 
 --anti_grid_fade
 flags family seed_w
 flags basic true
 component anti_grid_fade
-par seed_w 0.3
+par seed_w 0.4
 par n 0.5
 var wdt
 
@@ -333,7 +387,7 @@ var wdt
 flags family seed_w
 flags basic true
 component grid_fade
-par seed_w 0.3
+par seed_w 0.4
 par n 0.5
 var wdt
 
@@ -361,6 +415,7 @@ flags basic true
 component alpha_solid
 par alpha 0.5
 var a
+scripts main_a0 ..
 
 --alpha_linear
 flags family alpha
@@ -372,10 +427,51 @@ var a
 --simple_color
 flags family seed_color
 component simple_color
-par spd 0.1
+par spd 0.0
 par rot 0.0
 par sat 1.0
 par val 1.0
+var seed
+
+
+--seed_multi_main
+flags default true
+flags family seed
+modules t t_wrap
+component seed_multi
+modules seed0 seed_wca_main0
+modules seed1 seed_wca_main1
+modules seed2 seed_wca_main2
+var seed
+
+--seed_wca_main0
+flags family seed
+component seed_wca
+modules t ts_wrap_main0
+modules seed_w lines_inner
+modules seed_wt wt_id
+modules seed_color tex_color3
+modules alpha alpha_solid
+var seed
+
+--seed_wca_main1
+flags family seed
+component seed_wca
+modules t ts_wrap_main1
+modules seed_w w_nul
+modules seed_wt wt_id
+modules seed_color tex_color3
+modules alpha alpha_solid
+var seed
+
+--seed_wca_main2
+flags family seed
+component seed_wca
+modules t ts_wrap_main2
+modules seed_w w_nul
+modules seed_wt wt_id
+modules seed_color tex_color3
+modules alpha alpha_solid
 var seed
 
 
@@ -386,7 +482,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/grid_1.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -399,7 +495,7 @@ flags basic true
 component tex_color
 flags geom true
 images /textures/simplegeom/grid_2.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -412,7 +508,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/tile_grid1.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -425,7 +521,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/tile_grid2.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -438,7 +534,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/tile_grid3.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -451,7 +547,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/tile_grid6.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -464,7 +560,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/tile_hexagons1.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -477,7 +573,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/tile_psych1.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -490,7 +586,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/tile_rainbow1.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -503,7 +599,7 @@ flags basic true
 flags geom true
 component tex_color
 images /textures/simplegeom/tile_rainbow2.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -516,7 +612,7 @@ flags basic true
 flags psych true
 component tex_color
 images /textures/psych/psych_12.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -529,7 +625,7 @@ flags basic true
 flags psych true
 component tex_color
 images /textures/psych/psych_13.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -542,7 +638,7 @@ flags basic true
 flags psych true
 component tex_color
 images /textures/psych/psych_5.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -555,7 +651,7 @@ flags basic true
 flags psych true
 component tex_color
 images /textures/psych/psych_6.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -568,7 +664,7 @@ flags basic true
 flags psych true
 component tex_color
 images /textures/psych/psych_7.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -581,7 +677,7 @@ flags basic true
 flags vector true
 component tex_color
 images /textures/misc/tile_vector1.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -594,7 +690,7 @@ flags basic true
 flags vector true
 component tex_color
 images /textures/misc/tile_vector2.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -607,7 +703,7 @@ flags basic true
 flags vector true
 component tex_color
 images /textures/misc/tile_vector3.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -620,7 +716,7 @@ flags basic true
 flags vector true
 component tex_color
 images /textures/misc/tile_vector4.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -633,7 +729,7 @@ flags basic true
 flags flowers true
 component tex_color
 images /textures/nontile/flowers3.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -646,7 +742,7 @@ flags basic true
 flags misc true
 component tex_color
 images /textures/misc/tile_floral1.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -659,7 +755,7 @@ flags basic true
 flags misc true
 component tex_color
 images /textures/misc/tile_islamic1.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -672,7 +768,7 @@ flags basic true
 flags misc true
 component tex_color
 images /textures/misc/tile_oct1.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -685,7 +781,7 @@ flags basic true
 component tex_color
 flags vas true
 images /textures/Vasarely/tile_vasarely2.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -698,7 +794,7 @@ flags basic true
 flags vas true
 component tex_color
 images /textures/Vasarely/tile_vasarely4.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -711,7 +807,7 @@ flags basic true
 flags vas true
 component tex_color
 images /textures/Vasarely/tile_vasarely7.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -724,7 +820,7 @@ flags basic true
 component tex_color
 flags vas true
 images /textures/Vasarely/tile_vasarely8.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -737,7 +833,7 @@ flags basic true
 flags psych true
 component tex_color
 images /textures/Alexgrey/grey1.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -750,7 +846,7 @@ flags basic true
 flags misc true
 component tex_color
 images /textures/nontile/tile_dodec.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -763,7 +859,7 @@ flags basic true
 flags misc true
 component tex_color
 images /textures/nontile/tile_spidro.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -776,7 +872,7 @@ flags basic true
 flags flower true
 component tex_color
 images /textures/flowers/flowers3.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -789,7 +885,7 @@ flags basic true
 flags flower true
 component tex_color
 images /textures/flowers/flowers5.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -802,7 +898,7 @@ flags basic true
 flags flower true
 component tex_color
 images /textures/flowers/flowers6.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -815,7 +911,7 @@ flags basic true
 flags flower true
 component tex_color
 images /textures/flowers/flowers7.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -828,7 +924,7 @@ flags basic true
 flags flower true
 component tex_color
 images /textures/flowers/lines1.png ..
-par tex_sc 0.25
+par tex_sc 1.0
 par spd 0.0
 par rot 0.0
 par sat 1.0
@@ -875,7 +971,6 @@ component t_wrap
 modules reduce torus_reduce
 sub t_inner z
 var z
-
 
 --t_wrap_zo
 flags family t
@@ -986,6 +1081,44 @@ modules reduce torus_reduce
 sub t_inner z
 var z
 scripts circle_0 ..
+
+
+
+
+--t_wrap_main
+flags family t
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+component t_wrap
+modules reduce torus_reduce
+sub t_inner z
+var z
+
+--ts_wrap_main0
+flags family t
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+component t_wrap
+modules reduce torus_reduce
+sub t_inner z
+var z
+scripts main_ts0_0 .. main_ts0_1 .. main_ts0_2 .. main_ts0_3 ..
+
+--ts_wrap_main1
+flags family t
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+component t_wrap
+modules reduce torus_reduce
+sub t_inner expz(z)
+var z
+scripts main_ts1_0 .. main_ts1_1 .. main_ts1_2 .. main_ts1_3 ..
+
+--ts_wrap_main2
+flags family t
+zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+component t_wrap
+modules reduce torus_reduce
+sub t_inner coshz(z)
+var z
+scripts main_ts2_0 .. main_ts2_1 .. main_ts2_2 .. main_ts2_3 ..
 
 
 

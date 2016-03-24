@@ -1,8 +1,8 @@
---main
+--default
 flags default true
 flags family main
 component main
-modules main_body main_stc
+modules main_body main_default
 
 --test
 flags family main
@@ -13,3 +13,8 @@ modules main_body main_test
 flags family main
 component main
 modules main_body main_test_image
+
+--main
+flags family main
+component main
+modules main_body main_body

@@ -34,6 +34,8 @@ foreign import replaceAll :: String -> String -> String -> String
 foreign import uuid   :: forall eff. Eff eff String
 foreign import rndstr :: forall eff. Eff eff String
 foreign import gmod :: Int -> Int -> Int
+foreign import random :: forall eff. Eff eff Number
+foreign import randInt :: forall eff. Int -> Eff eff Number
 
 urlGet :: forall eff. String -> Eff eff (Either String String)
 urlGet = urlGetImpl Left Right

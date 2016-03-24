@@ -70,3 +70,19 @@ par psi_1 0.8
 par phi_2 0.3
 par psi_2 0.8
 var color
+
+
+--rotate_hsls_main
+flags family color
+flags basic true
+component rotate_hsls
+par rot 0.5
+par len_sc 0.5
+par len_sc_amt 1.0
+par th_spd 0.0
+par phi_1 1.0
+par psi_1 0.0
+par phi_2 0.0
+par psi_2 0.0
+var color
+scripts main_phi1 .. main_psi1 .. main_phi2 .. main_psi2 ..

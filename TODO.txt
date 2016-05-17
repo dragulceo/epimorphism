@@ -5,17 +5,18 @@ FIX IT!
 	- modules/scripts/etc are out of control.  too damn many of them or something
 	  - inheritence?
 		- inline scripts?
-		- dynamic creation
-  - weird divide by zero issue
+		- dynamic creation (??? parameterized?)
+  - is this shit with the ref pools necessary & clean enough?
+  - weird divide by zero issue - glitch in content
 	- switching states causes the system to glitch out for a second.  because of image uploading?
   - initAuxImages is mad ghetto
-	- library isn't thought out well enough
+	- library isn't thought out well enough.  basically just shitty content
 	- too many debug statements going on
 	- debugging is kind of obnoxious
-	- script level patterns
-	- way of switching modules while keeping phase
-	- clean up flags
-	- make patterns modules?
+	- script level patterns(what is this?)
+	- way of switching modules while keeping phase.  isn't recompiling ghetto?
+	- clean up flags.  how???
+	- make patterns modules??
 	- clean up scripts
   - ABSOLUTE ADDRESSING FOR IDX & MOD SWITCHING??	not necessary if we stop using sub for t
 
@@ -44,7 +45,7 @@ MISC
 LATER
   - remove mid from scripts?
   - maybe pixel alignment issues with images
-  - remote control
+  - remote control (webui, websockets, etc)
   - currently manually implementing GL.repeat for aux
   - shader indentation issues with switching
   - too many switches can cause par & zn overflow

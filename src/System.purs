@@ -23,6 +23,7 @@ initSystemST :: forall eff h. String -> Epi eff (SystemST h)
 initSystemST host = do
   -- gather system data here
 
+  -- initialize libraries
   systemConfLib <- buildLib buildSystemConf $ host ++ "/lib/system_conf.lib"
   engineConfLib <- buildLib buildEngineConf $ host ++ "/lib/engine_conf.lib"
   uiConfLib     <- buildLib buildUIConf $ host ++ "/lib/ui_conf.lib"

@@ -61,10 +61,11 @@ importModule ssRef md = do
   systemST <- lift $ readSTRef ssRef
   id <- lift $ uuid
 
+  -- find module
   m <- case md of
-    Left m -> do
+    Left m -> do -- we're given a module
       if (checkFlag m "pool" "true") then throwError "fuck you" else return m
-    Right m -> do
+    Right m -> do -- we're given a name (lib or pool ref)
       case (member m systemST.moduleRefPool) of
         true -> do
           ref <- loadLib m systemST.moduleRefPool "import module pool"

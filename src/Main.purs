@@ -58,7 +58,7 @@ init = do
   lift $ modifySTRef ssRef (\s -> s {mainRef = pattern'.main})
   systemST' <- lift $ readSTRef ssRef
 
-  -- init states
+  -- init engine & ui states
   esRef <- initEngineST systemConf engineConf systemST' pattern' uiConf.canvasId
   initUIST ucRef ecRef esRef pRef scRef ssRef
 

@@ -107,11 +107,9 @@ loadModules mr lib = do
 
 -- PRIVATE
 
-
 spc :: Int -> String
 spc 0 = ""
 spc m = " " ++ spc (m - 1)
-
 
 indentLines :: Int -> String -> String
 indentLines n s = joinWith "\n" $ map (\x -> (spc n) ++ x) $ split "\n" s

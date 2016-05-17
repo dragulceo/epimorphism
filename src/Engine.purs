@@ -70,7 +70,7 @@ initTex dim = do
 -- initialize auxiliary textures
 initAux :: WebGL (Array WebGLTexture)
 initAux = do
-  let numAux = 10
+  let numAux = 10 -- ghetto
   traverse (\_ -> getTex) (0..(numAux - 1))
 
 

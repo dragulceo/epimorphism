@@ -37,14 +37,14 @@ runScripts ssRef = do
       case (member n systemST.scriptRefPool) of
         true -> do
           sRef <- loadLib n systemST.scriptRefPool "runScripts"
-          scr <- lift $ readSTRef sRef
-          fn <- lookupScriptFN scr.fn
+          scr  <- lift $ readSTRef sRef
+          fn   <- lookupScriptFN scr.fn
           let t' = systemST.t - scr.tPhase
           case scr.mid of
             Nothing -> throwError $ "No module when running script: " ++ scr.fn
             Just mid -> fn ssRef n t' mid sRef
         false -> do
-          let g = lg "script removed" -- ghetto
+          let g = lg "script removed" -- ghetto(script purged by previous script)
           return false
 
 -- SCRIPT FUNCTIONS

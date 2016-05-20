@@ -1,0 +1,10 @@
+--default
+canvasId glcanvas
+consoleId console
+fullScreen false
+keyboardSwitchSpd 0.4
+
+--full
+canvasId glcanvas
+consoleId console
+fullScreen true

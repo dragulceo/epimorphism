@@ -416,6 +416,10 @@ reduce torus_reduce {{
 
 
 
+seed seed_empty {{
+  seed = vec4(0.0,0.0,0.0,0.0);
+}}
+
 seed seed_nothing {{
 	seed = vec4(0.0, 0.0, 0.0, 0.0);
 }}

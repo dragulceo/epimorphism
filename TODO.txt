@@ -5,7 +5,7 @@ FIX IT!
 	- modules/scripts/etc are out of control.  too damn many of them or something
 	  - inheritence?
 		- inline scripts?
-		- dynamic creation (??? parameterized?)
+		- dynamic creation(ie create via purescript, not loading from the library)
   - is this shit with the ref pools necessary & clean enough?
   - weird divide by zero issue - glitch in content
 	- switching states causes the system to glitch out for a second.  because of image uploading?

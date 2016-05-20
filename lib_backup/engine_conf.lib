@@ -1,0 +1,15 @@
+--low
+kernelDim 512
+fract 3
+
+--default
+kernelDim 1024
+fract 3
+
+--high_res
+kernelDim 2048
+fract 3
+
+--uhr
+kernelDim 3072
+fract 3

@@ -24,6 +24,7 @@ foreign import data Now :: !
 -- simple js functions
 foreign import unsafeNull :: forall a. a
 foreign import lg :: forall a b. a -> b
+foreign import stick :: forall a b. a -> b
 foreign import tLg :: forall a b. a -> b
 foreign import unsafeEval :: forall eff. String -> Eff eff Unit
 foreign import winLog :: forall a eff. a -> Eff eff Unit

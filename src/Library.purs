@@ -79,7 +79,7 @@ aggregateLibLines lines = do
     def _ Nothing = return empty
     def n _ = Left $ LibError $ "Expected : " ++ n ++ " : to be a map"
 
-
+-- parse one entry in a library file
 parseGroup :: forall a.  (StrMap LineVal -> Lib a) -> String -> Lib (Tuple String a)
 parseGroup builder group = do
   let lines = A.filter ((/=) "") $ split "\n" group
@@ -91,7 +91,7 @@ parseGroup builder group = do
     res (Just n) grp = return $ Tuple n grp
     res Nothing _ = Left $ LibError $ "name your group chump " ++ group
 
-
+-- parse an entire library file
 parseLib :: forall a. (StrMap LineVal -> Lib a) -> String -> Lib (StrMap a)
 parseLib builder lib = do
   let groups = A.filter ((/=) "") $ A.filter ((/=) "\n") $ split "\n\n" lib

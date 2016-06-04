@@ -22,6 +22,7 @@
     "purescript-jquery" : "*",
     "purescript-simple-dom" : "*",
 	  "purescript-math" : "*",
-    "purescript-complex": "*"
+    "purescript-complex": "*",
+		"purescript-sets": "*"
   }
 }

@@ -1,48 +1,42 @@
-ALPHA:
-
-
-FIX IT!
-	- modules/scripts/etc are out of control.  too damn many of them or something
-	  - inheritence?
-		- inline scripts?
-		- dynamic creation(ie create via purescript, not loading from the library)
-  - is this shit with the ref pools necessary & clean enough?
-  - weird divide by zero issue - glitch in content
-	- switching states causes the system to glitch out for a second.  because of image uploading?
-  - initAuxImages is mad ghetto
-	- library isn't thought out well enough.  basically just shitty content
-	- too many debug statements going on
-	- debugging is kind of obnoxious
-	- script level patterns(what is this?)
-	- way of switching modules while keeping phase.  isn't recompiling ghetto?
-	- clean up flags.  how???
-	- make patterns modules??
-	- clean up scripts
-  - ABSOLUTE ADDRESSING FOR IDX & MOD SWITCHING??	not necessary if we stop using sub for t
-
-
 CONFIG
-  - cleanup/finish parsing of libs & slibs
-    - general refactoring
-    - clean up error messages
-	- rethink flags
-  - saving
+  - make flags a set
+	- better array syntax
+	- better hash syntax
+	- inheritence
+	- better builders
+	  - saving
+  - error handling
   - data on engine_conf/state, etc split across library, engine, config :/
-	- module inheritence? this stuff is mildly out of control
-	- indexes
-	  - deriving family - @seed:0 @seed:1, etc?
+
+SYSTEM
+	- SWITCHING & REF POOLS
+	  - way of switching modules while keeping phase.  isn't recompiling ghetto?
+	  - is this shit with the ref pools necessary & clean enough?
+	  - switching states causes the system to glitch out for a second.  because of image uploading?
+    - ABSOLUTE ADDRESSING FOR IDX & MOD SWITCHING??	not necessary if we stop using sub for t
+		- keep scripts when switching modules?
 
 ENGINE
   - fract
-UI
-
 PATTERN
-  - keep scripts when switching modules?
+	- make patterns modules??
+	- script level patterns(what is this?)
 MISC
-  - build out library
-  - feature parity with existing app
+  - initAuxImages is mad ghetto
+	- too many debug statements going on
+	- debugging is kind of obnoxious
+  - logging?
+FINAL
+  - BETA INFRASTRUCTURE PASS
+  - build out library & interface
+  - weird divide by zero issue - glitch in content
+
+
 
 LATER
+  - how do we figure out the family of a submodle?  can't always use the name
+	  -  like if it's a multi_seed ie. @seed:0 @seed:1, etc?
+
   - remove mid from scripts?
   - maybe pixel alignment issues with images
   - remote control (webui, websockets, etc)
@@ -98,3 +92,4 @@ LATER
 		- where do things go?
 		- put ref pools in pattern?
 		- some kind of reactive data tree?
+  - think of T as vector fields, composition -> vector flow?

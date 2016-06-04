@@ -40,6 +40,7 @@ init = do
 
   -- init config
   systemConf <- loadLib "default" systemST.systemConfLib "init system"
+  let x = lg systemConf
   let systemConf' = systemConf {host = host}
   engineConf <- loadLib systemConf'.initEngineConf systemST.engineConfLib "init engine"
   uiConf     <- loadLib systemConf'.initUIConf systemST.uiConfLib "init ui"

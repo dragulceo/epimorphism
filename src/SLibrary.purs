@@ -1,16 +1,15 @@
 module SLibrary where
 
 import Prelude
-import Data.Array (length, filter, uncons)
+import Data.Array (filter, uncons)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Data.String (split, trim, joinWith, stripSuffix)
-import Data.StrMap (StrMap (), empty, fromFoldable, foldM, insert, lookup, update)
-import Data.Traversable
-import Control.Monad (when)
+import Data.StrMap (StrMap (), fromFoldable)
+import Data.Traversable (traverse)
 
-import Config
+import Config (Index, Component)
 
 data SLibError = SLibError String
 type SLib = Either SLibError

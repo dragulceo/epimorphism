@@ -1,19 +1,18 @@
 module Config where
 
 import Prelude
-import Data.Complex
-import Data.Maybe (Maybe (..))
-import Data.Tuple (Tuple ())
-import Data.StrMap (StrMap (), empty)
-import Control.Monad.ST (STRef, ST)
-import Control.Monad.Eff (Eff)
-import Control.Monad.Except.Trans (ExceptT ())
-import Graphics.WebGL.Types (WebGLProgram, WebGLTexture, WebGLFramebuffer, WebGLContext)
-import Graphics.Canvas (Canvas)
-import DOM (DOM)
+import Data.Complex (Complex)
 import Graphics.WebGL.Raw.Types as GLT
-
-import Data.String
+import Control.Monad.Eff (Eff)
+import Control.Monad.Except.Trans (ExceptT)
+import Control.Monad.ST (STRef, ST)
+import DOM (DOM)
+import Data.Maybe (Maybe(..))
+import Data.Set (Set)
+import Data.StrMap (StrMap, empty)
+import Data.Tuple (Tuple)
+import Graphics.Canvas (Canvas)
+import Graphics.WebGL.Types (WebGLProgram, WebGLTexture, WebGLFramebuffer, WebGLContext)
 
 type Epi eff a = ExceptT String (Eff (canvas :: Canvas, dom :: DOM | eff)) a
 type EpiS eff h a = Epi (st :: ST h | eff) a
@@ -50,6 +49,7 @@ type SystemST h = {
   , scriptRefPool :: StrMap (STRef h Script)
   , componentLib :: StrMap Component
   , indexLib :: StrMap Index
+  , testObjLib :: StrMap TestObj
   , mainRef :: String
 }
 
@@ -70,6 +70,7 @@ defaultSystemST = {
   , scriptRefPool: empty
   , componentLib: empty
   , indexLib: empty
+  , testObjLib: empty
   , mainRef: ""
 }
 
@@ -179,4 +180,17 @@ type Component = {
 type Index = {
     name :: String
   , lib  :: Array String
+}
+
+
+type TestObj = {
+    t_str :: String
+  , t_num :: Number
+  , t_int :: Int
+  , t_bool :: Boolean
+  , t_set :: Set String
+  , t_ast :: Array String
+  , t_acx :: Array Complex
+  , t_mn  :: StrMap Number
+  , t_mst :: StrMap Int
 }

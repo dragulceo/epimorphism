@@ -1,20 +1,17 @@
 module System where
 
-import Prelude
-import Data.Array (foldM) as A
+import Prelude ((++), return, ($), bind)
 import Data.Either (Either(..))
-import Data.List (fromList)
 import Data.Maybe (Maybe(..))
-import Data.StrMap (empty, lookup, insert, foldM, values, delete, StrMap())
-import Data.Tuple (Tuple(..), fst)
-import Data.Traversable (traverse)
-import Control.Monad.ST (ST, STRef, modifySTRef, newSTRef, readSTRef)
+import Data.StrMap (lookup, StrMap())
+import Data.Tuple (Tuple)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 
-import Config
-import Util (urlGet, lg, uuid)
-import Library
+import Config (Epi, SystemST, defaultSystemST)
+import Util (urlGet)
+import Library (Lib, LineVal, LibError(LibError), parseLib, buildPattern, buildScript, buildModule, buildUIConf, buildEngineConf, buildSystemConf)
+import Library2 (LibError2(..), parseLib2)
 import SLibrary
 
 data DataSource = LocalHTTP | LocalStorage | RemoteDB
@@ -30,6 +27,7 @@ initSystemST host = do
   moduleLib     <- buildLib buildModule $ host ++ "/lib/modules.lib"
   scriptLib     <- buildLib buildScript $ host ++ "/lib/scripts.lib"
   patternLib    <- buildLib buildPattern $ host ++ "/lib/patterns.lib"
+  --testObjLib     <- buildLib2 $ host ++ "/lib/test_obj.lib"
 
   componentLib  <- buildSLib buildComponent $ host ++ "/lib/components.slib"
   indexLib      <- buildSLib buildIndex $ host ++ "/lib/indexes.slib"
@@ -43,6 +41,7 @@ initSystemST host = do
     , patternLib    = patternLib
     , componentLib  = componentLib
     , indexLib      = indexLib
+--    , testObjLib    = testObjLib
   }
 
 
@@ -56,6 +55,15 @@ buildLib f loc = do
       (Right res') -> return res'
       (Left (LibError s)) -> throwError $ "Error building lib at : " ++ loc ++ " : " ++ s
 
+
+buildLib2 :: forall eff a. String -> Epi eff (StrMap a)
+buildLib2 loc = do
+  dt <- lift $ urlGet loc
+  case dt of
+    (Left er) -> throwError $ "Error loading lib : " ++ er
+    (Right res) -> case (parseLib2 res) of
+      (Right res') -> return res'
+      (Left (LibError2 s)) -> throwError $ "Error building lib at : " ++ loc ++ " : " ++ s
 
 -- build a shader library from a location with a builder
 buildSLib :: forall eff a.  (SHandle -> SLib (Tuple String a)) -> String -> Epi eff (StrMap a)

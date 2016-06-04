@@ -34,6 +34,10 @@ exports.lg = function lg(x) {
 	console.log(x);
 }
 
+exports.stick = function stick(x) {
+	$.stick = x;
+}
+
 
 exports.now = function () {
   return Date.now();

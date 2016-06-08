@@ -17,7 +17,7 @@ import Engine (initEngineST, render, setShaders)
 import UI (initUIST, showFps)
 import Script (runScripts)
 import System (initSystemST, loadLib)
-import Util (winLog, lg, requestAnimationFrame, now, Now, handleError)
+import Util (winLog, requestAnimationFrame, now, Now, handleError)
 import Pattern (importPattern)
 
 host :: String
@@ -40,7 +40,6 @@ init = do
 
   -- init config
   systemConf <- loadLib "default" systemST.systemConfLib "init system"
-  let x = lg systemConf
   let systemConf' = systemConf {host = host}
   engineConf <- loadLib systemConf'.initEngineConf systemST.engineConfLib "init engine"
   uiConf     <- loadLib systemConf'.initUIConf systemST.uiConfLib "init ui"

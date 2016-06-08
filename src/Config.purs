@@ -1,12 +1,12 @@
 module Config where
 
 import Prelude
-import Data.Complex (Complex)
 import Graphics.WebGL.Raw.Types as GLT
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (ExceptT)
 import Control.Monad.ST (STRef, ST)
 import DOM (DOM)
+import Data.Complex (Complex)
 import Data.Maybe (Maybe(..))
 import Data.Set (Set)
 import Data.StrMap (StrMap, empty)
@@ -194,3 +194,28 @@ type TestObj = {
   , t_mn  :: StrMap Number
   , t_mst :: StrMap Int
 }
+
+
+data SchemaEntryType = SE_St | SE_N | SE_I | SE_B | SE_S | SE_A_St | SE_A_Cx | SE_M_N | SE_M_St
+data SchemaEntry = SchemaEntry SchemaEntryType String
+type Schema = Array SchemaEntry
+
+systemConfSchema :: Schema
+systemConfSchema = [
+  SchemaEntry SE_St "initEngineConf",
+  SchemaEntry SE_St "initUIConf",
+  SchemaEntry SE_St "initPattern"
+]
+
+testObjSchema :: Schema
+testObjSchema = [
+    SchemaEntry SE_St "t_str"
+  , SchemaEntry SE_N "t_num"
+  , SchemaEntry SE_I "t_int"
+  , SchemaEntry SE_B "t_bool"
+  , SchemaEntry SE_S "t_set"
+  , SchemaEntry SE_A_St "t_ast"
+  , SchemaEntry SE_A_Cx "t_acx"
+  , SchemaEntry SE_M_N "t_mn"
+  , SchemaEntry SE_M_St "t_mst"
+]

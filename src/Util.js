@@ -4,6 +4,16 @@
 
 exports.unsafeNull = null
 
+exports.unsafeSetAttr = function(obj){
+	return function(attrn){
+		return function(attrv){
+			console.log(obj,attrn,attrv);
+			obj[attrn] = attrv;
+			return obj;
+		};
+	};
+};
+
 
 exports.requestAnimationFrame = function(x){
   if (typeof rAF === 'undefined') {

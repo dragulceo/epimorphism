@@ -38,6 +38,8 @@ foreign import gmod :: Int -> Int -> Int
 foreign import random :: forall eff. Eff eff Number
 foreign import randInt :: forall eff. Int -> Eff eff Number
 
+foreign import unsafeSetAttr :: forall a b. a -> String -> b -> a
+
 urlGet :: forall eff. String -> Eff eff (Either String String)
 urlGet = urlGetImpl Left Right
 

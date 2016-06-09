@@ -1,6 +1,4 @@
 --post_id
-flags default true
-flags family post
-flags basic true
+flags {default: true, family: post, basic: true}
 component post_id
 var frame

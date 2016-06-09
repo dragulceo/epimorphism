@@ -1,18 +1,12 @@
 --color_id
-flags default true
-flags family color
-flags basic true
+flags {default: true, family: color, basic: true}
 component color_id
 var color
 
---color_bgr
-flags family color
-flags basic true
+--color_bgr < color_id
+flags {family: color, basic: true}
 component color_bgr
-var color
 
---color_gbr
-flags family color
-flags basic true
+--color_gbr < color_id
+flags {family: color, basic: true}
 component color_gbr
-var color

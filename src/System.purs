@@ -1,14 +1,14 @@
 module System where
 
 import SLibrary
-import Config (testObjSchema, Schema, Epi, SystemST, defaultSystemST)
+import Config (scriptSchema, moduleSchema, patternSchema, systemConfSchema, testObjSchema, uiConfSchema, engineConfSchema, Schema, Epi, SystemST, defaultSystemST)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.StrMap (lookup, StrMap)
 import Data.Tuple (Tuple)
-import Library (Lib, LineVal, LibError(LibError), parseLib, buildPattern, buildScript, buildModule, buildUIConf, buildEngineConf, buildSystemConf)
+import Library (Lib, LineVal, LibError(LibError), parseLib)
 import Library2 (LibError2(..), parseLib2)
 import Prelude ((++), return, ($), bind)
 import Util (urlGet, lg)
@@ -20,14 +20,13 @@ initSystemST host = do
   -- gather system data here
 
   -- initialize libraries
-  systemConfLib <- buildLib buildSystemConf $ host ++ "/lib/system_conf.lib"
-  engineConfLib <- buildLib buildEngineConf $ host ++ "/lib/engine_conf.lib"
-  uiConfLib     <- buildLib buildUIConf $ host ++ "/lib/ui_conf.lib"
-  moduleLib     <- buildLib buildModule $ host ++ "/lib/modules.lib"
-  scriptLib     <- buildLib buildScript $ host ++ "/lib/scripts.lib"
-  patternLib    <- buildLib buildPattern $ host ++ "/lib/patterns.lib"
+  systemConfLib <- buildLib2 systemConfSchema $ host ++ "/lib/system_conf.lib"
+  engineConfLib <- buildLib2 engineConfSchema $ host ++ "/lib/engine_conf.lib"
+  uiConfLib     <- buildLib2 uiConfSchema $ host ++ "/lib/ui_conf.lib"
+  moduleLib     <- buildLib2 moduleSchema $ host ++ "/lib/modules.lib"
+  scriptLib     <- buildLib2 scriptSchema $ host ++ "/lib/scripts.lib"
+  patternLib    <- buildLib2 patternSchema $ host ++ "/lib/patterns.lib"
   testObjLib    <- buildLib2 testObjSchema $ host ++ "/lib/test_obj.lib"
-  let b = lg testObjLib
 
   componentLib  <- buildSLib buildComponent $ host ++ "/lib/components.slib"
   indexLib      <- buildSLib buildIndex $ host ++ "/lib/indexes.slib"

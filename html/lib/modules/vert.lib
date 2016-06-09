@@ -1,4 +1,3 @@
 --vert
-flags default true
-flags family vert
+flags {default: true, family: vert}
 component basic

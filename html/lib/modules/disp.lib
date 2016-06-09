@@ -1,4 +1,4 @@
 --disp_id
-flags family disp
+flags {family: disp}
 component disp
-modules post post_id
+modules {post: post_id}

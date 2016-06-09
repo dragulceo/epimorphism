@@ -1,21 +1,13 @@
 --id
-flags family id
+flags {family: id}
 component id
 
 --switch
-flags family switch
+flags {family: switch}
 component switch
-sub var v0
-sub dim float
-par intrp 0.0
-modules m0 id
-modules m1 id
+sub {var: v0, dim: float}
+par {intrp: 0.0}
+modules {m0: id, m1: id}
 
---smooth_switch
-flags family switch
+--smooth_switch < switch
 component smooth_switch
-sub var v0
-sub dim float
-par intrp 0.0
-modules m0 id
-modules m1 id

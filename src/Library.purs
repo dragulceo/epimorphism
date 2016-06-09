@@ -241,7 +241,7 @@ buildScript vals = do
   where
     handle dt key val = case key of
       "fn" -> (fromLAsgn "fn" val) >>= (\x -> return $ dt {fn = x})
-      "mid" -> (fromLAsgn "mid" val) >>= parseMString >>= (\x -> return $ dt {mid = x})
+      "mid" -> (fromLAsgn "mid" val) >>= (\x -> return $ dt {mid = x})
       "flags" -> (fromLMp "flags" val) >>= (\x -> return $ dt {flags = x})
       "dt" -> (fromLMp "dt" val) >>= (\x -> return $ dt {dt = x})
       _ -> Left (LibError $ "Script - unknown key - " ++ key)

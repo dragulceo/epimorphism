@@ -1,143 +1,111 @@
 --color_id
-flags default true
-flags family color
-flags basic true
+flags {default: true, family: color, basic: true}
 component color_id
 var color
 
---color_bgr
-flags family color
-flags basic true
+--color_bgr < color_id
+flags {family: color, basic: true}
 component color_bgr
-var color
 
---color_gbr
-flags family color
-flags basic true
+--color_gbr < color_id
+flags {family: color, basic: true}
 component color_gbr
-var color
 
 
 
 --disp_id
-flags family disp
+flags {family: disp}
 component disp
-modules post post_id
+modules {post: post_id}
 
 
 
 --default
-flags default true
-flags family main
+flags {default: true, family: main}
 component main
-modules main_body main_default
+modules {main_body: main_default}
 
---test
-flags family main
-component main
-modules main_body main_test
+--test < default
+flags {family: main}
+modules {main_body: main_test}
 
 
 
 --main_default
-flags default true
-flags family main_body
+flags {default: true, family: main_body}
 component main_stc
-modules seed seed_simple
-modules t t_wrap_zo
-modules color color_id
+modules {seed: seed_simple, t:t_wrap_zo, color: color_id}
 var color
 
 --main_test
-flags family main_body
+flags {family: main_body}
 component main_test
 var color
 
 
 --post_id
-flags default true
-flags family post
-flags basic true
+flags {default: true, family: post, basic: true}
 component post_id
 var frame
 
 
 
 --torus_reduce
-flags default true
-flags family reduce
+flags {default: true, family: reduce}
 component torus_reduce
 var z
 
 
 
 --seed_nothing
-flags family seed
-flags basic true
+flags {family: seed, basic: true}
 component seed_nothing
 var seed
 
 --seed_simple
-flags family seed
-flags basic true
+flags {family: seed, basic: true}
 component seed_simple
-par seed_w 0.2
-modules t t_wrap
+par {seed_w: 0.2}
+modules {t: t_wrap}
 var seed
 
 
 --id
-flags family id
+flags {family: id}
 component id
 
 --switch
-flags family switch
+flags {family: switch}
 component switch
-sub var v0
-sub dim float
-par intrp 0.0
-modules m0 id
-modules m1 id
+sub {var: v0, dim: float}
+par {intrp: 0.0}
+modules {m0: id, m1: id}
 
---smooth_switch
-flags family switch
+--smooth_switch < switch
 component smooth_switch
-sub var v0
-sub dim float
-par intrp 0.0
-modules m0 id
-modules m1 id
 
 
 
 --t_id
-flags family t
+flags {family: t}
 component t_id
 var z
 
 --t_wrap
-flags family t
-flags default true
-zn 1.0 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
+flags {family: t, default: true}
+zn [1.0 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]
 component t_wrap
-modules reduce torus_reduce
-sub t_inner z
+modules {reduce: torus_reduce}
+sub {t_inner: z}
 var z
 
---t_wrap_zo
-flags family t
-flags basic_t true
-zn 1.1 + 0.0i .. 0.0 + 0.0i .. 1.0 + 0.0i .. 0.0 + 0.0i ..
-component t_wrap
-modules reduce torus_reduce
-sub t_inner z
-var z
+--t_wrap_zo < t_wrap
+zn [1.1 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]
 
 
 
 --vert
-flags default true
-flags family vert
+flags {default: true, family: vert}
 component basic
 
 

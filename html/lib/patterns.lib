@@ -4,12 +4,7 @@ main   default
 disp   disp_id
 tPhase 0.0
 tSpd   1.0
-includes colorspace .. math ..
+includes [colorspace, math]
 
---test
-vert   vert
+--test < default
 main   test
-disp   disp_id
-tPhase 0.0
-tSpd   1.0
-includes colorspace .. math ..

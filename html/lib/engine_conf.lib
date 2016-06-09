@@ -1,15 +1,12 @@
---low
-kernelDim 512
-fract 3
-
 --default
 kernelDim 1024
 fract 3
 
---high_res
-kernelDim 2048
-fract 3
+--low < default
+kernelDim 512
 
---uhr
+--high_res < default
+kernelDim 2048
+
+--uhr < default
 kernelDim 3072
-fract 3

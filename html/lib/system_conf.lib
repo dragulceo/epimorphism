@@ -3,7 +3,8 @@ initEngineConf default
 initUIConf default
 initPattern default
 
---test
-initEngineConf default
-initUIConf default
+--test2 < default
+initPattern test2
+
+--test < default
 initPattern test

@@ -7,6 +7,7 @@ CONFIG
 	  - saving
   - error handling
   - data on engine_conf/state, etc split across library, engine, config :/
+	- when inheriting <, merge hashes & sets
 
 SYSTEM
 	- SWITCHING & REF POOLS
@@ -20,7 +21,7 @@ ENGINE
   - fract
 PATTERN
 	- make patterns modules??
-	- script level patterns(what is this?)
+	- pattern level scripts
 MISC
   - initAuxImages is mad ghetto
 	- too many debug statements going on
@@ -36,7 +37,7 @@ FINAL
 LATER
   - how do we figure out the family of a submodle?  can't always use the name
 	  -  like if it's a multi_seed ie. @seed:0 @seed:1, etc?
-
+  - namespace collision in modules.lib?
   - remove mid from scripts?
   - maybe pixel alignment issues with images
   - remote control (webui, websockets, etc)
@@ -85,6 +86,7 @@ LATER
   - passing context to loadLib is annoying
   - main & disp share includes
   - complex numbers library?
+	- complex parsing - currently need both components i.e 0.0 + 1.3i
   - better engine error checking/handling
   - texture organization
   - better data organization

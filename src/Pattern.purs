@@ -167,7 +167,7 @@ importScript ssRef sc mid = do
           return $ scr {tPhase = tPhase'}
 
   --update pool
-  ref <- lift $ newSTRef s {mid = Just mid}
+  ref <- lift $ newSTRef s {mid = mid}
   let sp = insert id ref systemST.scriptRefPool
   lift $ modifySTRef ssRef (\s -> s {scriptRefPool = sp})
 
@@ -192,8 +192,8 @@ purgeScript ssRef sid = do
 
   -- remove from module
   case sc.mid of
-    Nothing -> throwError $ "wtf didn't this script have a module: " ++ sid
-    Just mid -> do
+    "" -> throwError $ "wtf didn't this script have a module: " ++ sid
+    mid -> do
       mRef <- loadLib mid systemST.moduleRefPool "purge script - find module"
       mod <- lift $ readSTRef mRef
       lift $ modifySTRef mRef (\m -> m {scripts = A.delete sid mod.scripts})

@@ -1,13 +1,11 @@
 --seed_nothing
-flags family seed
-flags basic true
+flags {family: seed, basic: true}
 component seed_nothing
 var seed
 
 --seed_simple
-flags family seed
-flags basic true
+flags {family: seed, basic: true}
 component seed_simple
-par seed_w 0.2
-modules t t_wrap
+par {seed_w: 0.2}
+modules {t: t_wrap}
 var seed

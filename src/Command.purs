@@ -53,7 +53,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         Tuple scr' _ <- foldM (parseScript systemST.moduleRefPool pattern) (Tuple scr ScrFn) args
 
         -- import
-        mid <- return $ fromJust scr'.mid
+        mid <- return $ scr'.mid
         importScript ssRef (Left scr') mid
 
         return unit
@@ -74,7 +74,7 @@ parseScript mpool pattern (Tuple scr ps) dt = do
       return $ Tuple scr {fn = dt} ScrMid
     ScrMid -> do
       mid <- findModule mpool pattern dt
-      return $ Tuple scr {mid = Just mid} ScrDt
+      return $ Tuple scr {mid = mid} ScrDt
     ScrDt -> do
       let tok = split ":" dt
       case (length tok) of

@@ -48,8 +48,6 @@ parseGroup schema lib group = do
          else
            return $ unsafeGenericObject schema
 
-  let a = lg obj
-
   -- set attrs
   final <- A.foldM (parseLine schema) obj rst
 
@@ -71,7 +69,6 @@ parseGroup schema lib group = do
 -- parse a line & update an object
 parseLine :: forall a. Schema -> a -> String -> Lib a
 parseLine schema obj line = do
-  let x = lg obj
   let tokens = A.filter ((/=) "") $ split " " line
   when (A.length tokens < 2) do
     Left $ LibError2 $ "malformed line " ++ line

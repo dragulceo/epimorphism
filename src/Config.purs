@@ -17,6 +17,11 @@ import Graphics.WebGL.Types (WebGLProgram, WebGLTexture, WebGLFramebuffer, WebGL
 type Epi eff a = ExceptT String (Eff (canvas :: Canvas, dom :: DOM | eff)) a
 type EpiS eff h a = Epi (st :: ST h | eff) a
 
+
+data SchemaEntryType = SE_St | SE_N | SE_I | SE_B | SE_S | SE_A_St | SE_A_Cx | SE_M_N | SE_M_St
+data SchemaEntry = SchemaEntry SchemaEntryType String
+type Schema = Array SchemaEntry
+
 -- System
 type SystemConf = {
     initEngineConf :: String
@@ -25,13 +30,12 @@ type SystemConf = {
   , host           :: String
 }
 
-defaultSystemConf :: SystemConf
-defaultSystemConf = {
-    initEngineConf: "default"
-  , initUIConf:     "default"
-  , initPattern:    "default"
-  , host:           "http://localhost:8000"
-}
+systemConfSchema :: Schema
+systemConfSchema = [
+  SchemaEntry SE_St "initEngineConf",
+  SchemaEntry SE_St "initUIConf",
+  SchemaEntry SE_St "initPattern"
+]
 
 type SystemST h = {
     lastTimeMS :: Maybe Number
@@ -80,11 +84,11 @@ type EngineConf = {
   , fract :: Int
 }
 
-defaultEngineConf :: EngineConf
-defaultEngineConf = {
-    kernelDim: 1024
-  , fract: 3
-}
+engineConfSchema :: Schema
+engineConfSchema = [
+  SchemaEntry SE_I "kernelDim",
+  SchemaEntry SE_I "fract"
+]
 
 type EngineST = {
     dispProg :: Maybe WebGLProgram
@@ -106,13 +110,13 @@ type UIConf = {
   -- , showFps :: Boolean
 }
 
-defaultUIConf :: UIConf
-defaultUIConf = {
-    canvasId:   "glcanvas"
-  , consoleId:  "console"
-  , fullScreen: false
-  , keyboardSwitchSpd: 1.0
-}
+uiConfSchema :: Schema
+uiConfSchema = [
+  SchemaEntry SE_St "canvasId",
+  SchemaEntry SE_St "consoleId",
+  SchemaEntry SE_B  "fullScreen",
+  SchemaEntry SE_N  "keyboardSwitchSpd"
+]
 
 type UIST = {
     incIdx :: StrMap Int
@@ -139,6 +143,19 @@ type Module = {
   , var       :: String
 }
 
+moduleSchema :: Schema
+moduleSchema = [
+  SchemaEntry SE_St "component",
+  SchemaEntry SE_M_St "flags",
+  SchemaEntry SE_A_St "scripts",
+  SchemaEntry SE_M_St "modules",
+  SchemaEntry SE_M_N "par",
+  SchemaEntry SE_A_Cx "zn",
+  SchemaEntry SE_A_St "images",
+  SchemaEntry SE_M_St "sub",
+  SchemaEntry SE_St "var"
+]
+
 type Pattern = {
     vert :: ModRef
   , main :: ModRef
@@ -150,25 +167,36 @@ type Pattern = {
   , tSpd :: Number
 }
 
+patternSchema :: Schema
+patternSchema = [
+  SchemaEntry SE_St "vert",
+  SchemaEntry SE_St "main",
+  SchemaEntry SE_St "disp",
+  SchemaEntry SE_M_St "flags",
+  SchemaEntry SE_A_St "includes",
+  SchemaEntry SE_N "tPhase",
+  SchemaEntry SE_N "tSpd"
+]
+
 -- Script
 -- sys -> self(name) -> time -> module -> self(ref)
 type ScriptFn eff h = STRef h (SystemST h) -> String -> Number -> String -> STRef h Script -> EpiS eff h Boolean
 type Script = {
     fn     :: String
   , dt     :: StrMap String
-  , mid    :: Maybe String
+  , mid    :: String
   , flags  :: StrMap String
   , tPhase :: Number
 }
 
-defaultScript :: Script
-defaultScript = {
-    fn:     "null"
-  , dt:     empty
-  , mid:    Nothing
-  , flags:  empty
-  , tPhase: 0.0
-}
+scriptSchema :: Schema
+scriptSchema = [
+  SchemaEntry SE_St "fn",
+  SchemaEntry SE_M_St "dt",
+  SchemaEntry SE_St "mid",
+  SchemaEntry SE_M_St "flags",
+  SchemaEntry SE_N "tPhase"
+]
 
 --SLib
 type Component = {
@@ -183,6 +211,9 @@ type Index = {
 }
 
 
+
+-- trash
+
 type TestObj = {
     t_str :: String
   , t_num :: Number
@@ -194,18 +225,6 @@ type TestObj = {
   , t_mn  :: StrMap Number
   , t_mst :: StrMap Int
 }
-
-
-data SchemaEntryType = SE_St | SE_N | SE_I | SE_B | SE_S | SE_A_St | SE_A_Cx | SE_M_N | SE_M_St
-data SchemaEntry = SchemaEntry SchemaEntryType String
-type Schema = Array SchemaEntry
-
-systemConfSchema :: Schema
-systemConfSchema = [
-  SchemaEntry SE_St "initEngineConf",
-  SchemaEntry SE_St "initUIConf",
-  SchemaEntry SE_St "initPattern"
-]
 
 testObjSchema :: Schema
 testObjSchema = [
@@ -219,3 +238,35 @@ testObjSchema = [
   , SchemaEntry SE_M_N "t_mn"
   , SchemaEntry SE_M_St "t_mst"
 ]
+
+
+defaultSystemConf :: SystemConf
+defaultSystemConf = {
+    initEngineConf: "default"
+  , initUIConf:     "default"
+  , initPattern:    "default"
+  , host:           "http://localhost:8000"
+}
+
+defaultEngineConf :: EngineConf
+defaultEngineConf = {
+    kernelDim: 1024
+  , fract: 3
+}
+
+defaultUIConf :: UIConf
+defaultUIConf = {
+    canvasId:   "glcanvas"
+  , consoleId:  "console"
+  , fullScreen: false
+  , keyboardSwitchSpd: 1.0
+}
+
+defaultScript :: Script
+defaultScript = {
+    fn:     "null"
+  , dt:     empty
+  , mid:    ""
+  , flags:  empty
+  , tPhase: 0.0
+}

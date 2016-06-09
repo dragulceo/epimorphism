@@ -1,10 +1,8 @@
 --default
-flags default true
-flags family main
+flags {default: true, family: main}
 component main
-modules main_body main_default
+modules {main_body: main_default}
 
---test
-flags family main
-component main
-modules main_body main_test
+--test < default
+flags {family: main}
+modules {main_body: main_test}

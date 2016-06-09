@@ -41,8 +41,8 @@ runScripts ssRef = do
           fn   <- lookupScriptFN scr.fn
           let t' = systemST.t - scr.tPhase
           case scr.mid of
-            Nothing -> throwError $ "No module when running script: " ++ scr.fn
-            Just mid -> fn ssRef n t' mid sRef
+            "" -> throwError $ "No module when running script: " ++ scr.fn
+            mid -> fn ssRef n t' mid sRef
         false -> do
           let g = lg "script removed" -- ghetto(script purged by previous script)
           return false

@@ -1,6 +1,3 @@
-CONFIG
-  - make flags a set
-
 SYSTEM
 	- SWITCHING & REF POOLS
 	  - way of switching modules while keeping phase.  isn't recompiling ghetto?
@@ -26,6 +23,7 @@ FINAL
   - weird divide by zero issue - glitch in content
 
 LATER
+  - make flags a set?
 	- saving
 	- next config/library pass
   - how do we figure out the family of a submodle?  can't always use the name

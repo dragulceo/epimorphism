@@ -1,6 +1,6 @@
 "use strict";
 
-// module Library2
+// module Library
 
 exports.unsafeGenericObjectImpl = function(schema){
 	return function(set){

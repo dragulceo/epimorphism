@@ -1,13 +1,5 @@
 CONFIG
   - make flags a set
-	- better array syntax
-	- better hash syntax
-	- inheritence
-	- better builders
-	  - saving
-  - error handling
-  - data on engine_conf/state, etc split across library, engine, config :/
-	- when inheriting <, merge hashes & sets
 
 SYSTEM
 	- SWITCHING & REF POOLS
@@ -22,6 +14,7 @@ ENGINE
 PATTERN
 	- make patterns modules??
 	- pattern level scripts
+  - remove mid from scripts?
 MISC
   - initAuxImages is mad ghetto
 	- too many debug statements going on
@@ -32,13 +25,12 @@ FINAL
   - build out library & interface
   - weird divide by zero issue - glitch in content
 
-
-
 LATER
+	- saving
+	- next config/library pass
   - how do we figure out the family of a submodle?  can't always use the name
 	  -  like if it's a multi_seed ie. @seed:0 @seed:1, etc?
   - namespace collision in modules.lib?
-  - remove mid from scripts?
   - maybe pixel alignment issues with images
   - remote control (webui, websockets, etc)
   - currently manually implementing GL.repeat for aux

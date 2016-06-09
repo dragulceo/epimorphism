@@ -8,8 +8,7 @@ import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.StrMap (lookup, StrMap)
 import Data.Tuple (Tuple)
-import Library (Lib, LineVal, LibError(LibError), parseLib)
-import Library2 (LibError2(..), parseLib2)
+import Library (LibError(..), parseLib)
 import Prelude ((++), return, ($), bind)
 import Util (urlGet, lg)
 
@@ -20,16 +19,15 @@ initSystemST host = do
   -- gather system data here
 
   -- initialize libraries
-  systemConfLib <- buildLib2 systemConfSchema $ host ++ "/lib/system_conf.lib"
-  engineConfLib <- buildLib2 engineConfSchema $ host ++ "/lib/engine_conf.lib"
-  uiConfLib     <- buildLib2 uiConfSchema $ host ++ "/lib/ui_conf.lib"
-  moduleLib     <- buildLib2 moduleSchema $ host ++ "/lib/modules.lib"
-  scriptLib     <- buildLib2 scriptSchema $ host ++ "/lib/scripts.lib"
-  patternLib    <- buildLib2 patternSchema $ host ++ "/lib/patterns.lib"
-  testObjLib    <- buildLib2 testObjSchema $ host ++ "/lib/test_obj.lib"
+  systemConfLib <- buildLib systemConfSchema $ host ++ "/lib/system_conf.lib"
+  engineConfLib <- buildLib engineConfSchema $ host ++ "/lib/engine_conf.lib"
+  uiConfLib     <- buildLib uiConfSchema     $ host ++ "/lib/ui_conf.lib"
+  moduleLib     <- buildLib moduleSchema     $ host ++ "/lib/modules.lib"
+  scriptLib     <- buildLib scriptSchema     $ host ++ "/lib/scripts.lib"
+  patternLib    <- buildLib patternSchema    $ host ++ "/lib/patterns.lib"
 
-  componentLib  <- buildSLib buildComponent $ host ++ "/lib/components.slib"
-  indexLib      <- buildSLib buildIndex $ host ++ "/lib/indexes.slib"
+  componentLib  <- buildSLib buildComponent  $ host ++ "/lib/components.slib"
+  indexLib      <- buildSLib buildIndex      $ host ++ "/lib/indexes.slib"
 
   return $ defaultSystemST {
       systemConfLib = systemConfLib
@@ -40,29 +38,16 @@ initSystemST host = do
     , patternLib    = patternLib
     , componentLib  = componentLib
     , indexLib      = indexLib
-    , testObjLib    = testObjLib
   }
 
-
--- build a library from a location with a builder
-buildLib :: forall eff a.  (StrMap LineVal -> Lib a) -> String -> Epi eff (StrMap a)
-buildLib f loc = do
+buildLib :: forall eff a. Schema -> String -> Epi eff (StrMap a)
+buildLib schema loc = do
   dt <- lift $ urlGet loc
   case dt of
     (Left er) -> throwError $ "Error loading lib : " ++ er
-    (Right res) -> case (parseLib f res) of
+    (Right res) -> case (parseLib schema res) of
       (Right res') -> return res'
       (Left (LibError s)) -> throwError $ "Error building lib at : " ++ loc ++ " : " ++ s
-
-
-buildLib2 :: forall eff a. Schema -> String -> Epi eff (StrMap a)
-buildLib2 schema loc = do
-  dt <- lift $ urlGet loc
-  case dt of
-    (Left er) -> throwError $ "Error loading lib : " ++ er
-    (Right res) -> case (parseLib2 schema res) of
-      (Right res') -> return res'
-      (Left (LibError2 s)) -> throwError $ "Error building lib at : " ++ loc ++ " : " ++ s
 
 -- build a shader library from a location with a builder
 buildSLib :: forall eff a.  (SHandle -> SLib (Tuple String a)) -> String -> Epi eff (StrMap a)

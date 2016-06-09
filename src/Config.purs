@@ -53,7 +53,6 @@ type SystemST h = {
   , scriptRefPool :: StrMap (STRef h Script)
   , componentLib :: StrMap Component
   , indexLib :: StrMap Index
-  , testObjLib :: StrMap TestObj
   , mainRef :: String
 }
 
@@ -74,7 +73,6 @@ defaultSystemST = {
   , scriptRefPool: empty
   , componentLib: empty
   , indexLib: empty
-  , testObjLib: empty
   , mainRef: ""
 }
 

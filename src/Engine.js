@@ -65,6 +65,7 @@ exports.initAuxImages = function(){
 	window.images = {};
 	image_list.forEach(function(img){
 		window.images[img] = new Image();
+		window.images[img].onload = function(){console.log("loaded ", img);}
 		window.images[img].src = img;
 	});
 };

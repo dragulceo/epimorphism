@@ -72,6 +72,8 @@ exports.initAuxImages = function(){
 
 exports.emptyImage = function(dim){
 	return function(){
+		if(window.epiBlank)
+			return window.epiBlank;
 		var canvas = document.createElement("canvas");
 		canvas.width = dim;
 		canvas.height = dim;
@@ -79,8 +81,8 @@ exports.emptyImage = function(dim){
 		context.fillStyle = "#000000";
 		context.fill();
 
-		var img = new Image();
-		img.src = canvas.toDataURL("image/png");
-		return img;
+		window.epiBlank = new Image();
+		window.epiBlank.src = canvas.toDataURL("image/png");
+		return window.epiBlank;
 	};
 };

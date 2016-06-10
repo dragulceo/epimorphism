@@ -8,7 +8,6 @@ import Control.Monad.ST (STRef, ST)
 import DOM (DOM)
 import Data.Complex (Complex)
 import Data.Maybe (Maybe(..))
-import Data.Set (Set)
 import Data.StrMap (StrMap, empty)
 import Data.Tuple (Tuple)
 import Graphics.Canvas (Canvas)
@@ -80,12 +79,14 @@ defaultSystemST = {
 type EngineConf = {
     kernelDim :: Int
   , fract :: Int
+  , numAux :: Int
 }
 
 engineConfSchema :: Schema
 engineConfSchema = [
   SchemaEntry SE_I "kernelDim",
-  SchemaEntry SE_I "fract"
+  SchemaEntry SE_I "fract",
+  SchemaEntry SE_I "numAux"
 ]
 
 type EngineST = {
@@ -206,65 +207,4 @@ type Component = {
 type Index = {
     name :: String
   , lib  :: Array String
-}
-
-
-
--- trash
-
-type TestObj = {
-    t_str :: String
-  , t_num :: Number
-  , t_int :: Int
-  , t_bool :: Boolean
-  , t_set :: Set String
-  , t_ast :: Array String
-  , t_acx :: Array Complex
-  , t_mn  :: StrMap Number
-  , t_mst :: StrMap Int
-}
-
-testObjSchema :: Schema
-testObjSchema = [
-    SchemaEntry SE_St "t_str"
-  , SchemaEntry SE_N "t_num"
-  , SchemaEntry SE_I "t_int"
-  , SchemaEntry SE_B "t_bool"
-  , SchemaEntry SE_S "t_set"
-  , SchemaEntry SE_A_St "t_ast"
-  , SchemaEntry SE_A_Cx "t_acx"
-  , SchemaEntry SE_M_N "t_mn"
-  , SchemaEntry SE_M_St "t_mst"
-]
-
-
-defaultSystemConf :: SystemConf
-defaultSystemConf = {
-    initEngineConf: "default"
-  , initUIConf:     "default"
-  , initPattern:    "default"
-  , host:           "http://localhost:8000"
-}
-
-defaultEngineConf :: EngineConf
-defaultEngineConf = {
-    kernelDim: 1024
-  , fract: 3
-}
-
-defaultUIConf :: UIConf
-defaultUIConf = {
-    canvasId:   "glcanvas"
-  , consoleId:  "console"
-  , fullScreen: false
-  , keyboardSwitchSpd: 1.0
-}
-
-defaultScript :: Script
-defaultScript = {
-    fn:     "null"
-  , dt:     empty
-  , mid:    ""
-  , flags:  empty
-  , tPhase: 0.0
 }

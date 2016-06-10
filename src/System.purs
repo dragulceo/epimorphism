@@ -1,7 +1,7 @@
 module System where
 
 import SLibrary
-import Config (scriptSchema, moduleSchema, patternSchema, systemConfSchema, testObjSchema, uiConfSchema, engineConfSchema, Schema, Epi, SystemST, defaultSystemST)
+import Config (scriptSchema, moduleSchema, patternSchema, systemConfSchema, uiConfSchema, engineConfSchema, Schema, Epi, SystemST, defaultSystemST)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Data.Either (Either(..))
@@ -10,7 +10,7 @@ import Data.StrMap (lookup, StrMap)
 import Data.Tuple (Tuple)
 import Library (LibError(..), parseLib)
 import Prelude ((++), return, ($), bind)
-import Util (urlGet, lg)
+import Util (urlGet)
 
 data DataSource = LocalHTTP | LocalStorage | RemoteDB
 

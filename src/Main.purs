@@ -1,23 +1,22 @@
 module Main where
 
 import Prelude
-import Data.Either (Either(..), either)
 import Data.Maybe (fromMaybe, Maybe(Just))
 import Data.Int (round, toNumber)
 
 import Control.Monad (when)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Except.Trans (runExceptT, lift)
-import Control.Monad.ST (ST, STRef, writeSTRef, readSTRef, newSTRef, modifySTRef, runST)
+import Control.Monad.Except.Trans (lift)
+import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import Graphics.Canvas (Canvas)
 import DOM (DOM)
 
-import Config
+import Config (EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf, UIConf)
 import Engine (initEngineST, render, setShaders)
 import UI (initUIST, showFps)
 import Script (runScripts)
 import System (initSystemST, loadLib)
-import Util (winLog, requestAnimationFrame, now, Now, handleError)
+import Util (requestAnimationFrame, now, Now, handleError)
 import Pattern (importPattern)
 
 host :: String

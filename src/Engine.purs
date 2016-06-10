@@ -2,42 +2,41 @@ module Engine where
 
 import Prelude
 import Data.Complex(Cartesian(..), inCartesian)
-import Data.Tuple
-import Data.Maybe
+import Data.Tuple (Tuple(Tuple), snd, fst)
+import Data.Maybe (Maybe(Nothing, Just), isNothing)
 import Data.Maybe.Unsafe (fromJust)
-import Data.Either
-import Data.Array
+import Data.Either (either)
+import Data.Array (length, concatMap, (!!), (..), zip, foldM)
 import Data.TypedArray as T
 import Data.Int (toNumber, fromNumber)
-import Data.StrMap (StrMap(..))
+import Data.StrMap (StrMap)
 import Data.Traversable (traverse)
 
 import Control.Monad (when)
 import Control.Monad.Eff (Eff, forE)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Error.Class (throwError)
-import Control.Monad.Except.Trans (ExceptT (), lift)
-import Control.Monad.Reader.Trans (runReaderT)
+import Control.Monad.Reader.Trans (lift)
 import Control.Monad.Reader.Class (ask)
-import Control.Monad.ST
+import Control.Monad.ST (STRef, newSTRef, modifySTRef, readSTRef)
 
-import Graphics.WebGL
-import Graphics.WebGL.Types
+import Graphics.WebGL (runWebgl, debug)
+import Graphics.WebGL.Types (WebGL, WebGLContext, WebGLProgram, WebGLTexture, WebGLFramebuffer, ArrayBufferType(ArrayBuffer), BufferData(DataSource), BufferUsage(StaticDraw), DataType(Float), DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
 import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Graphics.WebGL.Raw.Types as GLT
-import Graphics.WebGL.Context
-import Graphics.WebGL.Shader
-import Graphics.WebGL.Methods
-import Graphics.Canvas (Canvas, getCanvasElementById, setCanvasWidth, setCanvasHeight)
+import Graphics.WebGL.Context (getWebglContext)
+import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram)
+import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor, vertexAttribPointer, enableVertexAttribArray, bufferData, bindBuffer, createBuffer, createFramebuffer, createTexture)
+import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
 
-import Config
-import Compiler
-import Util (lg, unsafeNull, winLog)
+import Config (Epi, EpiS, Module, Pattern, EngineST, EngineConf, SystemST, SystemConf)
+import Compiler (flattenParZn, compileShaders)
+import Util (lg, unsafeNull)
 
 -- PUBLIC
 
--- create a texture
+-- get a webgl texture, set default properties
 getTex :: WebGL WebGLTexture
 getTex = do
   ctx <- ask
@@ -53,7 +52,7 @@ getTex = do
   return tex
 
 
--- initialize framebuffer/texture combo
+-- initialize framebuffer/texture pair
 initTex :: Int -> WebGL (Tuple WebGLTexture WebGLFramebuffer)
 initTex dim = do
   ctx <- ask
@@ -68,10 +67,9 @@ initTex dim = do
 
 
 -- initialize auxiliary textures
-initAux :: WebGL (Array WebGLTexture)
-initAux = do
-  let numAux = 10 -- ghetto
-  traverse (\_ -> getTex) (0..(numAux - 1))
+initAux :: EngineConf -> WebGL (Array WebGLTexture)
+initAux engineConf = do
+  traverse (\_ -> getTex) (0..(engineConf.numAux - 1))
 
 
 -- upload aux textures
@@ -80,7 +78,7 @@ loadAux es host names = do
   when (isNothing es.aux) do
     throwError "aux textures not initialized"
 
-  Just aux <- return es.aux
+  aux <- return $ fromJust es.aux
   when (length aux < length names) do
     throwError "not enough aux textures"
 
@@ -126,7 +124,7 @@ setShaders sysConf esRef sys pattern = do
   {main, disp, vert, aux} <- compileShaders pattern sys
   cnt <- loadAux es sysConf.host aux
 
-  Tuple main disp <- execGL es.ctx ( do
+  Tuple main' disp' <- execGL es.ctx ( do
     -- create programs
     mainProg <- compileShadersIntoProgram vert main
     dispProg <- compileShadersIntoProgram vert disp
@@ -150,7 +148,7 @@ setShaders sysConf esRef sys pattern = do
     return $ Tuple mainProg dispProg
   )
 
-  lift $ modifySTRef esRef (\s -> s {dispProg = Just disp, mainProg = Just main, auxN = cnt})
+  lift $ modifySTRef esRef (\s -> s {dispProg = Just disp', mainProg = Just main', auxN = cnt})
   return unit
 
 
@@ -185,7 +183,7 @@ initEngineST sysConf engineConf sys pattern canvasId = do
   res <- execGL ctx do
     Tuple tex0 fb0 <- initTex dim
     Tuple tex1 fb1 <- initTex dim
-    aux <- initAux
+    aux <- initAux engineConf
 
     clearColor 0.0 0.0 0.0 1.0
     liftEff $ GL.clear ctx GLE.colorBufferBit
@@ -250,7 +248,7 @@ render systemST engineConf engineST pattern frameNum = do
     when (engineST.auxN > 0) do
       auxU <- liftEff $ GL.getUniformLocation ctx main "aux"
       case auxU of
-        Just auxU -> liftEff $ GL.uniform1iv ctx auxU (1..engineST.auxN)
+        Just auxU' -> liftEff $ GL.uniform1iv ctx auxU' (1..engineST.auxN)
         Nothing   -> throwError $ ShaderError "missing aux uniform!"
       liftEff $ forE 0.0 (toNumber engineST.auxN) \i -> do
         let i' = fromJust $ fromNumber i

@@ -1,13 +1,12 @@
 module Main where
 
 import Prelude
-import Config (patternSchema, EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf, UIConf)
+import Config (EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf, UIConf)
 import Control.Monad (when)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Except.Trans (throwError, lift)
+import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
-import Data.Either (Either(Right))
 import Data.Int (round, toNumber)
 import Data.Maybe (fromMaybe, Maybe(Just))
 import Engine (initEngineST, render, setShaders)
@@ -44,8 +43,6 @@ init = do
   engineConf <- loadLib systemConf'.initEngineConf systemST.engineConfLib "init engine"
   uiConf     <- loadLib systemConf'.initUIConf systemST.uiConfLib "init ui"
   pattern    <- loadLib systemConf'.initPattern systemST.patternLib "init pattern"
-  Right dt <- return $ unsafeSerialize patternSchema "default" pattern
-  throwError $ dt
 
   -- build strefs
   scRef <- lift $ newSTRef systemConf

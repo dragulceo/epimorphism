@@ -1,29 +1,27 @@
 module Command where
 
 import Prelude
-
-import Data.Array (length, head, tail, foldM, (!!))
-import Data.Either (Either(..))
-import Data.Maybe (Maybe(..))
-import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (StrMap(..), insert)
-import Data.String (split)
-import Data.Tuple (Tuple(..))
-
+import Config (moduleSchema, Script, EpiS, Pattern, Module, SystemST, SystemConf, EngineST, EngineConf, UIST, UIConf)
 import Control.Monad (unless)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
-import Control.Monad.Except.Trans (runExceptT, lift)
-import Control.Monad.ST
-
-import Graphics.Canvas (Canvas)
+import Control.Monad.Except.Trans (lift)
+import Control.Monad.ST (STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
-
-import Config
-import System (loadLib)
-import Pattern (importScript, findModule)
-import Util (winLog, lg, handleError)
+import Data.Array (length, head, tail, foldM, (!!))
+import Data.Either (Either(..))
+import Data.List (fromList)
+import Data.Maybe.Unsafe (fromJust)
+import Data.StrMap (toList, StrMap, insert)
+import Data.String (joinWith, split)
+import Data.Traversable (traverse)
+import Data.Tuple (Tuple(..))
 import Engine (clearFB)
+import Graphics.Canvas (Canvas)
+import Pattern (importScript, findModule)
+import Serialize (SerializeError(SerializeError), unsafeSerialize)
+import System (loadLib)
+import Util (lg, handleError)
 
 command :: forall eff h. STRef h UIConf -> STRef h UIST -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h SystemConf -> STRef h (SystemST h) -> String -> Eff (canvas :: Canvas, dom :: DOM, st :: ST h | eff) Unit
 command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
@@ -57,9 +55,30 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         importScript ssRef (Left scr') mid
 
         return unit
+      "save" -> do
+        -- pattern
+
+        -- modules
+        mods <- (traverse serializeModTup $ fromList $ toList systemST.moduleRefPool) :: EpiS eff h (Array String)
+        let res = joinWith "\n\n" mods
+        let x = lg res
+
+        -- scripts
+        return unit
+      "debugState" -> do
+        lift $ modifySTRef usRef (\us -> us {debugState = not us.debugState})
+        -- initLayout?
+        return unit
       "clear" -> do
         clearFB engineConf engineST
       _ -> throwError $ "Unknown command: " ++ msg
+  where
+    serializeModTup :: (Tuple String (STRef h Module)) -> EpiS eff h String
+    serializeModTup (Tuple n mRef) = do
+      m <- lift $ readSTRef mRef
+      case unsafeSerialize moduleSchema n m of
+        (Left (SerializeError er)) -> throwError $ "Error serializing " ++ n ++ " : " ++ er
+        (Right s) -> return s
 
 
 
@@ -83,4 +102,3 @@ parseScript mpool pattern (Tuple scr ps) dt = do
           let scr' = scr {dt = dt'}
           return $ Tuple scr' ScrDt
         _ -> throwError $ "invalid script data assignment :" ++ dt
-    _ -> throwError "parseScript - wtf?"

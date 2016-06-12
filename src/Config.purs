@@ -119,11 +119,13 @@ uiConfSchema = [
 
 type UIST = {
     incIdx :: StrMap Int
+  , debugState :: Boolean
 }
 
 defaultUIST :: UIST
 defaultUIST = {
     incIdx: empty
+  , debugState: false
 }
 
 

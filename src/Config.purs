@@ -104,6 +104,8 @@ type EngineST = {
 type UIConf = {
     canvasId          :: String
   , consoleId         :: String
+  , debugStateId      :: String
+  , fpsId             :: String
   , fullScreen        :: Boolean
   , keyboardSwitchSpd :: Number
   -- , showFps :: Boolean
@@ -113,6 +115,8 @@ uiConfSchema :: Schema
 uiConfSchema = [
   SchemaEntry SE_St "canvasId",
   SchemaEntry SE_St "consoleId",
+  SchemaEntry SE_St "debugStateId",
+  SchemaEntry SE_St "fpsId",
   SchemaEntry SE_B  "fullScreen",
   SchemaEntry SE_N  "keyboardSwitchSpd"
 ]

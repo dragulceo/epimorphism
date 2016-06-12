@@ -1,7 +1,7 @@
 module Command where
 
 import Prelude
-import Config (moduleSchema, Script, EpiS, Pattern, Module, SystemST, SystemConf, EngineST, EngineConf, UIST, UIConf)
+import Config (scriptSchema, Schema, patternSchema, moduleSchema, Script, EpiS, Pattern, Module, SystemST, SystemConf, EngineST, EngineConf, UIST, UIConf)
 import Control.Monad (unless)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
@@ -21,13 +21,14 @@ import Graphics.Canvas (Canvas)
 import Pattern (importScript, findModule)
 import Serialize (SerializeError(SerializeError), unsafeSerialize)
 import System (loadLib)
-import Util (lg, handleError)
+import Layout (initLayout)
+import Util (uuid, lg, handleError)
 
 command :: forall eff h. STRef h UIConf -> STRef h UIST -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h SystemConf -> STRef h (SystemST h) -> String -> Eff (canvas :: Canvas, dom :: DOM, st :: ST h | eff) Unit
 command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
   systemST   <- lift $ readSTRef ssRef
   uiConf     <- lift $ readSTRef ucRef
-  usConf     <- lift $ readSTRef usRef
+  uiST       <- lift $ readSTRef usRef
   engineConf <- lift $ readSTRef ecRef
   engineST   <- lift $ readSTRef esRef
   pattern    <- lift $ readSTRef pRef
@@ -56,33 +57,50 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
 
         return unit
       "save" -> do
-        -- pattern
-
-        -- modules
-        mods <- (traverse serializeModTup $ fromList $ toList systemST.moduleRefPool) :: EpiS eff h (Array String)
-        let res = joinWith "\n\n" mods
-        let x = lg res
-
-        -- scripts
-        return unit
+        save systemST pattern
       "debugState" -> do
         lift $ modifySTRef usRef (\us -> us {debugState = not us.debugState})
-        -- initLayout?
+        initLayout uiConf uiST
+
         return unit
       "clear" -> do
         clearFB engineConf engineST
       _ -> throwError $ "Unknown command: " ++ msg
+
+
+-- PRIVATE
+
+save :: forall eff h. (SystemST h) -> Pattern -> EpiS eff h Unit
+save systemST pattern = do
+  -- pattern
+  id <- lift $ uuid
+  ps <- case unsafeSerialize patternSchema id pattern of
+    (Left (SerializeError er)) -> throwError $ "Error serializing pattern " ++ id ++ " : " ++ er
+    (Right s) -> return s
+
+  -- modules
+  mods <- (traverse (serializeTup moduleSchema) $ fromList $ toList systemST.moduleRefPool) :: EpiS eff h (Array String)
+  let mres = joinWith "\n\n" mods
+
+  -- scripts
+  scrs <- (traverse (serializeTup scriptSchema) $ fromList $ toList systemST.scriptRefPool) :: EpiS eff h (Array String)
+  let sres = joinWith "\n\n" scrs
+
+  let res = "#PATTERN\n" ++ ps ++ "\n\n#MODULES\n" ++ mres ++ "\n\n#SCRIPTS\n" ++ sres
+  let a = lg res
+
+  return unit
+
   where
-    serializeModTup :: (Tuple String (STRef h Module)) -> EpiS eff h String
-    serializeModTup (Tuple n mRef) = do
-      m <- lift $ readSTRef mRef
-      case unsafeSerialize moduleSchema n m of
-        (Left (SerializeError er)) -> throwError $ "Error serializing " ++ n ++ " : " ++ er
+    serializeTup :: forall a. Schema -> (Tuple String (STRef h a)) -> EpiS eff h String
+    serializeTup schema (Tuple n ref) = do
+      obj <- lift $ readSTRef ref
+      case unsafeSerialize schema n obj of
+        (Left (SerializeError er)) -> throwError $ "Error serializing object " ++ n ++ " : " ++ er
         (Right s) -> return s
 
 
 
--- PRIVATE
 data ScrPS = ScrFn | ScrMid | ScrDt
 
 -- recursively parse a script from a string

@@ -1,7 +1,7 @@
 module Main where
 
 import Prelude
-import Config (EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf, UIConf)
+import Config (UIST, EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf, UIConf)
 import Control.Monad (when)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
@@ -9,20 +9,21 @@ import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
 import Data.Int (round, toNumber)
 import Data.Maybe (fromMaybe, Maybe(Just))
-import Engine (initEngineST, render, setShaders)
+import Engine (initEngineST, renderFrame, setShaders)
 import Graphics.Canvas (Canvas)
+import Layout (updateLayout)
 import Pattern (importPattern)
 import Script (runScripts)
-import Serialize (unsafeSerialize)
 import System (initSystemST, loadLib)
-import UI (initUIST, showFps)
-import Util (lg, requestAnimationFrame, now, Now, handleError)
+import UI (initUIST)
+import Util (requestAnimationFrame, now, Now, handleError)
 
 host :: String
 host = "http://localhost:8000"
 
 type State h = {
     ucRef :: STRef h UIConf
+  , usRef :: STRef h UIST
   , scRef :: STRef h SystemConf
   , ssRef :: STRef h (SystemST h)
   , ecRef :: STRef h EngineConf
@@ -59,15 +60,17 @@ init = do
 
   -- init engine & ui states
   esRef <- initEngineST systemConf engineConf systemST' pattern' uiConf.canvasId
-  initUIST ucRef ecRef esRef pRef scRef ssRef
+  usRef <- initUIST ucRef ecRef esRef pRef scRef ssRef
 
-  return {ucRef, ssRef, scRef, ecRef, esRef, pRef}
+  return {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef}
 
 
 animate :: forall h. EpiS (now :: Now) h (State h) -> Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
 animate stateM = handleError do
   -- unpack state
-  state@{ucRef, ssRef, scRef, ecRef, esRef, pRef} <- stateM
+  state@{ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef} <- stateM
+  uiConf     <- lift $ readSTRef ucRef
+  uiST       <- lift $ readSTRef usRef
   systemST   <- lift $ readSTRef ssRef
   systemConf <- lift $ readSTRef scRef
   engineConf <- lift $ readSTRef ecRef
@@ -87,10 +90,9 @@ animate stateM = handleError do
     let lastFpsTimeMS = fromMaybe currentTimeMS systemST.lastFpsTimeMS
     let fps = round $ (toNumber freq) * 1000.0 / (currentTimeMS - lastFpsTimeMS)
     lift $ modifySTRef ssRef (\s -> s {lastFpsTimeMS = Just currentTimeMS, fps = Just fps})
-    showFps fps
+    return unit
 
   -- update pattern
-
   recompile <- runScripts ssRef
   systemST' <- lift $ readSTRef ssRef
 
@@ -98,10 +100,13 @@ animate stateM = handleError do
     true -> do
       setShaders systemConf esRef systemST' pattern
     false -> return unit
-  engineST'   <- lift $ readSTRef esRef
+  engineST' <- lift $ readSTRef esRef
 
-  -- render
-  render systemST' engineConf engineST' pattern systemST'.frameNum
+  -- render!
+  renderFrame systemST' engineConf engineST' pattern systemST'.frameNum
+
+  -- update ui
+  updateLayout uiConf uiST systemST
 
   -- request next frame
   lift $ modifySTRef ssRef (\s -> s {frameNum = s.frameNum + 1})

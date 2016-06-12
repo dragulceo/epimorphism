@@ -23,6 +23,12 @@ FINAL
   - weird divide by zero issue - glitch in content
 
 LATER
+  - prevent default in ui.js
+  - bug: need to push debugState 2x
+  - remove {} [], etc when serializing
+  - update flags on save (default != true)
+  - check for duplicates when saving (id = hash of contents?)
+  - make serializable a class
   - make flags a set?
 	- saving
 	- next config/library pass (maybe better error detection)

@@ -15,7 +15,7 @@ import Data.String (joinWith, null, trim, stripPrefix, split)
 import Data.String.Regex (match, noFlags, regex)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Util (numFromString, cxFromString, boolFromString, unsafeSetAttr, lg)
+import Util (numFromString, cxFromString, boolFromString, unsafeSetAttr)
 
 data LibError = LibError String
 type Lib = Either LibError
@@ -70,45 +70,46 @@ parseGroup schema lib group = do
 parseLine :: forall a. Schema -> a -> String -> Lib a
 parseLine schema obj line = do
   let tokens = A.filter ((/=) "") $ split " " line
-  when (A.length tokens < 2) do
-    Left $ LibError $ "malformed line " ++ line
+  case (A.length tokens) of
+    0 -> Left $ LibError $ "malformed line " ++ line
+    1 -> return obj
+    _ -> do
+      let attrn = fromJust $ A.index tokens 0
+      let val = joinWith " " $ fromJust $ A.tail tokens
 
-  let attrn = fromJust $ A.index tokens 0
-  let val = joinWith " " $ fromJust $ A.tail tokens
+      let ses = A.filter (schemaSel attrn) schema
+      when (A.length ses /= 1) do
+        Left $ LibError $ line ++ " matched " ++ (show $ A.length ses) ++ " schema entries!!"
 
-  let ses = A.filter (schemaSel attrn) schema
-  when (A.length ses /= 1) do
-    Left $ LibError $ line ++ " matched " ++ (show $ A.length ses) ++ " schema entries!!"
+      (SchemaEntry st _) <- return $ fromJust $ A.head ses
 
-  (SchemaEntry st _) <- return $ fromJust $ A.head ses
-
-  case st of
-    SE_St -> do
-      return $ unsafeSetAttr obj attrn val
-    SE_N -> do
-      n <- parseNum val
-      return $ unsafeSetAttr obj attrn n
-    SE_I -> do
-      i <- parseInt val
-      return $ unsafeSetAttr obj attrn i
-    SE_B -> do
-      b <- parseBool val
-      return $ unsafeSetAttr obj attrn b
-    SE_S -> do
-      s <- parseSet val
-      return $ unsafeSetAttr obj attrn s
-    SE_M_St -> do
-      m <- parseMp val
-      return $ unsafeSetAttr obj attrn m
-    SE_M_N -> do
-      mn <- parseMp val >>= parseNMp
-      return $ unsafeSetAttr obj attrn mn
-    SE_A_St -> do
-      l <- parseLst val
-      return $ unsafeSetAttr obj attrn l
-    SE_A_Cx -> do
-      cx <- parseLst val >>= parseCLst
-      return $ unsafeSetAttr obj attrn cx
+      case st of
+        SE_St -> do
+          return $ unsafeSetAttr obj attrn val
+        SE_N -> do
+          n <- parseNum val
+          return $ unsafeSetAttr obj attrn n
+        SE_I -> do
+          i <- parseInt val
+          return $ unsafeSetAttr obj attrn i
+        SE_B -> do
+          b <- parseBool val
+          return $ unsafeSetAttr obj attrn b
+        SE_S -> do
+          s <- parseSet val
+          return $ unsafeSetAttr obj attrn s
+        SE_M_St -> do
+          m <- parseMp val
+          return $ unsafeSetAttr obj attrn m
+        SE_M_N -> do
+          mn <- parseMp val >>= parseNMp
+          return $ unsafeSetAttr obj attrn mn
+        SE_A_St -> do
+          l <- parseLst val
+          return $ unsafeSetAttr obj attrn l
+        SE_A_Cx -> do
+          cx <- parseLst val >>= parseCLst
+          return $ unsafeSetAttr obj attrn cx
 
   where
     schemaSel n (SchemaEntry _ sen) = (n == sen)
@@ -145,6 +146,8 @@ parseSet :: String -> Lib (S.Set String)
 parseSet st = do
   let rgx = regex "^\\{([^\\{\\}]*)\\}$" noFlags
   case (match rgx st) of
+    (Just [(Just _), (Just "")]) -> do
+      return S.empty
     (Just [(Just _), (Just l)]) -> return $ S.fromFoldable $ map trim $ split "," l
     _ -> Left $ LibError $ "Expected " ++ st ++ " to be a set"
 
@@ -152,13 +155,15 @@ parseMp :: String -> Lib (StrMap String)
 parseMp st = do
   let rgx = regex "^\\{([^\\{\\}]*)\\}$" noFlags
   case (match rgx st) of
+    (Just [(Just _), (Just "")]) -> do
+      return empty
     (Just [(Just _), (Just l)]) -> do
       dt <- traverse (exp <<< split ":") $ split "," l
       return $ fromFoldable dt
-    _ -> Left $ LibError $ "Expected " ++ st ++ " to be a map"
+    _ -> Left $ LibError $ "Expected " ++ st ++ " to be a map1"
   where
     exp [a, b] = Right $ Tuple (trim a) (trim b)
-    exp _ = Left $ LibError $ "Expected " ++ st ++ " to be a map"
+    exp _ = Left $ LibError $ "Expected " ++ st ++ " to be a map2"
 
 parseNMp :: StrMap String -> Lib (StrMap Number)
 parseNMp sm = foldM handle empty sm
@@ -171,6 +176,7 @@ parseLst :: String -> Lib (Array String)
 parseLst st = do
   let rgx = regex "^\\[([^\\[\\]]*)\\]$" noFlags
   case (match rgx st) of
+    (Just [(Just _), (Just "")]) -> return []
     (Just [(Just _), (Just l)]) -> return $ map trim $ split "," l
     _ -> Left $ LibError $ "Expected " ++ st ++ " to be a list"
 

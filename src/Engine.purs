@@ -203,26 +203,26 @@ initEngineST sysConf engineConf sys pattern canvasId = do
 
 
 -- do the thing!
-render :: forall eff h. SystemST h -> EngineConf -> EngineST -> Pattern -> Int -> EpiS eff h Unit
-render systemST engineConf engineST pattern frameNum = do
+renderFrame :: forall eff h. SystemST h -> EngineConf -> EngineST -> Pattern -> Int -> EpiS eff h Unit
+renderFrame systemST engineConf engineST pattern frameNum = do
   let ctx = engineST.ctx
 
   -- unpack
   tex <- case engineST.tex of
     Just x -> return x
-    Nothing -> throwError "Render: missing textures"
+    Nothing -> throwError "RenderFrame: missing textures"
   fbs <- case engineST.fb of
     Just x -> return x
-    Nothing -> throwError "Render: missing framebuffers"
+    Nothing -> throwError "RenderFrame: missing framebuffers"
   aux <- case engineST.aux of
     Just x -> return x
-    Nothing -> throwError "Render: missing aux"
+    Nothing -> throwError "RenderFrame: missing aux"
   main <- case engineST.mainProg of
     Just x -> return x
-    Nothing -> throwError "Render: missing main program"
+    Nothing -> throwError "RenderFrame: missing main program"
   disp <- case engineST.dispProg of
     Just x -> return x
-    Nothing -> throwError "Render: missing disp program"
+    Nothing -> throwError "RenderFrame: missing disp program"
 
   -- bind par & zn
   bindParZn systemST.moduleRefPool ctx main pattern.main

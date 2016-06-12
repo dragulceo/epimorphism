@@ -731,7 +731,7 @@ t t_wrap {{
 
 
 
-vert basic {{
+vert default_vert {{
 attribute vec2 a_position;
 
 void main() {

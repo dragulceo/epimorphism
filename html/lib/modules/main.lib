@@ -1,8 +1,8 @@
---default
+--default_main
 flags {default: true, family: main}
 component main
 modules {main_body: main_default}
 
---test < default
+--test < default_main
 flags {family: main}
 modules {main_body: main_test}

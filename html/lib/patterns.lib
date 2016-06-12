@@ -1,6 +1,6 @@
 --default
-vert   vert
-main   default
+vert   default_vert
+main   default_main
 disp   disp_id
 tPhase 0.0
 tSpd   1.0

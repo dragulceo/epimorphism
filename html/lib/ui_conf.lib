@@ -1,6 +1,8 @@
 --default
 canvasId glcanvas
 consoleId console
+debugStateId debugState
+fpsId showFps
 fullScreen false
 keyboardSwitchSpd 0.4
 

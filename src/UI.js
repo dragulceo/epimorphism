@@ -30,6 +30,9 @@ exports.registerKeyHandler = function(handler) {
 		document.onkeydown = function(event) {
 			var code = String.fromCharCode(event.keyCode);
 			var cmd = handler(code)();
+// fix me
+//			if(cmd != "null")
+//				event.preventDefault();
 			window.eventHandler(cmd);
 		};
 	};

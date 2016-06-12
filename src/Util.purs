@@ -39,6 +39,8 @@ foreign import random :: forall eff. Eff eff Number
 foreign import randInt :: forall eff. Int -> Eff eff Number
 
 foreign import unsafeSetAttr :: forall a b. a -> String -> b -> a
+foreign import unsafeGetAttr :: forall a b. a -> String -> b
+foreign import unsafeCast :: forall a b. a -> b
 
 urlGet :: forall eff. String -> Eff eff (Either String String)
 urlGet = urlGetImpl Left Right

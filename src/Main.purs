@@ -1,23 +1,23 @@
 module Main where
 
 import Prelude
-import Data.Maybe (fromMaybe, Maybe(Just))
-import Data.Int (round, toNumber)
-
+import Config (patternSchema, EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf, UIConf)
 import Control.Monad (when)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Except.Trans (lift)
+import Control.Monad.Except.Trans (throwError, lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
-import Graphics.Canvas (Canvas)
 import DOM (DOM)
-
-import Config (EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf, UIConf)
+import Data.Either (Either(Right))
+import Data.Int (round, toNumber)
+import Data.Maybe (fromMaybe, Maybe(Just))
 import Engine (initEngineST, render, setShaders)
-import UI (initUIST, showFps)
-import Script (runScripts)
-import System (initSystemST, loadLib)
-import Util (requestAnimationFrame, now, Now, handleError)
+import Graphics.Canvas (Canvas)
 import Pattern (importPattern)
+import Script (runScripts)
+import Serialize (unsafeSerialize)
+import System (initSystemST, loadLib)
+import UI (initUIST, showFps)
+import Util (lg, requestAnimationFrame, now, Now, handleError)
 
 host :: String
 host = "http://localhost:8000"
@@ -40,9 +40,12 @@ init = do
   -- init config
   systemConf <- loadLib "default" systemST.systemConfLib "init system"
   let systemConf' = systemConf {host = host}
+
   engineConf <- loadLib systemConf'.initEngineConf systemST.engineConfLib "init engine"
   uiConf     <- loadLib systemConf'.initUIConf systemST.uiConfLib "init ui"
   pattern    <- loadLib systemConf'.initPattern systemST.patternLib "init pattern"
+  Right dt <- return $ unsafeSerialize patternSchema "default" pattern
+  throwError $ dt
 
   -- build strefs
   scRef <- lift $ newSTRef systemConf

@@ -14,6 +14,16 @@ exports.unsafeSetAttr = function(obj){
 	};
 };
 
+exports.unsafeGetAttr = function(obj){
+	return function(attrn){
+		return obj[attrn];
+	};
+};
+
+exports.unsafeCast = function(obj){
+  return obj;
+};
+
 
 exports.requestAnimationFrame = function(x){
   if (typeof rAF === 'undefined') {

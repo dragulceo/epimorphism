@@ -95,7 +95,7 @@ type EngineST = {
   , tex :: Maybe (Tuple WebGLTexture WebGLTexture)
   , fb :: Maybe (Tuple WebGLFramebuffer WebGLFramebuffer)
   , aux :: Maybe (Array WebGLTexture)
-  , auxN :: Int
+  , auxImg :: Array String
   , ctx :: WebGLContext
   , empty :: GLT.TexImageSource
 }

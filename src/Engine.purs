@@ -1,37 +1,34 @@
 module Engine where
 
 import Prelude
-import Data.Complex(Cartesian(..), inCartesian)
-import Data.Tuple (Tuple(Tuple), snd, fst)
-import Data.Maybe (Maybe(Nothing, Just), isNothing)
-import Data.Maybe.Unsafe (fromJust)
-import Data.Either (either)
-import Data.Array (length, concatMap, (!!), (..), zip, foldM)
 import Data.TypedArray as T
-import Data.Int (toNumber, fromNumber)
-import Data.StrMap (StrMap)
-import Data.Traversable (traverse)
-
+import Graphics.WebGL.Raw as GL
+import Graphics.WebGL.Raw.Enums as GLE
+import Graphics.WebGL.Raw.Types as GLT
+import Compiler (flattenParZn, compileShaders)
+import Config (Epi, EpiS, Module, Pattern, EngineST, EngineConf, SystemST, SystemConf)
 import Control.Monad (when)
 import Control.Monad.Eff (Eff, forE)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Error.Class (throwError)
-import Control.Monad.Reader.Trans (lift)
 import Control.Monad.Reader.Class (ask)
+import Control.Monad.Reader.Trans (lift)
 import Control.Monad.ST (STRef, newSTRef, modifySTRef, readSTRef)
-
-import Graphics.WebGL (runWebgl, debug)
-import Graphics.WebGL.Types (WebGL, WebGLContext, WebGLProgram, WebGLTexture, WebGLFramebuffer, ArrayBufferType(ArrayBuffer), BufferData(DataSource), BufferUsage(StaticDraw), DataType(Float), DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
-import Graphics.WebGL.Raw as GL
-import Graphics.WebGL.Raw.Enums as GLE
-import Graphics.WebGL.Raw.Types as GLT
-import Graphics.WebGL.Context (getWebglContext)
-import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram)
-import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor, vertexAttribPointer, enableVertexAttribArray, bufferData, bindBuffer, createBuffer, createFramebuffer, createTexture)
+import Data.Array (length, concatMap, (!!), (..), zip, foldM)
+import Data.Complex (Cartesian(..), inCartesian)
+import Data.Either (either)
+import Data.Int (toNumber, fromNumber)
+import Data.Maybe (Maybe(Nothing, Just))
+import Data.Maybe.Unsafe (fromJust)
+import Data.StrMap (StrMap)
+import Data.Traversable (traverse)
+import Data.Tuple (Tuple(Tuple), snd, fst)
 import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
-
-import Config (Epi, EpiS, Module, Pattern, EngineST, EngineConf, SystemST, SystemConf)
-import Compiler (flattenParZn, compileShaders)
+import Graphics.WebGL (runWebgl, debug)
+import Graphics.WebGL.Context (getWebglContext)
+import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor, vertexAttribPointer, enableVertexAttribArray, bufferData, bindBuffer, createBuffer, createFramebuffer, createTexture)
+import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram)
+import Graphics.WebGL.Types (WebGL, WebGLContext, WebGLProgram, WebGLTexture, WebGLFramebuffer, ArrayBufferType(ArrayBuffer), BufferData(DataSource), BufferUsage(StaticDraw), DataType(Float), DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
 import Util (lg, unsafeNull)
 
 -- PUBLIC
@@ -73,16 +70,16 @@ initAux engineConf = do
 
 
 -- upload aux textures
-loadAux :: forall eff. EngineST -> String -> Array String -> Epi eff Int
-loadAux es host names = do
-  when (isNothing es.aux) do
-    throwError "aux textures not initialized"
+uploadAux :: forall eff. EngineST -> String -> Array String -> Epi eff (Array String)
+uploadAux es host names = do
+  case es.aux of
+    Nothing -> throwError "aux textures not initialized"
+    (Just aux) -> do
+      when (length aux < length names) do
+        throwError "not enough aux textures"
 
-  aux <- return $ fromJust es.aux
-  when (length aux < length names) do
-    throwError "not enough aux textures"
-
-  foldM (createImage es.ctx host) 0 (zip aux names)
+      foldM (createImage es.ctx host) 0 (zip aux names)
+      return names
 
 
 -- create an image object. can throw error if images missing!  also some synchronization issues
@@ -122,7 +119,7 @@ setShaders sysConf esRef sys pattern = do
 
   -- load & compile shaders
   {main, disp, vert, aux} <- compileShaders pattern sys
-  cnt <- loadAux es sysConf.host aux
+  auxImg <- uploadAux es sysConf.host aux
 
   Tuple main' disp' <- execGL es.ctx ( do
     -- create programs
@@ -148,7 +145,7 @@ setShaders sysConf esRef sys pattern = do
     return $ Tuple mainProg dispProg
   )
 
-  lift $ modifySTRef esRef (\s -> s {dispProg = Just disp', mainProg = Just main', auxN = cnt})
+  lift $ modifySTRef esRef (\s -> s {dispProg = Just disp', mainProg = Just main', auxImg = auxImg})
   return unit
 
 
@@ -168,7 +165,7 @@ initEngineST sysConf engineConf sys pattern canvasId = do
 
   -- default state
   empty <- lift $ emptyImage engineConf.kernelDim
-  let es = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, auxN: 0, ctx: ctx, empty}
+  let es = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, auxImg: [], ctx: ctx, empty}
   esRef <- lift $ newSTRef es
 
   -- if we change kernel_dim we need to redo this
@@ -177,7 +174,7 @@ initEngineST sysConf engineConf sys pattern canvasId = do
   lift $ setCanvasHeight (toNumber dim) canvas
 
   -- initialize js images
-  lift $ initAuxImages
+  --lift $ initAuxImages
 
   -- webgl initialization
   res <- execGL ctx do
@@ -245,12 +242,12 @@ renderFrame systemST engineConf engineST pattern frameNum = do
     uniform1f mainUnif.kernel_dim (toNumber engineConf.kernelDim)
 
     -- aux
-    when (engineST.auxN > 0) do
+    when (length engineST.auxImg > 0) do
       auxU <- liftEff $ GL.getUniformLocation ctx main "aux"
       case auxU of
-        Just auxU' -> liftEff $ GL.uniform1iv ctx auxU' (1..engineST.auxN)
+        Just auxU' -> liftEff $ GL.uniform1iv ctx auxU' (1..(length engineST.auxImg))
         Nothing   -> throwError $ ShaderError "missing aux uniform!"
-      liftEff $ forE 0.0 (toNumber engineST.auxN) \i -> do
+      liftEff $ forE 0.0 (toNumber $ length engineST.auxImg) \i -> do
         let i' = fromJust $ fromNumber i
         GL.activeTexture ctx (GLE.texture1 + i')
         GL.bindTexture ctx GLE.texture2d $ fromJust (aux !! i')

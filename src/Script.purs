@@ -28,11 +28,11 @@ import Pattern (purgeScript, replaceModule, importScript, flagFamily, findParent
 runScripts :: forall eff h. STRef h (SystemST h) -> EpiS eff h Boolean
 runScripts ssRef = do
   systemST <- lift $ readSTRef ssRef
-  res <- traverse (handle ssRef) (keys systemST.scriptRefPool)
+  res <- traverse (runScript ssRef) (keys systemST.scriptRefPool)
   return $ or res
   where
-    handle :: forall eff h. STRef h (SystemST h) -> String -> EpiS eff h Boolean
-    handle ssRef n = do
+    runScript :: forall eff h. STRef h (SystemST h) -> String -> EpiS eff h Boolean
+    runScript ssRef n = do
       systemST <- lift $ readSTRef ssRef
       case (member n systemST.scriptRefPool) of
         true -> do

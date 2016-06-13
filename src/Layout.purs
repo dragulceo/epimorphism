@@ -10,13 +10,14 @@ import Data.DOM.Simple.Element (setInnerHTML, setStyleAttr, querySelector)
 import Data.DOM.Simple.Unsafe.Element (HTMLElement)
 import Data.DOM.Simple.Window (innerHeight, innerWidth, document, globalWindow)
 import Data.Maybe (Maybe(Just, Nothing))
-import Data.StrMap (StrMap)
+import Data.Maybe.Unsafe (fromJust)
+import Data.StrMap (size, StrMap)
 import Data.String (joinWith, trim, split, replace)
 import Data.String.Regex (match, noFlags, regex)
 import Data.Traversable (traverse)
 import Serialize (unsafeSerialize)
 import System (loadLib)
-import Util (indentLines)
+import Util (lg, indentLines)
 
 initLayout :: forall eff. UIConf -> UIST -> Epi eff Unit
 initLayout uiConf uiST = do
@@ -49,14 +50,18 @@ initLayout uiConf uiST = do
     lift $ setStyleAttr "width" "100%" c2
     lift $ setStyleAttr "height" "100%" c2
 
+
 -- hides malformed html issues
 updateLayout :: forall eff h. UIConf -> UIST -> SystemST h -> Pattern -> EpiS eff h Unit
 updateLayout uiConf uiST systemST pattern = do
   when (systemST.frameNum `mod` uiConf.uiUpdateFreq == 0) do
     case systemST.fps of
-      (Just fps) -> showFps uiConf.fpsId fps
+      (Just fps) -> do
+        fpsDiv <- findElt uiConf.fpsId
+        lift $ setInnerHTML ((show fps) ++ "fps") fpsDiv
       Nothing -> return unit
 
+    let a = lg uiST.debugState
     when uiST.debugState do
       dsDiv <- findElt uiConf.debugStateId
       str <- renderDebugState systemST.moduleRefPool 0 pattern.main ("<span style='color:pink'>MAIN: " ++ pattern.main ++ "</span>")
@@ -97,10 +102,3 @@ findElt id = do
   case elt of
     (Just e) -> return e
     Nothing  -> throwError $ "couldn't find element: #" ++ id
-
-showFps :: forall eff. String -> Int -> Epi eff Unit
-showFps id fps = do
-  let window = globalWindow
-  doc <- lift $ document window
-  fpsDiv <- findElt id
-  lift $ setInnerHTML ((show fps) ++ "fps") fpsDiv

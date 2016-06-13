@@ -40,9 +40,9 @@ keyHandler ucRef usRef char = do
   let spd = show uiConf.keyboardSwitchSpd
   case char of
     "1" -> do
-      incM uiST "main.main_body" "t" "basic_t" "vec2" 1 spd
+      incM uiST "main.main_body" "seed" "fam1" "vec4" 1 spd
     "Q" -> do
-      incM uiST "main.main_body" "t" "basic_t" "vec2" (-1) spd
+      incM uiST "main.main_body" "seed" "fam1" "vec4" (-1) spd
     "2" -> do
       incI uiST "main.main_body.t" "t_inner" "t_inner" "vec2" 1 spd
     "W" -> do

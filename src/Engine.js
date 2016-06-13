@@ -5,18 +5,19 @@
 exports.createImageImpl = function(s){
 	return function(callback){
 		return function(){
-			var im = window.images[s];
-			callback(im)();
-			//var im = new Image();
-			//im.onload = function() {callback(im)()};
-//			console.log(callback);
-			//im.src = s;
+  		//var im = window.images[s];
+			//callback(im)();
+			var im = new Image();
+			im.onload = function() {callback(im)()};
+			//console.log(callback);
+			console.log(s);
+			im.src = s;
 		};
 	};
 };
 
-var image_list = [
-"http://localhost:8000/textures/simplegeom/tile_rainbow1.png",
+var image_list = [	"http://localhost:8000/textures/simplegeom/grid_1.png"];
+/*"http://localhost:8000/textures/simplegeom/tile_rainbow1.png",
 "http://localhost:8000/textures/simplegeom/tile_rainbow2.png",
 "http://localhost:8000/textures/simplegeom/tile_grid1.png",
 "http://localhost:8000/textures/simplegeom/tile_grid2.png",
@@ -42,7 +43,6 @@ var image_list = [
 "http://localhost:8000/textures/psych/psych_5.png",
 "http://localhost:8000/textures/psych/psych_6.png",
 "http://localhost:8000/textures/psych/psych_7.png",
-"http://localhost:8000/textures/simplegeom/grid_1.png",
 "http://localhost:8000/textures/simplegeom/grid_2.png",
 "http://localhost:8000/textures/simplegeom/tile_grid6.png",
 "http://localhost:8000/textures/simplegeom/tile_hexagons1.png",
@@ -59,7 +59,7 @@ var image_list = [
 "http://localhost:8000/textures/Vasarely/tile_vasarely4.png",
 "http://localhost:8000/textures/Vasarely/tile_vasarely7.png",
 "http://localhost:8000/textures/Vasarely/tile_vasarely8.png"];
-
+*/
 
 exports.initAuxImages = function(){
 	window.images = {};

@@ -1,10 +1,10 @@
 --default
 vert   default_vert
-main   default_main
+main   default_main_img
 disp   disp_id
 tPhase 0.0
 tSpd   1.0
 includes [colorspace, math]
 
 --test < default
-main   test
+main  test

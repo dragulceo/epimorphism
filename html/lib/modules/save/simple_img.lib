@@ -1,0 +1,16 @@
+--default_main_img < default_main
+modules {main_body: main_body_img}
+
+--main_body_img < default_main_body
+modules {seed: seed_simple_img, t:t_wrap_zo, color: color_id}
+
+--seed_simple_img < seed_simple
+flags {family: seed, basic: true, fam1: true}
+component seed_simple_img
+images [/textures/simplegeom/tile_grid1.png]
+
+--seed_simple_img2 < seed_simple_img
+images [/textures/simplegeom/tile_grid2.png]
+
+--seed_simple_img3 < seed_simple_img
+images [/textures/simplegeom/tile_grid3.png]

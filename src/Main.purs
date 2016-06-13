@@ -46,7 +46,7 @@ init = do
   pattern    <- loadLib systemConf'.initPattern systemST.patternLib "init pattern"
 
   -- build strefs
-  scRef <- lift $ newSTRef systemConf
+  scRef <- lift $ newSTRef systemConf'
   ecRef <- lift $ newSTRef engineConf
   ucRef <- lift $ newSTRef uiConf
   pRef  <- lift $ newSTRef pattern
@@ -59,7 +59,7 @@ init = do
   systemST' <- lift $ readSTRef ssRef
 
   -- init engine & ui states
-  esRef <- initEngineST systemConf engineConf systemST' pattern' uiConf.canvasId
+  esRef <- initEngineST systemConf' engineConf systemST' pattern' uiConf.canvasId
   usRef <- initUIST ucRef ecRef esRef pRef scRef ssRef
 
   return {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef}

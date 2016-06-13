@@ -1,7 +1,7 @@
 --default_main
 flags {default: true, family: main}
 component main
-modules {main_body: main_default}
+modules {main_body: default_main_body}
 
 --test < default_main
 flags {family: main}

@@ -14,17 +14,18 @@ PATTERN
   - remove mid from scripts?
 MISC
   - initAuxImages is mad ghetto
-	- too many debug statements going on
+	- too many debug statements going on (in engine?)
 	- debugging is kind of obnoxious
   - logging?
-FINAL
+FINAL (BETA)
   - BETA INFRASTRUCTURE PASS
   - build out library & interface
   - weird divide by zero issue - glitch in content
 
+
+
 LATER
   - prevent default in ui.js
-  - bug: need to push debugState 2x
   - update flags on save (default != true)
   - check for duplicates when saving (id = hash of contents?)
   - make serializable a class

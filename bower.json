@@ -23,7 +23,8 @@
     "purescript-simple-dom": "*",
     "purescript-math": "*",
     "purescript-complex": "*",
-    "purescript-sets": "*"
+    "purescript-sets": "*",
+		"purescript-format": "^0.1.1"
   },
   "resolutions": {
     "purescript-math": "~0.2.0",

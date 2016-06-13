@@ -7,11 +7,18 @@ exports.createImageImpl = function(s){
 		return function(){
   		//var im = window.images[s];
 			//callback(im)();
+
+			if(!window.images)
+				window.images = {};
+			if(window.images[s]){
+				callback(window.images[s])();
+				return window.images[s];
+			}
+
 			var im = new Image();
 			im.onload = function() {callback(im)()};
-			//console.log(callback);
-			console.log(s);
 			im.src = s;
+			window.images[s] = im;
 		};
 	};
 };

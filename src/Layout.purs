@@ -17,7 +17,7 @@ import Data.String.Regex (match, noFlags, regex)
 import Data.Traversable (traverse)
 import Serialize (unsafeSerialize)
 import System (loadLib)
-import Util (lg, indentLines)
+import Util (indentLines)
 
 initLayout :: forall eff. UIConf -> UIST -> Epi eff Unit
 initLayout uiConf uiST = do
@@ -61,7 +61,6 @@ updateLayout uiConf uiST systemST pattern = do
         lift $ setInnerHTML ((show fps) ++ "fps") fpsDiv
       Nothing -> return unit
 
-    let a = lg uiST.debugState
     when uiST.debugState do
       dsDiv <- findElt uiConf.debugStateId
       str <- renderDebugState systemST.moduleRefPool 0 pattern.main ("<span style='color:pink'>MAIN: " ++ pattern.main ++ "</span>")

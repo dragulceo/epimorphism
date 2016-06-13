@@ -7,11 +7,13 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (runExceptT)
 import DOM (DOM)
 import Data.Either (Either(..), either)
+import Data.Int (toNumber)
 import Data.Int (fromString) as I
 import Data.Maybe (Maybe(..))
 import Data.String (split, joinWith)
 import Data.Tuple (Tuple(..))
 import Graphics.Canvas (Canvas)
+import Math (floor, pow)
 
 foreign import data Now :: !
 

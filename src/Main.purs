@@ -105,7 +105,7 @@ animate stateM = handleError do
   renderFrame systemST' engineConf engineST' pattern systemST'.frameNum
 
   -- update ui
-  updateLayout uiConf uiST systemST pattern
+  updateLayout uiConf uiST systemST' pattern
 
   -- request next frame
   lift $ modifySTRef ssRef (\s -> s {frameNum = s.frameNum + 1})

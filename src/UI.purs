@@ -11,7 +11,7 @@ import DOM (DOM)
 import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (insert, member, lookup)
 import Layout(initLayout)
-import Util (lg)
+--import Util (lg)
 
 foreign import registerEventHandler :: forall eff. (String -> Eff eff Unit) -> Eff eff Unit
 foreign import registerKeyHandler :: forall eff. (String -> Eff eff String) -> Eff eff Unit
@@ -36,7 +36,7 @@ keyHandler ucRef usRef char = do
   uiConf <- readSTRef ucRef
   uiST   <- readSTRef usRef
 
-  let x = lg char
+  --let x = lg char
   let spd = show uiConf.keyboardSwitchSpd
   case char of
     "1" -> do

@@ -88,7 +88,8 @@ createImage ctx host c (Tuple aux name) = do
   lift $ createImageImpl (host ++ name) \img -> do
     runWebgl (do
       liftEff $ GL.bindTexture ctx GLE.texture2d aux
-      liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte img) ctx
+      liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte img
+    ) ctx
     return unit
   return $ c + 1
 
@@ -114,7 +115,7 @@ foreign import emptyImage :: forall eff. Int -> Eff eff GLT.TexImageSource
 -- compile shaders and load into systemST
 setShaders :: forall eff h. SystemConf -> STRef h EngineST -> SystemST h -> Pattern -> EpiS eff h Unit
 setShaders sysConf esRef sys pattern = do
-  let t = lg "setShaders"
+  let t = lg "SET SHADERS"
   es <- lift $ readSTRef esRef
 
   -- load & compile shaders

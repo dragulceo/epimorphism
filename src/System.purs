@@ -8,7 +8,7 @@ import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.StrMap (lookup, StrMap)
 import Data.Tuple (Tuple)
-import Library (LibError(..), parseLib)
+import Library (parseLib)
 import Prelude ((++), return, ($), bind)
 import Util (urlGet)
 
@@ -45,9 +45,7 @@ buildLib schema loc = do
   dt <- lift $ urlGet loc
   case dt of
     (Left er) -> throwError $ "Error loading lib : " ++ er
-    (Right res) -> case (parseLib schema res) of
-      (Right res') -> return res'
-      (Left (LibError s)) -> throwError $ "Error building lib at : " ++ loc ++ " : " ++ s
+    (Right res) -> parseLib schema res
 
 -- build a shader library from a location with a builder
 buildSLib :: forall eff a.  (SHandle -> SLib (Tuple String a)) -> String -> Epi eff (StrMap a)

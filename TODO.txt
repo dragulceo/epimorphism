@@ -25,12 +25,12 @@ FINAL
 LATER
   - prevent default in ui.js
   - bug: need to push debugState 2x
-  - remove {} [], etc when serializing
   - update flags on save (default != true)
   - check for duplicates when saving (id = hash of contents?)
   - make serializable a class
   - make flags a set?
-	- saving
+	- screenshots
+	- saving server
 	- next config/library pass (maybe better error detection)
 	- pause only works if tSpd == 1.0
   - how do we figure out the family of a submodle?  can't always use the name

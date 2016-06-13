@@ -9,15 +9,14 @@ import Control.Monad.Trans (lift)
 import Data.DOM.Simple.Element (setInnerHTML, setStyleAttr, querySelector)
 import Data.DOM.Simple.Unsafe.Element (HTMLElement)
 import Data.DOM.Simple.Window (innerHeight, innerWidth, document, globalWindow)
-import Data.Either (Either(Right, Left))
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.StrMap (StrMap)
 import Data.String (joinWith, trim, split, replace)
 import Data.String.Regex (match, noFlags, regex)
 import Data.Traversable (traverse)
-import Serialize (SerializeError(SerializeError), unsafeSerialize)
+import Serialize (unsafeSerialize)
 import System (loadLib)
-import Util (indentLines, lg)
+import Util (indentLines)
 
 initLayout :: forall eff. UIConf -> UIST -> Epi eff Unit
 initLayout uiConf uiST = do
@@ -60,37 +59,33 @@ updateLayout uiConf uiST systemST pattern = do
 
     when uiST.debugState do
       dsDiv <- findElt uiConf.debugStateId
-      str <- renderDebugState systemST.moduleRefPool 0 pattern.main
+      str <- renderDebugState systemST.moduleRefPool 0 pattern.main ("<span style='color:pink'>MAIN: " ++ pattern.main ++ "</span>")
       lift $ setInnerHTML str dsDiv
       return unit
 
 
-renderDebugState :: forall eff h. StrMap (STRef h Module) -> Int -> String -> EpiS eff h String
-renderDebugState pool ofs n = do
-  mRef <- loadLib n pool "renderDebugState"
+renderDebugState :: forall eff h. StrMap (STRef h Module) -> Int -> String -> String -> EpiS eff h String
+renderDebugState pool ofs nl nn = do
+  mRef <- loadLib nl pool "renderDebugState"
   main <- lift $ readSTRef mRef
-  str <- case unsafeSerialize moduleSchema n main of
-    (Left (SerializeError er)) -> throwError $ "Error serializing object " ++ n ++ " : " ++ er
-    (Right s) -> return s
+  str <- unsafeSerialize moduleSchema nn main
 
-  let rgx = regex "modules \\{([^\\{\\}]*)\\}\n" noFlags
-  let a = lg $ match rgx str
+  let rgx = regex "modules \\{([^\\{\\}]*)\\}" noFlags
   res <- case (match rgx str) of
     (Just [(Just _), (Just "")]) -> do
       return str
     (Just [(Just m0), (Just m1)]) -> do
       dt <- traverse (exp <<< split ":") $ split "," m1
       let modS = joinWith "\n" dt
-      return $ (replace m0 "" str) ++ "\nMODULES\n" ++ modS
+      return $ (trim (replace m0 "" $ replace (m0 ++ "\n") "" str)) ++ "\n<span style='color:red'>MODULES</span>\n" ++ modS
     _ ->
       return str
 
   return $ indentLines ofs res
   where
     exp [a, b] = do
-      mn <- renderDebugState pool 2 (trim b)
-      return $ "  ##" ++ (trim a) ++ "\n" ++ mn
-    exp _ = throwError $ "invalid map syntax in " ++ n
+      renderDebugState pool 2 (trim b) ("<span style='color:blue'>" ++ (trim a) ++ ": " ++ (trim b) ++ "</span>")
+    exp _ = throwError $ "invalid map syntax in " ++ nl
 
 
 

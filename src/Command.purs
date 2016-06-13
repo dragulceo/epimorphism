@@ -19,7 +19,7 @@ import Data.Tuple (Tuple(..))
 import Engine (clearFB)
 import Graphics.Canvas (Canvas)
 import Pattern (importScript, findModule)
-import Serialize (SerializeError(SerializeError), unsafeSerialize)
+import Serialize (unsafeSerialize)
 import System (loadLib)
 import Layout (initLayout)
 import Util (uuid, lg, handleError)
@@ -74,9 +74,7 @@ save :: forall eff h. (SystemST h) -> Pattern -> EpiS eff h Unit
 save systemST pattern = do
   -- pattern
   id <- lift $ uuid
-  ps <- case unsafeSerialize patternSchema id pattern of
-    (Left (SerializeError er)) -> throwError $ "Error serializing pattern " ++ id ++ " : " ++ er
-    (Right s) -> return s
+  ps <- unsafeSerialize patternSchema id pattern
 
   -- modules
   mods <- (traverse (serializeTup moduleSchema) $ fromList $ toList systemST.moduleRefPool) :: EpiS eff h (Array String)
@@ -95,10 +93,8 @@ save systemST pattern = do
     serializeTup :: forall a. Schema -> (Tuple String (STRef h a)) -> EpiS eff h String
     serializeTup schema (Tuple n ref) = do
       obj <- lift $ readSTRef ref
-      case unsafeSerialize schema n obj of
-        (Left (SerializeError er)) -> throwError $ "Error serializing object " ++ n ++ " : " ++ er
-        (Right s) -> return s
-
+      st <- unsafeSerialize schema n obj
+      return st
 
 
 data ScrPS = ScrFn | ScrMid | ScrDt

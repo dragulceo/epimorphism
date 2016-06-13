@@ -1,55 +1,62 @@
 module Serialize where
 
 import Prelude
-import Config (Schema, SchemaEntry(..), SchemaEntryType(..))
+import Config (Epi, Schema, SchemaEntry(..), SchemaEntryType(..))
+import Data.Array (null)
 import Data.Array (sortBy, foldM) as A
 import Data.Complex (Complex)
-import Data.Either (Either(..))
 import Data.List (fromList)
-import Data.Set (toList, Set)
+import Data.Set (isEmpty, toList, Set)
 import Data.StrMap (StrMap)
-import Data.StrMap (toList) as S
+import Data.StrMap (toList, isEmpty) as S
 import Data.String (joinWith)
 import Data.Tuple (Tuple(Tuple))
 import Util (unsafeCast, unsafeGetAttr)
 
-data SerializeError = SerializeError String
-type Serialize = Either SerializeError
-
 -- serializes an object.  will crase if object doesnt match schema
-unsafeSerialize :: forall a. Schema -> String -> a -> Serialize String
+unsafeSerialize :: forall eff a. Schema -> String -> a -> Epi eff String
 unsafeSerialize schema name obj = do
   dt <- A.foldM (serializeEntry obj) "" (A.sortBy schemaSort schema)
-  Right $ "--" ++ name ++ dt
+  return $ "--" ++ name ++ dt
 
 schemaSort :: SchemaEntry -> SchemaEntry -> Ordering
 schemaSort (SchemaEntry _ a) (SchemaEntry _ b) = compare a b
 
-serializeEntry :: forall a. a -> String -> SchemaEntry -> Serialize String
+serializeEntry :: forall eff a. a -> String -> SchemaEntry -> Epi eff String
 serializeEntry obj str (SchemaEntry entryType entryName) = do
   let val = unsafeGetAttr obj entryName
 
-  clause <- case entryType of
+  (Tuple clause isEmpty) <- case entryType of
     SE_St -> do
-      return $ val
+      return $ Tuple val (val == "")
     SE_N -> do
-      return $ (show (unsafeCast val :: Number))
+      let n = unsafeCast val :: Number
+      return $ Tuple (show n) (n == 0.0)
     SE_I -> do
-      return $ (show (unsafeCast val :: Int))
+      let i = unsafeCast val :: Int
+      return $ Tuple (show i) (i == 0)
     SE_B -> do
-      return $ (show (unsafeCast val :: Boolean))
+      let b = unsafeCast val :: Boolean
+      return $ Tuple (show b) false
     SE_S -> do
-      return $ serializeSet $ unsafeCast val
+      let s = unsafeCast val
+      return $ Tuple (serializeSet s) (isEmpty s)
     SE_M_St -> do
-      return $ serializeStMap $ unsafeCast val
+      let m = unsafeCast val
+      return $ Tuple (serializeStMap m) (S.isEmpty m)
     SE_M_N -> do
-      return $ serializeNMap $ unsafeCast val
+      let m = unsafeCast val
+      return $ Tuple (serializeNMap m) (S.isEmpty m)
     SE_A_St -> do
-      return $ serializeStArray $ unsafeCast val
+      let a = unsafeCast val
+      return $ Tuple (serializeStArray a) (null a)
     SE_A_Cx -> do
-      return $ serializeCxArray $ unsafeCast val
+      let a = unsafeCast val
+      return $ Tuple (serializeCxArray a) (null a)
 
-  Right $ str ++ "\n" ++ entryName ++ " " ++ clause
+  return $ case isEmpty of
+    true -> str
+    false -> str ++ "\n" ++ entryName ++ " " ++ clause
 
 
 serializeSet :: (Set String) -> String

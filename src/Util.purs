@@ -1,23 +1,17 @@
 module Util where
 
 import Prelude
-import Data.Either (Either(..))
-import Data.Complex
-import Data.Tuple (Tuple(..))
+import Config (Epi)
+import Control.Monad.Eff (Eff)
+import Control.Monad.Error.Class (throwError)
+import Control.Monad.Except.Trans (runExceptT)
+import DOM (DOM)
+import Data.Either (Either(..), either)
 import Data.Int (fromString) as I
 import Data.Maybe (Maybe(..))
-import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (CONSOLE)
-import Control.Monad.Error.Class (throwError)
-
-import Config -- should we do this
-
-
--- can remove with a less lazy type synonym
+import Data.String (split, joinWith)
+import Data.Tuple (Tuple(..))
 import Graphics.Canvas (Canvas)
-import DOM (DOM)
-import Control.Monad.Except.Trans (runExceptT)
-import Data.Either (Either(..), either)
 
 foreign import data Now :: !
 
@@ -28,7 +22,7 @@ foreign import stick :: forall a b. a -> b
 foreign import tLg :: forall a b. a -> b
 foreign import unsafeEval :: forall eff. String -> Eff eff Unit
 foreign import winLog :: forall a eff. a -> Eff eff Unit
-foreign import requestAnimationFrame :: forall eff a. Eff eff Unit -> Eff eff Unit
+foreign import requestAnimationFrame :: forall eff. Eff eff Unit -> Eff eff Unit
 foreign import now :: forall eff. Eff (now :: Now | eff) Number
 foreign import replaceAll :: String -> String -> String -> String
 
@@ -86,3 +80,11 @@ handleError :: forall eff. Epi eff Unit -> Eff (canvas :: Canvas, dom :: DOM | e
 handleError epi = do
   res <- runExceptT epi
   either winLog return res
+
+
+spc :: Int -> String
+spc 0 = ""
+spc m = " " ++ spc (m - 1)
+
+indentLines :: Int -> String -> String
+indentLines n s = joinWith "\n" $ map (\x -> (spc n) ++ x) $ split "\n" s

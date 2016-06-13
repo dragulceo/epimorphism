@@ -1,24 +1,21 @@
 module Compiler where
 
-import Prelude
+import Prelude (return, ($), bind, map, (++), (-), (+), show)
+import Data.Complex (Complex)
+import Config (Module, EpiS, ModRef, SystemST, Pattern)
+import System
+import Control.Monad.Except.Trans (lift)
+import Control.Monad.ST (STRef, readSTRef)
 import Data.Array (sort, length, foldM, (..)) as A
-import Data.Complex
 import Data.Foldable (foldl)
 import Data.Int (fromNumber)
 import Data.List (fromList)
 import Data.Maybe.Unsafe (fromJust)
-import Data.String (joinWith, split)
-import Data.StrMap (StrMap(), fold, empty, keys, size, foldM, insert, lookup, values)
-import Data.Tuple (Tuple(..), snd)
+import Data.StrMap (StrMap, fold, empty, keys, size, foldM, insert, lookup, values)
+import Data.String (joinWith)
 import Data.Traversable (traverse)
-
-import Control.Monad.Error.Class (throwError)
-import Control.Monad.Except.Trans (lift)
-import Control.Monad.ST (ST, STRef, readSTRef)
-
-import Config
-import System
-import Util (replaceAll, lg)
+import Data.Tuple (Tuple(..), snd)
+import Util (indentLines, replaceAll)
 
 type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}
 type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array String}
@@ -103,13 +100,3 @@ loadModules mr lib = do
       mRef <- loadLib v lib "loadModules"
       m    <- lift $ readSTRef mRef
       return $ insert k m dt
-
-
--- PRIVATE
-
-spc :: Int -> String
-spc 0 = ""
-spc m = " " ++ spc (m - 1)
-
-indentLines :: Int -> String -> String
-indentLines n s = joinWith "\n" $ map (\x -> (spc n) ++ x) $ split "\n" s

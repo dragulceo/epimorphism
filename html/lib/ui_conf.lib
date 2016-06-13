@@ -4,6 +4,7 @@ consoleId console
 debugStateId debugState
 fpsId showFps
 fullScreen false
+uiUpdateFreq 10
 keyboardSwitchSpd 0.4
 
 --full < default

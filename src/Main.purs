@@ -85,10 +85,9 @@ animate stateM = handleError do
   lift $ modifySTRef ssRef (\s -> s {t = t', lastTimeMS = Just currentTimeMS})
 
   -- fps
-  let freq = 10
-  when (systemST.frameNum `mod` freq == 0) do
+  when (systemST.frameNum `mod` uiConf.uiUpdateFreq == 0) do
     let lastFpsTimeMS = fromMaybe currentTimeMS systemST.lastFpsTimeMS
-    let fps = round $ (toNumber freq) * 1000.0 / (currentTimeMS - lastFpsTimeMS)
+    let fps = round $ (toNumber uiConf.uiUpdateFreq) * 1000.0 / (currentTimeMS - lastFpsTimeMS)
     lift $ modifySTRef ssRef (\s -> s {lastFpsTimeMS = Just currentTimeMS, fps = Just fps})
     return unit
 
@@ -106,7 +105,7 @@ animate stateM = handleError do
   renderFrame systemST' engineConf engineST' pattern systemST'.frameNum
 
   -- update ui
-  updateLayout uiConf uiST systemST
+  updateLayout uiConf uiST systemST pattern
 
   -- request next frame
   lift $ modifySTRef ssRef (\s -> s {frameNum = s.frameNum + 1})

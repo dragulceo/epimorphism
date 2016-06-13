@@ -1,14 +1,23 @@
 module Layout where
 
 import Prelude
-import Config (SystemST, UIST, Epi, UIConf)
+import Config (EpiS, moduleSchema, Module, Pattern, SystemST, UIST, Epi, UIConf)
 import Control.Monad (when, unless)
 import Control.Monad.Except.Trans (throwError)
+import Control.Monad.ST (readSTRef, STRef)
 import Control.Monad.Trans (lift)
 import Data.DOM.Simple.Element (setInnerHTML, setStyleAttr, querySelector)
 import Data.DOM.Simple.Unsafe.Element (HTMLElement)
 import Data.DOM.Simple.Window (innerHeight, innerWidth, document, globalWindow)
+import Data.Either (Either(Right, Left))
 import Data.Maybe (Maybe(Just, Nothing))
+import Data.StrMap (StrMap)
+import Data.String (joinWith, trim, split, replace)
+import Data.String.Regex (match, noFlags, regex)
+import Data.Traversable (traverse)
+import Serialize (SerializeError(SerializeError), unsafeSerialize)
+import System (loadLib)
+import Util (indentLines, lg)
 
 initLayout :: forall eff. UIConf -> UIST -> Epi eff Unit
 initLayout uiConf uiST = do
@@ -42,13 +51,47 @@ initLayout uiConf uiST = do
     lift $ setStyleAttr "height" "100%" c2
 
 -- hides malformed html issues
-updateLayout :: forall eff h. UIConf -> UIST -> SystemST h -> Epi eff Unit
-updateLayout uiConf uiST systemST = do
-  case systemST.fps of
-    (Just fps) -> showFps uiConf.fpsId fps
-    Nothing -> return unit
+updateLayout :: forall eff h. UIConf -> UIST -> SystemST h -> Pattern -> EpiS eff h Unit
+updateLayout uiConf uiST systemST pattern = do
+  when (systemST.frameNum `mod` uiConf.uiUpdateFreq == 0) do
+    case systemST.fps of
+      (Just fps) -> showFps uiConf.fpsId fps
+      Nothing -> return unit
 
---  when uiST.debugState do
+    when uiST.debugState do
+      dsDiv <- findElt uiConf.debugStateId
+      str <- renderDebugState systemST.moduleRefPool 0 pattern.main
+      lift $ setInnerHTML str dsDiv
+      return unit
+
+
+renderDebugState :: forall eff h. StrMap (STRef h Module) -> Int -> String -> EpiS eff h String
+renderDebugState pool ofs n = do
+  mRef <- loadLib n pool "renderDebugState"
+  main <- lift $ readSTRef mRef
+  str <- case unsafeSerialize moduleSchema n main of
+    (Left (SerializeError er)) -> throwError $ "Error serializing object " ++ n ++ " : " ++ er
+    (Right s) -> return s
+
+  let rgx = regex "modules \\{([^\\{\\}]*)\\}\n" noFlags
+  let a = lg $ match rgx str
+  res <- case (match rgx str) of
+    (Just [(Just _), (Just "")]) -> do
+      return str
+    (Just [(Just m0), (Just m1)]) -> do
+      dt <- traverse (exp <<< split ":") $ split "," m1
+      let modS = joinWith "\n" dt
+      return $ (replace m0 "" str) ++ "\nMODULES\n" ++ modS
+    _ ->
+      return str
+
+  return $ indentLines ofs res
+  where
+    exp [a, b] = do
+      mn <- renderDebugState pool 2 (trim b)
+      return $ "  ##" ++ (trim a) ++ "\n" ++ mn
+    exp _ = throwError $ "invalid map syntax in " ++ n
+
 
 
 findElt :: forall eff. String -> Epi eff HTMLElement

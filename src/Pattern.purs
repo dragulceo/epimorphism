@@ -31,7 +31,7 @@ checkFlags col flags = fold handle true flags
   where handle dt k v = dt && checkFlag col k v
 
 -- filter a family by specific flags, return the keys, sorted alphabetically
-flagFamily :: forall eff r. StrMap {flags :: StrMap String | r} -> StrMap String -> Array String
+flagFamily :: forall r. StrMap {flags :: StrMap String | r} -> StrMap String -> Array String
 flagFamily family flags = A.sort $ fold handle [] family
   where
     handle dt k v = case (checkFlags v flags) of
@@ -150,7 +150,7 @@ importScript ssRef sc mid = do
 
   s <- case sc of
     Left s -> do
-      let tPhase' = systemST.t -- - s.tPhase
+      let tPhase' = systemST.t - s.tPhase
       return $ s {tPhase = tPhase'}
     Right s -> do
       m <- lift $ readSTRef mRef

@@ -1,8 +1,7 @@
 SYSTEM
+
 	- SWITCHING & REF POOLS
-	  - way of switching modules while keeping phase.  isn't recompiling ghetto?
-	  - is this shit with the ref pools necessary & clean enough?
-	  - switching states causes the system to glitch out for a second.  because of image uploading?
+	  - way of switching modules while keeping phase/scripts.  isn't recompiling ghetto(what?)
     - ABSOLUTE ADDRESSING FOR IDX & MOD SWITCHING??	not necessary if we stop using sub for t
 		- keep scripts when switching modules?
 
@@ -13,9 +12,7 @@ PATTERN
 	- pattern level scripts
   - remove mid from scripts?
 MISC
-  - initAuxImages is mad ghetto
 	- too many debug statements going on (in engine?)
-	- debugging is kind of obnoxious
   - logging?
 FINAL (BETA)
   - BETA INFRASTRUCTURE PASS
@@ -25,6 +22,7 @@ FINAL (BETA)
 
 
 LATER
+	- very minor glitch during image uploading
   - prevent default in ui.js
   - update flags on save (default != true)
   - check for duplicates when saving (id = hash of contents?)

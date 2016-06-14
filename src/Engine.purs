@@ -98,7 +98,6 @@ foreign import createImageImpl :: forall eff. String ->
                                   (GLT.TexImageSource -> Eff eff Unit) ->
                                   Eff eff Unit
 
-foreign import initAuxImages :: forall eff. Eff eff Unit
 
 clearFB :: forall eff h. EngineConf -> EngineST -> EpiS eff h Unit
 clearFB engineConf engineST = do
@@ -173,9 +172,6 @@ initEngineST sysConf engineConf sys pattern canvasId = do
   let dim = engineConf.kernelDim
   lift $ setCanvasWidth (toNumber dim) canvas
   lift $ setCanvasHeight (toNumber dim) canvas
-
-  -- initialize js images
-  --lift $ initAuxImages
 
   -- webgl initialization
   res <- execGL ctx do

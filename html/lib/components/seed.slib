@@ -4,6 +4,7 @@ seed seed_nothing {{
 
 seed seed_multi {{
 	vec4 seed0, seed1, seed2;
+	vec2 z_i = z;
   %t%
 
 	vec2 z_tmp = z;
@@ -25,9 +26,11 @@ seed seed_multi {{
 	else
 		seed = 1.0 / a * (seed2.a * seed2 + (1.0 - seed2.a) * seed1.a * seed1 + (1.0 - seed2.a) * (1.0 - seed1.a) * seed0.a * seed0);
 	seed.a = a;
+	z = z_i;
 }}
 
 seed seed_simple_cool {{
+	vec2 z_i = z;
   %t%
 
   float w = VOID_W;
@@ -50,10 +53,12 @@ seed seed_simple_cool {{
   wx = w;
   vec4 frame_w = vec4(w, (abs(w-VOID_W) < 0.00001 ? 0.0 : w * 0.7), wx, wy);
   seed = vec4(frame_w.x, 0, 0, frame_w.y);
+	z = z_i;
 }}
 
 
 seed seed_simple {{
+	vec2 z_i = z;
   %t%
 
   float w = VOID_W;
@@ -76,9 +81,11 @@ seed seed_simple {{
   wx = w;
   vec4 frame_w = vec4(w, (abs(w-VOID_W) < 0.00001 ? 0.0 : 1.0), wx, wy);
   seed = vec4(frame_w.x, 0, 0, frame_w.y);
+	z = z_i;
 }}
 
 seed seed_simple_img {{
+	vec2 z_i = z;
   %t%
 
   float w = VOID_W;
@@ -105,7 +112,7 @@ seed seed_simple_img {{
   seed = texture2D(aux[#0], ofs);
 	seed.w = seed.w * frame_w.y;
 
-  //seed = vec4(frame_w.x, 0, 0, frame_w.y);
+	z = z_i;
 }}
 
 
@@ -114,6 +121,7 @@ seed seed_wca {{
   vec4 wdt, color;
   float w = VOID_W;
 	float a, wx, wy;
+	vec2 z_i = z;
   %t%
 
   // wdt = (w, a, wx, wy)
@@ -127,4 +135,5 @@ seed seed_wca {{
   %alpha%
 
   %seed_color%
+	z = z_i;
 }}

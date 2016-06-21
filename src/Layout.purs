@@ -63,14 +63,15 @@ updateLayout uiConf uiST systemST pattern = do
 
     when uiST.debugState do
       dsDiv <- findElt uiConf.debugStateId
-      str <- renderDebugState systemST.moduleRefPool 0 pattern.main ("<span style='color:pink'>MAIN: " ++ pattern.main ++ "</span>")
+      str <- serializeDebugState systemST.moduleRefPool 0 pattern.main ("<span style='color:pink'>MAIN: " ++ pattern.main ++ "</span>")
       lift $ setInnerHTML str dsDiv
       return unit
 
 
-renderDebugState :: forall eff h. StrMap (STRef h Module) -> Int -> String -> String -> EpiS eff h String
-renderDebugState pool ofs nl nn = do
-  mRef <- loadLib nl pool "renderDebugState"
+-- serializes the modRefPool into an html string for debugging
+serializeDebugState :: forall eff h. StrMap (STRef h Module) -> Int -> String -> String -> EpiS eff h String
+serializeDebugState pool ofs nl nn = do
+  mRef <- loadLib nl pool "serializeDebugState"
   main <- lift $ readSTRef mRef
   str <- unsafeSerialize moduleSchema nn main
 
@@ -88,7 +89,7 @@ renderDebugState pool ofs nl nn = do
   return $ indentLines ofs res
   where
     exp [a, b] = do
-      renderDebugState pool 2 (trim b) ("<span style='color:blue'>" ++ (trim a) ++ ": " ++ (trim b) ++ "</span>")
+      serializeDebugState pool 2 (trim b) ("<span style='color:blue'>" ++ (trim a) ++ ": " ++ (trim b) ++ "</span>")
     exp _ = throwError $ "invalid map syntax in " ++ nl
 
 

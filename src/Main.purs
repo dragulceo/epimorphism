@@ -19,7 +19,7 @@ import UI (initUIST)
 import Util (requestAnimationFrame, now, Now, handleError)
 
 host :: String
-host = "http://localhost:8000"
+host = ""
 
 type State h = {
     ucRef :: STRef h UIConf

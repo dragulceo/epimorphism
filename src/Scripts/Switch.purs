@@ -117,7 +117,7 @@ switchModules ssRef mid subN m1 dim spd t = do
   swid <- replaceModule ssRef mid subN m0 (ImportModule switch')
 
   -- create & import blending script
-  createScript ssRef swid "default" "finishSwitch" $ fromFoldable [(Tuple "spd" (show spd))]
+  createScript ssRef swid "default" "finishSwitch" $ fromFoldable [(Tuple "delay" (show spd))]
   createScript ssRef swid "default" "ppath" $ fromFoldable [(Tuple "par" "intrp"), (Tuple "path" "linear"), (Tuple "spd" (show spd))]
 
   return unit
@@ -130,9 +130,9 @@ finishSwitch ssRef self t mid sRef = do
   let dt = scr.dt
 
   -- get data
-  spd  <- (loadLib "spd" dt "finishSwitch spd") >>= numFromStringE
+  delay <- (loadLib "delay" dt "finishSwitch delay") >>= numFromStringE
 
-  case t * spd of
+  case t * delay of
     -- we're done
     x | x >= 1.0 -> do
       let a = lg "DONE SWITCHING"

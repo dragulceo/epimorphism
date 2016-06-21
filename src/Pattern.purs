@@ -1,25 +1,21 @@
 module Pattern where
 
 import Prelude
-import Data.Array (snoc, delete, length, head, tail, sort, filter) as A
+import Data.Array (snoc, delete, head, tail, sort) as A
 import Data.Either (Either(..))
-import Data.Either.Unsafe
-import Data.Foldable (all)
-import Data.Maybe (Maybe(..), isNothing, maybe)
+import Data.Maybe (Maybe(..), maybe)
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (member, empty, lookup, insert, foldM, values, delete, keys, fold, StrMap())
+import Data.StrMap (StrMap, foldM, fold, delete, insert, member, values, lookup)
 import Data.String (split)
 import Data.Tuple (Tuple(..))
 import Data.Traversable (traverse)
-import Control.Monad (unless, when)
-import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
-import Control.Monad.Except.Trans (ExceptT (), lift)
-import Control.Monad.ST (ST, STRef, modifySTRef, newSTRef, readSTRef)
+import Control.Monad.Except.Trans (lift)
+import Control.Monad.ST (STRef, modifySTRef, newSTRef, readSTRef)
 
-import Config
+import Config (EpiS, Module, Pattern, SystemST, Script)
 import System (loadLib)
-import Util (uuid, lg)
+import Util (uuid)
 
 -- PUBLIC
 -- check if an object has a flag
@@ -27,20 +23,18 @@ checkFlag :: forall r. {flags :: StrMap String | r} -> String -> String -> Boole
 checkFlag {flags} flag val = (member flag flags) && (fromJust (lookup flag flags) == val)
 
 checkFlags :: forall r. {flags :: StrMap String | r} -> StrMap String -> Boolean
-checkFlags col flags = fold handle true flags
-  where handle dt k v = dt && checkFlag col k v
+checkFlags obj flags = fold (\dt k v -> dt && checkFlag obj k v) true flags
 
 -- filter a family by specific flags, return the keys, sorted alphabetically
 flagFamily :: forall r. StrMap {flags :: StrMap String | r} -> StrMap String -> Array String
 flagFamily family flags = A.sort $ fold handle [] family
   where
-    handle dt k v = case (checkFlags v flags) of
-      true -> A.snoc dt k
-      false -> dt
+    handle res k v = case (checkFlags v flags) of
+      true -> A.snoc res k
+      false -> res
 
 
 -- import the modules of a pattern into the ref pool
-type RData h = {mdt :: StrMap (STRef h Module), sdt :: StrMap (STRef h Script), name :: String}
 importPattern :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Unit
 importPattern ssRef pRef =  do
   systemST <- lift $ readSTRef ssRef
@@ -56,6 +50,7 @@ importPattern ssRef pRef =  do
 
 
 -- import a module into the ref pool
+data ImportObj = ImportModule Module | ImportRef String | ImportLib String
 importModule :: forall eff h. STRef h (SystemST h) -> (Either Module String) -> EpiS eff h String
 importModule ssRef md = do
   systemST <- lift $ readSTRef ssRef
@@ -63,15 +58,15 @@ importModule ssRef md = do
 
   -- find module
   m <- case md of
-    Left m -> do -- we're given a module
-      if (checkFlag m "pool" "true") then throwError "fuck you" else return m
-    Right m -> do -- we're given a name (lib or pool ref)
-      case (member m systemST.moduleRefPool) of
+    Left m'' -> do -- we're given a module
+      if (checkFlag m'' "pool" "true") then throwError "fuck you" else return m''
+    Right m' -> do -- we're given a name (lib or pool ref)
+      case (member m' systemST.moduleRefPool) of
         true -> do
-          ref <- loadLib m systemST.moduleRefPool "import module pool"
+          ref <- loadLib m' systemST.moduleRefPool "import module pool"
           lift $ readSTRef ref
         false -> do
-          loadLib m systemST.moduleLib "import module lib"
+          loadLib m' systemST.moduleLib "import module lib"
 
   -- update pool
   let flags' = insert "pool" "true" m.flags
@@ -98,7 +93,7 @@ importModule ssRef md = do
       mRef <- loadLib mid systemSTC.moduleRefPool "import module - update parent"
       m <- lift $ readSTRef mRef
       let modules' = insert k child m.modules
-      lift $ modifySTRef mRef (\m -> m {modules = modules'})
+      lift $ modifySTRef mRef (\m' -> m' {modules = modules'})
 
       return mid
 
@@ -136,7 +131,7 @@ replaceModule ssRef mid subN cid c' = do
 
   -- update
   let mod' = insert subN n' m.modules
-  lift $ modifySTRef mRef (\m -> m {modules = mod'})
+  lift $ modifySTRef mRef (\m' -> m' {modules = mod'})
 
   return n'
 
@@ -149,32 +144,32 @@ importScript ssRef sc mid = do
   mRef <- loadLib mid systemST.moduleRefPool "import script - find module"
 
   s <- case sc of
-    Left s -> do
-      let tPhase' = systemST.t - s.tPhase
-      return $ s {tPhase = tPhase'}
-    Right s -> do
+    Left s' -> do
+      let tPhase' = systemST.t - s'.tPhase
+      return $ s' {tPhase = tPhase'}
+    Right s' -> do
       m <- lift $ readSTRef mRef
-      let scripts' = A.delete s m.scripts
-      lift $ modifySTRef mRef (\m -> m {scripts = scripts'})
+      let scripts' = A.delete s' m.scripts
+      lift $ modifySTRef mRef (\m' -> m' {scripts = scripts'})
 
-      case (member s systemST.scriptRefPool) of
+      case (member s' systemST.scriptRefPool) of
         true -> do
-          ref <- loadLib s systemST.scriptRefPool "import script pool"
+          ref <- loadLib s' systemST.scriptRefPool "import script pool"
           lift $ readSTRef ref
         false -> do
-          scr <- loadLib s systemST.scriptLib "import script"
+          scr <- loadLib s' systemST.scriptLib "import script"
           let tPhase' = systemST.t - scr.tPhase
           return $ scr {tPhase = tPhase'}
 
   --update pool
   ref <- lift $ newSTRef s {mid = mid}
   let sp = insert id ref systemST.scriptRefPool
-  lift $ modifySTRef ssRef (\s -> s {scriptRefPool = sp})
+  lift $ modifySTRef ssRef (\s' -> s' {scriptRefPool = sp})
 
   -- add script
   m <- lift $ readSTRef mRef
   let scripts' = A.snoc m.scripts id
-  lift $ modifySTRef mRef (\m -> m {scripts = scripts'})
+  lift $ modifySTRef mRef (\m' -> m' {scripts = scripts'})
 
   return id
 
@@ -206,11 +201,12 @@ findModule :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> EpiS
 findModule mpool pattern dt = do
   let addr = split "." dt
   case (A.head addr) of
-    Nothing -> throwError "we need data doofus"
+    Nothing -> throwError "we need data, chump"
     Just "vert" -> findModule' mpool pattern.vert $ fromJust $ A.tail addr
     Just "disp" -> findModule' mpool pattern.disp $ fromJust $ A.tail addr
     Just "main" -> findModule' mpool pattern.main $ fromJust $ A.tail addr
-    Just x -> throwError $ "value should be main, vert, or disp : " ++ x
+    Just x      -> throwError $ "value should be main, vert, or disp : " ++ x
+
 
 findModule' :: forall eff h. StrMap (STRef h Module) -> String -> Array String -> EpiS eff h String
 findModule' mpool mid addr = do
@@ -231,7 +227,7 @@ findParent mpool mid = do
     Nothing -> throwError $ "module has no parent: " ++ mid
     Just x -> return x
   where
-    handle :: forall eff h. Maybe (Tuple String String) -> String -> STRef h Module -> EpiS eff h (Maybe (Tuple String String))
+    handle :: Maybe (Tuple String String) -> String -> STRef h Module -> EpiS eff h (Maybe (Tuple String String))
     handle (Just x) _ _ = return $ Just x
     handle _ pid ref = do
       mod <- lift $ readSTRef ref
@@ -239,7 +235,7 @@ findParent mpool mid = do
         Nothing -> return Nothing
         Just x -> do
           return $ Just $ Tuple pid x
-    handle2 :: forall eff h. Maybe String -> String -> String -> Maybe String
+    handle2 :: Maybe String -> String -> String -> Maybe String
     handle2 (Just x) _ _ = Just x
     handle2 _ k cid | cid == mid = Just k
     handle2 _ _ _ = Nothing

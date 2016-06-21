@@ -4,6 +4,8 @@ SYSTEM
 	  - way of switching modules while keeping phase/scripts.  isn't recompiling ghetto(what?)
     - ABSOLUTE ADDRESSING FOR IDX & MOD SWITCHING??	not necessary if we stop using sub for t
 		- keep scripts when switching modules?
+		- mainRef refernece in randomMain seems ghetto
+		- patternRefPool?
 
 ENGINE
   - fract

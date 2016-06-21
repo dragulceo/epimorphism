@@ -1,7 +1,7 @@
 module Script where
 
 import Prelude
-import Config (ScriptFn, EpiS, SystemST)
+import Config (Pattern, ScriptFn, EpiS, SystemST)
 import Control.Monad (unless)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
@@ -13,22 +13,22 @@ import Data.Tuple (Tuple(..))
 import Path (zpath, ppath)
 import Pattern (findModule')
 import ScriptUtil (createScript)
-import Switch (incImage, incMod, finishSwitch, incSub)
+import Switch (incScript, incImage, incMod, finishSwitch, incSub)
 import System (loadLib)
 import Util (randInt, lg, numFromStringE)
 
 -- PUBLIC
 
 -- execute all scripts & script pool
-runScripts :: forall eff h. STRef h (SystemST h) -> EpiS eff h Boolean
-runScripts ssRef = do
+runScripts :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Boolean
+runScripts ssRef pRef = do
   systemST <- lift $ readSTRef ssRef
-  res <- traverse (runScript ssRef) (keys systemST.scriptRefPool)
+  res <- traverse (runScript ssRef pRef) (keys systemST.scriptRefPool)
   return $ or res
 
   where
-    runScript :: STRef h (SystemST h) -> String -> EpiS eff h Boolean
-    runScript ssRef n = do
+    runScript :: STRef h (SystemST h) -> STRef h Pattern -> String -> EpiS eff h Boolean
+    runScript ssRef pRef n = do
       systemST <- lift $ readSTRef ssRef
       case (member n systemST.scriptRefPool) of
         true -> do
@@ -38,32 +38,33 @@ runScripts ssRef = do
           let t' = systemST.t - scr.tPhase
           case scr.mid of
             "" -> throwError $ "No module when running script: " ++ scr.fn
-            mid -> fn ssRef n t' mid sRef
+            mid -> fn ssRef pRef n t' mid sRef
         false -> do
           let g = lg "script removed" -- ghetto(script purged by previous script)
           return false
 
 -- SCRIPT FUNCTIONS
 
--- dont do anything.  is this necessary?
+-- dont do anything
 nullS :: forall eff h. ScriptFn eff h
-nullS ssRef self t mid sRef = do
+nullS ssRef pRef self t mid sRef = do
   return false
 
 
 -- urgh
 randomMain :: forall eff h. ScriptFn eff h
-randomMain ssRef self t mid sRef = do
+randomMain ssRef pRef self t mid sRef = do
   systemST <- lift $ readSTRef ssRef
-  scr' <- lift $ readSTRef sRef
+  pattern  <- lift $ readSTRef pRef
+  scr <- lift $ readSTRef sRef
 
-  unless(member "nxt" scr'.dt) do
-    let dt' = insert "nxt" (show (t + 5.0)) scr'.dt
+  unless(member "nxt" scr.dt) do
+    let dt' = insert "nxt" (show (t + 5.0)) scr.dt
     lift $ modifySTRef sRef (\s -> s {dt = dt'})
     return unit
 
-  scr <- lift $ readSTRef sRef
-  let dt = scr.dt
+  scr' <- lift $ readSTRef sRef
+  let dt = scr'.dt
 
   nxt <- (loadLib "nxt" dt "randomMain nxt") >>= numFromStringE
 
@@ -74,7 +75,7 @@ randomMain ssRef self t mid sRef = do
       lift $ modifySTRef sRef (\s -> s {dt = dt'})
 
       idx <- lift $ randInt 100
-      tmid <- findModule' systemST.moduleRefPool systemST.mainRef ["main_body", "t"]
+      tmid <- findModule' systemST.moduleRefPool pattern.main ["main_body", "t"]
 
       createScript ssRef tmid "default" "incSub" $ fromFoldable [(Tuple "sub" "t_inner"), (Tuple "idx" (show idx)), (Tuple "spd" "0.15"), (Tuple "lib" "t_inner"), (Tuple "dim" "vec2")]
 
@@ -93,6 +94,7 @@ lookupScriptFN n = case n of
   "incMod"       -> return incMod
   "incSub"       -> return incSub
   "incImage"     -> return incImage
+  "incScript"    -> return incScript
   "finishSwitch" -> return finishSwitch
   "randomMain"   -> return randomMain
   _              -> throwError $ "script function not found: " ++ n

@@ -52,7 +52,6 @@ type SystemST h = {
   , indexLib :: StrMap Index
   , moduleRefPool :: StrMap (STRef h Module)
   , scriptRefPool :: StrMap (STRef h Script)
-  , mainRef :: String
 }
 
 defaultSystemST :: forall h. SystemST h
@@ -72,7 +71,6 @@ defaultSystemST = {
   , scriptRefPool: empty
   , componentLib: empty
   , indexLib: empty
-  , mainRef: ""
 }
 
 -- Engine
@@ -187,7 +185,7 @@ patternSchema = [
 
 -- Script
 -- sys -> self(name) -> time -> module -> self(ref) -> recompile
-type ScriptFn eff h = STRef h (SystemST h) -> String -> Number -> String -> STRef h Script -> EpiS eff h Boolean
+type ScriptFn eff h = STRef h (SystemST h) -> STRef h Pattern -> String -> Number -> String -> STRef h Script -> EpiS eff h Boolean
 type Script = {
     fn     :: String
   , dt     :: StrMap String

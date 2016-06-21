@@ -1,0 +1,5 @@
+t_0 {{
+	scr zpath main.body.t idx:0 path:linx spd:0.0
+	scr zpath main.body.t idx:0 path:linx spd:0.1
+	scr zpath main.body.t idx:0 path:circle spd:0.01
+}}

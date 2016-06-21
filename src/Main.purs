@@ -54,8 +54,6 @@ init = do
   -- import pattern
   importPattern ssRef pRef
   pattern'  <- lift $ readSTRef pRef
-
-  lift $ modifySTRef ssRef (\s -> s {mainRef = pattern'.main})
   systemST' <- lift $ readSTRef ssRef
 
   -- init engine & ui states
@@ -92,7 +90,7 @@ animate stateM = handleError do
     return unit
 
   -- update pattern
-  recompile <- runScripts ssRef
+  recompile <- runScripts ssRef pRef
   systemST' <- lift $ readSTRef ssRef
 
   case recompile of -- when doesnt work here for some godforsaken reason

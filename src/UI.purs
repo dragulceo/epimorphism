@@ -40,37 +40,41 @@ keyHandler ucRef usRef char = do
   let spd = show uiConf.keyboardSwitchSpd
   case char of
     "1" -> do
-      incG uiST "main.main_body.seed" "0" "basic_images" "vec4" 1 spd
-    "Q" -> do
-      incG uiST "main.main_body.seed" "0" "basic_images" "vec4" (-1) spd
-    "2" -> do
       incI uiST "main.main_body.t" "t_inner" "t_inner" "vec2" 1 spd
-    "W" -> do
+    "Q" -> do
       incI uiST "main.main_body.t" "t_inner" "t_inner" "vec2" (-1) spd
+    "2" -> do
+      incS uiST "main.main_body.t" "0" "t_0" "vec2" 1 spd
+    "W" -> do
+      incS uiST "main.main_body.t" "0" "t_0" "vec2" (-1) spd
     "3" -> do
-      incM uiST "main.main_body.seed.seed0" "t" "basic_seed" "vec2" 1 spd
+      incG uiST "main.main_body.seed" "0" "basic_images" "vec4" 1 spd
     "E" -> do
-      incM uiST "main.main_body.seed.seed0" "t" "basic_seed" "vec2" (-1) spd
-    "4" -> do
-      incI uiST "main.main_body.seed.seed0.t" "t_inner" "t_inner" "vec2" 1 spd
-    "R" -> do
-      incI uiST "main.main_body.seed.seed0.t" "t_inner" "t_inner" "vec2" (-1) spd
-    "5" -> do
-      incM uiST "main.main_body" "color" "basic" "vec4" 1 spd
-    "T" -> do
-      incM uiST "main.main_body" "color" "basic" "vec4" (-1) spd
-    "6" -> do
-      incM uiST "disp" "post" "basic" "vec4" 1 spd
-    "Y" -> do
-      incM uiST "disp" "post" "basic" "vec4" (-1) spd
-    "0" -> do
-      incM uiST "main.main_body.seed.seed0" "seed_color" "basic" "vec4" 1 spd
-    "P" -> do
-      incM uiST "main.main_body.seed.seed0" "seed_color" "basic" "vec4" (-1) spd
-    "½" -> do
-      incM uiST "main.main_body.seed.seed1" "seed_color" "basic" "vec4" 1 spd
-    "Û" -> do
-      incM uiST "main.main_body.seed.seed1" "seed_color" "basic" "vec4" (-1) spd
+      incG uiST "main.main_body.seed" "0" "basic_images" "vec4" (-1) spd
+--    "3" -> do
+--      incM uiST "main.main_body.seed.seed0" "t" "basic_seed" "vec2" 1 spd
+--    "E" -> do
+--      incM uiST "main.main_body.seed.seed0" "t" "basic_seed" "vec2" (-1) spd
+--    "4" -> do
+--      incI uiST "main.main_body.seed.seed0.t" "t_inner" "t_inner" "vec2" 1 spd
+--    "R" -> do
+--      incI uiST "main.main_body.seed.seed0.t" "t_inner" "t_inner" "vec2" (-1) spd
+--    "5" -> do
+--      incM uiST "main.main_body" "color" "basic" "vec4" 1 spd
+--    "T" -> do
+--      incM uiST "main.main_body" "color" "basic" "vec4" (-1) spd
+--    "6" -> do
+--      incM uiST "disp" "post" "basic" "vec4" 1 spd
+--    "Y" -> do
+--      incM uiST "disp" "post" "basic" "vec4" (-1) spd
+--    "0" -> do
+--      incM uiST "main.main_body.seed.seed0" "seed_color" "basic" "vec4" 1 spd
+--    "P" -> do
+--      incM uiST "main.main_body.seed.seed0" "seed_color" "basic" "vec4" (-1) spd
+--    "½" -> do
+--      incM uiST "main.main_body.seed.seed1" "seed_color" "basic" "vec4" 1 spd
+--    "Û" -> do
+--      incM uiST "main.main_body.seed.seed1" "seed_color" "basic" "vec4" (-1) spd
     "Ü" -> return $ "clear"
     " " -> return $ "save"
     _   -> return $ "null"
@@ -81,6 +85,12 @@ keyHandler ucRef usRef char = do
       let dt = insert idn' idx uiST.incIdx
       modifySTRef usRef (\s -> s {incIdx = dt})
       return $ "scr incImage " ++  bdy ++ " sub:" ++ idn ++ " lib:" ++ lib ++ " dim:" ++ dim ++ " idx:" ++ (show idx) ++ " spd:" ++ spd
+    incS uiST bdy idn lib dim inc spd = do
+      let idn' = bdy ++ idn
+      let idx = if (member idn' uiST.incIdx) then ((fromJust $ lookup idn' uiST.incIdx) + inc) else 0
+      let dt = insert idn' idx uiST.incIdx
+      modifySTRef usRef (\s -> s {incIdx = dt})
+      return $ "scr incScript " ++  bdy ++ " sub:" ++ idn ++ " lib:" ++ lib ++ " dim:" ++ dim ++ " idx:" ++ (show idx) ++ " spd:" ++ spd
     incM uiST bdy idn lib dim inc spd = do
       let idn' = bdy ++ idn
       let idx = if (member idn' uiST.incIdx) then ((fromJust $ lookup idn' uiST.incIdx) + inc) else 0

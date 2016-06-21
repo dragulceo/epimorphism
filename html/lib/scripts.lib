@@ -1,6 +1,75 @@
 --default
-fn nullS
+fn null
 
---test
+
+--lin0
 fn zpath
-dt {idx: 1, path: linx, spd: 0.1, r: 1.0}
+dt {idx:0, path:linx, spd:0.0}
+flags {lin0:true, lin:true}
+
+--linx_0 < lin0
+dt {idx:0, path:linx, spd:0.1}
+
+--liny_0 < lin0
+dt {idx:0, path:liny, spd:0.1}
+
+
+--lin1
+fn zpath
+dt {idx:0, path:linx, spd:0.0}
+flags {lin1:true, lin:true}
+
+--linx_1 < lin1
+dt {idx:1, path:linx, spd:0.1}
+
+--liny_1 < lin1
+dt {idx:1, path:liny, spd:0.1}
+
+
+--lin2
+fn zpath
+dt {idx:0, path:linx, spd:0.0}
+flags {lin2:true, lin:true}
+
+--linx_2 < lin2
+dt {idx:2, path:linx, spd:0.1}
+
+--liny_2 < lin2
+dt {idx:2, path:liny, spd:0.1}
+
+
+--lin3
+fn zpath
+dt {idx:0, path:linx, spd:0.0}
+flags {lin3:true, lin:true}
+
+--linx_3 < lin3
+dt {idx:3, path:linx, spd:-0.1}
+
+--liny_3 < lin3
+dt {idx:3, path:liny, spd:-0.1}
+
+
+--circle_null
+fn null
+flags {circle:true}
+
+--circle_0
+fn zpath
+flags {circle0:true, circle:true}
+dt {idx:0, path:circle, r:1.0, spd:0.01}
+
+--circle_1
+fn zpath
+flags {circle1:true, circle:true}
+dt {idx:1, path:circle, r:1.0, spd:0.01}
+
+--circle_2
+fn zpath
+flags {circle2:true, circle:true}
+dt {idx:2, path:circle, r:1.0, spd:0.01}
+
+--circle_3
+fn zpath
+flags {circle3:true, circle:true}
+dt {idx:3, path:circle, r:1.0, spd:0.01}

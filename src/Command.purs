@@ -97,9 +97,9 @@ save systemST pattern = do
       return st
 
 
+-- recursively parse a script from a string
 data ScrPS = ScrFn | ScrMid | ScrDt
 
--- recursively parse a script from a string
 parseScript :: forall eff h. StrMap (STRef h Module) -> Pattern -> (Tuple Script ScrPS) -> String -> EpiS eff h (Tuple Script ScrPS)
 parseScript mpool pattern (Tuple scr ps) dt = do
   case ps of

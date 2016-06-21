@@ -4,17 +4,20 @@ DEMO
 
 NEXT
  SYSTEM
-	  - way of switching modules while keeping phase/scripts.  isn't recompiling ghetto(what?)
-    - ABSOLUTE ADDRESSING FOR IDX & MOD SWITCHING??	not necessary if we stop using sub for t
-		- keep scripts when switching modules?
-		- patternRefPool?
-    - make patterns modules
-	  - mainRef refernece in randomMain seems ghetto
-	  - module.moduels should be [SubModule = SubLib String | SubPool String] or something
-	  - pattern level scripts
-    - remove mid from scripts?
+  - way of switching modules while keeping phase/scripts.  isn't recompiling ghetto(what?)
+  - ABSOLUTE ADDRESSING FOR IDX & MOD SWITCHING??	not necessary if we stop using sub for t
+	- keep scripts when switching modules?
+	- patternRefPool?
+  - make patterns modules
+  - mainRef refernece in randomMain seems ghetto
+  - module.moduels should be [SubModule = SubLib String | SubPool String] or something
+  - pattern level scripts
+  - remove mid from scripts?
+UI
+  - UI.purs is ghetto
 
 LATER
+	- importing scripts in an index via ParseScript
   - BETA INFRASTRUCTURE PASS
   - fract
 	- too many debug statements going on (in engine?)

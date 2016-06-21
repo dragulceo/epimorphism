@@ -43,7 +43,7 @@ incData systemST scr loader = do
 
 -- increment a module within the specified families
 incMod :: forall eff h. ScriptFn eff h
-incMod ssRef self t mid sRef = do
+incMod ssRef pRef self t mid sRef = do
   systemST <- lift $ readSTRef ssRef
   scr <- lift $ readSTRef sRef
 
@@ -62,7 +62,7 @@ incMod ssRef self t mid sRef = do
 
 -- increment a substitution through an index
 incSub :: forall eff h. ScriptFn eff h
-incSub ssRef self t mid sRef = do
+incSub ssRef pRef self t mid sRef = do
   systemST <- lift $ readSTRef ssRef
   scr <- lift $ readSTRef sRef
 
@@ -93,8 +93,74 @@ incSub ssRef self t mid sRef = do
       return false
 
 
+incScript2 :: forall eff h. ScriptFn eff h
+incScript2 ssRef pRef self t mid sRef = do
+  systemST <- lift $ readSTRef ssRef
+  scr <- lift $ readSTRef sRef
+
+  {sub, nxt, dim, spd} <- incData systemST scr
+    \l' s' -> return $ flagFamily systemST.scriptLib $ fromFoldable [(Tuple l' "true")]
+
+  let nul = lg $ "SWITCHING SCRIPT: " ++ mid ++ ":" ++ sub ++ " to : " ++ nxt
+
+  -- remove self (do this before duplicating module)
+  purgeScript ssRef self
+
+  -- duplicate & switch
+  mRef  <- loadLib mid systemST.moduleRefPool "incScript module"
+  m     <- lift $ readSTRef mRef
+  idx   <- intFromStringE sub
+  case (A.updateAt idx nxt m.scripts) of
+    Just scripts' -> do
+      let m' = m {scripts = scripts'}
+      m'id <- importModule ssRef (ImportModule m') -- this is kind of hackish, as its reimported
+
+      (Tuple parent childN) <- findParent systemST.moduleRefPool mid
+      switchModules ssRef parent childN m'id dim spd t
+      return true
+    Nothing -> do  -- HRM, maybe we want to be able to expand the number of existing scripts
+      let nul' = lg "TEMP: don't have enough scripts!"
+      return false
+
+
+incScript :: forall eff h. ScriptFn eff h
+incScript ssRef pRef self t mid sRef = do
+  systemST <- lift $ readSTRef ssRef
+  scr <- lift $ readSTRef sRef
+
+  {sub, nxt, dim, spd} <- incData systemST scr
+    \l' s' -> do
+      dt <- loadLib l' systemST.indexLib "incScript index"
+      return dt.lib
+
+  let nul = lg $ "SWITCHING SCRIPT: " ++ mid ++ ":" ++ sub ++ " to : " ++ nxt
+
+  -- remove self (do this before duplicating module)
+  purgeScript ssRef self
+
+  -- duplicate & switch
+  mRef  <- loadLib mid systemST.moduleRefPool "incScript module"
+  m     <- lift $ readSTRef mRef
+  idx   <- intFromStringE sub
+  return false
+--  case (idx < A.length m.scripts) of
+--    true -> do
+--
+----      let m' = m {scripts = scripts'}
+--      m'id <- importModule ssRef (ImportModule m') -- this is kind of hackish, as its reimported
+--
+--      (Tuple parent childN) <- findParent systemST.moduleRefPool mid
+--      switchModules ssRef parent childN m'id dim spd t
+--      return true
+--    Nothing -> do  -- HRM, maybe we want to be able to expand the number of existing scripts
+--      let nul' = lg "TEMP: don't have enough scripts!"
+--      return false
+--
+--  return false
+
+
 incImage :: forall eff h. ScriptFn eff h
-incImage ssRef self t mid sRef = do
+incImage ssRef pRef self t mid sRef = do
   systemST <- lift $ readSTRef ssRef
   scr <- lift $ readSTRef sRef
 
@@ -103,7 +169,7 @@ incImage ssRef self t mid sRef = do
       dt <- loadLib l' systemST.indexLib "incImage index"
       return dt.lib
 
-  let nul = lg $ "SWITCHING : " ++ mid ++ ":" ++ sub ++ " to : " ++ nxt
+  let nul = lg $ "SWITCHING IMAGE: " ++ mid ++ ":" ++ sub ++ " to : " ++ nxt
 
   -- remove self (do this before duplicating module)
   purgeScript ssRef self
@@ -123,8 +189,6 @@ incImage ssRef self t mid sRef = do
     Nothing -> do  -- HRM, maybe we want to be able to expand the number of existing images
       let nul' = lg "TEMP: don't have enough images!"
       return false
-
-  return true
 
 
 switchModules :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> String -> Number -> Number -> EpiS eff h Unit
@@ -153,7 +217,7 @@ switchModules ssRef mid subN m1 dim spd t = do
 
 
 finishSwitch :: forall eff h. ScriptFn eff h
-finishSwitch ssRef self t mid sRef = do
+finishSwitch ssRef pRef self t mid sRef = do
   systemST <- lift $ readSTRef ssRef
   scr <- lift $ readSTRef sRef
   let dt = scr.dt

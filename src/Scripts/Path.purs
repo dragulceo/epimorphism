@@ -17,7 +17,7 @@ import Util (numFromStringE, intFromStringE)
 
 -- move par[par] around on a path
 ppath :: forall eff h. ScriptFn eff h
-ppath ssRef self t mid sRef = do
+ppath ssRef pRef self t mid sRef = do
   systemST <- lift $ readSTRef ssRef
   scr <- lift $ readSTRef sRef
   let dt = scr.dt
@@ -53,7 +53,7 @@ ppath ssRef self t mid sRef = do
 
 -- move zn[idx] around on a path
 zpath :: forall eff h. ScriptFn eff h
-zpath ssRef self t mid sRef = do
+zpath ssRef pRef self t mid sRef = do
   systemST <- lift $ readSTRef ssRef
   scr <- lift $ readSTRef sRef
   let dt = scr.dt

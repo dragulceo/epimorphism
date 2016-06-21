@@ -212,7 +212,7 @@ importScript ssRef obj mid = do
   let pool' = insert id ref systemST.scriptRefPool
   lift $ modifySTRef ssRef (\s' -> s' {scriptRefPool = pool'})
 
-  -- add script
+  -- add script to module
   m' <- lift $ readSTRef mRef
   let scripts' = A.snoc m'.scripts id
   lift $ modifySTRef mRef (\m'' -> m'' {scripts = scripts'})

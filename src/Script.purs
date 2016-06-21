@@ -10,7 +10,7 @@ import Data.Foldable (or)
 import Data.StrMap (fromFoldable, insert, member, keys)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Path (zpath, ppath)
+import Path (zpath, ppath, zfix, pfix)
 import Pattern (findModule')
 import ScriptUtil (createScript)
 import Switch (incScript, incImage, incMod, finishSwitch, incSub)
@@ -89,6 +89,8 @@ randomMain ssRef pRef self t mid sRef = do
 lookupScriptFN :: forall eff h. String -> EpiS eff h (ScriptFn eff h)
 lookupScriptFN n = case n of
   "null"         -> return nullS
+  "zfix"         -> return zfix
+  "pfix"         -> return pfix
   "ppath"        -> return ppath
   "zpath"        -> return zpath
   "incMod"       -> return incMod

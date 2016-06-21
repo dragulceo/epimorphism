@@ -44,9 +44,9 @@ keyHandler ucRef usRef char = do
     "Q" -> do
       incI uiST "main.main_body.t" "t_inner" "t_inner" "vec2" (-1) spd
     "2" -> do
-      incS uiST "main.main_body.t" "0" "t_0" "vec2" 1 spd
+      incS uiST "main.main_body.t" "0" "z1" "vec2" 1 spd
     "W" -> do
-      incS uiST "main.main_body.t" "0" "t_0" "vec2" (-1) spd
+      incS uiST "main.main_body.t" "0" "z1" "vec2" (-1) spd
     "3" -> do
       incG uiST "main.main_body.seed" "0" "basic_images" "vec4" 1 spd
     "E" -> do

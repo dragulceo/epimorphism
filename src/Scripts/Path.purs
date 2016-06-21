@@ -14,6 +14,21 @@ import Config (ScriptFn)
 import System (loadLib)
 import Util (numFromStringE, intFromStringE)
 
+-- fixed point
+pfix :: forall eff h. ScriptFn eff h
+pfix ssRef pRef self t mid sRef = do
+  systemST <- lift $ readSTRef ssRef
+  scr <- lift $ readSTRef sRef
+  let dt = scr.dt
+  par <- loadLib "par" dt "pfix par"
+  val <- (loadLib "val" dt "pfix val") >>= numFromStringE
+  mRef <- loadLib mid systemST.moduleRefPool "pfix module"
+  m <- lift $ readSTRef mRef
+
+  let par' = insert par val m.par
+  lift $ modifySTRef mRef (\m' -> m' {par = par'})
+
+  return false
 
 -- move par[par] around on a path
 ppath :: forall eff h. ScriptFn eff h
@@ -47,6 +62,26 @@ ppath ssRef pRef self t mid sRef = do
   -- modify data
   let par' = insert par val m.par
   lift $ modifySTRef mRef (\m' -> m' {par = par'})
+
+  return false
+
+
+-- fixed z
+zfix :: forall eff h. ScriptFn eff h
+zfix ssRef pRef self t mid sRef = do
+  systemST <- lift $ readSTRef ssRef
+  scr <- lift $ readSTRef sRef
+  let dt = scr.dt
+  idx <- (loadLib "idx" dt "zfix idx") >>= intFromStringE
+  x <- (loadLib "x" dt "zfix x") >>= numFromStringE
+  y <- (loadLib "y" dt "zfix y") >>= numFromStringE
+  mRef <- loadLib mid systemST.moduleRefPool "zfix module"
+  m <- lift $ readSTRef mRef
+
+  let z = outCartesian $ Cartesian x y
+  case (A.updateAt idx z m.zn) of
+    (Just zn') -> lift $ modifySTRef mRef (\m' -> m' {zn = zn'})
+    _ -> throwError $ "zn idx out of bound : " ++ (show idx) ++ " : in zfix"
 
   return false
 

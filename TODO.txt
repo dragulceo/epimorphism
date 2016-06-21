@@ -17,7 +17,7 @@ UI
   - UI.purs is ghetto
 
 LATER
-	- importing scripts in an index via ParseScript
+	- finish importScript2
   - BETA INFRASTRUCTURE PASS
   - fract
 	- too many debug statements going on (in engine?)

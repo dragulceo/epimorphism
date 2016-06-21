@@ -92,10 +92,10 @@ all_images {{
 
 
 
-t_0 {{
-	scr zpath main.body.t idx:0 path:linx spd:0.0
-	scr zpath main.body.t idx:0 path:linx spd:0.1
-	scr zpath main.body.t idx:0 path:circle spd:0.01
+t_1 {{
+	zpath main.main_body.t idx:1 path:linx spd:0.0
+	zpath main.main_body.t idx:1 path:linx spd:0.1
+	zpath main.main_body.t idx:1 path:circle r:1.0 spd:0.01
 }}
 
 

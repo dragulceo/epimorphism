@@ -1,16 +1,18 @@
 module Switch where
 
 import Prelude
+import Command (ScrPS(ScrFn), parseScript)
 import Config (Script, ScriptFn, EpiS, SystemST)
 import Control.Monad (when)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, readSTRef)
-import Data.Array (index, length, null, updateAt) as A
+import Data.Array (foldM, index, length, null, updateAt) as A
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.StrMap (fromFoldable, insert, member, union)
+import Data.String (split)
 import Data.Tuple (Tuple(..))
-import Pattern (ImportObj(ImportModule), replaceModule, findParent, importModule, purgeScript, flagFamily)
+import Pattern (importScript, ImportObj(ImportScript, ImportModule), replaceModule, findParent, importModule, purgeScript, flagFamily)
 import ScriptUtil (createScript)
 import System (loadLib)
 import Util (lg, numFromStringE, intFromStringE, gmod)
@@ -93,21 +95,21 @@ incSub ssRef pRef self t mid sRef = do
       return false
 
 
-incScript2 :: forall eff h. ScriptFn eff h
-incScript2 ssRef pRef self t mid sRef = do
+incScript :: forall eff h. ScriptFn eff h
+incScript ssRef pRef self t mid sRef = do
   systemST <- lift $ readSTRef ssRef
   scr <- lift $ readSTRef sRef
 
   {sub, nxt, dim, spd} <- incData systemST scr
     \l' s' -> return $ flagFamily systemST.scriptLib $ fromFoldable [(Tuple l' "true")]
 
-  let nul = lg $ "SWITCHING SCRIPT: " ++ mid ++ ":" ++ sub ++ " to : " ++ nxt
+  let nul = lg $ "SWITCHING SCRIPT2: " ++ mid ++ ":" ++ sub ++ " to : " ++ nxt
 
   -- remove self (do this before duplicating module)
   purgeScript ssRef self
 
   -- duplicate & switch
-  mRef  <- loadLib mid systemST.moduleRefPool "incScript module"
+  mRef  <- loadLib mid systemST.moduleRefPool "incScript2 module"
   m     <- lift $ readSTRef mRef
   idx   <- intFromStringE sub
   case (A.updateAt idx nxt m.scripts) of
@@ -123,9 +125,10 @@ incScript2 ssRef pRef self t mid sRef = do
       return false
 
 
-incScript :: forall eff h. ScriptFn eff h
-incScript ssRef pRef self t mid sRef = do
+incScript2 :: forall eff h. ScriptFn eff h
+incScript2 ssRef pRef self t mid sRef = do
   systemST <- lift $ readSTRef ssRef
+  pattern  <- lift $ readSTRef pRef
   scr <- lift $ readSTRef sRef
 
   {sub, nxt, dim, spd} <- incData systemST scr
@@ -133,7 +136,7 @@ incScript ssRef pRef self t mid sRef = do
       dt <- loadLib l' systemST.indexLib "incScript index"
       return dt.lib
 
-  let nul = lg $ "SWITCHING SCRIPT: " ++ mid ++ ":" ++ sub ++ " to : " ++ nxt
+  let nul = lg $ "SWITCHING SCRIPT!!: " ++ mid ++ ":" ++ sub ++ " to : " ++ nxt
 
   -- remove self (do this before duplicating module)
   purgeScript ssRef self
@@ -142,22 +145,24 @@ incScript ssRef pRef self t mid sRef = do
   mRef  <- loadLib mid systemST.moduleRefPool "incScript module"
   m     <- lift $ readSTRef mRef
   idx   <- intFromStringE sub
-  return false
---  case (idx < A.length m.scripts) of
---    true -> do
---
-----      let m' = m {scripts = scripts'}
---      m'id <- importModule ssRef (ImportModule m') -- this is kind of hackish, as its reimported
---
---      (Tuple parent childN) <- findParent systemST.moduleRefPool mid
---      switchModules ssRef parent childN m'id dim spd t
---      return true
---    Nothing -> do  -- HRM, maybe we want to be able to expand the number of existing scripts
---      let nul' = lg "TEMP: don't have enough scripts!"
---      return false
---
---  return false
 
+  case (idx < A.length m.scripts) of
+    true -> do
+      def <- loadLib "default" systemST.scriptLib "building script in inc"
+      let dt = split " " nxt
+      Tuple scr' _ <- A.foldM (parseScript systemST.moduleRefPool pattern) (Tuple def ScrFn) dt
+
+      m'id <- importModule ssRef (ImportModule m) -- this is kind of hackish, as its reimported
+      let scr'' = scr' {mid = m'id}
+      importScript ssRef (ImportScript scr'') m'id
+
+      (Tuple parent childN) <- findParent systemST.moduleRefPool mid
+      switchModules ssRef parent childN m'id dim spd t
+
+      return true
+    false -> do  -- HRM, maybe we want to be able to expand the number of existing scripts
+      let nul' = lg "TEMP: don't have enough scripts!"
+      return false
 
 incImage :: forall eff h. ScriptFn eff h
 incImage ssRef pRef self t mid sRef = do

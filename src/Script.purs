@@ -1,20 +1,19 @@
 module Script where
 
 import Prelude
-import Control.Monad.ST (STRef, modifySTRef, readSTRef)
+import Config (ScriptFn, EpiS, SystemST)
 import Control.Monad (unless)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
+import Control.Monad.ST (STRef, modifySTRef, readSTRef)
 import Data.Foldable (or)
 import Data.StrMap (fromFoldable, insert, member, keys)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-
-import Config (ScriptFn, EpiS, SystemST)
 import Path (zpath, ppath)
 import Pattern (findModule')
 import ScriptUtil (createScript)
-import Switch (incMod, finishSwitch, incSub)
+import Switch (incImage, incMod, finishSwitch, incSub)
 import System (loadLib)
 import Util (randInt, lg, numFromStringE)
 
@@ -93,6 +92,7 @@ lookupScriptFN n = case n of
   "zpath"        -> return zpath
   "incMod"       -> return incMod
   "incSub"       -> return incSub
+  "incImage"     -> return incImage
   "finishSwitch" -> return finishSwitch
   "randomMain"   -> return randomMain
   _              -> throwError $ "script function not found: " ++ n

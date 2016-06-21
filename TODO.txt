@@ -1,31 +1,23 @@
-SYSTEM
-
-	- SWITCHING & REF POOLS
-	  - way of switching modules while keeping phase/scripts.  isn't recompiling ghetto(what?)
-    - ABSOLUTE ADDRESSING FOR IDX & MOD SWITCHING??	not necessary if we stop using sub for t
-		- keep scripts when switching modules?
-		- patternRefPool?
-
-ENGINE
-  - fract
-PATTERN
-	- make patterns modules??
-	- pattern level scripts
-  - remove mid from scripts?
-MISC
-	- too many debug statements going on (in engine?)
-  - logging?
-FINAL (BETA)
-  - BETA INFRASTRUCTURE PASS
+DEMO
   - build out library & interface
   - weird divide by zero issue - glitch in content
 
 NEXT
-  - make patterns modules
-	- mainRef refernece in randomMain seems ghetto
-	- module.moduels should be [SubModule = SubLib String | SubPool String] or something
+ SYSTEM
+	  - way of switching modules while keeping phase/scripts.  isn't recompiling ghetto(what?)
+    - ABSOLUTE ADDRESSING FOR IDX & MOD SWITCHING??	not necessary if we stop using sub for t
+		- keep scripts when switching modules?
+		- patternRefPool?
+    - make patterns modules
+	  - mainRef refernece in randomMain seems ghetto
+	  - module.moduels should be [SubModule = SubLib String | SubPool String] or something
+	  - pattern level scripts
+    - remove mid from scripts?
 
 LATER
+  - BETA INFRASTRUCTURE PASS
+  - fract
+	- too many debug statements going on (in engine?)
 	- very minor glitch during image uploading
   - prevent default in ui.js
   - update flags on save (default != true)

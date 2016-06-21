@@ -40,9 +40,9 @@ keyHandler ucRef usRef char = do
   let spd = show uiConf.keyboardSwitchSpd
   case char of
     "1" -> do
-      incM uiST "main.main_body" "seed" "fam1" "vec4" 1 spd
+      incG uiST "main.main_body.seed" "0" "basic_images" "vec4" 1 spd
     "Q" -> do
-      incM uiST "main.main_body" "seed" "fam1" "vec4" (-1) spd
+      incG uiST "main.main_body.seed" "0" "basic_images" "vec4" (-1) spd
     "2" -> do
       incI uiST "main.main_body.t" "t_inner" "t_inner" "vec2" 1 spd
     "W" -> do
@@ -75,6 +75,12 @@ keyHandler ucRef usRef char = do
     " " -> return $ "save"
     _   -> return $ "null"
   where
+    incG uiST bdy idn lib dim inc spd = do
+      let idn' = bdy ++ idn
+      let idx = if (member idn' uiST.incIdx) then ((fromJust $ lookup idn' uiST.incIdx) + inc) else 0
+      let dt = insert idn' idx uiST.incIdx
+      modifySTRef usRef (\s -> s {incIdx = dt})
+      return $ "scr incImage " ++  bdy ++ " sub:" ++ idn ++ " lib:" ++ lib ++ " dim:" ++ dim ++ " idx:" ++ (show idx) ++ " spd:" ++ spd
     incM uiST bdy idn lib dim inc spd = do
       let idn' = bdy ++ idn
       let idx = if (member idn' uiST.incIdx) then ((fromJust $ lookup idn' uiST.incIdx) + inc) else 0

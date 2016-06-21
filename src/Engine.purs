@@ -119,6 +119,7 @@ setShaders sysConf esRef sys pattern = do
 
   -- load & compile shaders
   {main, disp, vert, aux} <- compileShaders pattern sys
+  let a = lg aux
   auxImg <- uploadAux es sysConf.host aux
 
   Tuple main' disp' <- execGL es.ctx ( do

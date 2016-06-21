@@ -9,7 +9,6 @@ import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Array (length, head, tail, foldM, (!!))
-import Data.Either (Either(..))
 import Data.List (fromList)
 import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (toList, StrMap, insert)
@@ -18,10 +17,10 @@ import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Engine (clearFB)
 import Graphics.Canvas (Canvas)
-import Pattern (importScript, findModule)
+import Layout (initLayout)
+import Pattern (ImportObj(ImportScript), importScript, findModule)
 import Serialize (unsafeSerialize)
 import System (loadLib)
-import Layout (initLayout)
 import Util (uuid, lg, handleError)
 
 command :: forall eff h. STRef h UIConf -> STRef h UIST -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h SystemConf -> STRef h (SystemST h) -> String -> Eff (canvas :: Canvas, dom :: DOM, st :: ST h | eff) Unit
@@ -53,7 +52,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
 
         -- import
         mid <- return $ scr'.mid
-        importScript ssRef (Left scr') mid
+        importScript ssRef (ImportScript scr') mid
 
         return unit
       "save" -> do

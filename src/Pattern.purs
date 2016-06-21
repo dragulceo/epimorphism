@@ -1,19 +1,17 @@
 module Pattern where
 
 import Prelude
-import Data.Array (snoc, delete, head, tail, sort) as A
-import Data.Either (Either(..))
-import Data.Maybe (Maybe(..), maybe)
-import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (StrMap, foldM, fold, delete, insert, member, values, lookup)
-import Data.String (split)
-import Data.Tuple (Tuple(..))
-import Data.Traversable (traverse)
+import Config (EpiS, Module, Pattern, SystemST, Script)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, modifySTRef, newSTRef, readSTRef)
-
-import Config (EpiS, Module, Pattern, SystemST, Script)
+import Data.Array (snoc, delete, head, tail, sort) as A
+import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe.Unsafe (fromJust)
+import Data.StrMap (member, StrMap, foldM, fold, delete, insert, values, lookup)
+import Data.String (split)
+import Data.Traversable (traverse)
+import Data.Tuple (Tuple(..))
 import System (loadLib)
 import Util (uuid)
 
@@ -34,17 +32,64 @@ flagFamily family flags = A.sort $ fold handle [] family
       false -> res
 
 
+-- find a module given an address - ie main.main_body.t
+findModule :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> EpiS eff h String
+findModule mpool pattern dt = do
+  let addr = split "." dt
+  case (A.head addr) of
+    Nothing -> throwError "we need data, chump"
+    Just "vert" -> findModule' mpool pattern.vert $ fromJust $ A.tail addr
+    Just "disp" -> findModule' mpool pattern.disp $ fromJust $ A.tail addr
+    Just "main" -> findModule' mpool pattern.main $ fromJust $ A.tail addr
+    Just x      -> throwError $ "value should be main, vert, or disp : " ++ x
+
+
+findModule' :: forall eff h. StrMap (STRef h Module) -> String -> Array String -> EpiS eff h String
+findModule' mpool mid addr = do
+  maybe (return $ mid) handle (A.head addr)
+  where
+    handle mid' = do
+      mRef <- loadLib mid mpool "findModule'"
+      mod <- lift $ readSTRef mRef
+      c <- loadLib mid' mod.modules "findModule' find child"
+      findModule' mpool c $ fromJust $ A.tail addr
+
+
+-- find parent module id & submodule that a module is binded to. kind of ghetto
+findParent :: forall eff h. StrMap (STRef h Module) -> String -> EpiS eff h (Tuple String String)
+findParent mpool mid = do
+  res <- foldM handle Nothing mpool
+  case res of
+    Nothing -> throwError $ "module has no parent: " ++ mid
+    Just x -> return x
+  where
+    handle :: Maybe (Tuple String String) -> String -> STRef h Module -> EpiS eff h (Maybe (Tuple String String))
+    handle (Just x) _ _ = return $ Just x
+    handle _ pid ref = do
+      mod <- lift $ readSTRef ref
+      case (fold handle2 Nothing mod.modules) of
+        Nothing -> return Nothing
+        Just x -> do
+          return $ Just $ Tuple pid x
+    handle2 :: Maybe String -> String -> String -> Maybe String
+    handle2 (Just x) _ _ = Just x
+    handle2 _ k cid | cid == mid = Just k
+    handle2 _ _ _ = Nothing
+
+
+-- IMPORTING ---
+
 -- import the modules of a pattern into the ref pool
-data ImportObj = ImportModule Module | ImportScript Script | ImportPool String | ImportLib String
+data ImportObj = ImportModule Module | ImportScript Script | ImportRef String
 importPattern :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Unit
 importPattern ssRef pRef =  do
   systemST <- lift $ readSTRef ssRef
   pattern  <- lift $ readSTRef pRef
 
   -- import all modules
-  main <- importModule ssRef (ImportLib pattern.main)
-  disp <- importModule ssRef (ImportLib pattern.disp)
-  vert <- importModule ssRef (ImportLib pattern.vert)
+  main <- importModule ssRef (ImportRef pattern.main)
+  disp <- importModule ssRef (ImportRef pattern.disp)
+  vert <- importModule ssRef (ImportRef pattern.vert)
   lift $ modifySTRef pRef (\p -> p {main = main, disp = disp, vert = vert})
 
   return unit
@@ -59,11 +104,12 @@ importModule ssRef obj = do
   -- find module
   mod <- case obj of
     ImportModule m -> return m
-    ImportPool mRef -> do
-      ref <- loadLib mRef systemST.moduleRefPool "reimport from pool"
-      lift $ readSTRef ref
-    ImportLib n -> do
-      loadLib n systemST.moduleLib "import module lib"
+    ImportRef n -> case (member n systemST.moduleRefPool) of
+      true -> do
+        ref <- loadLib n systemST.moduleRefPool "reimport from pool"
+        lift $ readSTRef ref
+      false -> do
+        loadLib n systemST.moduleLib "import module lib"
     ImportScript _ -> throwError "dont give me a script"
 
   -- update pool
@@ -75,7 +121,7 @@ importModule ssRef obj = do
   foldM (importChild ssRef) id mod.modules
 
   -- update scripts
-  traverse (\x -> importScript ssRef (Right x) id) mod.scripts
+  traverse (\x -> importScript ssRef (ImportRef x) id) mod.scripts
 
   return id
 
@@ -84,10 +130,9 @@ importModule ssRef obj = do
     importChild ssRef mid k v = do
       systemSTC <- lift $ readSTRef ssRef
       systemST <- lift $ readSTRef ssRef
+
       -- import child
-      child <- case (member v systemST.moduleRefPool) of
-        true -> importModule ssRef (ImportPool v)
-        false -> importModule ssRef (ImportLib v)
+      child <- importModule ssRef (ImportRef v)
 
       -- update parent
       mRef <- loadLib mid systemSTC.moduleRefPool "import module - update parent"
@@ -137,39 +182,40 @@ replaceModule ssRef mid subN cid obj = do
 
 
 -- import a script into the ref pool
-importScript :: forall eff h. STRef h (SystemST h) -> (Either Script String) -> String -> EpiS eff h String
-importScript ssRef sc mid = do
+importScript :: forall eff h. STRef h (SystemST h) -> ImportObj -> String -> EpiS eff h String
+importScript ssRef obj mid = do
   systemST <- lift $ readSTRef ssRef
   id <- lift $ uuid
   mRef <- loadLib mid systemST.moduleRefPool "import script - find module"
+  m <- lift $ readSTRef mRef
 
-  s <- case sc of
-    Left s' -> do
-      let tPhase' = systemST.t - s'.tPhase
-      return $ s' {tPhase = tPhase'}
-    Right s' -> do
-      m <- lift $ readSTRef mRef
-      let scripts' = A.delete s' m.scripts
+  scr <- case obj of
+    ImportScript s -> do
+      let tPhase' = systemST.t - s.tPhase -- UPDATE PHASE
+      return $ s {tPhase = tPhase'}
+    ImportRef n -> do
+      let scripts' = A.delete n m.scripts
       lift $ modifySTRef mRef (\m' -> m' {scripts = scripts'})
 
-      case (member s' systemST.scriptRefPool) of
+      case (member n systemST.scriptRefPool) of
         true -> do
-          ref <- loadLib s' systemST.scriptRefPool "import script pool"
+          ref <- loadLib n systemST.scriptRefPool "import script pool"
           lift $ readSTRef ref
         false -> do
-          scr <- loadLib s' systemST.scriptLib "import script"
-          let tPhase' = systemST.t - scr.tPhase
-          return $ scr {tPhase = tPhase'}
+          scr' <- loadLib n systemST.scriptLib "import script"
+          let tPhase' = systemST.t - scr'.tPhase
+          return $ scr' {tPhase = tPhase'}
+    ImportModule _ -> throwError "dont give me a module"
 
   --update pool
-  ref <- lift $ newSTRef s {mid = mid}
-  let sp = insert id ref systemST.scriptRefPool
-  lift $ modifySTRef ssRef (\s' -> s' {scriptRefPool = sp})
+  ref <- lift $ newSTRef scr {mid = mid}
+  let pool' = insert id ref systemST.scriptRefPool
+  lift $ modifySTRef ssRef (\s' -> s' {scriptRefPool = pool'})
 
   -- add script
-  m <- lift $ readSTRef mRef
-  let scripts' = A.snoc m.scripts id
-  lift $ modifySTRef mRef (\m' -> m' {scripts = scripts'})
+  m' <- lift $ readSTRef mRef
+  let scripts' = A.snoc m'.scripts id
+  lift $ modifySTRef mRef (\m'' -> m'' {scripts = scripts'})
 
   return id
 
@@ -194,48 +240,3 @@ purgeScript ssRef sid = do
       lift $ modifySTRef mRef (\m -> m {scripts = A.delete sid mod.scripts})
 
   return unit
-
-
--- find a module given an address - ie main.main_body.t
-findModule :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> EpiS eff h String
-findModule mpool pattern dt = do
-  let addr = split "." dt
-  case (A.head addr) of
-    Nothing -> throwError "we need data, chump"
-    Just "vert" -> findModule' mpool pattern.vert $ fromJust $ A.tail addr
-    Just "disp" -> findModule' mpool pattern.disp $ fromJust $ A.tail addr
-    Just "main" -> findModule' mpool pattern.main $ fromJust $ A.tail addr
-    Just x      -> throwError $ "value should be main, vert, or disp : " ++ x
-
-
-findModule' :: forall eff h. StrMap (STRef h Module) -> String -> Array String -> EpiS eff h String
-findModule' mpool mid addr = do
-  maybe (return $ mid) handle (A.head addr)
-  where
-    handle mid' = do
-      mRef <- loadLib mid mpool "findModule'"
-      mod <- lift $ readSTRef mRef
-      c <- loadLib mid' mod.modules "findModule' find child"
-      findModule' mpool c $ fromJust $ A.tail addr
-
-
--- find parent module id & submodule that a module is binded to. kind of ghetto
-findParent :: forall eff h. StrMap (STRef h Module) -> String -> EpiS eff h (Tuple String String)
-findParent mpool mid = do
-  res <- foldM handle Nothing mpool
-  case res of
-    Nothing -> throwError $ "module has no parent: " ++ mid
-    Just x -> return x
-  where
-    handle :: Maybe (Tuple String String) -> String -> STRef h Module -> EpiS eff h (Maybe (Tuple String String))
-    handle (Just x) _ _ = return $ Just x
-    handle _ pid ref = do
-      mod <- lift $ readSTRef ref
-      case (fold handle2 Nothing mod.modules) of
-        Nothing -> return Nothing
-        Just x -> do
-          return $ Just $ Tuple pid x
-    handle2 :: Maybe String -> String -> String -> Maybe String
-    handle2 (Just x) _ _ = Just x
-    handle2 _ k cid | cid == mid = Just k
-    handle2 _ _ _ = Nothing

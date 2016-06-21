@@ -4,7 +4,6 @@ SYSTEM
 	  - way of switching modules while keeping phase/scripts.  isn't recompiling ghetto(what?)
     - ABSOLUTE ADDRESSING FOR IDX & MOD SWITCHING??	not necessary if we stop using sub for t
 		- keep scripts when switching modules?
-		- mainRef refernece in randomMain seems ghetto
 		- patternRefPool?
 
 ENGINE
@@ -21,7 +20,10 @@ FINAL (BETA)
   - build out library & interface
   - weird divide by zero issue - glitch in content
 
-
+NEXT
+  - make patterns modules
+	- mainRef refernece in randomMain seems ghetto
+	- module.moduels should be [SubModule = SubLib String | SubPool String] or something
 
 LATER
 	- very minor glitch during image uploading

@@ -35,50 +35,47 @@ flagFamily family flags = A.sort $ fold handle [] family
 
 
 -- import the modules of a pattern into the ref pool
+data ImportObj = ImportModule Module | ImportScript Script | ImportPool String | ImportLib String
 importPattern :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Unit
 importPattern ssRef pRef =  do
   systemST <- lift $ readSTRef ssRef
   pattern  <- lift $ readSTRef pRef
 
   -- import all modules
-  main <- importModule ssRef (Right pattern.main)
-  disp <- importModule ssRef (Right pattern.disp)
-  vert <- importModule ssRef (Right pattern.vert)
+  main <- importModule ssRef (ImportLib pattern.main)
+  disp <- importModule ssRef (ImportLib pattern.disp)
+  vert <- importModule ssRef (ImportLib pattern.vert)
   lift $ modifySTRef pRef (\p -> p {main = main, disp = disp, vert = vert})
 
   return unit
 
 
 -- import a module into the ref pool
-data ImportObj = ImportModule Module | ImportRef String | ImportLib String
-importModule :: forall eff h. STRef h (SystemST h) -> (Either Module String) -> EpiS eff h String
-importModule ssRef md = do
+importModule :: forall eff h. STRef h (SystemST h) -> ImportObj -> EpiS eff h String
+importModule ssRef obj = do
   systemST <- lift $ readSTRef ssRef
   id <- lift $ uuid
 
   -- find module
-  m <- case md of
-    Left m'' -> do -- we're given a module
-      if (checkFlag m'' "pool" "true") then throwError "fuck you" else return m''
-    Right m' -> do -- we're given a name (lib or pool ref)
-      case (member m' systemST.moduleRefPool) of
-        true -> do
-          ref <- loadLib m' systemST.moduleRefPool "import module pool"
-          lift $ readSTRef ref
-        false -> do
-          loadLib m' systemST.moduleLib "import module lib"
+  mod <- case obj of
+    ImportModule m -> return m
+    ImportPool mRef -> do
+      ref <- loadLib mRef systemST.moduleRefPool "reimport from pool"
+      lift $ readSTRef ref
+    ImportLib n -> do
+      loadLib n systemST.moduleLib "import module lib"
+    ImportScript _ -> throwError "dont give me a script"
 
   -- update pool
-  let flags' = insert "pool" "true" m.flags
-  ref <- lift $ newSTRef m {flags = flags'}
+  ref <- lift $ newSTRef mod
   let mp' = insert id ref systemST.moduleRefPool  -- maybe check for duplicates here?
   lift $ modifySTRef ssRef (\s -> s {moduleRefPool = mp'})
 
   -- import children
-  foldM (importChild ssRef) id m.modules
+  foldM (importChild ssRef) id mod.modules
 
   -- update scripts
-  traverse (\x -> importScript ssRef (Right x) id) m.scripts
+  traverse (\x -> importScript ssRef (Right x) id) mod.scripts
 
   return id
 
@@ -86,8 +83,11 @@ importModule ssRef md = do
     importChild :: STRef h (SystemST h) -> String -> String -> String -> EpiS eff h String
     importChild ssRef mid k v = do
       systemSTC <- lift $ readSTRef ssRef
+      systemST <- lift $ readSTRef ssRef
       -- import child
-      child <- importModule ssRef (Right v)
+      child <- case (member v systemST.moduleRefPool) of
+        true -> importModule ssRef (ImportPool v)
+        false -> importModule ssRef (ImportLib v)
 
       -- update parent
       mRef <- loadLib mid systemSTC.moduleRefPool "import module - update parent"
@@ -118,15 +118,15 @@ purgeModule ssRef mid = do
   return unit
 
 
--- replace child subN:cid(in ref pool) with child subN:c'(in lib)
-replaceModule :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> (Either Module String) -> EpiS eff h String
-replaceModule ssRef mid subN cid c' = do
+-- replace child subN:cid(in ref pool) with child subN:obj
+replaceModule :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> ImportObj -> EpiS eff h String
+replaceModule ssRef mid subN cid obj = do
   systemST <- lift $ readSTRef ssRef
   mRef <- loadLib mid systemST.moduleRefPool "replace module"
   m <- lift $ readSTRef mRef
 
   -- import & purge
-  n' <- importModule ssRef c'
+  n' <- importModule ssRef obj
   purgeModule ssRef cid
 
   -- update

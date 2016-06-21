@@ -7,11 +7,10 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, readSTRef)
 import Data.Array (index, length, null) as A
-import Data.Either (Either(..))
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.StrMap (fromFoldable, insert, member, union)
 import Data.Tuple (Tuple(..))
-import Pattern (replaceModule, findParent, importModule, purgeScript, flagFamily)
+import Pattern (ImportObj(ImportModule), replaceModule, findParent, importModule, purgeScript, flagFamily)
 import ScriptUtil (createScript)
 import System (loadLib)
 import Util (lg, numFromStringE, intFromStringE, gmod)
@@ -88,9 +87,8 @@ incSub ssRef self t mid sRef = do
   case (member subN m.sub) of
     true -> do
       let sub' = insert subN sub m.sub
-      let flags' = insert "pool" "false" m.flags
-      let m' = m {sub = sub', flags = flags'}
-      m'id <- importModule ssRef (Left m') -- this is kind of hackish, as its reimported
+      let m' = m {sub = sub'}
+      m'id <- importModule ssRef (ImportModule m') -- this is kind of hackish, as its reimported
 
       (Tuple parent subN') <- findParent systemST.moduleRefPool mid
       switchModules ssRef parent subN' m'id dim spd t
@@ -116,7 +114,7 @@ switchModules ssRef mid subN m1 dim spd t = do
   let sub'    = union (fromFoldable [(Tuple "dim" dim), (Tuple "var" m0M.var)]) switch.sub
   let switch' = switch {sub = sub', modules = modules, var = m0M.var}
 
-  swid <- replaceModule ssRef mid subN m0 (Left switch')
+  swid <- replaceModule ssRef mid subN m0 (ImportModule switch')
 
   -- create & import blending script
   createScript ssRef swid "default" "finishSwitch" $ fromFoldable [(Tuple "spd" (show spd))]
@@ -143,10 +141,12 @@ finishSwitch ssRef self t mid sRef = do
       (Tuple parent subN) <- findParent systemST.moduleRefPool mid
       mRef   <- loadLib mid systemST.moduleRefPool "finishSwitch module"
       m      <- lift $ readSTRef mRef
-      m1     <- loadLib "m1" m.modules "finishSwitch module"
+      m1id   <- loadLib "m1" m.modules "finishSwitch module"
+      m1Ref  <- loadLib m1id systemST.moduleRefPool "finishSwitch m1"
+      m1     <- lift $ readSTRef m1Ref
 
       -- replace.  this removes all scripts wrt this as well
-      replaceModule ssRef parent subN mid (Right m1)
+      replaceModule ssRef parent subN mid (ImportModule m1)
 
       return true
     _ -> do

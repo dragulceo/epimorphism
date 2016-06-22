@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Demo Proposal: Epimorphism</title>
+		<style>
+			body {background-color:lightgrey; font-family: Arial, Helvetica, sans-serif;}
+			img {width:260px; height:260px;padding:5px 9px;}
+			#center {margin: 0 auto;width: 800px;box-shadow: 10px 10px 5px #888888;background-color:white;padding:0px 6px 6px 6px;text-align:justify;text-justify: inter-word;}
+		</style>
+  </head>
+  <body>
+		<div id="center">
+			<h1> Epimorphism </h1>
+			<p>
+				Epimorphism is a generative art project written in the functional programming language PureScript which simulates video feedback in a realitime, mathematically interesting, fractaline, and aesthetically pleasing fashion in users web browsers.
+			</p>
+			<img style="float:left;padding-top:16px;"src="http://i.imgur.com/hNZLuuH.jpg"/>
+			<h3> How it works </h3>
+			<p> Epimorphism is a digital simulation of video feedback.  Video feedback is a traditionally analog art form which has been used since the 1960s to create somewhat psychedelic recursive & self similar video animations.  The basic concept is simple, and requires only a video input source(camera) and an output source(screen).  The output of the camera is routed to the screen and the camera is then pointed at this information, using the output of the camera(with some time delay) as its input.  In the simplest example, where the camera is silghtly zoomed out, you see an image of the screen as it was a few(n) ms previously.  And in that second screen you see an image of the screen as it was 2*n ms ago.  And so forth.  The situation can get significantly more interesting when you rotate the camera, adjust the zoom, add filters, add external imagry, etc, and quite often the system can become chaotic, which is a common characteristic of recursive systems.
+			</p>
+			<p>
+				<br/>
+				A traditional video feedback system can be mathematically modeled by a transfer function T where <br/>
+				<img style="width:622px; height:125px; padding-top:5px;padding-left:80px;" src="http://i.imgur.com/djPvpHD.png" />
+				<br/><br/>
+				We can expand this further as: <br>
+				<img style="width:680px;height:220px;padding-top:5px;padding-left:50px;" src="http://i.imgur.com/PnF7MkS.png" />
+
+			</p>
+			<img style="float:right; padding:5px"src="http://i.imgur.com/cQEEZl3.jpg"/>
+			<p>
+				The Epimorphism software project attempts to expand upon these ideas by digitally simulating the entire process, adding fidelity, precision and breadth of possibility to the system.  A virtual framebuffer is maintained, and the above equation applied. We can immediately see many ways in which the analog situation can be improved upon & expanded.  For the color transfer function, we no longer have to deal with imperfect color reproduction and unfortunate unsaturated fixed points.  We are free to use this pert of the pipeline in an explicitly asthetic capacity.  We are no longer constrained to the basic affine transformations supported by a camera such as zoom, pan & rotatation.  Epimorphism makes extensive use of elementary complex transformations such as are used when computing mandelbrot & julia sets, lending the system a distinctly fractaline appearence.  And we are no longer constrained to manually inserting external information into the system.  We can now seed the system with arbitrary shapes & textures.
+			</p>
+			<h3> Technology </h3>
+			<img style="float:left;"src="http://i.imgur.com/1urWDRi.jpg"/>
+			<p>
+				The current iteration of the project is written in PureScript, which is a dialect of Haskell that compiles to javascript and runs on a wide array of platforms.  The project is open source and can be found <a href="https://github.com/geneshuman/pure_morph"> here</a>.  The PureScript software acts as the front end for a GPGPU(general purpose gpu) application which runs directly on the clients graphics hardware via pixel shaders & WebGL, and is written in GLSL.  The frontend of the application(PureScript) is responsible for UI, the WebGL interface, pixel shader compilation, state evolution, and maintaining and modulating the pattern library.  The backend of the application (GLSL) is responsible for implementing the feedback transfer function.  It is a highly parallel application, where the color value of each pixel is computed in its own thread.  The backend of the application is a highly parameterized system, taking each of the above sub-transfer functions and breaking them down further, creating a very high dimensional parameter space/space of possibilities for the system.  The default mode of operation of the system is a random walk through the parameter space.  Numerical parameters, as well as distinct transfer functions themselves are animated and interpolated by the front end of the software.  Interactive modes of the software are also available, exposing the parameter space to the user.  Previous versions of the software have allowed for MIDI, OSC, TCP, and basic audio information to control the system as well, however these features have not been ported to the current version of the application.
+			</p>
+			<h3> Live Demo </h3>
+			<p>
+			The software is currently <a href="http://www.epimorphism.com"> live here!</a> An interactive demo is proposed to be given at FARM 2016 which intends to covers the topics mentioned herein, and provides a more detailed and thorough exploration of the parameter space of the system.
+			</p>
+
+			<h3> PureScript & Functional Programming</h3>
+			<p>
+				<a href="http://www.purescript.org/"> PureScript</a> is a relatively new functional programming language directly inspired by Haskell which compiles directly to javascript.  Purescript borrows heavily from haskell.  It shares a very similar syntax, is strongly statically typed, supports type inference, has immutable data, ADT's, pattern matching, type classes, and ss on, with the major high level difference being that in PureScript evalutaion is strict.  There is a collection of more trivial differences, but the language should be easily picked up by anyone fluent in Haskell.
+			</p>
+			<h5> Why Functional Programming? </h5>
+			<img style="float:left;"src="http://i.imgur.com/XxnxTW8.jpg"/>
+			<p>
+				The problem domain at hand here admittedly doesn't lend itself to any particularly elegant representaion as compositions or in terms any of other major functional paradigms, so you may ask why use a functional programming language for this project at all, given that we're regularly doing such non-functional things such as interfacing with state machines(WebGL) and mutating various data structures which represent the video output of the system, when it seems that there are little to no domain specific bonus?  The answer is simply that the inherent benifites of writing purely functional programs(even when not in a particularly functional domain space) are more than sufficent to justify the use of functional programming.  Ive heard it said that Haskell is better at writing imperative code than some imperative languages, and I can see some truth to that.  Development on this project has been faster, more stable, less error prone, and the software has been easier to reason about and to return to after a period of absence. The later two points are particularly important, as I intend for this code base to stay in use for many years.  All of these are a direct consequence of using functional programming.
+			</p>
+			<h5> Why Purescript</h5>
+			<p>
+				The project is intended to target as wide of an audience as is possible, as easily as possible, in particular anybody with a web-browser which supports WebGL 1.0.  The software currently runs on all major desktop browsers, as well as iPads, and this is because the ubiquity of support for HTML5 applications.  PureScript is one of the more powerfull, well developed and easy to use entries in the fairly tiny space of functional + web.  Other contenders are...
+			</p>
+			<h3> History </h3>
+			<img style="float:right;"src="http://i.imgur.com/URvrHuW.jpg"/>
+			<p>
+				Epimorphism began life in 2004 as an analog video feedback system which was seeded by several dozen clusters of computer controlled leds.  The second iteration of the project despensed with the leds and spliced a computer into the signal path to insert information into the system and to distort the image in mathematically interesting ways.  The next step was to increase fidelty by digitizing the project entirely, despensing entirely with the camera and screen.  The results were quite exciting and unexpected, and this is when the project first began to take its current character.  However, the the algorithm was then running directly on CPUs and could only compute one frame every few seconds.  Deciding to parallelize the software on GPUs was the critical breakthrough that enebled the current level of technical and artistic fidelity.  This version of the software was written in C and used pixel shaders and would be recognizably similiar to the current iteration. The next iteration of the software switch the front end to python and the backend to OpenCL.  The software is currently being rewritten in PureScript and once again uses pixel shaders.
+			</p>
+			<h3> Future </h3>
+			<p>
+				The current rewrite of the software is in a beta state, with the majority of major features from the previous application functional.  Significant near term plans for the software include audio responsiveness, a more detailed & user accessible creation UI, and implementing machine learning algorithms to more adeptly navigate the phase space of the software, possibly even to tailor the results to users individual tastes.  Also, an algorithm to ray trace a generalized version of the software in 3 dimensions using distance fields has been developed but technology is currently lacking.  However back of the envelope calculations imply that consumer hardware is only about 2 generations away from being able to support this idea :)
+			</p>
+			<h2> Gallery </h2>
+			<img style="width:600px;height:600px;" src="http://i.imgur.com/BHS1Zy9.jpg"/>
+			<img style="width:600px;height:600px;" src="http://i.imgur.com/DgvY2W6.jpg"/>
+			<img style="width:600px;height:600px;" src="http://i.imgur.com/cMA7yJm.jpg"/>
+			<img style="width:600px;height:600px;" src="http://i.imgur.com/uSfHr6k.jpg"/>
+			<img style="width:600px;height:600px;" src="http://i.imgur.com/LwTzRFz.jpg"/>
+			<img style="width:600px;height:600px;" src="http://i.imgur.com/FemRReH.jpg"/>
+			<img style="width:600px;height:600px;" src="http://i.imgur.com/jIZeQ2h.jpg"/
+			<br style="clear:both;" />
+		</div>
+  </body>
+</html>

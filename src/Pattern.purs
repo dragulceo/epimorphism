@@ -5,7 +5,7 @@ import Config (EpiS, Module, Pattern, SystemST, Script)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, modifySTRef, newSTRef, readSTRef)
-import Data.Array (snoc, delete, head, tail, sort) as A
+import Data.Array (cons, snoc, delete, head, tail, sort) as A
 import Data.Maybe (Maybe(..), maybe)
 import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (member, StrMap, foldM, fold, delete, insert, values, lookup)
@@ -33,26 +33,34 @@ flagFamily family flags = A.sort $ fold handle [] family
 
 
 -- find a module given an address - ie main.main_body.t
-findModule :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> EpiS eff h String
-findModule mpool pattern dt = do
+findModule :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> Boolean -> EpiS eff h String
+findModule mpool pattern dt followSwitch = do
   let addr = split "." dt
   case (A.head addr) of
     Nothing -> throwError "we need data, chump"
-    Just "vert" -> findModule' mpool pattern.vert $ fromJust $ A.tail addr
-    Just "disp" -> findModule' mpool pattern.disp $ fromJust $ A.tail addr
-    Just "main" -> findModule' mpool pattern.main $ fromJust $ A.tail addr
+    Just "vert" -> findModule' mpool pattern.vert (fromJust $ A.tail addr) followSwitch
+    Just "disp" -> findModule' mpool pattern.disp (fromJust $ A.tail addr) followSwitch
+    Just "main" -> findModule' mpool pattern.main (fromJust $ A.tail addr) followSwitch
     Just x      -> throwError $ "value should be main, vert, or disp : " ++ x
 
 
-findModule' :: forall eff h. StrMap (STRef h Module) -> String -> Array String -> EpiS eff h String
-findModule' mpool mid addr = do
+findModule' :: forall eff h. StrMap (STRef h Module) -> String -> Array String -> Boolean -> EpiS eff h String
+findModule' mpool mid addr followSwitch = do
+
   maybe (return $ mid) handle (A.head addr)
   where
     handle mid' = do
-      mRef <- loadLib mid mpool "findModule'"
-      mod <- lift $ readSTRef mRef
-      c <- loadLib mid' mod.modules "findModule' find child"
-      findModule' mpool c $ fromJust $ A.tail addr
+      mRef    <- loadLib mid mpool "findModule'"
+      mod     <- lift $ readSTRef mRef
+      childId <- loadLib mid' mod.modules "findModule' find child"
+      cRef    <- loadLib childId mpool "findModule' child ref"
+      child   <- lift $ readSTRef cRef
+      addr'   <- return $ fromJust $ A.tail addr
+
+      case (checkFlag child "family" "switch" && followSwitch) of
+        true ->  findModule' mpool childId (A.cons "m1" addr') followSwitch
+        false -> findModule' mpool childId addr' followSwitch
+
 
 
 -- find parent module id & submodule that a module is binded to. kind of ghetto

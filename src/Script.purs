@@ -75,7 +75,7 @@ randomMain ssRef pRef self t mid sRef = do
       lift $ modifySTRef sRef (\s -> s {dt = dt'})
 
       idx <- lift $ randInt 100
-      tmid <- findModule' systemST.moduleRefPool pattern.main ["main_body", "t"]
+      tmid <- findModule' systemST.moduleRefPool pattern.main ["main_body", "t"] true
 
       createScript ssRef tmid "default" "incSub" $ fromFoldable [(Tuple "sub" "t_inner"), (Tuple "idx" (show idx)), (Tuple "spd" "0.15"), (Tuple "lib" "t_inner"), (Tuple "dim" "vec2")]
 

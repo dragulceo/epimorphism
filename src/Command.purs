@@ -106,7 +106,7 @@ parseScript mpool pattern (Tuple scr ps) dt = do
     ScrFn -> do
       return $ Tuple scr {fn = dt} ScrMid
     ScrMid -> do
-      mid <- findModule mpool pattern dt
+      mid <- findModule mpool pattern dt true
       return $ Tuple scr {mid = mid} ScrDt
     ScrDt -> do
       let tok = split ":" dt

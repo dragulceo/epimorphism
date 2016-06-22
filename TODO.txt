@@ -1,17 +1,23 @@
 DEMO
   - build out library & interface
+	  - randomMain
+	  - t
+		- seed
+		- color
+		- post
+
   - weird divide by zero issue - glitch in content
+  - choppiness when doing a bunch of switching.  might be image uploading.  there is a error "texImage2D: invalid image" when a bunch of image switches happen
+
 
 NEXT
  SYSTEM
   - way of switching modules while keeping phase/scripts.  isn't recompiling ghetto(what?)
-  - ABSOLUTE ADDRESSING FOR IDX & MOD SWITCHING??	not necessary if we stop using sub for t
 	- keep scripts when switching modules?
 	- patternRefPool?
-  - make patterns modules
+  - make patterns modules/pattern level scripts
   - mainRef refernece in randomMain seems ghetto
-  - module.moduels should be [SubModule = SubLib String | SubPool String] or something
-  - pattern level scripts
+  - module.modules should be [SubModule = SubLib String | SubPool String] or something
   - remove mid from scripts?
 UI
   - UI.purs is ghetto

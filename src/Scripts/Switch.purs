@@ -15,7 +15,7 @@ import Data.Tuple (Tuple(..))
 import Pattern (importScript, ImportObj(ImportScript, ImportModule), replaceModule, findParent, importModule, purgeScript, flagFamily)
 import ScriptUtil (createScript)
 import System (loadLib)
-import Util (lg, numFromStringE, intFromStringE, gmod)
+import Util (randInt, lg, numFromStringE, intFromStringE, gmod)
 
 incData :: forall eff h. SystemST h -> Script -> String -> (String -> String -> EpiS eff h (Array String)) -> EpiS eff h {childN :: String, nxt :: String, dim :: String, spd :: Number}
 incData systemST scr rootId loader = do
@@ -34,7 +34,11 @@ incData systemST scr rootId loader = do
   when (A.null index) do
     throwError $ "your index doesnt exist"
 
-  let nxtPos = idx `gmod` (A.length index)
+  nxtPos <-
+    if idx < 0 then
+      lift $ randInt $ A.length index
+    else
+      return $ idx `gmod` (A.length index)
 
   nxt <- case (A.index index nxtPos) of
     Nothing -> throwError $ "your index doesnt exist" -- doesn't look like this works

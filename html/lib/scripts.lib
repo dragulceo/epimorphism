@@ -1,3 +1,7 @@
+--randomMain
+fn randomMain
+dt {dly: 5.5, spd: 0.25}
+
 --default
 fn null
 

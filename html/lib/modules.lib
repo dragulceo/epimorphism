@@ -24,6 +24,7 @@ modules {post: post_id}
 flags {default: true, family: main}
 component main
 modules {main_body: default_main_body}
+scripts [randomMain]
 
 --test < default_main
 flags {family: main}

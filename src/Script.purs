@@ -7,7 +7,7 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, modifySTRef, readSTRef)
 import Data.Foldable (or)
-import Data.StrMap (fromFoldable, insert, member, keys)
+import Data.StrMap (size, fromFoldable, insert, member, keys)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Path (zpath, ppath, zfix, pfix)
@@ -15,7 +15,7 @@ import Pattern (findModule')
 import ScriptUtil (createScript)
 import Switch (incScript, incImage, incMod, finishSwitch, incSub)
 import System (loadLib)
-import Util (randInt, lg, numFromStringE)
+import Util (lg, numFromStringE)
 
 -- PUBLIC
 
@@ -23,6 +23,7 @@ import Util (randInt, lg, numFromStringE)
 runScripts :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Boolean
 runScripts ssRef pRef = do
   systemST <- lift $ readSTRef ssRef
+  let b = lg $ show (size systemST.scriptRefPool)
   res <- traverse (runScript ssRef pRef) (keys systemST.scriptRefPool)
   return $ or res
 
@@ -56,10 +57,13 @@ randomMain :: forall eff h. ScriptFn eff h
 randomMain ssRef pRef self t mid sRef = do
   systemST <- lift $ readSTRef ssRef
   pattern  <- lift $ readSTRef pRef
-  scr <- lift $ readSTRef sRef
+  scr      <- lift $ readSTRef sRef
+
+  dly <- (loadLib "dly" scr.dt "randomMain") >>= numFromStringE
+  spd <-  loadLib "spd" scr.dt "randomMain"
 
   unless(member "nxt" scr.dt) do
-    let dt' = insert "nxt" (show (t + 5.0)) scr.dt
+    let dt' = insert "nxt" (show (t + dly)) scr.dt
     lift $ modifySTRef sRef (\s -> s {dt = dt'})
     return unit
 
@@ -68,19 +72,20 @@ randomMain ssRef pRef self t mid sRef = do
 
   nxt <- (loadLib "nxt" dt "randomMain nxt") >>= numFromStringE
 
+  -- next iteration
   case t of
     t | t > nxt -> do
-      let a = lg "do thing"
-      let dt' = insert "nxt" (show (t + 5.0)) dt
+      let a = lg "iterate randomMain"
+      let dt' = insert "nxt" (show (t + dly)) dt
       lift $ modifySTRef sRef (\s -> s {dt = dt'})
 
-      idx <- lift $ randInt 100
       tmid <- findModule' systemST.moduleRefPool pattern.main ["main_body", "t"] true
 
-      createScript ssRef tmid "default" "incSub" $ fromFoldable [(Tuple "sub" "t_inner"), (Tuple "idx" (show idx)), (Tuple "spd" "0.15"), (Tuple "lib" "t_inner"), (Tuple "dim" "vec2")]
+      createScript ssRef tmid "default" "incSub" $ fromFoldable [(Tuple "sub" "t_inner"), (Tuple "idx" "-1.0"), (Tuple "spd" spd), (Tuple "lib" "t_inner"), (Tuple "dim" "vec2")]
+      return unit
+    _ -> return unit
 
-      return false
-    _ -> return false
+  return false
 
 
 -- PRIVATE

@@ -12,7 +12,7 @@ import Data.Maybe (Maybe(Just, Nothing))
 import Data.StrMap (fromFoldable, insert, member, union)
 import Data.String (split)
 import Data.Tuple (Tuple(..))
-import Pattern (importScript, ImportObj(ImportScript, ImportModule), replaceModule, findParent, importModule, purgeScript, flagFamily)
+import Pattern (purgeModule, importScript, ImportObj(ImportScript, ImportModule), replaceModule, findParent, importModule, purgeScript, flagFamily)
 import ScriptUtil (createScript)
 import System (loadLib)
 import Util (randInt, lg, numFromStringE, intFromStringE, gmod)
@@ -89,6 +89,7 @@ incSub ssRef pRef self t rootId sRef = do
 
       (Tuple parent child) <- findParent systemST.moduleRefPool rootId
       switchModules ssRef parent child root'id dim spd
+      purgeModule ssRef root'id --  THIS IS REALLY TRICKY!  WILL CAUSE MEMORY LEAK IF NOT PURGED
       return true
     false -> do  -- HRM, I think we can do better here
       let nul' = lg "TEMP: can't find subVar!"
@@ -117,6 +118,7 @@ incScript ssRef pRef self t rootId sRef = do
 
       (Tuple parent childN) <- findParent systemST.moduleRefPool rootId
       switchModules ssRef parent childN m'id dim spd
+      purgeModule ssRef m'id --  THIS IS REALLY TRICKY!  WILL CAUSE MEMORY LEAK IF NOT PURGED
       return true
     Nothing -> do  -- HRM, maybe we want to be able to expand the number of existing scripts
       let nul' = lg "TEMP: don't have enough scripts!"

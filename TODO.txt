@@ -23,6 +23,9 @@ UI
   - UI.purs is ghetto
 
 LATER
+  - limit to tree size?
+  - more debugState info
+  - hard pause button (do nothing at all, not just tSpd=0)
 	- finish importScript2
   - BETA INFRASTRUCTURE PASS
   - fract
@@ -52,7 +55,7 @@ LATER
   - investigate dsl for scripts
   - use fb as texture source
   - enforce integrity of pools & module references
-	- scripts conflicting with each other
+v	- scripts conflicting with each other
   - module/submodule cycles??
   - real fullscreen mode
   - handle window resizing

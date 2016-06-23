@@ -3,8 +3,7 @@ module Script where
 import Prelude
 import Config (Pattern, ScriptFn, EpiS, SystemST)
 import Control.Monad (unless)
-import Control.Monad.Error.Class (throwError)
-import Control.Monad.Except.Trans (lift)
+import Control.Monad.Except.Trans (throwError, lift)
 import Control.Monad.ST (STRef, modifySTRef, readSTRef)
 import Data.Foldable (or)
 import Data.StrMap (size, fromFoldable, insert, member, keys)
@@ -23,7 +22,8 @@ import Util (lg, numFromStringE)
 runScripts :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Boolean
 runScripts ssRef pRef = do
   systemST <- lift $ readSTRef ssRef
-  let b = lg $ show (size systemST.scriptRefPool)
+  let b = lg $ show (size systemST.moduleRefPool)
+
   res <- traverse (runScript ssRef pRef) (keys systemST.scriptRefPool)
   return $ or res
 

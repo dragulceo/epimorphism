@@ -13,7 +13,7 @@ import Data.String (split)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import System (loadLib)
-import Util (uuid)
+import Util (lg, uuid)
 
 -- PUBLIC
 -- check if an object has a flag
@@ -157,6 +157,9 @@ purgeModule ssRef mid = do
   systemST <- lift $ readSTRef ssRef
   mRef <- loadLib mid systemST.moduleRefPool "purge module"
   mod <- lift $ readSTRef mRef
+
+  let a = lg "purging"
+  let tmp = lg $ mod
 
   -- purge scripts
   traverse (purgeScript ssRef) mod.scripts

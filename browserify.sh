@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 
-pulp browserify --standalone Main --to html/index.js
+echo "Browserifying"
+pulp browserify --standalone Main --to html/index.tmp
+echo "Minifying"
+uglifyjs html/index.tmp > html/index.js
+rm html/index.tmp
 #psc-bundle-fast -i output -m Main --main Main -o html/index.js

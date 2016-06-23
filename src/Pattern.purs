@@ -158,7 +158,6 @@ purgeModule ssRef mid = do
   mRef <- loadLib mid systemST.moduleRefPool "purge module"
   mod <- lift $ readSTRef mRef
 
-  let a = lg "purging"
   let tmp = lg $ mod
 
   -- purge scripts

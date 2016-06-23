@@ -5,6 +5,7 @@ DEMO
 		- seed
 		- color
 		- post
+		- minor scripts & images infr
 
   - weird divide by zero issue - glitch in content
   - choppiness when doing a bunch of switching.  might be image uploading.  there is a error "texImage2D: invalid image" when a bunch of image switches happen

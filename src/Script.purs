@@ -22,7 +22,6 @@ import Util (lg, numFromStringE)
 runScripts :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Boolean
 runScripts ssRef pRef = do
   systemST <- lift $ readSTRef ssRef
-  let b = lg $ show (size systemST.moduleRefPool)
 
   res <- traverse (runScript ssRef pRef) (keys systemST.scriptRefPool)
   return $ or res

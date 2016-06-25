@@ -63,10 +63,10 @@ keyHandler ucRef usRef char = do
 --      incM uiST "main.main_body" "color" "basic" "vec4" 1 spd
 --    "T" -> do
 --      incM uiST "main.main_body" "color" "basic" "vec4" (-1) spd
---    "6" -> do
---      incM uiST "disp" "post" "basic" "vec4" 1 spd
---    "Y" -> do
---      incM uiST "disp" "post" "basic" "vec4" (-1) spd
+    "6" -> do
+      incM uiST "disp" "post" "post_hlim" "vec4" 1 spd
+    "Y" -> do
+      incM uiST "disp" "post" "post_hlim" "vec4" (-1) spd
 --    "0" -> do
 --      incM uiST "main.main_body.seed.seed0" "seed_color" "basic" "vec4" 1 spd
 --    "P" -> do

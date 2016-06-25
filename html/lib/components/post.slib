@@ -1,7 +1,7 @@
 post post_id {{
 }}
 
-post post1 {{
+post post_hlim {{
 	// optomize me!
   frame = _gamma3(frame, @gamma@);
 

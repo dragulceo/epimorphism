@@ -1,0 +1,45 @@
+--main_restate < default_main
+modules {main_body: main_stc_cool}
+
+
+--main_stc_cool < default_main_body
+flags {family: main_body}
+modules {t: t_sinhz_tst, color: rotate_hsv1, seed: seed_simple_cool}
+
+--seed_simple_cool
+flags {family: seed}
+component seed_simple_cool
+par {seed_w: 0.4}
+modules {t: ts_wrap_linx3'}
+var seed
+
+--t_sinhz_tst
+flags {family: t, incTest: true}
+component t_wrap
+zn [1.0 + 0.0i, 0.0 + 0.0i, 1.1 + 0.0i, 0.0 + 0.0i]
+modules {reduce: torus_reduce}
+sub {t_inner: sinhz(z)}
+var z
+scripts [circle_0]
+
+--rotate_hsv1
+flags {family: color, basic: true}
+component rotate_hsv
+par {rot: 0.17, len_sc:0.0, len_sc_amt:0.0, th_spd: 0.0}
+var color
+
+
+--ts_wrap_linx3'
+flags {family: t, basic_seed: true}
+zn [1.1 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]
+component t_wrap
+modules {reduce: torus_reduce}
+sub {t_inner: z}
+var z
+scripts [linx_3]
+
+
+--disp_restate
+flags {family: post}
+component disp
+modules {post: post_hlim3}

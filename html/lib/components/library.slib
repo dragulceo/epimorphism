@@ -110,8 +110,8 @@ vec4 rgb2hsls(vec4 c){
 library math {{
 /* math utility library */
 
-#define __1 vec2(1.0, 0.0)
-#define __I vec2(1.0, 0.0)
+#define _1_ vec2(1.0, 0.0)
+#define _I_ vec2(1.0, 0.0)
 
 precision mediump float;
 

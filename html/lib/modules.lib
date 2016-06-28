@@ -50,7 +50,7 @@ component post_id
 var frame
 
 --post_hlim1
-flags {family: post_hlim}
+flags {family: post, post_hlim:true}
 component post_hlim
 var frame
 par {gamma:2.0, hue:0.0, spread:0.5, lgv:0.5}

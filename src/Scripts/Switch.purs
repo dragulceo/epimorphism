@@ -28,6 +28,9 @@ incData systemST scr rootId loader = do
   lib    <- loadLib "lib" dt "incMod lib"
   dim    <- loadLib "dim" dt "incMod dim"
 
+  let a = lg lib
+  let b = lg childN
+
   -- index & next data
   index <- loader lib childN
 
@@ -54,7 +57,7 @@ incMod :: forall eff h. ScriptFn eff h
 incMod ssRef pRef self t rootId sRef = do
   systemST <- lift $ readSTRef ssRef
   scr <- lift $ readSTRef sRef
-
+  --let g = lg systemST.moduleLib
   {childN, nxt, dim, spd} <- incData systemST scr rootId
     \l' s' -> return $ flagFamily systemST.moduleLib $ fromFoldable [(Tuple "family" s'), (Tuple l' "true")]
 

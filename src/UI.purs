@@ -44,9 +44,9 @@ keyHandler ucRef usRef char = do
     "Q" -> do
       incI uiST "main.main_body.t" "t_inner" "t_inner" "vec2" (-1) spd
     "2" -> do
-      incS uiST "main.main_body.t" "0" "z1" "vec2" 1 spd
+      incM uiST "disp" "post" "post_hlim" "vec4" 1 spd
     "W" -> do
-      incS uiST "main.main_body.t" "0" "z1" "vec2" (-1) spd
+      incM uiST "disp" "post" "post_hlim" "vec4" (-1) spd
     "3" -> do
       incG uiST "main.main_body.seed" "0" "basic_images" "vec4" 1 spd
     "E" -> do
@@ -63,10 +63,6 @@ keyHandler ucRef usRef char = do
 --      incM uiST "main.main_body" "color" "basic" "vec4" 1 spd
 --    "T" -> do
 --      incM uiST "main.main_body" "color" "basic" "vec4" (-1) spd
-    "6" -> do
-      incM uiST "disp" "post" "post_hlim" "vec4" 1 spd
-    "Y" -> do
-      incM uiST "disp" "post" "post_hlim" "vec4" (-1) spd
 --    "0" -> do
 --      incM uiST "main.main_body.seed.seed0" "seed_color" "basic" "vec4" 1 spd
 --    "P" -> do
@@ -75,6 +71,11 @@ keyHandler ucRef usRef char = do
 --      incM uiST "main.main_body.seed.seed1" "seed_color" "basic" "vec4" 1 spd
 --    "Û" -> do
 --      incM uiST "main.main_body.seed.seed1" "seed_color" "basic" "vec4" (-1) spd
+    "6" -> do
+      incS uiST "main.main_body.t" "0" "z1" "vec2" 1 spd
+    "Y" -> do
+      incS uiST "main.main_body.t" "0" "z1" "vec2" (-1) spd
+
     "Ü" -> return $ "clear"
     " " -> return $ "save"
     _   -> return $ "null"

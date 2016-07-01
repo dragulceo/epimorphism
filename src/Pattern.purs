@@ -158,7 +158,7 @@ purgeModule ssRef mid = do
   mRef <- loadLib mid systemST.moduleRefPool "purge module"
   mod <- lift $ readSTRef mRef
 
-  let tmp = lg $ mod
+  --let tmp = lg $ mod
 
   -- purge scripts
   traverse (purgeScript ssRef) mod.scripts

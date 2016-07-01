@@ -75,7 +75,6 @@ keyHandler ucRef usRef char = do
       incS uiST "main.main_body.t" "0" "z1" "vec2" 1 spd
     "Y" -> do
       incS uiST "main.main_body.t" "0" "z1" "vec2" (-1) spd
-
     "Ü" -> return $ "clear"
     " " -> return $ "save"
     _   -> return $ "null"

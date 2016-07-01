@@ -1,7 +1,7 @@
 --default
 vert   default_vert
-main   main_restate
-disp   disp_restate
+main   main
+disp   disp
 tPhase 0.0
 tSpd   1.0
 includes [colorspace, math]
@@ -9,4 +9,6 @@ includes [colorspace, math]
 --test < default
 main  test
 
---restate < default
+--main1 < default
+main  main1
+disp  disp_main1

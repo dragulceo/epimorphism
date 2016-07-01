@@ -6,7 +6,7 @@ import Control.Monad (unless)
 import Control.Monad.Except.Trans (throwError, lift)
 import Control.Monad.ST (STRef, modifySTRef, readSTRef)
 import Data.Foldable (or)
-import Data.StrMap (size, fromFoldable, insert, member, keys)
+import Data.StrMap (fromFoldable, insert, member, keys)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Path (zpath, ppath, zfix, pfix)
@@ -54,6 +54,8 @@ nullS ssRef pRef self t mid sRef = do
 -- urgh
 randomMain :: forall eff h. ScriptFn eff h
 randomMain ssRef pRef self t mid sRef = do
+
+
   systemST <- lift $ readSTRef ssRef
   pattern  <- lift $ readSTRef pRef
   scr      <- lift $ readSTRef sRef
@@ -87,6 +89,48 @@ randomMain ssRef pRef self t mid sRef = do
   return false
 
 
+
+randomMain1 :: forall eff h. ScriptFn eff h
+randomMain1 ssRef pRef self t mid sRef = do
+  systemST <- lift $ readSTRef ssRef
+  pattern  <- lift $ readSTRef pRef
+  scr      <- lift $ readSTRef sRef
+
+  dly <- (loadLib "dly" scr.dt "randomMain1") >>= numFromStringE
+  spd <-  loadLib "spd" scr.dt "randomMain1"
+
+  unless(member "nxt" scr.dt) do
+    let dly' = dly / 2.0
+    let dt' = insert "nxt" (show (t + dly)) scr.dt
+    lift $ modifySTRef sRef (\s -> s {dt = dt'})
+    return unit
+
+
+  scr' <- lift $ readSTRef sRef
+  let dt = scr'.dt
+
+  nxt <- (loadLib "nxt" dt "randomMain1 nxt") >>= numFromStringE
+
+  -- next iteration
+  case t of
+    t | t > nxt -> do
+      let a = lg "ITERATE RANDOMMAIN1"
+      let dt' = insert "nxt" (show (t + dly)) dt
+      lift $ modifySTRef sRef (\s -> s {dt = dt'})
+
+      tmid <- findModule' systemST.moduleRefPool pattern.main ["main_body", "t"] true
+
+      createScript ssRef tmid "default" "incSub" $ fromFoldable [(Tuple "sub" "t_inner"), (Tuple "idx" "-1.0"), (Tuple "spd" spd), (Tuple "lib" "t_inner"), (Tuple "dim" "vec2")]
+
+      tmid' <- findModule' systemST.moduleRefPool pattern.main ["main_body", "seed", "t"] true
+
+      createScript ssRef tmid' "default" "incSub" $ fromFoldable [(Tuple "sub" "t_inner"), (Tuple "idx" "-1.0"), (Tuple "spd" spd), (Tuple "lib" "t_inner"), (Tuple "dim" "vec2")]
+      return unit
+    _ -> return unit
+
+  return false
+
+
 -- PRIVATE
 
 -- find script fuction given name
@@ -102,5 +146,5 @@ lookupScriptFN n = case n of
   "incImage"     -> return incImage
   "incScript"    -> return incScript
   "finishSwitch" -> return finishSwitch
-  "randomMain"   -> return randomMain
+  "randomMain1"  -> return randomMain1
   _              -> throwError $ "script function not found: " ++ n

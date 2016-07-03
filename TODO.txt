@@ -1,3 +1,23 @@
+RELEASE
+	- fullscreen mode / fix current layout
+	- other ui mailing list, about, controls
+	- about page, gallery, etc
+
+
+  - more & better patterns
+	  - look at what we have
+	  - check out more ts. systematically
+	- interpolating between patterns?
+
+	- better hosting?
+	- savingDebugState somewhere for analysis
+  - available to users & a server to put it on
+
+MISC
+  - better show for CX
+	- there are a bunch of dummy scripts assigned to things atm
+
+
 DEMO
   - build out library & interface
 	  - randomMain
@@ -9,6 +29,17 @@ DEMO
 
   - weird divide by zero issue - glitch in content
   - choppiness when doing a bunch of switching.  might be image uploading.  there is a error "texImage2D: invalid image" when a bunch of image switches happen
+
+
+
+
+
+
+
+
+
+
+
 
 
 NEXT

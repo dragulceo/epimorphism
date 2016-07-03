@@ -12,3 +12,44 @@
 #debugState {
 		font-size: 11px;
 }
+
+#showFps {
+		color: #0F0;
+		float: left;
+		font-weight:bold;
+}
+
+#buttons {
+		padding-left:75px;
+}
+
+.hide {
+		display:none;
+}
+
+.fullWindow{
+		position:fixed;
+    padding:0;
+    margin:0;
+
+    top:0;
+    left:0;
+
+    width: 100%;
+    height: 100%;
+    background:rgba(255,255,255,0.5);
+
+}
+
+
+.fullWindow #glcanvas{
+		position:fixed;
+    padding:0;
+    margin:0;
+
+    left:0;
+
+    width: 100%;
+    background:rgba(255,255,255,0.5);
+
+}

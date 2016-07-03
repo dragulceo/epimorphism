@@ -104,7 +104,7 @@ type UIConf = {
   , consoleId         :: String
   , debugStateId      :: String
   , fpsId             :: String
-  , fullScreen        :: Boolean
+  , windowState       :: String
   , uiUpdateFreq      :: Int
   , keyboardSwitchSpd :: Number
   -- , showFps :: Boolean
@@ -116,20 +116,18 @@ uiConfSchema = [
   SchemaEntry SE_St "consoleId",
   SchemaEntry SE_St "debugStateId",
   SchemaEntry SE_St "fpsId",
-  SchemaEntry SE_B  "fullScreen",
+  SchemaEntry SE_St "windowState",
   SchemaEntry SE_I  "uiUpdateFreq",
   SchemaEntry SE_N  "keyboardSwitchSpd"
 ]
 
 type UIST = {
     incIdx :: StrMap Int
-  , debugState :: Boolean
 }
 
 defaultUIST :: UIST
 defaultUIST = {
     incIdx: empty
-  , debugState: false
 }
 
 

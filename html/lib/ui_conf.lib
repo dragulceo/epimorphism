@@ -3,9 +3,9 @@ canvasId glcanvas
 consoleId console
 debugStateId debugState
 fpsId showFps
-fullScreen true
+windowState dev
 uiUpdateFreq 10
 keyboardSwitchSpd 0.4
 
 --full < default
-fullScreen true
+windowState fullWindow

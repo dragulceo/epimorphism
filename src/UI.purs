@@ -1,17 +1,18 @@
 module UI where
 
 import Prelude
-import Control.Monad.ST (ST, STRef, readSTRef, modifySTRef, newSTRef)
-import Graphics.Canvas (Canvas)
-import Config (UIST, UIConf, EpiS, SystemST, SystemConf, Pattern, EngineST, EngineConf, defaultUIST)
 import Command (command)
+import Config (UIST, UIConf, EpiS, SystemST, SystemConf, Pattern, EngineST, EngineConf, defaultUIST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
+import Control.Monad.ST (ST, STRef, readSTRef, modifySTRef, newSTRef)
 import DOM (DOM)
 import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (insert, member, lookup)
-import Layout(initLayout)
---import Util (lg)
+import Graphics.Canvas (Canvas)
+import Layout (initLayout)
+
+import Util (lg)
 
 foreign import registerEventHandler :: forall eff. (String -> Eff eff Unit) -> Eff eff Unit
 foreign import registerKeyHandler :: forall eff. (String -> Eff eff String) -> Eff eff Unit
@@ -36,7 +37,7 @@ keyHandler ucRef usRef char = do
   uiConf <- readSTRef ucRef
   uiST   <- readSTRef usRef
 
-  --let x = lg char
+  let x = lg char
   let spd = show uiConf.keyboardSwitchSpd
   case char of
     "1" -> do
@@ -75,6 +76,7 @@ keyHandler ucRef usRef char = do
       incS uiST "main.main_body.t" "0" "z1" "vec2" 1 spd
     "Y" -> do
       incS uiST "main.main_body.t" "0" "z1" "vec2" (-1) spd
+    "Z" -> return "dev"
     "Ü" -> return $ "clear"
     " " -> return $ "save"
     _   -> return $ "null"

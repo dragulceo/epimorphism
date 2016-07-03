@@ -57,10 +57,22 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         return unit
       "save" -> do
         save systemST pattern
-      "debugState" -> do
-        lift $ modifySTRef usRef (\us -> us {debugState = not us.debugState})
-        uiST' <- lift $ readSTRef usRef
-        initLayout uiConf uiST'
+      "fullWindow" -> do
+        lift $ modifySTRef ucRef (\ui -> ui {windowState = "fullWindow"})
+        uiConf' <- lift $ readSTRef ucRef
+        initLayout uiConf' uiST
+
+        return unit
+      "fullScreen" -> do
+        lift $ modifySTRef ucRef (\ui -> ui {windowState = "fullScreen"})
+        uiConf' <- lift $ readSTRef ucRef
+        initLayout uiConf' uiST
+
+        return unit
+      "dev" -> do
+        lift $ modifySTRef ucRef (\ui -> ui {windowState = "dev"})
+        uiConf' <- lift $ readSTRef ucRef
+        initLayout uiConf' uiST
 
         return unit
       "clear" -> do

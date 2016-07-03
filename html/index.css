@@ -27,7 +27,7 @@
 		display:none;
 }
 
-.fullWindow{
+.fullWindow, #window:-webkit-full-screen{
 		position:fixed;
     padding:0;
     margin:0;
@@ -42,7 +42,7 @@
 }
 
 
-.fullWindow #glcanvas{
+.fullWindow #glcanvas, #window:-webkit-full-screen #glcanvas{
 		position:fixed;
     padding:0;
     margin:0;

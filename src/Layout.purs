@@ -3,6 +3,7 @@ module Layout where
 import Prelude
 import Config (EpiS, moduleSchema, Module, Pattern, SystemST, UIST, Epi, UIConf)
 import Control.Monad (when)
+import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (readSTRef, STRef)
 import Control.Monad.Trans (lift)
@@ -16,7 +17,9 @@ import Data.String.Regex (match, noFlags, regex)
 import Data.Traversable (traverse)
 import Serialize (unsafeSerialize)
 import System (loadLib)
-import Util (indentLines)
+import Util (lg, indentLines)
+
+foreign import requestFullScreen :: forall eff. String -> Eff eff Unit
 
 initLayout :: forall eff. UIConf -> UIST -> Epi eff Unit
 initLayout uiConf uiST = do
@@ -25,32 +28,39 @@ initLayout uiConf uiST = do
   width  <- lift $ innerWidth window
   height <- lift $ innerHeight window
 
+  canvas <- findElt uiConf.canvasId
+  win <- findElt "window"
+  console <- findElt uiConf.consoleId
+
+  lift $ classAdd "hide" console
+  lift $ classRemove "fullWindow" win
+
   case uiConf.windowState of
     "fullWindow" -> do
-      canvas <- findElt uiConf.canvasId
       lift $ setStyleAttr "width" "" canvas
       lift $ setStyleAttr "height" "" canvas
       let ofs = (width - height) / -2.0
       lift $ setStyleAttr "top" (show ofs ++ "px") canvas
       lift $ setStyleAttr "bottom" (show ofs ++ "px") canvas
 
-      win <- findElt "window"
       lift $ classAdd "fullWindow" win
 
-      console <- findElt uiConf.consoleId
-      lift $ classAdd "hide" console
       return unit
     "fullScreen" -> do
+      lift $ setStyleAttr "width" "" canvas
+      lift $ setStyleAttr "height" "" canvas
+      let ofs = (width - height) / -2.0
+      lift $ setStyleAttr "top" (show ofs ++ "px") canvas
+      lift $ setStyleAttr "bottom" (show ofs ++ "px") canvas
+
+      lift $ classAdd "fullWindow" win
+
+      lift $ requestFullScreen "window"
       return unit
     _ -> do
-      canvas <- findElt uiConf.canvasId
       lift $ setStyleAttr "width" (show (height - 10.0) ++ "px") canvas
       lift $ setStyleAttr "height" (show (height - 11.0) ++ "px") canvas
 
-      win <- findElt "window"
-      lift $ classRemove "fullWindow" win
-
-      console <- findElt uiConf.consoleId
       lift $ classRemove "hide" console
       lift $ setStyleAttr "width" (show (width - height - 30.0) ++ "px") console
       lift $ setStyleAttr "height" (show (height - 21.0) ++ "px") console

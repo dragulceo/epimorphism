@@ -89,7 +89,7 @@ LATER
   - enforce integrity of pools & module references
 v	- scripts conflicting with each other
   - module/submodule cycles??
-  - real fullscreen mode
+  - error handling for failing to enter fullscreen mode
   - handle window resizing
   - ERROR HANDLING for createImage - missing images & sync issues & the unusable image issue
   - number parsing flakey?

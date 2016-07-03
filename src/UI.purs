@@ -16,7 +16,7 @@ import Util (lg)
 
 foreign import registerEventHandler :: forall eff. (String -> Eff eff Unit) -> Eff eff Unit
 foreign import registerKeyHandler :: forall eff. (String -> Eff eff String) -> Eff eff Unit
-foreign import requestFullScreen :: forall eff. String -> Eff eff Unit
+foreign import addGlobalEventListeners :: forall eff. (String -> Eff eff Unit) -> Eff eff Unit
 
 -- PUBLIC
 initUIST :: forall eff h. STRef h UIConf -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h SystemConf -> STRef h (SystemST h) -> EpiS eff h (STRef h UIST)
@@ -26,8 +26,10 @@ initUIST ucRef ecRef esRef pRef scRef ssRef = do
   usRef <- lift $ newSTRef uiST
 
   initLayout uiConf uiST
-  lift $ registerEventHandler (command ucRef usRef ecRef esRef pRef scRef ssRef)
+  let handler = command ucRef usRef ecRef esRef pRef scRef ssRef
+  lift $ registerEventHandler handler
   lift $ registerKeyHandler (keyHandler ucRef usRef)
+  lift $ addGlobalEventListeners handler
 
   return usRef
 
@@ -37,7 +39,7 @@ keyHandler ucRef usRef char = do
   uiConf <- readSTRef ucRef
   uiST   <- readSTRef usRef
 
-  let x = lg char
+  --let x = lg char
   let spd = show uiConf.keyboardSwitchSpd
   case char of
     "1" -> do
@@ -76,7 +78,8 @@ keyHandler ucRef usRef char = do
       incS uiST "main.main_body.t" "0" "z1" "vec2" 1 spd
     "Y" -> do
       incS uiST "main.main_body.t" "0" "z1" "vec2" (-1) spd
-    "Z" -> return "dev"
+    "Z" -> return "fullScreen"
+    "À" -> return "dev"
     "Ü" -> return $ "clear"
     " " -> return $ "save"
     _   -> return $ "null"

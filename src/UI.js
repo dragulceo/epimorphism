@@ -8,23 +8,6 @@ exports.registerEventHandler = function(handler) {
   }
 };
 
-
-exports.requestFullScreen = function(id) {
-  return function() {
-    var elem = document.getElementById(id);
-    if (elem.requestFullscreen) {
-      elem.requestFullscreen();
-    } else if (elem.msRequestFullscreen) {
-      elem.msRequestFullscreen();
-    } else if (elem.mozRequestFullScreen) {
-      elem.mozRequestFullScreen();
-    } else if (elem.webkitRequestFullscreen) {
-      elem.webkitRequestFullscreen();
-    }
-	};
-};
-
-
 exports.registerKeyHandler = function(handler) {
   return function(){
 		document.onkeydown = function(event) {
@@ -36,4 +19,21 @@ exports.registerKeyHandler = function(handler) {
 			window.eventHandler(cmd);
 		};
 	};
+};
+
+
+exports.addGlobalEventListeners = function(handler) {
+  return function() {
+		var fsHandler = function(event){
+			var isFullScreen = document.fullScreen ||
+          document.mozFullScreen ||
+          document.webkitIsFullScreen;
+
+			if (!isFullScreen) {
+				handler("fullWindow")();
+			}
+		};
+
+		$(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', fsHandler);
+  }
 };

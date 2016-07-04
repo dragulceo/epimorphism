@@ -4,7 +4,7 @@ import Prelude
 import Config (Epi, Schema, SchemaEntry(..), SchemaEntryType(..))
 import Data.Array (null)
 import Data.Array (sortBy, foldM) as A
-import Data.Complex (Complex)
+import Data.Complex (inCartesian, Cartesian(Cartesian), Complex)
 import Data.List (fromList)
 import Data.Set (isEmpty, toList, Set)
 import Data.StrMap (StrMap)
@@ -73,4 +73,8 @@ serializeStArray :: (Array String) -> String
 serializeStArray ary = "[" ++ (joinWith ", " ary) ++ "]"
 
 serializeCxArray :: (Array Complex) -> String
-serializeCxArray ary = "[" ++ (joinWith ", " (map show ary)) ++ "]"
+serializeCxArray ary = "[" ++ (joinWith ", " (map showCX ary)) ++ "]"
+
+showCX :: Complex -> String
+showCX z = case (inCartesian z) of
+    (Cartesian x y) -> (format (precision 3) x) ++ " + " ++ (format (precision 3) y) ++ "i"

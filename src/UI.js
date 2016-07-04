@@ -29,11 +29,36 @@ exports.addGlobalEventListeners = function(handler) {
           document.mozFullScreen ||
           document.webkitIsFullScreen;
 
-			if (!isFullScreen) {
+			if (isFullScreen) {
+				$('#exitFullScreen').removeClass('hide');
+				$('#enterFullScreen').addClass('hide');
+			} else {
+				$('#exitFullScreen').addClass('hide');
+				$('#enterFullScreen').removeClass('hide');
+
 				handler("fullWindow")();
 			}
 		};
 
 		$(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', fsHandler);
+
+
+		var iconOverHandler =
+				function(event){
+					$('#menu-icon').addClass('hide');
+					$('#menuContainer').removeClass('hide');
+				};
+
+		$("#menu-icon").on('mouseover', iconOverHandler);
+
+
+		var menuExitHandler =
+				function(event){
+					$('#menu-icon').removeClass('hide');
+					$('#menuContainer').addClass('hide');
+				};
+
+
+		$("#menuContainer").on('mouseleave', menuExitHandler);
   }
 };

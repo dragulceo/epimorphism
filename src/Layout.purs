@@ -20,6 +20,7 @@ import System (loadLib)
 import Util (lg, indentLines)
 
 foreign import requestFullScreen :: forall eff. String -> Eff eff Unit
+foreign import requestExitFullScreen :: forall eff. Eff eff Unit
 
 initLayout :: forall eff. UIConf -> UIST -> Epi eff Unit
 initLayout uiConf uiST = do
@@ -30,9 +31,11 @@ initLayout uiConf uiST = do
 
   canvas <- findElt uiConf.canvasId
   win <- findElt "window"
+  menu <- findElt "menu"
   console <- findElt uiConf.consoleId
 
   lift $ classAdd "hide" console
+  lift $ classAdd "hide" menu
   lift $ classRemove "fullWindow" win
 
   case uiConf.windowState of
@@ -44,6 +47,9 @@ initLayout uiConf uiST = do
       lift $ setStyleAttr "bottom" (show ofs ++ "px") canvas
 
       lift $ classAdd "fullWindow" win
+      lift $ classRemove "hide" menu
+
+      lift $ requestExitFullScreen
 
       return unit
     "fullScreen" -> do
@@ -56,6 +62,7 @@ initLayout uiConf uiST = do
       lift $ classAdd "fullWindow" win
 
       lift $ requestFullScreen "window"
+      lift $ classRemove "hide" menu
       return unit
     _ -> do
       lift $ setStyleAttr "width" (show (height - 10.0) ++ "px") canvas

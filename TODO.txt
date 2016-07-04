@@ -1,42 +1,27 @@
 RELEASE
-	- fullscreen mode / fix current layout
-	- other ui mailing list, about, controls
-	- about page, gallery, etc
-
-
-  - more & better patterns
-	  - look at what we have
-	  - check out more ts. systematically
-	- interpolating between patterns?
-
-	- better hosting?
-	- savingDebugState somewhere for analysis
-  - available to users & a server to put it on
+  DEPLOY:
+  	- about page / gallery
+  	- mailing list
+  	- google analytics
+  	- resolution controls
+  	- better hosting
+  	- cross browser testing
+	SYSTEM:
+		- savingDebugState somewhere for analysis - save server?
+		- better show for CX
+		- there are a bunch of dummy scripts assigned to things atm
+		- keyboard controls
+		  - misc (fullscreen/dev/etc)
+			- par & zn
+  CONTENTS:
+	  - interpolating between patterns?
+		- length_scale
 
 MISC
-  - better show for CX
-	- there are a bunch of dummy scripts assigned to things atm
 
-
-DEMO
-  - build out library & interface
-	  - randomMain
-	  - t
-		- seed
-		- color
-		- post
-		- minor scripts & images infr
 
   - weird divide by zero issue - glitch in content
   - choppiness when doing a bunch of switching.  might be image uploading.  there is a error "texImage2D: invalid image" when a bunch of image switches happen
-
-
-
-
-
-
-
-
 
 
 
@@ -87,7 +72,7 @@ LATER
   - investigate dsl for scripts
   - use fb as texture source
   - enforce integrity of pools & module references
-v	- scripts conflicting with each other
+	- scripts conflicting with each other
   - module/submodule cycles??
   - error handling for failing to enter fullscreen mode
   - handle window resizing
@@ -109,7 +94,6 @@ v	- scripts conflicting with each other
   - test on android
 	- https://www.khronos.org/registry/webgl/extensions/WEBGL_debug_shaders/
 	- unit tests
-  - website
   - logging system
   - programming guidelines document - i.e make sure all tree modifications rebuild mod ref lib
   - better kernel debug support

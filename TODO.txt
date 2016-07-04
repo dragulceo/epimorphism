@@ -2,7 +2,6 @@ RELEASE
   DEPLOY:
   	- about page / gallery
   	- mailing list
-  	- google analytics
   	- resolution controls
   	- better hosting
   	- cross browser testing
@@ -10,27 +9,22 @@ RELEASE
 		- savingDebugState somewhere for analysis - save server?
 		- better show for CX
 		- there are a bunch of dummy scripts assigned to things atm
+		- fps overlay
+		- when starting the app
 		- keyboard controls
 		  - misc (fullscreen/dev/etc)
 			- par & zn
   CONTENTS:
+	  - initial state
 	  - interpolating between patterns?
 		- length_scale
-
-MISC
-
-
-  - weird divide by zero issue - glitch in content
-  - choppiness when doing a bunch of switching.  might be image uploading.  there is a error "texImage2D: invalid image" when a bunch of image switches happen
-
-
-
 
 
 NEXT
  SYSTEM
-  - way of switching modules while keeping phase/scripts.  isn't recompiling ghetto(what?)
-	- keep scripts when switching modules?
+  - scripts
+    - way of switching modules while keeping phase/scripts.  isn't recompiling ghetto(what?)
+	  - keep scripts when switching modules?
 	- patternRefPool?
   - make patterns modules/pattern level scripts
   - mainRef refernece in randomMain seems ghetto
@@ -40,6 +34,9 @@ UI
   - UI.purs is ghetto
 
 LATER
+  - weird divide by zero issue - glitch in content
+  - choppiness when doing a bunch of switching.  might be image uploading.  there is a error "texImage2D: invalid image" when a bunch of image switches happen
+
   - limit to tree size?
   - more debugState info
   - hard pause button (do nothing at all, not just tSpd=0)

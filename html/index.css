@@ -47,9 +47,7 @@
 		bottom:0px;
 		right:0px;
 		padding:5px;
-
-		width:210px;
-
+		width:160px;
 
 		-webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
     -moz-animation: fadein 1s; /* Firefox < 16 */
@@ -60,7 +58,7 @@
 
 #menuContainer a{
 		display:block;
-		font-size:25px;
+		font-size:18px;
 		color: rgba(255,255,255,0.50);
 		text-decoration:none;
 		padding:10px;
@@ -72,7 +70,7 @@
 
 #menuContainer a:hover{
 		color:rgba(255,255,255,1.0);
-		font-size:26px;
+		font-size:19px;
 }
 
 

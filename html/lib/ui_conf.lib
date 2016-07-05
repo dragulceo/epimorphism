@@ -7,6 +7,11 @@ showFps false
 windowState dev
 uiUpdateFreq 10
 keyboardSwitchSpd 0.4
+keySet dev
 
 --full < default
 windowState fullWindow
+
+--prod < default
+windowState fullWindow
+keySet prod

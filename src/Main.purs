@@ -16,7 +16,7 @@ import Pattern (importPattern)
 import Script (runScripts)
 import System (initSystemST, loadLib)
 import UI (initUIST)
-import Util (lg, requestAnimationFrame, now, Now, handleError)
+import Util (requestAnimationFrame, now, Now, handleError)
 
 host :: String
 host = ""

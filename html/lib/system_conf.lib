@@ -1,10 +1,9 @@
 --default
 initEngineConf default
-initUIConf full
+initUIConf default
 initPattern main1
 
---test2 < default
-initPattern test2
-
---test < default
-initPattern test
+--prod
+initEngineConf default
+initUIConf prod
+initPattern main1

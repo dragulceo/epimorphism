@@ -108,7 +108,7 @@ type UIConf = {
   , windowState       :: String
   , uiUpdateFreq      :: Int
   , keyboardSwitchSpd :: Number
-  -- , showFps :: Boolean
+  , keySet            :: String
 }
 
 uiConfSchema :: Schema
@@ -120,7 +120,8 @@ uiConfSchema = [
   SchemaEntry SE_B  "showFps",
   SchemaEntry SE_St "windowState",
   SchemaEntry SE_I  "uiUpdateFreq",
-  SchemaEntry SE_N  "keyboardSwitchSpd"
+  SchemaEntry SE_N  "keyboardSwitchSpd",
+  SchemaEntry SE_St "keySet"
 ]
 
 type UIST = {

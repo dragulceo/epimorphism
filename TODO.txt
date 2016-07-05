@@ -6,8 +6,7 @@ RELEASE
 
   	- cross browser testing
 		- keyboard controls
-		  - turn off in production?
-		  - par & zn
+		  - clean up UI & zn
 	SYSTEM:
 	  - js console commands
 		- save debugState somewhere for analysis - save server?

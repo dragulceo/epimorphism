@@ -19,7 +19,6 @@ exports.requestFullScreen = function(id) {
 
 
 exports.requestExitFullScreen = function() {
-	console.log("fart")
 	if (document.exitFullscreen) {
 		document.exitFullscreen();
 	} else if (document.webkitExitFullscreen) {

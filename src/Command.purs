@@ -9,13 +9,15 @@ import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Array (length, head, tail, foldM, (!!))
+import Data.Int (fromString)
 import Data.List (fromList)
+import Data.Maybe (Maybe(Just))
 import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (toList, StrMap, insert)
 import Data.String (joinWith, split)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Engine (clearFB)
+import Engine (initEngineST, clearFB)
 import Graphics.Canvas (Canvas)
 import Layout (initLayout)
 import Pattern (ImportObj(ImportScript), importScript, findModule)
@@ -25,6 +27,7 @@ import Util (uuid, lg, handleError)
 
 command :: forall eff h. STRef h UIConf -> STRef h UIST -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h SystemConf -> STRef h (SystemST h) -> String -> Eff (canvas :: Canvas, dom :: DOM, st :: ST h | eff) Unit
 command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
+  systemConf <- lift $ readSTRef scRef
   systemST   <- lift $ readSTRef ssRef
   uiConf     <- lift $ readSTRef ucRef
   uiST       <- lift $ readSTRef usRef
@@ -75,13 +78,31 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         initLayout uiConf' uiST
 
         return unit
+      "showFps" -> do
+        lift $ modifySTRef ucRef (\ui -> ui {showFps = not ui.showFps})
+        uiConf' <- lift $ readSTRef ucRef
+        initLayout uiConf' uiST
+
+        return unit
+      "setKernelDim" -> do
+        case args of
+          [dim] -> do
+            case (fromString dim) of
+              Just dim' -> do
+                lift $ modifySTRef ecRef (\ec -> ec {kernelDim = dim'})
+                engineConf' <- lift $ readSTRef ecRef
+                initEngineST systemConf engineConf' systemST pattern uiConf.canvasId (Just esRef)
+
+                return unit
+              _ -> return unit -- should probably do some error handling here
+          _ -> return unit -- should probably do some error handling here
+        return unit
       "clear" -> do
         clearFB engineConf engineST
       _ -> throwError $ "Unknown command: " ++ msg
 
 
 -- PRIVATE
-
 save :: forall eff h. (SystemST h) -> Pattern -> EpiS eff h Unit
 save systemST pattern = do
   -- pattern

@@ -104,6 +104,7 @@ type UIConf = {
   , consoleId         :: String
   , debugStateId      :: String
   , fpsId             :: String
+  , showFps           :: Boolean
   , windowState       :: String
   , uiUpdateFreq      :: Int
   , keyboardSwitchSpd :: Number
@@ -116,6 +117,7 @@ uiConfSchema = [
   SchemaEntry SE_St "consoleId",
   SchemaEntry SE_St "debugStateId",
   SchemaEntry SE_St "fpsId",
+  SchemaEntry SE_B  "showFps",
   SchemaEntry SE_St "windowState",
   SchemaEntry SE_I  "uiUpdateFreq",
   SchemaEntry SE_N  "keyboardSwitchSpd"

@@ -1,3 +1,7 @@
+body {
+		font-family:helvetica;
+}
+
 #glcanvas {
     float:left;
 }
@@ -7,6 +11,8 @@
     border: solid 1px green;
     margin-left: 10px;
     padding: 5px;
+		overflow-y: scroll;
+		overflow-x: scroll;
 }
 
 #debugState {
@@ -15,12 +21,15 @@
 
 #showFps {
 		color: #0F0;
-		float: left;
+		position:absolute;
+		top:20px;
+		left:20px;
 		font-weight:bold;
+		z-index: 200;
+		font-size:25px;
 }
 
 #buttons {
-		padding-left:75px;
 }
 
 #menu {
@@ -40,8 +49,8 @@
 		background-color:rgba(255,255,255,0.05);
 
 		color: rgba(255,255,255,0.50);
-		font-family:helvetica;
 		text-align:center;
+		font-size:18px;
 
 		position:absolute;
 		bottom:0px;
@@ -56,9 +65,13 @@
     animation: fadein 1s;
 }
 
-#menuContainer a{
+#menuContainer select {
+		background-color: rgba(255,255,255,0.1);
+		color: rgba(255,255,255,0.7);
+}
+
+#menuContainer a, #resolution{
 		display:block;
-		font-size:18px;
 		color: rgba(255,255,255,0.50);
 		text-decoration:none;
 		padding:10px;
@@ -70,7 +83,6 @@
 
 #menuContainer a:hover{
 		color:rgba(255,255,255,1.0);
-		font-size:19px;
 }
 
 

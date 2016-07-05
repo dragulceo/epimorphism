@@ -13,7 +13,7 @@ import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Reader.Class (ask)
 import Control.Monad.Reader.Trans (lift)
-import Control.Monad.ST (STRef, newSTRef, modifySTRef, readSTRef)
+import Control.Monad.ST (writeSTRef, STRef, newSTRef, modifySTRef, readSTRef)
 import Data.Array (length, concatMap, (!!), (..), zip, foldM)
 import Data.Complex (Cartesian(..), inCartesian)
 import Data.Either (either)
@@ -149,9 +149,10 @@ setShaders sysConf esRef sys pattern = do
   return unit
 
 
--- initialize the rendering engine & create state
-initEngineST :: forall eff h. SystemConf -> EngineConf -> SystemST h -> Pattern -> String -> EpiS eff h (STRef h EngineST)
-initEngineST sysConf engineConf sys pattern canvasId = do
+-- initialize the rendering engine & create state.  updates an existing state if passed
+-- maybe validate that kernelDim > 0?
+initEngineST :: forall eff h. SystemConf -> EngineConf -> SystemST h -> Pattern -> String -> Maybe (STRef h EngineST) -> EpiS eff h (STRef h EngineST)
+initEngineST sysConf engineConf sys pattern canvasId esRef' = do
   -- find canvas & create context
   canvasM <- liftEff $ getCanvasElementById canvasId
   canvas <- case canvasM of
@@ -163,10 +164,16 @@ initEngineST sysConf engineConf sys pattern canvasId = do
     Just c -> return c
     Nothing -> throwError "Unable to get a webgl context!!!"
 
-  -- default state
   empty <- lift $ emptyImage engineConf.kernelDim
-  let es = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, auxImg: [], ctx: ctx, empty}
-  esRef <- lift $ newSTRef es
+
+  -- get reference
+  esRef <- case esRef' of
+    Just ref -> return ref
+    Nothing -> do
+      let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, auxImg: [], ctx: ctx, empty}
+      lift $ newSTRef tmp
+
+  es <- lift $ readSTRef esRef
 
   -- if we change kernel_dim we need to redo this
   let dim = engineConf.kernelDim
@@ -190,10 +197,10 @@ initEngineST sysConf engineConf sys pattern canvasId = do
     }
 
   -- set shaders
-  esRef' <- lift $ newSTRef res
-  setShaders sysConf esRef' sys pattern
+  lift $ writeSTRef esRef res
+  setShaders sysConf esRef sys pattern
 
-  return esRef'
+  return esRef
 
 
 -- do the thing!

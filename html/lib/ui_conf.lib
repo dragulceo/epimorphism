@@ -3,6 +3,7 @@ canvasId glcanvas
 consoleId console
 debugStateId debugState
 fpsId showFps
+showFps false
 windowState dev
 uiUpdateFreq 10
 keyboardSwitchSpd 0.4

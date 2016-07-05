@@ -8,7 +8,7 @@ import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
 import Data.Int (round, toNumber)
-import Data.Maybe (fromMaybe, Maybe(Just))
+import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
 import Engine (initEngineST, renderFrame, setShaders)
 import Graphics.Canvas (Canvas)
 import Layout (updateLayout)
@@ -57,7 +57,7 @@ init = do
   systemST' <- lift $ readSTRef ssRef
 
   -- init engine & ui states
-  esRef <- initEngineST systemConf' engineConf systemST' pattern' uiConf.canvasId
+  esRef <- initEngineST systemConf' engineConf systemST' pattern' uiConf.canvasId Nothing
   usRef <- initUIST ucRef ecRef esRef pRef scRef ssRef
 
   return {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef}

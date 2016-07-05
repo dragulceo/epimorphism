@@ -12,13 +12,22 @@
 </head>
 <body>
 	<div id="window">
+    <div id="showFps" class="hide"></div>
 		<div id="menu">
 			<img id="menu-icon" src="/images/menu-icon1-5.png"/>
 			<div id="menuContainer" class="hide">
+				<a target="_blank" href="/about.html"> About </a>
 				<a id="enterFullScreen" href="javascript:window.eventHandler('fullScreen')"> Full Screen </a>
 				<a id="exitFullScreen" class="hide" href="javascript:window.eventHandler('fullWindow')"> Exit Full Screen </a>
-				<a href="javascript:void(0)">Resolution</a>
-				<a href="/about.html"> About </a>
+				<div id="resolution">
+				Resolution
+				<select id="resolutionSel">
+					<option value="512">low</option>
+					<option value="1024" selected>medium</option>
+					<option value="2048">high</option>
+					<option value="3072">ultra</option>
+				</select>
+				</div>
 			</div>
 		</div>
     <canvas id="glcanvas">
@@ -26,10 +35,9 @@
     </canvas>
 	</div>
   <div id="console" class="hide">
-    <div style="color:#0F0" id="showFps"></div>
 		<div id="buttons">
 			<button onclick="window.eventHandler('pause')"> Pause </button>
-			<button onclick="window.eventHandler('fullWindow')"> Full Window </button>
+			<button onclick="window.eventHandler('fullWindow')"> Exit </button>
 		</div>
 		<pre id="debugState"> </pre>
   </div>

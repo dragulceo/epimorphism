@@ -10,9 +10,10 @@ exports.registerEventHandler = function(handler) {
 
 exports.registerKeyHandler = function(handler) {
   return function(){
-		document.onkeydown = function(event) {
-			var code = String.fromCharCode(event.keyCode);
-			var cmd = handler(code)();
+		document.onkeypress = function(event) {
+			var code = event.which || event.keyCode
+			var chr = String.fromCharCode(code);
+			var cmd = handler(chr)();
 // fix me
 //			if(cmd != "null")
 //				event.preventDefault();
@@ -60,5 +61,13 @@ exports.addGlobalEventListeners = function(handler) {
 
 
 		$("#menuContainer").on('mouseleave', menuExitHandler);
+
+
+		var resChangeHandler =
+				function (){
+					handler("setKernelDim " + this.value)();
+				};
+
+		$("#resolutionSel").on('change', resChangeHandler);
   }
 };

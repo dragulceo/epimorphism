@@ -21,19 +21,21 @@ foreign import addGlobalEventListeners :: forall eff. (String -> Eff eff Unit) -
 -- PUBLIC
 initUIST :: forall eff h. STRef h UIConf -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h SystemConf -> STRef h (SystemST h) -> EpiS eff h (STRef h UIST)
 initUIST ucRef ecRef esRef pRef scRef ssRef = do
-  uiConf <- lift $ readSTRef ucRef
   let uiST = defaultUIST
-  usRef <- lift $ newSTRef uiST
+  usRef  <- lift $ newSTRef uiST
+  uiConf <- lift $ readSTRef ucRef
 
   initLayout uiConf uiST
+
   let handler = command ucRef usRef ecRef esRef pRef scRef ssRef
+  lift $ addGlobalEventListeners handler
   lift $ registerEventHandler handler
   lift $ registerKeyHandler (keyHandler ucRef usRef)
-  lift $ addGlobalEventListeners handler
 
   return usRef
 
 
+-- converts key codes into command sequences
 keyHandler :: forall eff h. STRef h UIConf -> STRef h UIST -> String -> Eff (canvas :: Canvas, dom :: DOM, st :: ST h | eff) String
 keyHandler ucRef usRef char = do
   uiConf <- readSTRef ucRef
@@ -78,9 +80,9 @@ keyHandler ucRef usRef char = do
       incS uiST "main.main_body.t" "0" "z1" "vec2" 1 spd
     "Y" -> do
       incS uiST "main.main_body.t" "0" "z1" "vec2" (-1) spd
-    "Z" -> return "fullScreen"
-    "À" -> return "dev"
-    "Ü" -> return $ "clear"
+    "~" -> return "dev"
+    "|" -> return "showFps"
+    "\\" -> return $ "clear"
     " " -> return $ "save"
     _   -> return $ "null"
   where

@@ -9,7 +9,7 @@ import Data.Foldable (or)
 import Data.StrMap (fromFoldable, insert, member, keys)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Path (zpath, ppath, zfix, pfix)
+import Path (incZn, zpath, ppath, zfix, pfix)
 import Pattern (findModule')
 import ScriptUtil (createScript)
 import Switch (incScript, incImage, incMod, finishSwitch, incSub)
@@ -145,6 +145,7 @@ lookupScriptFN n = case n of
   "incSub"       -> return incSub
   "incImage"     -> return incImage
   "incScript"    -> return incScript
+  "incZn"        -> return incZn
   "finishSwitch" -> return finishSwitch
   "randomMain1"  -> return randomMain1
   _              -> throwError $ "script function not found: " ++ n

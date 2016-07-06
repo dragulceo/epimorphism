@@ -3,11 +3,11 @@ RELEASE
   	- about page / gallery
   	- mailing list
   	- better hosting?
-
+		- contact@epimorphism.com/mail server
+	SYSTEM:
   	- cross browser testing
 		- keyboard controls
-		  - clean up UI & zn
-	SYSTEM:
+		  - zn
 	  - js console commands
 		- save debugState somewhere for analysis - save server?
 		- there are a bunch of dummy scripts assigned to things atm
@@ -27,8 +27,6 @@ NEXT
   - mainRef refernece in randomMain seems ghetto
   - module.modules should be [SubModule = SubLib String | SubPool String] or something
   - remove mid from scripts?
-UI
-  - UI.purs is ghetto
 
 LATER
   - really choppy at higher resolutions

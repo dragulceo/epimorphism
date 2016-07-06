@@ -1,16 +1,19 @@
 module Path where
 
 import Prelude
+import Config (ScriptFn)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, readSTRef)
+import Data.Array (index)
 import Data.Array (updateAt) as A
-import Data.Complex (outCartesian, outPolar, Polar(Polar), Cartesian(Cartesian))
+import Data.Complex (inPolar, outPolar, outCartesian, Polar(Polar), Cartesian(Cartesian))
 import Data.Maybe (Maybe(Just))
-import Data.StrMap (insert)
+import Data.StrMap (fromFoldable, insert)
+import Data.Tuple (Tuple(Tuple))
 import Math (cos, floor, pi)
-
-import Config (ScriptFn)
+import Pattern (purgeScript)
+import ScriptUtil (createScript)
 import System (loadLib)
 import Util (numFromStringE, intFromStringE)
 
@@ -102,28 +105,72 @@ zpath ssRef pRef self t mid sRef = do
 
   -- lookup path function
   fn <- case pathN of
+    "intrp" -> do
+      fromR <- (loadLib "fromR" dt "intrp fromR") >>= numFromStringE
+      fromTh <- (loadLib "fromTh" dt "intrp fromTh") >>= numFromStringE
+      toR <- (loadLib "toR" dt "intrp toR") >>= numFromStringE
+      toTh <- (loadLib "toTh" dt "intrp toTh") >>= numFromStringE
+      return $ \t ->
+        Tuple (outPolar $ Polar (toTh * t + fromTh * (1.0 - t)) (toR * t + fromR * (1.0 - t))) (t >= 1.0)
     "linx" -> return $ \t ->
-      outCartesian $ Cartesian t 0.0
+      Tuple (outCartesian $ Cartesian t 0.0) false
     "liny" -> return $ \t ->
-      outCartesian $ Cartesian 0.0 t
+      Tuple (outCartesian $ Cartesian 0.0 t) false
     "circle" -> do
       r <- (loadLib "r" dt "zpath circle r") >>= numFromStringE
       return $ \t ->
-        outPolar $ Polar (2.0 * pi * t) r
+        Tuple (outPolar $ Polar (2.0 * pi * t) r) false
     "rose" -> do
       a <- (loadLib "a" dt "zpath rose a") >>= numFromStringE
       b <- (loadLib "b" dt "zpath rose b") >>= numFromStringE
       c <- (loadLib "c" dt "zpath rose c") >>= numFromStringE
       return $ \t ->
-        outPolar $ Polar (2.0 * pi * t) (a * cos(b * t) + c)
+        Tuple (outPolar $ Polar (2.0 * pi * t) (a * cos(b * t) + c)) false
     _ -> throwError $ "Unknown z path : " ++ pathN
 
   -- execute
-  let z' = fn (t * spd)
+  (Tuple z' remove) <- return $ fn (t * spd)
 
   -- modify data
   case (A.updateAt idx z' m.zn) of
     (Just zn') -> lift $ modifySTRef mRef (\m' -> m' {zn = zn'})
     _ -> throwError $ "zn idx out of bound : " ++ (show idx) ++ " : in zpath"
+
+  return false
+
+
+-- increment Zn
+incZn :: forall eff h. ScriptFn eff h
+incZn ssRef pRef self t mid sRef = do
+  systemST <- lift $ readSTRef ssRef
+  scr <- lift $ readSTRef sRef
+  let dt = scr.dt
+
+  mRef <- loadLib mid systemST.moduleRefPool "incZn module"
+  mod  <- lift $ readSTRef mRef
+
+  idx <- (loadLib "idx" dt "incZn idx") >>= intFromStringE
+  ofs <-  loadLib "ofs" dt "incZn ofs"
+
+  z <- case (index mod.zn idx) of
+    Just z' -> return z'
+    _ -> throwError "index out of bounds - incZn"
+
+  (Polar fromTh fromR) <- return $ inPolar z
+
+
+  --(Polar toTh toR) <- case ofs of
+  --  "1" -> do
+
+  let toTh = 0.0
+  let toR = 0.0
+
+
+
+  createScript ssRef mid "default" "zpath" $ fromFoldable [(Tuple "fn" "intrp"), (Tuple "spd" "0.1"), (Tuple "fromTh" (show fromTh)), (Tuple "toTh" (show toTh)),
+                                                           (Tuple "fromR" (show fromR)), (Tuple "toR" (show toR))]
+
+  -- remove self
+  purgeScript ssRef self
 
   return false

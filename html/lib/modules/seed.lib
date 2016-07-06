@@ -9,3 +9,9 @@ component seed_simple
 par {seed_w: 0.2}
 modules {t: t_wrap}
 var seed
+
+--seed_border
+flags {family: seed}
+par {w: 0.2, alpha: 1.0}
+component seed_border
+var seed

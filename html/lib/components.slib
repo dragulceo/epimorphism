@@ -448,7 +448,7 @@ seed seed_multi {{
 	z = z_i;
 }}
 
-seed seed_simple_cool {{
+seed seed_border {{
 	vec2 z_i = z;
   %t%
 
@@ -471,34 +471,6 @@ seed seed_simple_cool {{
   }
   wx = w;
   vec4 frame_w = vec4(w, (abs(w-VOID_W) < 0.00001 ? 0.0 : w * @alpha@), wx, wy);
-  seed = vec4(frame_w.x, 0, 0, frame_w.y);
-	z = z_i;
-}}
-
-
-seed seed_simple {{
-	vec2 z_i = z;
-  %t%
-
-  float w = VOID_W;
-  float wx = (z.x + @seed_w@) / (2.0 * @seed_w@);
-  float wy = (z.y + @seed_w@) / (2.0 * @seed_w@);
-
-  if(z.x >= z.y && z.x >= -1.0 * z.y && z.x > (1.0 - @seed_w@)){
-    w = (z.x - (1.0 - @seed_w@)) / @seed_w@;
-    wy = z.y / (0.5 * @seed_w@) - 0.5;
-  }else if(z.y >= z.x && z.y >= -1.0 * z.x && z.y > (1.0 - @seed_w@)){
-    w = (z.y - (1.0 - @seed_w@)) / @seed_w@;
-    wy = z.x / (0.5 * @seed_w@) - 0.5;
-  }else if(z.y >= z.x && z.y <= -1.0 * z.x && z.x < -1.0 * (1.0 - @seed_w@)){
-    w = (-1.0 * (1.0 - @seed_w@) - z.x) / @seed_w@;
-    wy = z.y / (0.5 * @seed_w@) - 0.5;
-  }else if(z.x >= z.y && z.x <= -1.0 * z.y && z.y < -1.0 * (1.0 - @seed_w@)){
-    w = (-1.0 * (1.0 - @seed_w@) - z.y) / @seed_w@;
-    wy = z.x / (0.5 * @seed_w@) - 0.5;
-  }
-  wx = w;
-  vec4 frame_w = vec4(w, (abs(w-VOID_W) < 0.00001 ? 0.0 : 1.0), wx, wy);
   seed = vec4(frame_w.x, 0, 0, frame_w.y);
 	z = z_i;
 }}

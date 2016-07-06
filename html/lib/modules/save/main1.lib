@@ -3,7 +3,7 @@ modules {main_body: main1_body}
 
 --main1_body < default_main_body
 flags {family: main_body}
-modules {t: t_sinhz_tst, seed: seed_simple_cool, color: rotate_hsv1}
+modules {t: t_sinhz_tst, seed: seed_borderM, color: rotate_hsv1}
 scripts [randomMain1]
 
 --t_sinhz_tst
@@ -15,13 +15,9 @@ sub {t_inner: sinhz(z)}
 var z
 scripts [circle_0, rose1_0, rose3_2]
 
-
---seed_simple_cool
-flags {family: seed}
-component seed_simple_cool
+--seed_borderM < seed_border
 par {w: 0.5, alpha: 0.5}
 modules {t: ts_wrap_linx3'}
-var seed
 scripts [ssc_w1, ssc_a1]
 
 --ts_wrap_linx3'

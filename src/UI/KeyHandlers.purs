@@ -31,16 +31,18 @@ devKeyHandler ucRef usRef char = do
   case char of
     "1" -> do
       inc uiConf uiST "Sub" "main.main_body.t" "t_inner" "t_inner" "vec2" 1
-    "Q" -> do
+    "q" -> do
       inc uiConf uiST "Sub" "main.main_body.t" "t_inner" "t_inner" "vec2" (-1)
     "2" -> do
       inc uiConf uiST "Mod" "disp" "post" "post_hlim" "vec4" 1
-    "W" -> do
+    "w" -> do
       inc uiConf uiST "Mod" "disp" "post" "post_hlim" "vec4" (-1)
     "3" -> do
       inc uiConf uiST "Image" "main.main_body.seed" "0" "basic_images" "vec4" 1
-    "E" -> do
+    "e" -> do
       inc uiConf uiST "Image" "main.main_body.seed" "0" "basic_images" "vec4" (-1)
+    "a" -> do
+      return "scr incZn main.body.t idx:0 ofs:1"
     _   -> commonKeyHandler ucRef usRef char
   where
     inc uiConf uiST typ addr sub lib dim ofs = do

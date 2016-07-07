@@ -19,7 +19,7 @@
 				<a target="_blank" href="/about.html"> About </a>
 				<a id="enterFullScreen" href="javascript:window.eventHandler('fullScreen')"> Full Screen </a>
 				<a id="exitFullScreen" class="hide" href="javascript:window.eventHandler('fullWindow')"> Exit Full Screen </a>
-				<div id="resolution">
+				<span id="resolution">
 				Resolution
 				<select id="resolutionSel">
 					<option value="512">low</option>
@@ -27,10 +27,10 @@
 					<option value="2048">high</option>
 					<option value="3072">ultra</option>
 				</select>
-				</div>
+				</span>
 			</div>
 		</div>
-    <canvas id="glcanvas">
+    <canvas id="glcanvas" class="tmp">
       Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
     </canvas>
 	</div>

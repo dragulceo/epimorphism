@@ -2,6 +2,7 @@ module Path where
 
 import Prelude
 import Config (ScriptFn)
+import Control.Monad (when)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, readSTRef)
@@ -11,11 +12,11 @@ import Data.Complex (inPolar, outPolar, outCartesian, Polar(Polar), Cartesian(Ca
 import Data.Maybe (Maybe(Just))
 import Data.StrMap (fromFoldable, insert)
 import Data.Tuple (Tuple(Tuple))
-import Math (cos, floor, pi)
+import Math (min, pi, round, cos, floor)
 import Pattern (purgeScript)
 import ScriptUtil (createScript)
 import System (loadLib)
-import Util (numFromStringE, intFromStringE)
+import Util (lg, numFromStringE, intFromStringE)
 
 -- fixed point
 pfix :: forall eff h. ScriptFn eff h
@@ -110,8 +111,9 @@ zpath ssRef pRef self t mid sRef = do
       fromTh <- (loadLib "fromTh" dt "intrp fromTh") >>= numFromStringE
       toR <- (loadLib "toR" dt "intrp toR") >>= numFromStringE
       toTh <- (loadLib "toTh" dt "intrp toTh") >>= numFromStringE
-      return $ \t ->
-        Tuple (outPolar $ Polar (toTh * t + fromTh * (1.0 - t)) (toR * t + fromR * (1.0 - t))) (t >= 1.0)
+
+      return $ \t -> let t' = (min t 1.0) in
+        Tuple (outPolar $ Polar (toTh * t' + fromTh * (1.0 - t')) (toR * t' + fromR * (1.0 - t'))) (t >= 1.0)
     "linx" -> return $ \t ->
       Tuple (outCartesian $ Cartesian t 0.0) false
     "liny" -> return $ \t ->
@@ -130,6 +132,10 @@ zpath ssRef pRef self t mid sRef = do
 
   -- execute
   (Tuple z' remove) <- return $ fn (t * spd)
+
+  -- remove self
+  when remove do
+    purgeScript ssRef self
 
   -- modify data
   case (A.updateAt idx z' m.zn) of
@@ -158,16 +164,28 @@ incZn ssRef pRef self t mid sRef = do
 
   (Polar fromTh fromR) <- return $ inPolar z
 
+  let incR = 0.1
+  let incTh = 3.1415926535 / 4.0
 
-  --(Polar toTh toR) <- case ofs of
-  --  "1" -> do
+  (Polar toTh toR) <- case ofs of
+    "1" -> do
+      let new = (round (fromR / incR + 1.0)) * incR
+      return $ (Polar fromTh new)
+    "-1" -> do
+      let new = (round (fromR / incR - 1.0)) * incR
+      return $ (Polar fromTh new)
+    "i" -> do
+      let new = (round (fromTh / incTh + 1.0)) * incTh
+      return $ (Polar new fromR)
+    "-i" -> do
+      let new = (round (fromTh / incTh - 1.0)) * incTh
+      return $ (Polar new fromR)
+    _ -> throwError "offset should be +-1 or +-i"
 
-  let toTh = 0.0
-  let toR = 0.0
+  let a = lg toTh
+  let b = lg toR
 
-
-
-  createScript ssRef mid "default" "zpath" $ fromFoldable [(Tuple "fn" "intrp"), (Tuple "spd" "0.1"), (Tuple "fromTh" (show fromTh)), (Tuple "toTh" (show toTh)),
+  createScript ssRef mid "default" "zpath" $ fromFoldable [(Tuple "path" "intrp"), (Tuple "idx" (show idx)), (Tuple "spd" "4.0"), (Tuple "fromTh" (show fromTh)), (Tuple "toTh" (show toTh)),
                                                            (Tuple "fromR" (show fromR)), (Tuple "toR" (show toR))]
 
   -- remove self

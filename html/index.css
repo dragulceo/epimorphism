@@ -57,7 +57,9 @@ body {
 		right:0px;
 		padding:5px;
 		width:160px;
+}
 
+#menuContainer.fadeIn{
 		-webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
     -moz-animation: fadein 1s; /* Firefox < 16 */
     -ms-animation: fadein 1s; /* Internet Explorer */
@@ -65,9 +67,9 @@ body {
     animation: fadein 1s;
 }
 
-#menuContainer select {
-		background-color: rgba(255,255,255,0.1);
-		color: rgba(255,255,255,0.7);
+#menuContainer select, #menuContainer option{
+		background-color: rgba(255,255,255,0.4);
+		color: black;
 }
 
 #menuContainer a, #resolution{
@@ -90,7 +92,7 @@ body {
 		display:none;
 }
 
-.fullWindow, #window:-webkit-full-screen{
+.fullWindow{
 		position:fixed;
     padding:0;
     margin:0;
@@ -105,7 +107,7 @@ body {
 }
 
 
-.fullWindow #glcanvas, #window:-webkit-full-screen #glcanvas{
+.fullWindow #glcanvas{
 		position:fixed;
     padding:0;
     margin:0;
@@ -114,7 +116,6 @@ body {
 
     width: 100%;
     background:rgba(255,255,255,0.5);
-
 }
 
 

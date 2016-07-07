@@ -42,7 +42,21 @@ devKeyHandler ucRef usRef char = do
     "e" -> do
       inc uiConf uiST "Image" "main.main_body.seed" "0" "basic_images" "vec4" (-1)
     "a" -> do
-      return "scr incZn main.body.t idx:0 ofs:1"
+      return "scr incZn main.main_body.t idx:0 ofs:1"
+    "z" -> do
+      return "scr incZn main.main_body.t idx:0 ofs:-1"
+    "A" -> do
+      return "scr incZn main.main_body.t idx:0 ofs:i"
+    "Z" -> do
+      return "scr incZn main.main_body.t idx:0 ofs:-i"
+    "s" -> do
+      return "scr incZn main.main_body.t idx:1 ofs:1"
+    "x" -> do
+      return "scr incZn main.main_body.t idx:1 ofs:-1"
+    "S" -> do
+      return "scr incZn main.main_body.t idx:1 ofs:i"
+    "X" -> do
+      return "scr incZn main.main_body.t idx:1 ofs:-i"
     _   -> commonKeyHandler ucRef usRef char
   where
     inc uiConf uiST typ addr sub lib dim ofs = do

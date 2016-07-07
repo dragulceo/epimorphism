@@ -4,10 +4,10 @@ RELEASE
   	- mailing list
   	- better hosting?
 		- contact@epimorphism.com/mail server
+		- test in ie
+		- firefox fullscreen
 	SYSTEM:
-  	- cross browser testing
-		- keyboard controls
-		  - zn
+	  - full screen isnt completely centered
 	  - js console commands
 		- save debugState somewhere for analysis - save server?
 		- there are a bunch of dummy scripts assigned to things atm

@@ -1,7 +1,7 @@
 --default
 initEngineConf default
-initUIConf default
-initPattern main1
+initUIConf prod
+initPattern default
 
 --prod
 initEngineConf default

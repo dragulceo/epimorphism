@@ -48,6 +48,7 @@ exports.addGlobalEventListeners = function(handler) {
 				function(event){
 					$('#menu-icon').addClass('hide');
 					$('#menuContainer').removeClass('hide');
+					$('#menuContainer').addClass('fadeIn');
 				};
 
 		$("#menu-icon").on('mouseover', iconOverHandler);
@@ -55,10 +56,12 @@ exports.addGlobalEventListeners = function(handler) {
 
 		var menuExitHandler =
 				function(event){
-					$('#menu-icon').removeClass('hide');
-					$('#menuContainer').addClass('hide');
+					if($.inArray(event.target.tagName.toLowerCase(), ["select", "option", "input", "a", "span"]) == -1){
+						$('#menu-icon').removeClass('hide');
+						$('#menuContainer').addClass('hide');
+						$('#menuContainer').removeClass('fadeIn');
+					}
 				};
-
 
 		$("#menuContainer").on('mouseleave', menuExitHandler);
 

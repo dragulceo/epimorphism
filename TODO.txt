@@ -5,9 +5,7 @@ RELEASE
   	- better hosting?
 		- contact@epimorphism.com/mail server
 		- test in ie
-		- firefox fullscreen
 	SYSTEM:
-	  - full screen isnt completely centered
 	  - js console commands
 		- save debugState somewhere for analysis - save server?
 		- there are a bunch of dummy scripts assigned to things atm
@@ -29,6 +27,7 @@ NEXT
   - remove mid from scripts?
 
 LATER
+  - weird when opening console in fullscreen
   - really choppy at higher resolutions
   - addGlobalEventListeners is a bit ghetto
   - weird divide by zero issue - glitch in content
@@ -69,7 +68,6 @@ LATER
 	- scripts conflicting with each other
   - module/submodule cycles??
   - error handling for failing to enter fullscreen mode
-  - handle window resizing
   - ERROR HANDLING for createImage - missing images & sync issues & the unusable image issue
   - number parsing flakey?
   - engine stability/lost context - https://www.khronos.org/registry/webgl/extensions/WEBGL_lose_context/

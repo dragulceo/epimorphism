@@ -4,21 +4,21 @@
     <title>Epimorphism</title>
     <script type="text/javascript" src="jquery-2.2.0.min.js"></script>
     <script type="text/javascript" src="index.js"></script>
-    <script type="text/javascript" src="index.js"></script>
+    <script type="text/javascript" src="global.js"></script>
     <script type="text/javascript"> onload = Main.main; </script>
 
     <link rel="stylesheet" type="text/css" href="index.css"></script>
 <link rel="shortcut icon" href="favicon.ico" />
 </head>
 <body>
-	<div id="window" class="fullWindow">
+	<div id="container" class="fullWindow">
     <div id="showFps" class="hide"></div>
 		<div id="menu">
 			<img id="menu-icon" src="/images/menu-icon1-5.png"/>
 			<div id="menuContainer" class="hide">
 				<a target="_blank" href="/about.html"> About </a>
-				<a id="enterFullScreen" href="javascript:window.eventHandler('fullScreen')"> Full Screen </a>
-				<a id="exitFullScreen" class="hide" href="javascript:window.eventHandler('fullWindow')"> Exit Full Screen </a>
+				<a id="enterFullScreen" href="javascript:void(0)" onclick="window.requestFullScreen('container');"> Full Screen </a>
+				<a id="exitFullScreen" class="hide" href="javascript:void(0)" onclick="window.requestExitFullScreen()"> Exit Full Screen </a>
 				<span id="resolution">
 				Resolution
 				<select id="resolutionSel">

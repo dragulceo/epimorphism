@@ -3,7 +3,6 @@ module Layout where
 import Prelude
 import Config (EpiS, moduleSchema, Module, Pattern, SystemST, UIST, Epi, UIConf)
 import Control.Monad (when)
-import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (readSTRef, STRef)
 import Control.Monad.Trans (lift)
@@ -17,10 +16,7 @@ import Data.String.Regex (match, noFlags, regex)
 import Data.Traversable (traverse)
 import Serialize (unsafeSerialize)
 import System (loadLib)
-import Util (indentLines)
-
-foreign import requestFullScreen :: forall eff. String -> Eff eff Unit
-foreign import requestExitFullScreen :: forall eff. Eff eff Unit
+import Util (lg, indentLines)
 
 initLayout :: forall eff. UIConf -> UIST -> Epi eff Unit
 initLayout uiConf uiST = do
@@ -30,7 +26,7 @@ initLayout uiConf uiST = do
   height <- lift $ innerHeight window
 
   canvas <- findElt uiConf.canvasId
-  win <- findElt "window"
+  cont <- findElt "container"
   menu <- findElt "menu"
   console <- findElt uiConf.consoleId
   fps <- findElt uiConf.fpsId
@@ -38,44 +34,29 @@ initLayout uiConf uiST = do
   lift $ classAdd "hide" console
   lift $ classAdd "hide" menu
   lift $ classAdd "hide" fps
-  lift $ classRemove "fullWindow" win
+  lift $ classRemove "fullWindow" cont
 
   when uiConf.showFps do
     lift $ classRemove "hide" fps
 
   case uiConf.windowState of
-    "fullWindow" -> do
-      lift $ setStyleAttr "width" "" canvas
-      lift $ setStyleAttr "height" "" canvas
-      let ofs = (width - height) / -2.0
-      lift $ setStyleAttr "top" (show ofs ++ "px") canvas
-      lift $ setStyleAttr "bottom" (show ofs ++ "px") canvas
-
-      lift $ classAdd "fullWindow" win
-      lift $ classRemove "hide" menu
-
-      lift $ requestExitFullScreen
-
-      return unit
-    "fullScreen" -> do
-      lift $ setStyleAttr "width" "" canvas
-      lift $ setStyleAttr "height" "" canvas
-      let ofs = (width - height) / -2.0
-      lift $ setStyleAttr "top" (show ofs ++ "px") canvas
-      lift $ setStyleAttr "bottom" (show ofs ++ "px") canvas
-
-      lift $ classAdd "fullWindow" win
-
-      lift $ requestFullScreen "window"
-      lift $ classRemove "hide" menu
-      return unit
-    _ -> do
+    "dev" -> do
       lift $ setStyleAttr "width" (show (height - 10.0) ++ "px") canvas
       lift $ setStyleAttr "height" (show (height - 11.0) ++ "px") canvas
 
       lift $ classRemove "hide" console
       lift $ setStyleAttr "width" (show (width - height - 30.0) ++ "px") console
       lift $ setStyleAttr "height" (show (height - 21.0) ++ "px") console
+    _ -> do
+      lift $ setStyleAttr "width" "" canvas
+      lift $ setStyleAttr "height" "" canvas
+      let ofs = (width - height) / -2.0
+      lift $ setStyleAttr "top" (show ofs ++ "px") canvas
+      lift $ setStyleAttr "bottom" (show ofs ++ "px") canvas
+
+      lift $ classAdd "fullWindow" cont
+      lift $ classRemove "hide" menu
+      return unit
 
 
 -- hides malformed html issues

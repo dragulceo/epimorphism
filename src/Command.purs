@@ -61,22 +61,19 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
       "save" -> do
         save systemST pattern
       "fullWindow" -> do
-        lift $ modifySTRef ucRef (\ui -> ui {windowState = "fullWindow"})
-        uiConf' <- lift $ readSTRef ucRef
-        initLayout uiConf' uiST
-
-        return unit
-      "fullScreen" -> do
-        lift $ modifySTRef ucRef (\ui -> ui {windowState = "fullScreen"})
+        lift $ modifySTRef ucRef (\ui -> ui {windowState = "full"})
         uiConf' <- lift $ readSTRef ucRef
         initLayout uiConf' uiST
 
         return unit
       "dev" -> do
-        lift $ modifySTRef ucRef (\ui -> ui {windowState = "dev"})
+        lift $ modifySTRef ucRef (\ui -> ui {windowState = "dev", keySet = "dev"})
         uiConf' <- lift $ readSTRef ucRef
         initLayout uiConf' uiST
 
+        return unit
+      "initLayout" -> do
+        initLayout uiConf uiST
         return unit
       "showFps" -> do
         lift $ modifySTRef ucRef (\ui -> ui {showFps = not ui.showFps})

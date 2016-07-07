@@ -29,20 +29,25 @@ exports.addGlobalEventListeners = function(handler) {
 			var isFullScreen = document.fullScreen ||
           document.mozFullScreen ||
           document.webkitIsFullScreen;
-
 			if (isFullScreen) {
 				$('#exitFullScreen').removeClass('hide');
 				$('#enterFullScreen').addClass('hide');
 			} else {
 				$('#exitFullScreen').addClass('hide');
 				$('#enterFullScreen').removeClass('hide');
-
-				handler("fullWindow")();
 			}
+			handler('fullWindow')();
 		};
 
 		$(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', fsHandler);
 
+
+		var resizeHandler = function(){
+			console.log('resize');
+			handler('initLayout')();
+		}
+
+		$(window).resize(resizeHandler);
 
 		var iconOverHandler =
 				function(event){

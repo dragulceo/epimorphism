@@ -22,8 +22,11 @@ exports.createImageImpl = function(s){
 
 exports.emptyImage = function(dim){
 	return function(){
-		if(window.epiBlank)
-			return window.epiBlank;
+		if(window.epiBlank && window.epiBlank[dim])
+			return window.epiBlank[dim];
+		if(!window.epiBlank)
+			window.epiBlank = {}
+
 		var canvas = document.createElement("canvas");
 		canvas.width = dim;
 		canvas.height = dim;
@@ -31,8 +34,8 @@ exports.emptyImage = function(dim){
 		context.fillStyle = "#000000";
 		context.fill();
 
-		window.epiBlank = new Image();
-		window.epiBlank.src = canvas.toDataURL("image/png");
-		return window.epiBlank;
+		window.epiBlank[dim] = new Image();
+		window.epiBlank[dim].src = canvas.toDataURL("image/png");
+		return window.epiBlank[dim];
 	};
 };

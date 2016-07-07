@@ -168,7 +168,9 @@ initEngineST sysConf engineConf sys pattern canvasId esRef' = do
 
   -- get reference
   esRef <- case esRef' of
-    Just ref -> return ref
+    Just ref -> do
+      lift $ modifySTRef ref (\r -> r {empty = empty})
+      return ref
     Nothing -> do
       let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, auxImg: [], ctx: ctx, empty}
       lift $ newSTRef tmp

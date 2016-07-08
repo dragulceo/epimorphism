@@ -1,17 +1,31 @@
 RELEASE
-  DEPLOY:
+  LAUNCH:
   	- about page / gallery
   	- mailing list
-  	- better hosting?
-		- contact@epimorphism.com/mail server
-		- test in ie
+  	- upgrade hosting
 	SYSTEM:
+		- test in ie
 		- save debugState somewhere for analysis - save server?
 		- there are a bunch of dummy scripts assigned to things atm
+		- pre import hooks?  i.e, when loading a T module, choose a random t_inner, before importing?
   CONTENTS:
 	  - initial state
 	  - interpolating between patterns?
-		- length_scale
+		T:
+		  - state machine - "tan(z) + i * tan(-z)"
+			- visualization
+			- vector fields
+			- expand library
+			- animations
+			- make sure paths/animations dont zoom out/in too much?
+		SEED:
+		  - impulses
+			- wca & multi seed
+			- images, use w for value
+			- expand library
+		COLOR:
+		  - length_scale
+	  POST:
 
 
 NEXT

@@ -29,15 +29,10 @@ sub {t_inner: z}
 var z
 scripts [rose3_2]
 
-
---rotate_hsv1
-flags {family: color, basic: true}
-component rotate_hsv
-par {rot: 0.17, len_sc:1.0, len_sc_amt:0.5, th_spd: 0.0}
-var color
-
-
 --disp_main1
 flags {family: post}
 component disp
-modules {post: post_hlim1}
+modules {post: post_hlim1'}
+
+--post_hlim1' < post_hlim1
+scripts [hlim_h1, hlim_s1, hlim_l1]

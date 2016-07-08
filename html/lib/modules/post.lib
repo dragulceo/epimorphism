@@ -10,7 +10,6 @@ var frame
 par {gamma:2.0, hue:0.0, spread:0.5, lgv:0.5}
 scripts [hlim_h1, hlim_s1, hlim_l1]
 
-
 --post_hlim2 < post_hlim1
 par {gamma:2.0, hue:0.33, spread:0.5, lgv:0.5}
 

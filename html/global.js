@@ -1,3 +1,6 @@
+var __, __M, __D;
+var halt = false;
+
 window.requestFullScreen = function(id) {
   var elem = document.getElementById(id);
   if (elem.requestFullscreen) {

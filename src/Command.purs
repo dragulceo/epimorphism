@@ -9,11 +9,10 @@ import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Array (length, head, tail, foldM, (!!))
-import Data.Int (fromString)
 import Data.List (fromList)
 import Data.Maybe (Maybe(Just))
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (toList, StrMap, insert)
+import Data.StrMap (insert, toList, StrMap)
 import Data.String (joinWith, split)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
@@ -23,7 +22,7 @@ import Layout (initLayout)
 import Pattern (ImportObj(ImportScript), importScript, findModule)
 import Serialize (unsafeSerialize)
 import System (loadLib)
-import Util (uuid, lg, handleError)
+import Util (intFromStringE, numFromStringE, lg, uuid, handleError)
 
 command :: forall eff h. STRef h UIConf -> STRef h UIST -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h SystemConf -> STRef h (SystemST h) -> String -> Eff (canvas :: Canvas, dom :: DOM, st :: ST h | eff) Unit
 command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
@@ -58,6 +57,19 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         importScript ssRef (ImportScript scr') mid
 
         return unit
+      "setP" -> do
+        let a = lg args
+        case args of
+          [addr, par, val] -> do
+            val' <- numFromStringE val
+            mid <- findModule systemST.moduleRefPool pattern addr true
+            mRef <- loadLib mid systemST.moduleRefPool "find module - setP"
+            mod <- lift $ readSTRef mRef
+            let par' = insert par val' mod.par
+            lift $ modifySTRef mRef (\m -> m {par = par'})
+
+            return unit
+          _ -> throwError "invalid format: setPar addr par val"
       "save" -> do
         save systemST pattern
       "fullWindow" -> do
@@ -84,15 +96,12 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
       "setKernelDim" -> do
         case args of
           [dim] -> do
-            case (fromString dim) of
-              Just dim' -> do
-                lift $ modifySTRef ecRef (\ec -> ec {kernelDim = dim'})
-                engineConf' <- lift $ readSTRef ecRef
-                initEngineST systemConf engineConf' systemST pattern uiConf.canvasId (Just esRef)
+            dim' <- intFromStringE dim
+            lift $ modifySTRef ecRef (\ec -> ec {kernelDim = dim'})
+            engineConf' <- lift $ readSTRef ecRef
+            initEngineST systemConf engineConf' systemST pattern uiConf.canvasId (Just esRef)
 
-                return unit
-              _ -> return unit -- should probably do some error handling here
-          _ -> return unit -- should probably do some error handling here
+          _ -> throwError "invalid format: setKerneldim dim"
         return unit
       "clear" -> do
         clearFB engineConf engineST

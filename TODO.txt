@@ -6,7 +6,6 @@ RELEASE
 		- contact@epimorphism.com/mail server
 		- test in ie
 	SYSTEM:
-	  - js console commands
 		- save debugState somewhere for analysis - save server?
 		- there are a bunch of dummy scripts assigned to things atm
   CONTENTS:
@@ -27,6 +26,7 @@ NEXT
   - remove mid from scripts?
 
 LATER
+  - better deploy system
   - weird when opening console in fullscreen
   - really choppy at higher resolutions
   - addGlobalEventListeners is a bit ghetto

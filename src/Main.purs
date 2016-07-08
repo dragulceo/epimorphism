@@ -2,7 +2,7 @@ module Main where
 
 import Prelude
 import Config (UIST, EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf, UIConf)
-import Control.Monad (when)
+import Control.Monad (unless, when)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
@@ -16,7 +16,7 @@ import Pattern (importPattern)
 import Script (runScripts)
 import System (initSystemST, loadLib)
 import UI (initUIST)
-import Util (requestAnimationFrame, now, Now, handleError)
+import Util (isHalted, requestAnimationFrame, now, Now, handleError)
 
 host :: String
 host = ""
@@ -106,8 +106,12 @@ animate stateM = handleError do
   updateLayout uiConf uiST systemST' pattern
 
   -- request next frame
-  lift $ modifySTRef ssRef (\s -> s {frameNum = s.frameNum + 1})
-  lift $ requestAnimationFrame $ animate $ return state
+  halted <- lift $ isHalted
+  unless halted do
+    lift $ modifySTRef ssRef (\s -> s {frameNum = s.frameNum + 1})
+    lift $ requestAnimationFrame $ animate $ return state
+
+  return unit
 
 
 main :: Eff (canvas :: Canvas, dom :: DOM, now :: Now) Unit

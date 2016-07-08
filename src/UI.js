@@ -5,6 +5,11 @@
 exports.registerEventHandler = function(handler) {
   return function() {
     window.eventHandler = function(msg){handler(msg)()};
+
+		// a little ghetto
+		__  = function(msg) {handler(msg)();}
+		__M = function(msg) {handler("setP main.main_body." + msg)();}
+		__D = function(msg) {handler("setP disp." + msg)();}
   }
 };
 
@@ -43,7 +48,6 @@ exports.addGlobalEventListeners = function(handler) {
 
 
 		var resizeHandler = function(){
-			console.log('resize');
 			handler('initLayout')();
 		}
 

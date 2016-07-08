@@ -145,6 +145,15 @@ exports.cxFromStringImpl = function (tuple) {
   };
 };
 
+exports.halt = function() {
+	halt = true;
+};
+
+
+exports.isHalted = function() {
+	return halt;
+};
+
 
 exports.uuid = function() {
 	function s4() {

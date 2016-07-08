@@ -29,7 +29,7 @@ import Graphics.WebGL.Context (getWebglContext)
 import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor, vertexAttribPointer, enableVertexAttribArray, bufferData, bindBuffer, createBuffer, createFramebuffer, createTexture)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram)
 import Graphics.WebGL.Types (WebGL, WebGLContext, WebGLProgram, WebGLTexture, WebGLFramebuffer, ArrayBufferType(ArrayBuffer), BufferData(DataSource), BufferUsage(StaticDraw), DataType(Float), DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
-import Util (lg, unsafeNull)
+import Util (unsafeNull)
 
 -- PUBLIC
 
@@ -114,7 +114,6 @@ foreign import emptyImage :: forall eff. Int -> Eff eff GLT.TexImageSource
 -- compile shaders and load into systemST
 setShaders :: forall eff h. SystemConf -> STRef h EngineST -> SystemST h -> Pattern -> EpiS eff h Unit
 setShaders sysConf esRef sys pattern = do
-  let t = lg "SET SHADERS"
   es <- lift $ readSTRef esRef
 
   -- load & compile shaders

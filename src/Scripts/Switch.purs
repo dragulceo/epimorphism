@@ -47,7 +47,7 @@ incData systemST scr rootId loader = do
     Nothing -> throwError $ "your index doesnt exist" -- doesn't look like this works
     Just v -> return v
 
-  let nul = lg $ "SWITCHING : " ++ rootId ++ ":" ++ childN ++ " to : " ++ nxt
+  --let nul = lg $ "SWITCHING : " ++ rootId ++ ":" ++ childN ++ " to : " ++ nxt
 
   return {childN, nxt, dim, spd}
 
@@ -228,7 +228,7 @@ finishSwitch ssRef pRef self t rootId sRef = do
   case t * delay of
     -- we're done
     x | x >= 1.0 -> do
-      let a = lg "DONE SWITCHING"
+      --let a = lg "DONE SWITCHING"
 
       -- find parent & m1
       (Tuple parent subN) <- findParent systemST.moduleRefPool rootId

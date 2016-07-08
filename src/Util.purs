@@ -26,6 +26,9 @@ foreign import requestAnimationFrame :: forall eff. Eff eff Unit -> Eff eff Unit
 foreign import now :: forall eff. Eff (now :: Now | eff) Number
 foreign import replaceAll :: String -> String -> String -> String
 
+foreign import halt :: forall eff. Eff eff Unit
+foreign import isHalted :: forall eff. Eff eff Boolean
+
 foreign import uuid   :: forall eff. Eff eff String
 foreign import rndstr :: forall eff. Eff eff String
 foreign import gmod :: Int -> Int -> Int
@@ -79,8 +82,11 @@ intFromStringE s = case (I.fromString s) of
 handleError :: forall eff. Epi eff Unit -> Eff (canvas :: Canvas, dom :: DOM | eff) Unit
 handleError epi = do
   res <- runExceptT epi
-  either winLog return res
-
+  either err return res
+  where
+    err msg = do
+      halt
+      winLog msg
 
 spc :: Int -> String
 spc 0 = ""

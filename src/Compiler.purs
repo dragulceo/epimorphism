@@ -1,24 +1,29 @@
 module Compiler where
 
-import Prelude (return, ($), bind, map, (++), (-), (+), show)
-import Data.Complex (Complex)
-import Config (Module, EpiS, ModRef, SystemST, Pattern)
 import System
+import Config (Epi, Module, EpiS, ModRef, SystemST, Pattern)
+import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, readSTRef)
 import Data.Array (sort, length, foldM, (..)) as A
+import Data.Complex (Complex)
 import Data.Foldable (foldl)
 import Data.Int (fromNumber)
 import Data.List (fromList)
+import Data.Maybe (Maybe(Nothing, Just))
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (StrMap, fold, empty, keys, size, foldM, insert, lookup, values)
+import Data.StrMap (lookup, StrMap, fold, empty, keys, size, foldM, insert, values)
 import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
-import Util (indentLines, replaceAll)
+import Prelude (return, ($), bind, map, (++), (-), (+), show)
+import Util (replaceAll, lg, indentLines)
 
 type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}
 type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array String}
+
+foreign import parseT :: forall eff. String -> String
+
 
 -- compile vertex, disp & main shaders
 compileShaders :: forall eff h. Pattern -> (SystemST h) -> EpiS eff h Shaders
@@ -47,7 +52,8 @@ compile :: forall eff h. Module -> SystemST h -> Int -> Int -> (Array String) ->
 compile mod systemST zOfs parOfs images = do
   -- substitutions
   comp <- loadLib mod.component systemST.componentLib "compile component"
-  let component' = fold handleSub comp.body mod.sub
+  sub' <- preProcessSub mod.sub
+  let component' = fold handleSub comp.body sub'
 
   -- pars
   let k = (A.sort $ keys mod.par)
@@ -90,8 +96,39 @@ flattenParZn {lib, par, zn} n = do
   where
     get dt n = fromJust $ (lookup n dt)
 
+preProcessSub :: forall eff. StrMap String -> Epi eff (StrMap String)
+preProcessSub sub = do
+  case (lookup "t_inner" sub) of
+    (Just expr) -> do
+      expr' <- parseTexp expr
+      let sub' = insert "t_inner" expr' sub
+      return sub'
+    Nothing -> do
+      return sub
 
--- bulk load a list of modules
+parseTexp :: forall eff. String -> Epi eff String
+parseTexp expr = do
+  let expr1 = parseT expr
+
+  --substitutions
+  let expr2 = replaceAll "\\+" "A" expr1
+  let expr3 = replaceAll "\\-" "S" expr2
+  let expr4 = replaceAll "\\*" "M" expr3
+  let expr5 = replaceAll "\\\\"  "D" expr4
+  let expr6 = replaceAll "sinh" "SINHZ" expr5
+  let expr7 = replaceAll "cosh" "COSHZ" expr6
+  let expr8 = replaceAll "tanh" "TANHZ" expr7
+  let expr9 = replaceAll "sin" "SINZ" expr8
+  let expr10 = replaceAll "cos" "COSZ" expr9
+  let expr11 = replaceAll "tan" "TANZ" expr10
+  let expr12 = replaceAll "exp" "EXPZ" expr11
+  let expr13 = replaceAll "sq" "SQZ" expr12
+
+  let a = lg expr13
+  return expr13
+
+
+-- Bulk load a list of modules
 loadModules :: forall eff h. StrMap ModRef -> (StrMap (STRef h Module)) -> EpiS eff h (StrMap Module)
 loadModules mr lib = do
   foldM handle empty mr

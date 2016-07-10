@@ -11,7 +11,7 @@ flags {family: t}
 component t_wrap
 zn [1.0 + 0.0i, 0.0 + 0.0i, 1.1 + 0.0i, 0.0 + 0.0i]
 modules {reduce: torus_reduce}
-sub {t_inner: sinhz(z)}
+sub {t_inner: sinh(z)}
 var z
 scripts [circle_0, rose1_0, rose3_2]
 

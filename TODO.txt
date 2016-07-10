@@ -14,10 +14,13 @@ RELEASE
 		T:
 		  - state machine - "tan(z) + i * tan(-z)"
 			- visualization
+			- expand library
 			- vector fields
 			- expand library
 			- animations
-			- make sure paths/animations dont zoom out/in too much?
+			- make sure paths/animations dont zoom out/in too much? - constraint system
+			- use images(self????) as transformations
+			- random idea - different Ts on different frames?????
 		SEED:
 		  - impulses
 			- wca & multi seed

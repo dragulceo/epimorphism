@@ -123,6 +123,14 @@ float cosh(float x){
   return (exp(x) + exp(-1.0 * x)) / 2.0;
 }
 
+vec2 A(vec2 z0, vec2 z1){
+  return vec2(z0.x + z1.x, z0.y + z1.y);
+}
+
+vec2 S(vec2 z0, vec2 z1){
+  return vec2(z0.x - z1.x, z0.y - z1.y);
+}
+
 vec2 M(vec2 z0, vec2 z1){
   return vec2(z0.x * z1.x - z0.y * z1.y, z0.x * z1.y + z0.y * z1.x);
 }
@@ -132,23 +140,23 @@ vec2 D(vec2 z0, vec2 z1){
   return vec2((z0.x * z1.x + z0.y * z1.y) / r, (z0.y * z1.x - z0.x * z1.y) / r);
 }
 
-vec2 sqz(vec2 z0){
+vec2 SQZ(vec2 z0){
   return M(z0, z0);
 }
 
-vec2 sinz(vec2 z0){
+vec2 SINZ(vec2 z0){
   float s = sin(z0.x);
   float c = cos(z0.x);
   return vec2(s * cosh(z0.y), c * sinh(z0.y));
 }
 
-vec2 cosz(vec2 z0){
+vec2 COSZ(vec2 z0){
   float s = sin(z0.x);
   float c = cos(z0.x);
   return vec2(c * cosh(z0.y), -1.0 * s * sinh(z0.y));
 }
 
-vec2 tanz(vec2 z0){
+vec2 TANZ(vec2 z0){
   float s, c;
   s = sin(2.0 * z0.x);
 	c = cos(2.0 * z0.x);
@@ -156,21 +164,21 @@ vec2 tanz(vec2 z0){
   return vec2(s, sinh(2.0 * z0.y)) / r;
 }
 
-vec2 sinhz(vec2 z0){
+vec2 SINHZ(vec2 z0){
   float s, c;
 	s = sin(z0.y);
 	c = cos(z0.y);
   return vec2(sinh(z0.x) * c, cosh(z0.x) * s);
 }
 
-vec2 coshz(vec2 z0){
+vec2 COSHZ(vec2 z0){
   float s, c;
 	s = sin(z0.y);
 	c = cos(z0.y);
   return vec2(cosh(z0.x) * c, sinh(z0.x) * s);
 }
 
-vec2 tanhz(vec2 z0){
+vec2 TANHZ(vec2 z0){
   float s, c;
   s = sin(2.0 * z0.y);
 	c = cos(2.0 * z0.y);
@@ -178,7 +186,7 @@ vec2 tanhz(vec2 z0){
   return vec2(sinh(2.0 * z0.x), s) / r;
 }
 
-vec2 expz(vec2 z0){
+vec2 EXPZ(vec2 z0){
   float f = exp(z0.x);
   float s, c;
 	s = sin(z0.y);

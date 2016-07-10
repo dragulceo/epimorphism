@@ -26,3 +26,33 @@ window.requestExitFullScreen = function() {
 		document.msExitFullscreen();
 	}
 }
+
+
+var parseT = function(expr){
+	var node = math.parse(expr); // check syntax errors
+	$.n = node;
+	console.log(node);
+	return parseN(node);
+}
+
+var parseN = function(node){
+		console.log(node.type);
+	switch (node.type) {
+  case 'ConstantNode':
+		return "vec2(" + node.value + ",0.0)";
+		break;
+	case 'SymbolNode':
+		return node.name == 'i' ? "vec2(0.0,1.0)" : node.name;
+		break;
+	case 'FunctionNode':
+		args = $.map(node.args, function(n, i) {return parseN(n)});
+		return node.fn.name + '(' + args.join(',') + ')'
+		break;
+	case 'OperatorNode':
+		args = $.map(node.args, function(n, i) {return parseN(n)});
+		return node.op + '(' + args.join(',') + ')'
+		break;
+	case 'ParenthesisNode':
+		return parseN(node.content);
+	}
+}

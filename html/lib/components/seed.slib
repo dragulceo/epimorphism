@@ -2,36 +2,45 @@ seed seed_nothing {{
 	seed = vec4(0.0, 0.0, 0.0, 0.0);
 }}
 
-seed seed_multi {{
-	vec4 seed0, seed1, seed2;
+seed seed_analysis {{
 	vec2 z_i = z;
   %t%
+	%reduce%
 
-	vec2 z_tmp = z;
-	%seed0%
-	seed0 = seed;
+  float w = VOID_W;
+  float wx = (z.x + @w@) / (2.0 * @w@);
+  float wy = (z.y + @w@) / (2.0 * @w@);
 
-	z = z_tmp;
-	%seed1%
-	seed1 = seed;
+  if(z.x >= z.y && z.x >= -1.0 * z.y && z.x > (1.0 - @w@)){
+    w = (z.x - (1.0 - @w@)) / @w@;
+    wy = z.y / (0.5 * @w@) - 0.5;
+  }else if(z.y >= z.x && z.y >= -1.0 * z.x && z.y > (1.0 - @w@)){
+    w = (z.y - (1.0 - @w@)) / @w@;
+    wy = z.x / (0.5 * @w@) - 0.5;
+  }else if(z.y >= z.x && z.y <= -1.0 * z.x && z.x < -1.0 * (1.0 - @w@)){
+    w = (-1.0 * (1.0 - @w@) - z.x) / @w@;
+    wy = z.y / (0.5 * @w@) - 0.5;
+  }else if(z.x >= z.y && z.x <= -1.0 * z.y && z.y < -1.0 * (1.0 - @w@)){
+    w = (-1.0 * (1.0 - @w@) - z.y) / @w@;
+    wy = z.x / (0.5 * @w@) - 0.5;
+  }
+  wx = w;
 
-	z = z_tmp;
-	%seed2%
-	seed2 = seed;
+  vec4 frame_w;
+	if(abs(w-VOID_W) < 0.00001){
+		vec2 fr = fract((z + vec2(1,1)) / vec2(2,2));
+		seed = vec4(0, fr.x, fr.y, 1.0);
+	}else{
+	  seed = vec4(w, 0, 0, 1.0);
+	}
 
-	float a = 1.0 - (1.0 - seed0.a) * (1.0 - seed1.a) * (1.0 - seed2.a);
-
-	if(a == 0.0)
-		seed = vec4(0.0, 0.0, 0.0, 0.0);
-	else
-		seed = 1.0 / a * (seed2.a * seed2 + (1.0 - seed2.a) * seed1.a * seed1 + (1.0 - seed2.a) * (1.0 - seed1.a) * seed0.a * seed0);
-	seed.a = a;
 	z = z_i;
 }}
 
 seed seed_border {{
 	vec2 z_i = z;
   %t%
+	%reduce%
 
   float w = VOID_W;
   float wx = (z.x + @w@) / (2.0 * @w@);
@@ -56,9 +65,11 @@ seed seed_border {{
 	z = z_i;
 }}
 
+
 seed seed_simple_img {{
 	vec2 z_i = z;
   %t%
+	%reduce%
 
   float w = VOID_W;
   float wx = (z.x + @seed_w@) / (2.0 * @seed_w@);
@@ -88,13 +99,13 @@ seed seed_simple_img {{
 }}
 
 
-
 seed seed_wca {{
   vec4 wdt, color;
   float w = VOID_W;
 	float a, wx, wy;
 	vec2 z_i = z;
   %t%
+	%reduce%
 
   // wdt = (w, a, wx, wy)
   %seed_w%
@@ -107,5 +118,35 @@ seed seed_wca {{
   %alpha%
 
   %seed_color%
+	z = z_i;
+}}
+
+
+
+seed seed_multi {{
+	vec4 seed0, seed1, seed2;
+	vec2 z_i = z;
+  %t%
+	%reduce%
+
+	vec2 z_tmp = z;
+	%seed0%
+	seed0 = seed;
+
+	z = z_tmp;
+	%seed1%
+	seed1 = seed;
+
+	z = z_tmp;
+	%seed2%
+	seed2 = seed;
+
+	float a = 1.0 - (1.0 - seed0.a) * (1.0 - seed1.a) * (1.0 - seed2.a);
+
+	if(a == 0.0)
+		seed = vec4(0.0, 0.0, 0.0, 0.0);
+	else
+		seed = 1.0 / a * (seed2.a * seed2 + (1.0 - seed2.a) * seed1.a * seed1 + (1.0 - seed2.a) * (1.0 - seed1.a) * seed0.a * seed0);
+	seed.a = a;
 	z = z_i;
 }}

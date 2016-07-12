@@ -3,15 +3,14 @@ flags {family: seed, basic: true}
 component seed_nothing
 var seed
 
---seed_simple
+--seed_border
 flags {family: seed, basic: true}
-component seed_simple
-par {seed_w: 0.2}
+component seed_border
+par {w: 0.2, alpha: 1.0}
 modules {t: t_wrap}
 var seed
 
---seed_border
+--seed_analysis < seed_border
 flags {family: seed}
-par {w: 0.2, alpha: 1.0}
-component seed_border
-var seed
+par {w: 0.05}
+component seed_analysis

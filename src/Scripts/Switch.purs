@@ -38,7 +38,7 @@ incData systemST scr rootId loader = do
     throwError $ "your index doesnt exist"
 
   nxtPos <-
-    if idx < 0 then
+    if idx < -10000 then
       lift $ randInt $ A.length index
     else
       return $ idx `gmod` (A.length index)
@@ -201,7 +201,7 @@ switchModules ssRef rootId childN m1 dim spd = do
   m0M   <- lift $ readSTRef m0Ref
 
   -- create switch module
-  switch <- loadLib "smooth_switch" systemST.moduleLib "switchModules"
+  switch <- loadLib "switch" systemST.moduleLib "switchModules"
 
   let modules = fromFoldable [(Tuple "m0" m0), (Tuple "m1" m1)]
   let sub'    = union (fromFoldable [(Tuple "dim" dim), (Tuple "var" m0M.var)]) switch.sub

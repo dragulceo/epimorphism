@@ -12,13 +12,16 @@ main_body main_test_image {{
 
 main_body main_stc {{
   vec4 seed, frame;
-  vec2 frame_z;
+  vec2 frame_z, t_z;
 
   %t%
 
   // get frame
+	t_z = z;
+  %reduce%
   frame_z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
   frame = texture2D(fb, frame_z);
+	z = t_z;
 
   //z = z_in;
   %seed%

@@ -2,7 +2,6 @@ module Compiler where
 
 import System
 import Config (Epi, Module, EpiS, ModRef, SystemST, Pattern)
-import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, readSTRef)
 import Data.Array (sort, length, foldM, (..)) as A
@@ -17,13 +16,12 @@ import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
 import Prelude (return, ($), bind, map, (++), (-), (+), show)
-import Util (replaceAll, lg, indentLines)
+import Util (replaceAll, indentLines)
 
 type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}
 type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array String}
 
-foreign import parseT :: forall eff. String -> String
-
+foreign import parseT :: String -> String
 
 -- compile vertex, disp & main shaders
 compileShaders :: forall eff h. Pattern -> (SystemST h) -> EpiS eff h Shaders
@@ -96,6 +94,7 @@ flattenParZn {lib, par, zn} n = do
   where
     get dt n = fromJust $ (lookup n dt)
 
+-- preprocess substitutions.  just parses t expressions
 preProcessSub :: forall eff. StrMap String -> Epi eff (StrMap String)
 preProcessSub sub = do
   case (lookup "t_inner" sub) of
@@ -110,22 +109,13 @@ parseTexp :: forall eff. String -> Epi eff String
 parseTexp expr = do
   let expr1 = parseT expr
 
-  --substitutions
-  let expr2 = replaceAll "\\+" "A" expr1
-  let expr3 = replaceAll "\\-" "S" expr2
-  let expr4 = replaceAll "\\*" "M" expr3
-  let expr5 = replaceAll "\\\\"  "D" expr4
-  let expr6 = replaceAll "sinh" "SINHZ" expr5
-  let expr7 = replaceAll "cosh" "COSHZ" expr6
-  let expr8 = replaceAll "tanh" "TANHZ" expr7
-  let expr9 = replaceAll "sin" "SINZ" expr8
-  let expr10 = replaceAll "cos" "COSZ" expr9
-  let expr11 = replaceAll "tan" "TANZ" expr10
-  let expr12 = replaceAll "exp" "EXPZ" expr11
-  let expr13 = replaceAll "sq" "SQZ" expr12
+  let subs = [["\\+","A"],["\\-","S"],["\\~","CONJ"],["\\+","A"],["\\-","S"],["\\*","M"],["/","D"],["sinh","SINHZ"],
+              ["cosh","COSHZ"],["tanh","TANHZ"],["sin","SINZ"],["cos","COSZ"],["tan","TANZ"],["exp","EXPZ"],["sq","SQZ"]]
 
-  let a = lg expr13
-  return expr13
+  return $ foldl f expr1 subs
+  where
+    f exp [a, b] = replaceAll a b exp
+    f exp _ = exp
 
 
 -- Bulk load a list of modules

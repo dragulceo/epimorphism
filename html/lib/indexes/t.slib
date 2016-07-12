@@ -1,21 +1,21 @@
 t_inner {{
   z
+  tanh(z)
   exp(z)
-  sin(z)
   cos(z)
-	1 - sq(z)
   sinh(z)
   cosh(z)
-  tanh(z)
-  1 - 0.5 * (sq(z) + tanh(z))
+	z / (z + 1) + z / (z - 1)
+	1 - 5 * z * z * z / 3
+	1 - z * z
+	z * (1 + z) / 2
+  z * z
+  1 - (z * z + tanh(z)) / 2
   cos(z) - tanh(z)
-	1 - 0.5 * (sq(z) + i * sq(2.0 * z))
-  0.5 * (z + exp(z))
-  0.5 * (z + sq(z))
+  (z + exp(z)) / 2
   sin(tan(z))
-  0.5 * (sin(z) + tan(z))
-  sq(z)
+  (sin(z) + tan(z)) / 2
   cosh(z) + exp(z)
   z * cos(z)
-  0.5 * (cosh(z) + sinh(z))
+  (cosh(z) + sinh(z)) / 2
 }}

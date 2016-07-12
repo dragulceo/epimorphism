@@ -4,7 +4,7 @@ modules {main_body: main_body_img}
 --main_body_img < default_main_body
 modules {seed: seed_simple_img, t:t_wrap_zo, color: color_id}
 
---seed_simple_img < seed_simple
+--seed_simple_img < seed_border
 flags {family: seed, basic: true, fam1: true}
 modules {t: t_wrap}
 component seed_simple_img

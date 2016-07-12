@@ -6,6 +6,10 @@ tPhase 0.0
 tSpd   1.0
 includes [colorspace, math]
 
+--analysis < default
+main  analysis_main
+disp  disp_id
+
 --main1 < default
 main  main1
 disp  disp_main1

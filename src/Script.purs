@@ -120,11 +120,11 @@ randomMain1 ssRef pRef self t mid sRef = do
 
       tmid <- findModule' systemST.moduleRefPool pattern.main ["main_body", "t"] true
 
-      createScript ssRef tmid "default" "incSub" $ fromFoldable [(Tuple "sub" "t_inner"), (Tuple "idx" "-1.0"), (Tuple "spd" spd), (Tuple "lib" "t_inner"), (Tuple "dim" "vec2")]
+      createScript ssRef tmid "default" "incSub" $ fromFoldable [(Tuple "sub" "t_inner"), (Tuple "idx" "-1000000.0"), (Tuple "spd" spd), (Tuple "lib" "t_inner"), (Tuple "dim" "vec2")]
 
       tmid' <- findModule' systemST.moduleRefPool pattern.main ["main_body", "seed", "t"] true
 
-      createScript ssRef tmid' "default" "incSub" $ fromFoldable [(Tuple "sub" "t_inner"), (Tuple "idx" "-1.0"), (Tuple "spd" spd), (Tuple "lib" "t_inner"), (Tuple "dim" "vec2")]
+      createScript ssRef tmid' "default" "incSub" $ fromFoldable [(Tuple "sub" "t_inner"), (Tuple "idx" "-1000000.0"), (Tuple "spd" spd), (Tuple "lib" "t_inner"), (Tuple "dim" "vec2")]
       return unit
     _ -> return unit
 

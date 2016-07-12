@@ -34,13 +34,9 @@ devKeyHandler ucRef usRef char = do
     "q" -> do
       inc uiConf uiST "Sub" "main.main_body.t" "t_inner" "t_inner" "vec2" (-1)
     "2" -> do
-      inc uiConf uiST "Mod" "disp" "post" "post_hlim" "vec4" 1
+      inc uiConf uiST "Mod" "disp" "post" "basic" "vec4" 1
     "w" -> do
-      inc uiConf uiST "Mod" "disp" "post" "post_hlim" "vec4" (-1)
-    "2" -> do
-      inc uiConf uiST "Mod" "disp" "post" "post_hlim" "vec4" 1
-    "w" -> do
-      inc uiConf uiST "Mod" "disp" "post" "post_hlim" "vec4" (-1)
+      inc uiConf uiST "Mod" "disp" "post" "basic" "vec4" (-1)
     "3" -> do
       inc uiConf uiST "Mod" "main.main_body" "color" "basic" "vec4" 1
     "e" -> do

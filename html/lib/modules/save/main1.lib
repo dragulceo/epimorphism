@@ -3,28 +3,26 @@ modules {main_body: main1_body}
 
 --main1_body < default_main_body
 flags {family: main_body}
-modules {t: t_sinhz_tst, seed: seed_borderM, color: rotate_hsv1}
+modules {t: t_sinhz_tst, seed: seed_borderM, color: rotate_hsv1, reduce: torus_reduce}
 scripts [randomMain1]
 
 --t_sinhz_tst
 flags {family: t}
 component t_wrap
 zn [1.0 + 0.0i, 0.0 + 0.0i, 1.1 + 0.0i, 0.0 + 0.0i]
-modules {reduce: torus_reduce}
 sub {t_inner: sinh(z)}
 var z
 scripts [circle_0, rose1_0, rose3_2]
 
 --seed_borderM < seed_border
 par {w: 0.5, alpha: 0.5}
-modules {t: ts_wrap_linx3'}
+modules {t: ts_wrap_linx3', reduce: torus_reduce}
 scripts [ssc_w1, ssc_a1]
 
 --ts_wrap_linx3'
 flags {family: t}
 zn [1.1 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]
 component t_wrap
-modules {reduce: torus_reduce}
 sub {t_inner: z}
 var z
 scripts [rose3_2]

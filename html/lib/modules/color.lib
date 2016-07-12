@@ -11,6 +11,11 @@ component color_bgr
 flags {family: color, basic: true}
 component color_gbr
 
+--rotate_hsv0 < color_id
+flags {family: color, basic: true}
+component rotate_hsv
+par {rot: 0.03, len_sc:0.0, len_sc_amt:0.0, th_spd: 0.0}
+
 --rotate_hsv1 < color_id
 flags {family: color, basic: true}
 component rotate_hsv

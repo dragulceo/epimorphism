@@ -4,16 +4,15 @@ RELEASE
   	- mailing list
   	- upgrade hosting
 	SYSTEM:
+	  - menu issues - chrome
 		- test in ie
 		- save debugState somewhere for analysis - save server?
 		- there are a bunch of dummy scripts assigned to things atm
-		- pre import hooks?  i.e, when loading a T module, choose a random t_inner, before importing?
+		- move random_main script into individual components.  i.e, T switches itself
   CONTENTS:
 	  - initial state
 	  - interpolating between patterns?
 		T:
-		  - state machine - "tan(z) + i * tan(-z)"
-			- visualization
 			- expand library
 			- vector fields
 			- expand library
@@ -43,6 +42,7 @@ NEXT
   - remove mid from scripts?
 
 LATER
+  - check for syntax errors in parseT
   - better deploy system
   - weird when opening console in fullscreen
   - really choppy at higher resolutions
@@ -124,3 +124,14 @@ LATER
 		- put ref pools in pattern?
 		- some kind of reactive data tree?
   - think of T as vector fields, composition -> vector flow?
+
+
+
+
+
+
+MATH!!!!!
+t_inner:z / (z + 1) + z / (z - 1)}
+zn [1.500 + 0.000i, 0.000 + 0.000i, 0.800 + 0.000i, 0.200 + 0.000i]
+
+creates a legitimate fractal!!!!!!!!

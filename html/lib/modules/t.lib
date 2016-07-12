@@ -7,7 +7,6 @@ var z
 flags {family: t, default: true}
 zn [1.0 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]
 component t_wrap
-modules {reduce: torus_reduce}
 sub {t_inner: z}
 scripts [default, default, default, default]
 var z

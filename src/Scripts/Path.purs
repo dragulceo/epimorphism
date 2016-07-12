@@ -182,9 +182,6 @@ incZn ssRef pRef self t mid sRef = do
       return $ (Polar new fromR)
     _ -> throwError "offset should be +-1 or +-i"
 
-  let a = lg toTh
-  let b = lg toR
-
   createScript ssRef mid "default" "zpath" $ fromFoldable [(Tuple "path" "intrp"), (Tuple "idx" (show idx)), (Tuple "spd" "4.0"), (Tuple "fromTh" (show fromTh)), (Tuple "toTh" (show toTh)),
                                                            (Tuple "fromR" (show fromR)), (Tuple "toR" (show toR))]
 

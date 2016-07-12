@@ -10,6 +10,7 @@ exports.registerEventHandler = function(handler) {
 		__  = function(msg) {handler(msg)();}
 		__M = function(msg) {handler("setP main.main_body." + msg)();}
 		__D = function(msg) {handler("setP disp." + msg)();}
+		__T = function(msg) {handler("setT " + msg)();}
   }
 };
 

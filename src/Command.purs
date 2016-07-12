@@ -16,7 +16,7 @@ import Data.StrMap (insert, toList, StrMap)
 import Data.String (joinWith, split)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Engine (initEngineST, clearFB)
+import Engine (setShaders, initEngineST, clearFB)
 import Graphics.Canvas (Canvas)
 import Layout (initLayout)
 import Pattern (ImportObj(ImportScript), importScript, findModule)
@@ -58,7 +58,6 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
 
         return unit
       "setP" -> do
-        let a = lg args
         case args of
           [addr, par, val] -> do
             val' <- numFromStringE val
@@ -70,6 +69,16 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
 
             return unit
           _ -> throwError "invalid format: setPar addr par val"
+      "setT" -> do
+        let tExp = joinWith "" args
+        mid <- findModule systemST.moduleRefPool pattern "main.main_body.t" true
+        mRef <- loadLib mid systemST.moduleRefPool "find module - setP"
+        mod <- lift $ readSTRef mRef
+        let sub' = insert "t_inner" tExp mod.sub
+        lift $ modifySTRef mRef (\m -> m {sub = sub'})
+        setShaders systemConf esRef systemST pattern
+
+        return unit
       "save" -> do
         save systemST pattern
       "fullWindow" -> do

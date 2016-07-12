@@ -110,8 +110,6 @@ vec4 rgb2hsls(vec4 c){
 library math {{
 /* math utility library */
 
-#define _1_ vec2(1.0, 0.0)
-#define _I_ vec2(1.0, 0.0)
 
 precision mediump float;
 
@@ -121,6 +119,10 @@ float sinh(float x){
 
 float cosh(float x){
   return (exp(x) + exp(-1.0 * x)) / 2.0;
+}
+
+vec2 CONJ(vec2 z0){
+  return vec2(z0.x, -1.0 * z0.y);
 }
 
 vec2 A(vec2 z0, vec2 z1){
@@ -142,6 +144,14 @@ vec2 D(vec2 z0, vec2 z1){
 
 vec2 SQZ(vec2 z0){
   return M(z0, z0);
+}
+
+vec2 EXPZ(vec2 z0){
+  float f = exp(z0.x);
+  float s, c;
+	s = sin(z0.y);
+	c = cos(z0.y);
+  return vec2(f * c, f * s);
 }
 
 vec2 SINZ(vec2 z0){
@@ -186,13 +196,7 @@ vec2 TANHZ(vec2 z0){
   return vec2(sinh(2.0 * z0.x), s) / r;
 }
 
-vec2 EXPZ(vec2 z0){
-  float f = exp(z0.x);
-  float s, c;
-	s = sin(z0.y);
-	c = cos(z0.y);
-  return vec2(f * c, f * s);
-}
+
 
 vec4 _gamma3(vec4 v, float gamma){
   return vec4(pow(v.xyz, vec3(gamma, gamma, gamma)), v.w);

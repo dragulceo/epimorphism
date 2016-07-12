@@ -1,7 +1,12 @@
 --default
 initEngineConf default
 initUIConf default
-initPattern default
+initPattern main1
+
+--analysis
+initEngineConf default
+initUIConf default
+initPattern analysis
 
 --prod
 initEngineConf default

@@ -2,3 +2,7 @@
 flags {default: true, family: main}
 component main
 modules {main_body: default_main_body}
+
+--analysis_main < default_main
+flags {family: main}
+modules {main_body: analysis_main_body}

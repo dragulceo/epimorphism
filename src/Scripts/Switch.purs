@@ -1,21 +1,19 @@
 module Switch where
 
 import Prelude
-import Command (ScrPS(ScrFn), parseScript)
 import Config (Script, ScriptFn, EpiS, SystemST)
 import Control.Monad (when)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
-import Control.Monad.ST (STRef, readSTRef)
-import Data.Array (foldM, index, length, null, updateAt) as A
+import Control.Monad.ST (modifySTRef, STRef, readSTRef)
+import Data.Array (index, length, null, updateAt) as A
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.StrMap (fromFoldable, insert, member, union)
-import Data.String (split)
 import Data.Tuple (Tuple(..))
-import Pattern (purgeModule, importScript, ImportObj(ImportScript, ImportModule), replaceModule, findParent, importModule, purgeScript, flagFamily)
-import ScriptUtil (createScript)
+import Pattern (purgeModule, ImportObj(ImportModule), replaceModule, findParent, importModule, purgeScript, flagFamily)
+import ScriptUtil (createScript, parseAndImportScript)
 import System (loadLib)
-import Util (randInt, lg, numFromStringE, intFromStringE, gmod)
+import Util (inj, randInt, lg, numFromStringE, intFromStringE, gmod)
 
 incData :: forall eff h. SystemST h -> Script -> String -> (String -> String -> EpiS eff h (Array String)) -> EpiS eff h {childN :: String, nxt :: String, dim :: String, spd :: Number}
 incData systemST scr rootId loader = do
@@ -127,7 +125,7 @@ incScript ssRef pRef self t rootId sRef = do
       let nul' = lg "TEMP: don't have enough scripts!"
       return false
 
-
+-- DOESNT WORK YET
 incScript2 :: forall eff h. ScriptFn eff h
 incScript2 ssRef pRef self t rootId sRef = do
   systemST <- lift $ readSTRef ssRef
@@ -147,13 +145,8 @@ incScript2 ssRef pRef self t rootId sRef = do
 
   case (idx < A.length m.scripts) of
     true -> do
-      def <- loadLib "default" systemST.scriptLib "building script in inc"
-      let dt = split " " nxt
-      Tuple scr' _ <- A.foldM (parseScript systemST.moduleRefPool pattern) (Tuple def ScrFn) dt
-
       m'id <- importModule ssRef (ImportModule m) -- this is kind of hackish, as its reimported
-      let scr'' = scr' {mid = m'id}
-      importScript ssRef (ImportScript scr'') m'id
+      --scr <- parseAndImportScript systemST m'id pattern nxt
 
       (Tuple parent childN) <- findParent systemST.moduleRefPool rootId
       switchModules ssRef parent childN m'id dim spd
@@ -201,7 +194,7 @@ switchModules ssRef rootId childN m1 dim spd = do
   m0M   <- lift $ readSTRef m0Ref
 
   -- create switch module
-  switch <- loadLib "switch" systemST.moduleLib "switchModules"
+  switch <- loadLib "smooth_switch" systemST.moduleLib "switchModules"
 
   let modules = fromFoldable [(Tuple "m0" m0), (Tuple "m1" m1)]
   let sub'    = union (fromFoldable [(Tuple "dim" dim), (Tuple "var" m0M.var)]) switch.sub
@@ -210,7 +203,10 @@ switchModules ssRef rootId childN m1 dim spd = do
   swid <- replaceModule ssRef rootId childN m0 (ImportModule switch')
 
   -- create & import blending script
+  --parseAndImportScript ssRef $ inj "finishSwitch %1 delay:%0" [swid, (show spd)]
   createScript ssRef swid "default" "finishSwitch" $ fromFoldable [(Tuple "delay" (show spd))]
+  --parseAndImportScript ssRef $ inj "finishSwitch %1 delay:%0" [show spd]
+
   createScript ssRef swid "default" "ppath" $ fromFoldable [(Tuple "par" "intrp"), (Tuple "path" "linear"), (Tuple "spd" (show spd))]
 
   return unit
@@ -244,3 +240,36 @@ finishSwitch ssRef pRef self t rootId sRef = do
       return true
     _ -> do
       return false
+
+
+randomize :: forall eff h. ScriptFn eff h
+randomize ssRef pRef self t mid sRef = do
+  systemST <- lift $ readSTRef ssRef
+  pattern  <- lift $ readSTRef pRef
+  scr      <- lift $ readSTRef sRef
+
+  dly <- (loadLib "dly" scr.dt "randomComponent") >>= numFromStringE
+  spd <-  loadLib "spd" scr.dt "randomComponent"
+  lib <-  loadLib "lib" scr.dt "randomComponent"
+  dim <-  loadLib "dim" scr.dt "randomComponent"
+  sub <-  loadLib "sub" scr.dt "randomComponent"
+  typ <-  loadLib "typ" scr.dt "randomComponent"
+  adr <-  loadLib "adr" scr.dt "randomComponent"
+
+  nxt <- case (member "nxt" scr.dt) of
+    false -> return t
+    true  -> (loadLib "nxt" scr.dt "randomMain1 nxt") >>= numFromStringE
+
+  -- next iteration
+  case t of
+    t | t >= nxt -> do
+      let a = lg "ITERATE COMPONENT"
+      let dt' = insert "nxt" (show (t + dly)) scr.dt
+      lift $ modifySTRef sRef (\s -> s {dt = dt'})
+
+      parseAndImportScript ssRef pattern $ inj "inc%0 %1 sub:%2 lib:%3 dim:%4 spd:%5 idx:-1000000" [typ, adr, sub, lib, dim, spd]
+
+      return unit
+    _ -> return unit
+
+  return false

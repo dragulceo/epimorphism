@@ -10,13 +10,13 @@ import Data.Array (index)
 import Data.Array (updateAt) as A
 import Data.Complex (inPolar, outPolar, outCartesian, Polar(Polar), Cartesian(Cartesian))
 import Data.Maybe (Maybe(Just))
-import Data.StrMap (fromFoldable, insert)
+import Data.StrMap (insert)
 import Data.Tuple (Tuple(Tuple))
-import Math (min, pi, round, cos, floor)
+import Math (max, min, pi, round, cos, floor)
 import Pattern (purgeScript)
-import ScriptUtil (createScript)
+import ScriptUtil (parseAndImportScript)
 import System (loadLib)
-import Util (lg, numFromStringE, intFromStringE)
+import Util (inj, numFromStringE, intFromStringE)
 
 -- fixed point
 pfix :: forall eff h. ScriptFn eff h
@@ -149,6 +149,8 @@ zpath ssRef pRef self t mid sRef = do
 incZn :: forall eff h. ScriptFn eff h
 incZn ssRef pRef self t mid sRef = do
   systemST <- lift $ readSTRef ssRef
+  pattern  <- lift $ readSTRef pRef
+
   scr <- lift $ readSTRef sRef
   let dt = scr.dt
 
@@ -169,10 +171,10 @@ incZn ssRef pRef self t mid sRef = do
 
   (Polar toTh toR) <- case ofs of
     "1" -> do
-      let new = (round (fromR / incR + 1.0)) * incR
+      let new = max ((round (fromR / incR + 1.0)) * incR) 0.0
       return $ (Polar fromTh new)
     "-1" -> do
-      let new = (round (fromR / incR - 1.0)) * incR
+      let new = max ((round (fromR / incR - 1.0)) * incR) 0.0
       return $ (Polar fromTh new)
     "i" -> do
       let new = (round (fromTh / incTh + 1.0)) * incTh
@@ -182,8 +184,7 @@ incZn ssRef pRef self t mid sRef = do
       return $ (Polar new fromR)
     _ -> throwError "offset should be +-1 or +-i"
 
-  createScript ssRef mid "default" "zpath" $ fromFoldable [(Tuple "path" "intrp"), (Tuple "idx" (show idx)), (Tuple "spd" "4.0"), (Tuple "fromTh" (show fromTh)), (Tuple "toTh" (show toTh)),
-                                                           (Tuple "fromR" (show fromR)), (Tuple "toR" (show toR))]
+  parseAndImportScript ssRef pattern $ inj "zpath %0 path:intrp idx:%1 spd:4.0 fromTh:%2 toTh:%3 fromR:%4 toR:%5" [mid, (show idx), (show fromTh), (show toTh), (show fromR), (show toR)]
 
   -- remove self
   purgeScript ssRef self

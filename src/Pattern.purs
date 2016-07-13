@@ -32,7 +32,7 @@ flagFamily family flags = A.sort $ fold handle [] family
       false -> res
 
 
--- find a module given an address - ie main.main_body.t
+-- find a module given an address - ie main.main_body.t or a reference
 findModule :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> Boolean -> EpiS eff h String
 findModule mpool pattern dt followSwitch = do
   let addr = split "." dt
@@ -46,7 +46,6 @@ findModule mpool pattern dt followSwitch = do
 
 findModule' :: forall eff h. StrMap (STRef h Module) -> String -> Array String -> Boolean -> EpiS eff h String
 findModule' mpool mid addr followSwitch = do
-
   maybe (return $ mid) handle (A.head addr)
   where
     handle mid' = do

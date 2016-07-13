@@ -1,11 +1,16 @@
 module ScriptUtil where
 
 import Prelude
-import Config (EpiS, SystemST)
+import Config (Script, Pattern, Module, EpiS, SystemST)
+import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (readSTRef, STRef)
 import Control.Monad.Trans (lift)
-import Data.StrMap (union, StrMap)
-import Pattern (ImportObj(ImportScript), importScript)
+import Data.Array (length, (!!), foldM)
+import Data.Maybe.Unsafe (fromJust)
+import Data.StrMap (member, insert, union, StrMap)
+import Data.String (split)
+import Data.Tuple (Tuple(Tuple))
+import Pattern (findModule, ImportObj(ImportScript), importScript)
 import System (loadLib)
 
 -- create a script dynamically & import it
@@ -16,3 +21,37 @@ createScript ssRef mid parent fn dt = do
 
   let scr' = scr {fn = fn, dt = union dt scr.dt}
   importScript ssRef (ImportScript scr') mid
+
+
+-- recursively parse a script from a string
+data ScrPS = ScrFn | ScrMid | ScrDt
+
+parseAndImportScript :: forall eff h. STRef h (SystemST h) -> Pattern -> String -> EpiS eff h Script
+parseAndImportScript ssRef pattern dt = do
+  systemST <- lift $ readSTRef ssRef
+
+  def <- loadLib "default" systemST.scriptLib "building script in inc"
+  Tuple scr _ <- foldM (parseScript' systemST.moduleRefPool pattern) (Tuple def ScrFn) (split " " dt)
+
+  importScript ssRef (ImportScript scr) scr.mid
+
+  return scr
+
+parseScript' :: forall eff h. StrMap (STRef h Module) -> Pattern -> (Tuple Script ScrPS) -> String -> EpiS eff h (Tuple Script ScrPS)
+parseScript' mpool pattern (Tuple scr ps) dt = do
+  case ps of
+    ScrFn -> do
+      return $ Tuple scr {fn = dt} ScrMid
+    ScrMid -> do
+      mid <- case (member dt mpool) of
+        true -> return dt
+        false -> findModule mpool pattern dt true
+      return $ Tuple scr {mid = mid} ScrDt
+    ScrDt -> do
+      let tok = split ":" dt
+      case (length tok) of
+        2 -> do
+          let dt' = insert (fromJust $ tok !! 0) (fromJust $ tok !! 1) scr.dt
+          let scr' = scr {dt = dt'}
+          return $ Tuple scr' ScrDt
+        _ -> throwError $ "invalid script data assignment :" ++ dt

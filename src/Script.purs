@@ -2,21 +2,33 @@ module Script where
 
 import Prelude
 import Config (Pattern, ScriptFn, EpiS, SystemST)
-import Control.Monad (unless)
 import Control.Monad.Except.Trans (throwError, lift)
-import Control.Monad.ST (STRef, modifySTRef, readSTRef)
+import Control.Monad.ST (STRef, readSTRef)
 import Data.Foldable (or)
-import Data.StrMap (fromFoldable, insert, member, keys)
+import Data.StrMap (member, keys)
 import Data.Traversable (traverse)
-import Data.Tuple (Tuple(..))
 import Path (incZn, zpath, ppath, zfix, pfix)
-import Pattern (findModule')
-import ScriptUtil (createScript)
-import Switch (incScript, incImage, incMod, finishSwitch, incSub)
+import Switch (randomize, incScript, incImage, incMod, finishSwitch, incSub)
 import System (loadLib)
-import Util (lg, numFromStringE)
+import Util (lg)
 
--- PUBLIC
+-- find script fuction given name
+lookupScriptFN :: forall eff h. String -> EpiS eff h (ScriptFn eff h)
+lookupScriptFN n = case n of
+  "null"         -> return nullS
+  "zfix"         -> return zfix
+  "pfix"         -> return pfix
+  "ppath"        -> return ppath
+  "zpath"        -> return zpath
+  "incMod"       -> return incMod
+  "incSub"       -> return incSub
+  "incImage"     -> return incImage
+  "incScript"    -> return incScript
+  "incZn"        -> return incZn
+  "finishSwitch" -> return finishSwitch
+  "randomize"    -> return randomize
+  _              -> throwError $ "script function not found: " ++ n
+
 
 -- execute all scripts & script pool
 runScripts :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Boolean
@@ -43,109 +55,7 @@ runScripts ssRef pRef = do
           let g = lg "script removed" -- ghetto(script purged by previous script)
           return false
 
--- SCRIPT FUNCTIONS
-
 -- dont do anything
 nullS :: forall eff h. ScriptFn eff h
 nullS ssRef pRef self t mid sRef = do
   return false
-
-
--- urgh
-randomMain :: forall eff h. ScriptFn eff h
-randomMain ssRef pRef self t mid sRef = do
-
-
-  systemST <- lift $ readSTRef ssRef
-  pattern  <- lift $ readSTRef pRef
-  scr      <- lift $ readSTRef sRef
-
-  dly <- (loadLib "dly" scr.dt "randomMain") >>= numFromStringE
-  spd <-  loadLib "spd" scr.dt "randomMain"
-
-  unless(member "nxt" scr.dt) do
-    let dt' = insert "nxt" (show (t + dly)) scr.dt
-    lift $ modifySTRef sRef (\s -> s {dt = dt'})
-    return unit
-
-  scr' <- lift $ readSTRef sRef
-  let dt = scr'.dt
-
-  nxt <- (loadLib "nxt" dt "randomMain nxt") >>= numFromStringE
-
-  -- next iteration
-  case t of
-    t | t > nxt -> do
-      let a = lg "iterate randomMain"
-      let dt' = insert "nxt" (show (t + dly)) dt
-      lift $ modifySTRef sRef (\s -> s {dt = dt'})
-
-      tmid <- findModule' systemST.moduleRefPool pattern.main ["main_body", "t"] true
-
-      createScript ssRef tmid "default" "incSub" $ fromFoldable [(Tuple "sub" "t_inner"), (Tuple "idx" "-1.0"), (Tuple "spd" spd), (Tuple "lib" "t_inner"), (Tuple "dim" "vec2")]
-      return unit
-    _ -> return unit
-
-  return false
-
-
-
-randomMain1 :: forall eff h. ScriptFn eff h
-randomMain1 ssRef pRef self t mid sRef = do
-  systemST <- lift $ readSTRef ssRef
-  pattern  <- lift $ readSTRef pRef
-  scr      <- lift $ readSTRef sRef
-
-  dly <- (loadLib "dly" scr.dt "randomMain1") >>= numFromStringE
-  spd <-  loadLib "spd" scr.dt "randomMain1"
-
-  unless(member "nxt" scr.dt) do
-    let dly' = dly / 2.0
-    let dt' = insert "nxt" (show (t + dly)) scr.dt
-    lift $ modifySTRef sRef (\s -> s {dt = dt'})
-    return unit
-
-
-  scr' <- lift $ readSTRef sRef
-  let dt = scr'.dt
-
-  nxt <- (loadLib "nxt" dt "randomMain1 nxt") >>= numFromStringE
-
-  -- next iteration
-  case t of
-    t | t > nxt -> do
-      let a = lg "ITERATE RANDOMMAIN1"
-      let dt' = insert "nxt" (show (t + dly)) dt
-      lift $ modifySTRef sRef (\s -> s {dt = dt'})
-
-      tmid <- findModule' systemST.moduleRefPool pattern.main ["main_body", "t"] true
-
-      createScript ssRef tmid "default" "incSub" $ fromFoldable [(Tuple "sub" "t_inner"), (Tuple "idx" "-1000000.0"), (Tuple "spd" spd), (Tuple "lib" "t_inner"), (Tuple "dim" "vec2")]
-
-      tmid' <- findModule' systemST.moduleRefPool pattern.main ["main_body", "seed", "t"] true
-
-      createScript ssRef tmid' "default" "incSub" $ fromFoldable [(Tuple "sub" "t_inner"), (Tuple "idx" "-1000000.0"), (Tuple "spd" spd), (Tuple "lib" "t_inner"), (Tuple "dim" "vec2")]
-      return unit
-    _ -> return unit
-
-  return false
-
-
--- PRIVATE
-
--- find script fuction given name
-lookupScriptFN :: forall eff h. String -> EpiS eff h (ScriptFn eff h)
-lookupScriptFN n = case n of
-  "null"         -> return nullS
-  "zfix"         -> return zfix
-  "pfix"         -> return pfix
-  "ppath"        -> return ppath
-  "zpath"        -> return zpath
-  "incMod"       -> return incMod
-  "incSub"       -> return incSub
-  "incImage"     -> return incImage
-  "incScript"    -> return incScript
-  "incZn"        -> return incZn
-  "finishSwitch" -> return finishSwitch
-  "randomMain1"  -> return randomMain1
-  _              -> throwError $ "script function not found: " ++ n

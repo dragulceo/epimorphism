@@ -1,25 +1,26 @@
 module Command where
 
 import Prelude
-import Config (scriptSchema, Schema, patternSchema, moduleSchema, Script, EpiS, Pattern, Module, SystemST, SystemConf, EngineST, EngineConf, UIST, UIConf)
+import Config (scriptSchema, Schema, patternSchema, moduleSchema, EpiS, Pattern, SystemST, SystemConf, EngineST, EngineConf, UIST, UIConf)
 import Control.Monad (unless)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
-import Data.Array (length, head, tail, foldM, (!!))
+import Data.Array (length, head, tail)
 import Data.List (fromList)
 import Data.Maybe (Maybe(Just))
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (insert, toList, StrMap)
+import Data.StrMap (empty, insert, toList)
 import Data.String (joinWith, split)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Engine (setShaders, initEngineST, clearFB)
 import Graphics.Canvas (Canvas)
 import Layout (initLayout)
-import Pattern (ImportObj(ImportScript), importScript, findModule)
+import Pattern (findModule)
+import ScriptUtil (parseAndImportScript)
 import Serialize (unsafeSerialize)
 import System (loadLib)
 import Util (intFromStringE, numFromStringE, lg, uuid, handleError)
@@ -47,15 +48,11 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
       "pause" -> do
         lift $ modifySTRef pRef (\p -> p {tSpd = 1.0 - p.tSpd})
         return unit
+      "killScripts" -> do
+        --lift $ modifySTRef ssRef (\s -> s {scriptRefPool = empty})
+        return unit
       "scr" -> do
-        -- build
-        scr <- loadLib "default" systemST.scriptLib "building script"
-        Tuple scr' _ <- foldM (parseScript systemST.moduleRefPool pattern) (Tuple scr ScrFn) args
-
-        -- import
-        mid <- return $ scr'.mid
-        importScript ssRef (ImportScript scr') mid
-
+        parseAndImportScript ssRef pattern (joinWith " " args)
         return unit
       "setP" -> do
         case args of
@@ -143,24 +140,3 @@ save systemST pattern = do
       obj <- lift $ readSTRef ref
       st <- unsafeSerialize schema n obj
       return st
-
-
--- recursively parse a script from a string
-data ScrPS = ScrFn | ScrMid | ScrDt
-
-parseScript :: forall eff h. StrMap (STRef h Module) -> Pattern -> (Tuple Script ScrPS) -> String -> EpiS eff h (Tuple Script ScrPS)
-parseScript mpool pattern (Tuple scr ps) dt = do
-  case ps of
-    ScrFn -> do
-      return $ Tuple scr {fn = dt} ScrMid
-    ScrMid -> do
-      mid <- findModule mpool pattern dt true
-      return $ Tuple scr {mid = mid} ScrDt
-    ScrDt -> do
-      let tok = split ":" dt
-      case (length tok) of
-        2 -> do
-          let dt' = insert (fromJust $ tok !! 0) (fromJust $ tok !! 1) scr.dt
-          let scr' = scr {dt = dt'}
-          return $ Tuple scr' ScrDt
-        _ -> throwError $ "invalid script data assignment :" ++ dt

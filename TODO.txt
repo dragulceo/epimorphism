@@ -1,14 +1,17 @@
+randomMain1 speed not working?
+randomMain1 randomness not working?
+
+
 RELEASE
   LAUNCH:
   	- about page / gallery
   	- mailing list
   	- upgrade hosting
 	SYSTEM:
-	  - menu issues - chrome
 		- test in ie
 		- save debugState somewhere for analysis - save server?
 		- there are a bunch of dummy scripts assigned to things atm
-		- move random_main script into individual components.  i.e, T switches itself
+		- put pattern into systemST, patternRefPool.  remove createScript & stop passing pattern around
   CONTENTS:
 	  - initial state
 	  - interpolating between patterns?

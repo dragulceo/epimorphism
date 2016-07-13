@@ -127,21 +127,22 @@ flags {default: true, family: vert}
 component default_vert
 
 
+
+
 --main1 < default_main
 modules {main_body: main1_body}
 
 --main1_body < default_main_body
 flags {family: main_body}
-modules {t: t_sinhz_tst, seed: seed_borderM, color: rotate_hsv1, reduce: torus_reduce}
-scripts [randomMain1]
+modules {t: t_main1, seed: seed_borderM, color: rotate_hsv1, reduce: torus_reduce}
 
---t_sinhz_tst
+--t_main1
 flags {family: t}
 component t_wrap
 zn [1.0 + 0.0i, 0.0 + 0.0i, 1.1 + 0.0i, 0.0 + 0.0i]
 sub {t_inner: sinh(z)}
 var z
-scripts [circle_0, rose1_0, rose3_2]
+scripts [randomizeT1, circle_0, rose1_0, rose3_2]
 
 --seed_borderM < seed_border
 par {w: 0.5, alpha: 0.5}

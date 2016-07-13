@@ -6,11 +6,13 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (runExceptT)
 import DOM (DOM)
+import Data.Array (length)
 import Data.Either (Either(..), either)
+import Data.Foldable (foldr)
 import Data.Int (fromString) as I
 import Data.Maybe (Maybe(..))
 import Data.String (split, joinWith)
-import Data.Tuple (Tuple(..))
+import Data.Tuple (fst, Tuple(..))
 import Graphics.Canvas (Canvas)
 
 foreign import data Now :: !
@@ -94,3 +96,10 @@ spc m = " " ++ spc (m - 1)
 
 indentLines :: Int -> String -> String
 indentLines n s = joinWith "\n" $ map (\x -> (spc n) ++ x) $ split "\n" s
+
+
+inj :: String -> Array String -> String
+inj template dt = do
+  fst $ foldr handle (Tuple template ((length dt) - 1)) dt
+    where
+      handle elt (Tuple res idx) = (Tuple (replaceAll ("%" ++ (show idx)) elt res) (idx - 1))

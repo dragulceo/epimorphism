@@ -54,27 +54,8 @@ exports.addGlobalEventListeners = function(handler) {
 
 		$(window).resize(resizeHandler);
 
-		var iconOverHandler =
-				function(event){
-					$('#menu-icon').addClass('hide');
-					$('#menuContainer').removeClass('hide');
-					$('#menuContainer').addClass('fadeIn');
-				};
-
-		$("#menu-icon").on('mouseover', iconOverHandler);
-
-
-		var menuExitHandler =
-				function(event){
-					if($.inArray(event.target.tagName.toLowerCase(), ["select", "option", "input", "a", "span"]) == -1){
-						$('#menu-icon').removeClass('hide');
-						$('#menuContainer').addClass('hide');
-						$('#menuContainer').removeClass('fadeIn');
-					}
-				};
-
-		$("#menuContainer").on('mouseleave', menuExitHandler);
-
+		$("#menu-icon").hover(function(){$("#menuContainer").fadeIn("slow");$("#menu-icon").fadeOut("slow");},function(){});
+		$("#menuContainer").hover(function(){},function(){$("#menuContainer").fadeOut("slow");$("#menu-icon").fadeIn("slow");});
 
 		var resChangeHandler =
 				function (){

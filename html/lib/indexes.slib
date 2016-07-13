@@ -113,7 +113,6 @@ t_inner {{
   1 - (z * z + tanh(z)) / 2
   cos(z) - tanh(z)
   (z + exp(z)) / 2
-  sin(tan(z))
   (sin(z) + tan(z)) / 2
   cosh(z) + exp(z)
   z * cos(z)

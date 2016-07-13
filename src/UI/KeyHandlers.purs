@@ -79,13 +79,13 @@ devKeyHandler ucRef usRef char = do
       return "scr incZn main.main_body.t idx:3 ofs:-i"
     _   -> commonKeyHandler ucRef usRef char
   where
-    inc uiConf uiST typ addr sub lib dim ofs = do
-      let idn' = addr ++ sub
+    inc uiConf uiST typ adr sub lib dim ofs = do
+      let idn' = adr ++ sub
       let idx = if (member idn' uiST.incIdx) then ((fromJust $ lookup idn' uiST.incIdx) + ofs) else 0
       let dt = insert idn' idx uiST.incIdx
       modifySTRef usRef (\s -> s {incIdx = dt})
       let spd = show uiConf.keyboardSwitchSpd
-      return $ "scr inc" ++ typ ++ " " ++  addr ++ " sub:" ++ sub ++ " lib:" ++ lib ++ " dim:" ++ dim ++ " idx:" ++ (show idx) ++ " spd:" ++ spd
+      return $ "scr inc" ++ typ ++ " " ++ adr ++ " sub:" ++ sub ++ " lib:" ++ lib ++ " dim:" ++ dim ++ " idx:" ++ (show idx) ++ " spd:" ++ spd
 
 prodKeyHandler :: KeyHandler
 prodKeyHandler ucRef usRef char = do

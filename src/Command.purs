@@ -12,7 +12,7 @@ import Data.Array (length, head, tail)
 import Data.List (fromList)
 import Data.Maybe (Maybe(Just))
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (empty, insert, toList)
+import Data.StrMap (insert, toList)
 import Data.String (joinWith, split)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
@@ -73,7 +73,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         mod <- lift $ readSTRef mRef
         let sub' = insert "t_inner" tExp mod.sub
         lift $ modifySTRef mRef (\m -> m {sub = sub'})
-        setShaders systemConf esRef systemST pattern
+        setShaders systemConf engineConf esRef systemST pattern
 
         return unit
       "save" -> do
@@ -108,6 +108,17 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
             initEngineST systemConf engineConf' systemST pattern uiConf.canvasId (Just esRef)
 
           _ -> throwError "invalid format: setKerneldim dim"
+        return unit
+      "setFract" -> do
+        case args of
+          [fract] -> do
+            fract' <- intFromStringE fract
+            lift $ modifySTRef ecRef (\ec -> ec {fract = fract'})
+            engineConf' <- lift $ readSTRef ecRef
+            setShaders systemConf engineConf' esRef systemST pattern
+            --initEngineST systemConf engineConf' systemST pattern uiConf.canvasId (Just esRef)
+
+          _ -> throwError "invalid format: setFract fract"
         return unit
       "clear" -> do
         clearFB engineConf engineST

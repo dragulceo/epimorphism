@@ -14,6 +14,17 @@ main_body main_stc {{
   vec4 seed, frame;
   vec2 frame_z, t_z;
 
+	vec4 accum = vec4(0.0, 0.0, 0.0, 0.0);
+
+	float delta = 1.0 / (float($fract$) * kernel_dim);
+	float ofs = delta * (float($fract$) - 1.0);
+
+ 	for(int i=0; i<$fract$; i++){
+		for(int j=0; j<$fract$; j++){
+			z = z_in;
+			z = z - vec2(ofs, ofs) + vec2(2.0 * delta * float(i), 2.0 * delta * float(j));
+
+
   %t%
 
   // get frame
@@ -27,7 +38,13 @@ main_body main_stc {{
   %seed%
 
   // blend
-  color = vec4(seed.a * seed.rgb + (1.0 - seed.a) * frame.rgb, seed.a);
+  accum += vec4(seed.a * seed.rgb + (1.0 - seed.a) * frame.rgb, seed.a);
+			z = z_in;
+		}
+	}
+
+	float f2 = float($fract$ * $fract$);
+	color = accum / vec4(f2, f2, f2, f2);
 
   %color%
 }}

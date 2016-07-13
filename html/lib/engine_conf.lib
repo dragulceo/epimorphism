@@ -4,10 +4,13 @@ fract 3
 numAux 10
 
 --low < default
+fract 4
 kernelDim 512
 
 --high_res < default
+fract 2
 kernelDim 2048
 
 --uhr < default
+fract 2
 kernelDim 3072

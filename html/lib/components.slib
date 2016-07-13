@@ -182,9 +182,6 @@ vec4 rgb2hsls(vec4 c){
 
 }
 
-
-
-
 }}
 
 
@@ -310,6 +307,18 @@ bool isNan(float val)
   return ( val < 0.0 || 0.0 < val || val == 0.0 ) ? false : true;
 }
 
+vec2 torus_reduce(vec2 z){
+	// can probably optimize this a bit
+	z = z + vec2(1.0, 1.0);
+
+  z = mod(z, 4.0);
+  if(z.x >= 2.0)
+    z.x = 4.0 - z.x;
+  if(z.y >= 2.0)
+    z.y = 4.0 - z.y;
+
+  return z - vec2(1.0, 1.0);
+}
 
 }}
 
@@ -359,6 +368,17 @@ main_body main_stc {{
   vec4 seed, frame;
   vec2 frame_z, t_z;
 
+	vec4 accum = vec4(0.0, 0.0, 0.0, 0.0);
+
+	float delta = 1.0 / (float($fract$) * kernel_dim);
+	float ofs = delta * (float($fract$) - 1.0);
+
+ 	for(int i=0; i<$fract$; i++){
+		for(int j=0; j<$fract$; j++){
+			z = z_in;
+			z = z - vec2(ofs, ofs) + vec2(2.0 * delta * float(i), 2.0 * delta * float(j));
+
+
   %t%
 
   // get frame
@@ -372,7 +392,13 @@ main_body main_stc {{
   %seed%
 
   // blend
-  color = vec4(seed.a * seed.rgb + (1.0 - seed.a) * frame.rgb, seed.a);
+  accum += vec4(seed.a * seed.rgb + (1.0 - seed.a) * frame.rgb, seed.a);
+			z = z_in;
+		}
+	}
+
+	float f2 = float($fract$ * $fract$);
+	color = accum / vec4(f2, f2, f2, f2);
 
   %color%
 }}
@@ -419,15 +445,7 @@ post post_hlim {{
 
 
 reduce torus_reduce {{
-  z = z + vec2(1.0, 1.0);
-
-  z = mod(z, 4.0);
-  if(z.x >= 2.0)
-    z.x = 4.0 - z.x;
-  if(z.y >= 2.0)
-    z.y = 4.0 - z.y;
-
-  z = z - vec2(1.0, 1.0);
+	z = torus_reduce(z);
 }}
 
 
@@ -506,28 +524,32 @@ seed seed_simple_img {{
 	%reduce%
 
   float w = VOID_W;
-  float wx = (z.x + @seed_w@) / (2.0 * @seed_w@);
-  float wy = (z.y + @seed_w@) / (2.0 * @seed_w@);
+  float wx = (z.x + @w@) / (2.0 * @w@);
+  float wy = (z.y + @w@) / (2.0 * @w@);
 
-  if(z.x >= z.y && z.x >= -1.0 * z.y && z.x > (1.0 - @seed_w@)){
-    w = (z.x - (1.0 - @seed_w@)) / @seed_w@;
-    wy = z.y / (0.5 * @seed_w@) - 0.5;
-  }else if(z.y >= z.x && z.y >= -1.0 * z.x && z.y > (1.0 - @seed_w@)){
-    w = (z.y - (1.0 - @seed_w@)) / @seed_w@;
-    wy = z.x / (0.5 * @seed_w@) - 0.5;
-  }else if(z.y >= z.x && z.y <= -1.0 * z.x && z.x < -1.0 * (1.0 - @seed_w@)){
-    w = (-1.0 * (1.0 - @seed_w@) - z.x) / @seed_w@;
-    wy = z.y / (0.5 * @seed_w@) - 0.5;
-  }else if(z.x >= z.y && z.x <= -1.0 * z.y && z.y < -1.0 * (1.0 - @seed_w@)){
-    w = (-1.0 * (1.0 - @seed_w@) - z.y) / @seed_w@;
-    wy = z.x / (0.5 * @seed_w@) - 0.5;
+  if(z.x >= z.y && z.x >= -1.0 * z.y && z.x > (1.0 - @w@)){
+    w = (z.x - (1.0 - @w@)) / @w@;
+    wy = z.y / (0.5 * @w@) - 0.5;
+  }else if(z.y >= z.x && z.y >= -1.0 * z.x && z.y > (1.0 - @w@)){
+    w = (z.y - (1.0 - @w@)) / @w@;
+    wy = z.x / (0.5 * @w@) - 0.5;
+  }else if(z.y >= z.x && z.y <= -1.0 * z.x && z.x < -1.0 * (1.0 - @w@)){
+    w = (-1.0 * (1.0 - @w@) - z.x) / @w@;
+    wy = z.y / (0.5 * @w@) - 0.5;
+  }else if(z.x >= z.y && z.x <= -1.0 * z.y && z.y < -1.0 * (1.0 - @w@)){
+    w = (-1.0 * (1.0 - @w@) - z.y) / @w@;
+    wy = z.x / (0.5 * @w@) - 0.5;
   }
   wx = w;
   vec4 frame_w = vec4(w, (abs(w-VOID_W) < 0.00001 ? 0.0 : 1.0), wx, wy);
 
 	vec2 ofs = mod(0.25 * frame_w.zw, 1.0);
   seed = texture2D(aux[#0], ofs);
-	seed.w = seed.w * frame_w.y;
+	seed.w = seed.w * @alpha@ * frame_w.y;
+
+	seed = rgb2hsv(seed);
+	seed.z = w;
+	seed = hsv2rgb(seed);
 
 	z = z_i;
 }}

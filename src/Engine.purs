@@ -29,7 +29,7 @@ import Graphics.WebGL.Context (getWebglContext)
 import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor, vertexAttribPointer, enableVertexAttribArray, bufferData, bindBuffer, createBuffer, createFramebuffer, createTexture)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram)
 import Graphics.WebGL.Types (WebGL, WebGLContext, WebGLProgram, WebGLTexture, WebGLFramebuffer, ArrayBufferType(ArrayBuffer), BufferData(DataSource), BufferUsage(StaticDraw), DataType(Float), DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
-import Util (unsafeNull)
+import Util (replaceAll, unsafeNull)
 
 -- PUBLIC
 
@@ -112,17 +112,19 @@ clearFB engineConf engineST = do
 foreign import emptyImage :: forall eff. Int -> Eff eff GLT.TexImageSource
 
 -- compile shaders and load into systemST
-setShaders :: forall eff h. SystemConf -> STRef h EngineST -> SystemST h -> Pattern -> EpiS eff h Unit
-setShaders sysConf esRef sys pattern = do
+setShaders :: forall eff h. SystemConf -> EngineConf -> STRef h EngineST -> SystemST h -> Pattern -> EpiS eff h Unit
+setShaders sysConf engineConf esRef sys pattern = do
   es <- lift $ readSTRef esRef
 
   -- load & compile shaders
   {main, disp, vert, aux} <- compileShaders pattern sys
+  let mainF = replaceAll "\\$fract\\$" (show engineConf.fract) main -- a little ghetto, we need this in a for loop
+
   auxImg <- uploadAux es sysConf.host aux
 
   Tuple main' disp' <- execGL es.ctx ( do
     -- create programs
-    mainProg <- compileShadersIntoProgram vert main
+    mainProg <- compileShadersIntoProgram vert mainF
     dispProg <- compileShadersIntoProgram vert disp
 
     -- vertex coords
@@ -199,7 +201,7 @@ initEngineST sysConf engineConf sys pattern canvasId esRef' = do
 
   -- set shaders
   lift $ writeSTRef esRef res
-  setShaders sysConf esRef sys pattern
+  setShaders sysConf engineConf esRef sys pattern
 
   return esRef
 

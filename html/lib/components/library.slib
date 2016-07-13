@@ -101,9 +101,6 @@ vec4 rgb2hsls(vec4 c){
 
 }
 
-
-
-
 }}
 
 
@@ -229,5 +226,17 @@ bool isNan(float val)
   return ( val < 0.0 || 0.0 < val || val == 0.0 ) ? false : true;
 }
 
+vec2 torus_reduce(vec2 z){
+	// can probably optimize this a bit
+	z = z + vec2(1.0, 1.0);
+
+  z = mod(z, 4.0);
+  if(z.x >= 2.0)
+    z.x = 4.0 - z.x;
+  if(z.y >= 2.0)
+    z.y = 4.0 - z.y;
+
+  return z - vec2(1.0, 1.0);
+}
 
 }}

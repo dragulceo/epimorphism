@@ -1,7 +1,3 @@
-randomMain1 speed not working?
-randomMain1 randomness not working?
-
-
 RELEASE
   LAUNCH:
   	- about page / gallery
@@ -9,20 +5,24 @@ RELEASE
   	- upgrade hosting
 	SYSTEM:
 		- test in ie
-		- save debugState somewhere for analysis - save server?
-		- there are a bunch of dummy scripts assigned to things atm
+		- saving
 		- put pattern into systemST, patternRefPool.  remove createScript & stop passing pattern around
+		- kill scripts
+		- remove mid from scripts & tree iteration
+	  - interpolating between patterns?
+		- chopiness when at higher resolutions
+		- inline scripts
+		- flags a set
   CONTENTS:
 	  - initial state
-	  - interpolating between patterns?
 		T:
-			- expand library
 			- vector fields
 			- expand library
 			- animations
 			- make sure paths/animations dont zoom out/in too much? - constraint system
 			- use images(self????) as transformations
 			- random idea - different Ts on different frames?????
+			- when interpolating between t's, are different zns handled correctly?
 		SEED:
 		  - impulses
 			- wca & multi seed
@@ -30,7 +30,10 @@ RELEASE
 			- expand library
 		COLOR:
 		  - length_scale
+			- maintain values
 	  POST:
+		BLEND:
+		  - blend maps!! variable interpolation
 
 
 NEXT
@@ -58,7 +61,7 @@ LATER
   - hard pause button (do nothing at all, not just tSpd=0)
 	- finish importScript2
   - BETA INFRASTRUCTURE PASS
-  - fract
+  - more work on fract.  more specific fracts.  like for seed vs T.  can possibly also increase quality
 	- too many debug statements going on (in engine?)
 	- very minor glitch during image uploading
   - prevent default in ui.js
@@ -138,3 +141,4 @@ t_inner:z / (z + 1) + z / (z - 1)}
 zn [1.500 + 0.000i, 0.000 + 0.000i, 0.800 + 0.000i, 0.200 + 0.000i]
 
 creates a legitimate fractal!!!!!!!!
+g

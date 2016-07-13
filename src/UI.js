@@ -11,6 +11,7 @@ exports.registerEventHandler = function(handler) {
 		__M = function(msg) {handler("setP main.main_body." + msg)();}
 		__D = function(msg) {handler("setP disp." + msg)();}
 		__T = function(msg) {handler("setT " + msg)();}
+		__S = function(msg) {handler("scr " + msg)();}
   }
 };
 

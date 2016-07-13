@@ -1,4 +1,4 @@
-var __, __M, __D, __T;
+var __, __M, __D, __T, __S;
 var halt = false;
 
 window.requestFullScreen = function(id) {

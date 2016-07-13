@@ -95,7 +95,7 @@ animate stateM = handleError do
 
   case recompile of -- when doesnt work here for some godforsaken reason
     true -> do
-      setShaders systemConf esRef systemST' pattern
+      setShaders systemConf engineConf esRef systemST' pattern
     false -> return unit
   engineST' <- lift $ readSTRef esRef
 

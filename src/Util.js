@@ -59,7 +59,7 @@ exports.stick = function stick(x) {
 
 
 exports.now = function () {
-  return Date.now();
+  return performance.now();
 };
 
 exports.unsafeEval = function (s) {

@@ -100,7 +100,7 @@ serializeDebugState pool ofs nl nn = do
   return $ indentLines ofs res
   where
     exp [a, b] = do
-      serializeDebugState pool 2 (trim b) ("<span style='color:blue'>" ++ (trim a) ++ ": " ++ (trim b) ++ "</span>")
+      serializeDebugState pool 2 (trim b) ("<span style='color:blue;font-weight:bold'>" ++ (trim a) ++ ": " ++ (trim b) ++ "</span>")
     exp _ = throwError $ "invalid map syntax in " ++ nl
 
 

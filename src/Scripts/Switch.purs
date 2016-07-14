@@ -203,9 +203,9 @@ switchModules ssRef rootId childN m1 dim spd = do
   swid <- replaceModule ssRef rootId childN m0 (ImportModule switch')
 
   -- create & import blending script
-  --parseAndImportScript ssRef $ inj "finishSwitch %1 delay:%0" [swid, (show spd)]
+  --parseAndImportScript ssRef $ inj "finishSwitch %0 delay:%1" [swid, (show spd)]
+  --parseAndImportScript ssRef $ inj "finishSwitch %0 par:intrp path:linear spd:%1" [swid, show spd]
   createScript ssRef swid "default" "finishSwitch" $ fromFoldable [(Tuple "delay" (show spd))]
-  --parseAndImportScript ssRef $ inj "finishSwitch %1 delay:%0" [show spd]
 
   createScript ssRef swid "default" "ppath" $ fromFoldable [(Tuple "par" "intrp"), (Tuple "path" "linear"), (Tuple "spd" (show spd))]
 

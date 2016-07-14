@@ -96,7 +96,7 @@ seed seed_simple_img {{
 	seed.w = seed.w * @alpha@ * frame_w.y;
 
 	seed = rgb2hsv(seed);
-	seed.z = w;
+	seed.z *= w;
 	seed = hsv2rgb(seed);
 
 	z = z_i;

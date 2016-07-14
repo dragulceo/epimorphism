@@ -308,16 +308,12 @@ bool isNan(float val)
 }
 
 vec2 torus_reduce(vec2 z){
-	// can probably optimize this a bit
 	z = z + vec2(1.0, 1.0);
 
-  z = mod(z, 4.0);
-  if(z.x >= 2.0)
-    z.x = 4.0 - z.x;
-  if(z.y >= 2.0)
-    z.y = 4.0 - z.y;
+	z = mod(z, 4.0);
+	z = vec2(1.0, 1.0) - abs(z - vec2(2.0, 2.0));
 
-  return z - vec2(1.0, 1.0);
+  return z;
 }
 
 }}
@@ -548,7 +544,7 @@ seed seed_simple_img {{
 	seed.w = seed.w * @alpha@ * frame_w.y;
 
 	seed = rgb2hsv(seed);
-	seed.z = w;
+	seed.z *= w;
 	seed = hsv2rgb(seed);
 
 	z = z_i;

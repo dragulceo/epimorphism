@@ -14,6 +14,7 @@ var z
 scripts [randomizeT1, circle_0, rose1_0, rose3_2]
 
 --seed_borderM < seed_border
+flags {family: seed}
 par {w: 0.5, alpha: 0.5}
 modules {t: ts_wrap_linx3', reduce: torus_reduce}
 scripts [ssc_w1, ssc_a1]

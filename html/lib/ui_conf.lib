@@ -6,7 +6,7 @@ fpsId showFps
 showFps false
 windowState dev
 uiUpdateFreq 10
-keyboardSwitchSpd 0.4
+keyboardSwitchSpd 1.0
 keySet dev
 
 --full < default

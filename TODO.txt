@@ -13,27 +13,46 @@ RELEASE
 		- chopiness when at higher resolutions
 		- inline scripts
 		- flags a set
+		- properties, etc
+		- try to remove branching from seed
   CONTENTS:
-	  - initial state
 		T:
-			- vector fields
-			- expand library
-			- animations
-			- make sure paths/animations dont zoom out/in too much? - constraint system
-			- use images(self????) as transformations
-			- random idea - different Ts on different frames?????
-			- when interpolating between t's, are different zns handled correctly?
+		  - make a few more seeds, some with simple animations
+		  - BASIC IDEA
+			  - given a collection of constraints, generate a T
+				- CONSTRAINTS:
+				  - animation type: none, symmetric X/Y, inner/outer, 0 vs 1, etc
+					- constrain scale
+					- maybe some interesting properties
+				- first, generate t_inner, then add animations
+			- EXPAND LIBRARY
+			  - catagorize transformations:
+				  - symmetries, is_inversion, scale, periodic?, rational?, accumulation points, empty regions?, elementary, custom?
+			- ANIMATIONS
+			  - make sure paths/animations dont zoom out/in too much? - constraint system
+				- seed animations vs t animations
+				- various classes of animations. non-animated, symmetric
+			- MISC
+			  - use images(self????) as transformations
+			  - random idea - different Ts on different frames?????
+			  - when interpolating between t's, are different zns handled correctly? yes, because incSub preserves scripts
+			  - vector fields
 		SEED:
 		  - impulses
 			- wca & multi seed
 			- images, use w for value
+			- outline seeds
 			- expand library
 		COLOR:
 		  - length_scale
-			- maintain values
+			- maintain val
 	  POST:
+		  - pay better attention to gamma
 		BLEND:
 		  - blend maps!! variable interpolation
+		MISC:
+		  - initial state
+			- master pattern
 
 
 NEXT
@@ -48,6 +67,9 @@ NEXT
   - remove mid from scripts?
 
 LATER
+  - ppath, remove path if t > 1.0 when necessary
+  - less performant when zoomed out??  branches?
+  - change zn & par through clicking on console
   - check for syntax errors in parseT
   - better deploy system
   - weird when opening console in fullscreen

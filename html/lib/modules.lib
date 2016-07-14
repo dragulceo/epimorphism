@@ -14,7 +14,7 @@ component color_gbr
 --rotate_hsv0 < color_id
 flags {family: color, basic: true}
 component rotate_hsv
-par {rot: 0.03, len_sc:0.0, len_sc_amt:0.0, th_spd: 0.0}
+par {rot: 0.06, len_sc:0.0, len_sc_amt:0.0, th_spd: 0.0}
 
 --rotate_hsv1 < color_id
 flags {family: color, basic: true}
@@ -40,7 +40,7 @@ modules {main_body: analysis_main_body}
 --default_main_body
 flags {default: true, family: main_body}
 component main_stc
-modules {seed: seed_border, t:t_wrap_zo, color: color_gbr, reduce: torus_reduce}
+modules {seed: seed_border_img1, t:t_wrap_zo, color: color_gbr, reduce: torus_reduce}
 var color
 
 --analysis_main_body < default_main_body
@@ -65,6 +65,9 @@ par {gamma:2.0, hue:0.33, spread:0.5, lgv:0.5}
 --post_hlim3 < post_hlim1
 par {gamma:2.0, hue:0.66, spread:0.5, lgv:0.5}
 
+--post_hlim1' < post_hlim1
+scripts [hlim_h1, hlim_s1, hlim_l1]
+
 
 --torus_reduce
 flags {default: true, family: reduce}
@@ -73,16 +76,27 @@ var z
 
 
 --seed_nothing
-flags {family: seed, basic: true}
+flags {family: seed}
 component seed_nothing
 var seed
 
---seed_border
+--seed_border < seed_nothing
 flags {family: seed, basic: true}
 component seed_border
 par {w: 0.2, alpha: 1.0}
 modules {t: t_wrap}
-var seed
+
+--seed_border_img1 < seed_border
+flags {family: seed, basic: true, img: true}
+component seed_simple_img
+images [/textures/simplegeom/tile_grid1.png]
+
+--seed_border_img2 < seed_border_img1
+images [/textures/simplegeom/tile_grid6.png]
+
+--seed_border_img3 < seed_border_img1
+images [/textures/simplegeom/tile_psych1.png]
+
 
 --seed_analysis < seed_border
 flags {family: seed}
@@ -144,6 +158,7 @@ var z
 scripts [randomizeT1, circle_0, rose1_0, rose3_2]
 
 --seed_borderM < seed_border
+flags {family: seed}
 par {w: 0.5, alpha: 0.5}
 modules {t: ts_wrap_linx3', reduce: torus_reduce}
 scripts [ssc_w1, ssc_a1]
@@ -167,24 +182,5 @@ modules {post: post_hlim1'}
 
 --post_hlim1' < post_hlim1
 scripts [hlim_h1, hlim_s1, hlim_l1]
-
-
---default_main_img < default_main
-modules {main_body: main_body_img}
-
---main_body_img < default_main_body
-modules {seed: seed_simple_img, t:t_wrap_zo, color: color_id, reduce: torus_reduce}
-
---seed_simple_img < seed_border
-flags {family: seed, basic: true, fam1: true}
-modules {t: t_wrap}
-component seed_simple_img
-images [/textures/simplegeom/tile_grid1.png]
-
---seed_simple_img2 < seed_simple_img
-images [/textures/simplegeom/tile_grid2.png]
-
---seed_simple_img3 < seed_simple_img
-images [/textures/simplegeom/tile_grid3.png]
 
 

@@ -52,6 +52,8 @@ ppath ssRef pRef self t mid sRef = do
   fn <- case pathN of
     "linear" -> do
       return $ \t -> t
+    "smooth" -> do
+      return $ \t -> t * t * (3.0 - 2.0 * t)
     "loop" -> do
       return $ \t -> t - floor(t)
     "wave" -> do

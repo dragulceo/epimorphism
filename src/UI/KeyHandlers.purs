@@ -41,10 +41,10 @@ devKeyHandler ucRef usRef char = do
       inc uiConf uiST "Mod" "main.main_body" "color" "basic" "vec4" 1
     "e" -> do
       inc uiConf uiST "Mod" "main.main_body" "color" "basic" "vec4" (-1)
---    "3" -> do
---      inc uiConf uiST "Image" "main.main_body.seed" "0" "basic_images" "vec4" 1
---    "e" -> do
---      inc uiConf uiST "Image" "main.main_body.seed" "0" "basic_images" "vec4" (-1)
+    "4" -> do
+      inc uiConf uiST "Mod" "main.main_body" "seed" "basic" "vec4" 1
+    "r" -> do
+      inc uiConf uiST "Mod" "main.main_body" "seed" "basic" "vec4" (-1)
     "a" -> do
       return "scr incZn main.main_body.t idx:0 ofs:1"
     "z" -> do

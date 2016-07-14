@@ -40,7 +40,7 @@ modules {main_body: analysis_main_body}
 --default_main_body
 flags {default: true, family: main_body}
 component main_stc
-modules {seed: seed_border_img1, t:t_wrap_zo, color: color_gbr, reduce: torus_reduce}
+modules {seed: seed_border, t:t_wrap_zo, color: color_gbr, reduce: torus_reduce}
 var color
 
 --analysis_main_body < default_main_body

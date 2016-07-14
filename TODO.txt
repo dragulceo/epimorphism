@@ -14,10 +14,12 @@ RELEASE
 		- inline scripts
 		- flags a set
 		- properties, etc
-		- try to remove branching from seed
   CONTENTS:
-		T:
+		:T
 		  - make a few more seeds, some with simple animations
+			- implement properties & flags correctly
+			- stop using indexes for T, so we can flag functions.  need to maintain scripts then, possibly, when switching
+
 		  - BASIC IDEA
 			  - given a collection of constraints, generate a T
 				- CONSTRAINTS:
@@ -67,8 +69,8 @@ NEXT
   - remove mid from scripts?
 
 LATER
+- zoom out performance problem.  unclear what the deal is
   - ppath, remove path if t > 1.0 when necessary
-  - less performant when zoomed out??  branches?
   - change zn & par through clicking on console
   - check for syntax errors in parseT
   - better deploy system
@@ -114,14 +116,11 @@ LATER
   - module/submodule cycles??
   - error handling for failing to enter fullscreen mode
   - ERROR HANDLING for createImage - missing images & sync issues & the unusable image issue
-  - number parsing flakey?
   - engine stability/lost context - https://www.khronos.org/registry/webgl/extensions/WEBGL_lose_context/
   - compiler performance
   - database support
   - compiler substitutions %XXXX%, etc can still cause errors?  dont remember what kind
   - check out setTimeout vs requestAminFrame
-  - figure out how to render UI
-  - build some kind of UI
   - video rendering
 	- old style (automation) scripts
   - config/ lib file comments
@@ -142,6 +141,7 @@ LATER
   - preprocesser malfunctions give weird errors
   - passing context to loadLib is annoying
   - main & disp share includes
+  - number parsing flakey?
   - complex numbers library?
 	- complex parsing - currently need both components i.e 0.0 + 1.3i
   - better engine error checking/handling
@@ -151,7 +151,7 @@ LATER
 		- where do things go?
 		- put ref pools in pattern?
 		- some kind of reactive data tree?
-  - think of T as vector fields, composition -> vector flow?
+
 
 
 

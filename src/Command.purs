@@ -6,7 +6,7 @@ import Control.Monad (unless)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
-import Control.Monad.ST (STRef, ST, modifySTRef, readSTRef)
+import Control.Monad.ST (writeSTRef, STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Array (length, head, tail)
 import Data.List (fromList)
@@ -116,7 +116,16 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
             lift $ modifySTRef ecRef (\ec -> ec {fract = fract'})
             engineConf' <- lift $ readSTRef ecRef
             setShaders systemConf engineConf' esRef systemST pattern
-            --initEngineST systemConf engineConf' systemST pattern uiConf.canvasId (Just esRef)
+
+          _ -> throwError "invalid format: setFract fract"
+        return unit
+      "setEngineProfile" -> do
+        case args of
+          [lib] -> do
+            engineConf' <- loadLib lib systemST.engineConfLib "setEngineProfile"
+            lift $ writeSTRef ecRef engineConf'
+
+            initEngineST systemConf engineConf' systemST pattern uiConf.canvasId (Just esRef)
 
           _ -> throwError "invalid format: setFract fract"
         return unit

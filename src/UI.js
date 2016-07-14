@@ -60,7 +60,7 @@ exports.addGlobalEventListeners = function(handler) {
 
 		var resChangeHandler =
 				function (){
-					handler("setKernelDim " + this.value)();
+					handler("setEngineProfile " + this.value)();
 				};
 
 		$("#resolutionSel").on('change', resChangeHandler);

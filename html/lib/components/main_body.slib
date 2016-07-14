@@ -24,22 +24,22 @@ main_body main_stc {{
 			z = z_in;
 			z = z - vec2(ofs, ofs) + vec2(2.0 * delta * float(i), 2.0 * delta * float(j));
 
+			%t%
 
-  %t%
+			// get frame
+			t_z = z;
+			%reduce%
+			frame_z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+			frame = texture2D(fb, frame_z);
+			z = t_z;
 
-  // get frame
-	t_z = z;
-  %reduce%
-  frame_z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
-  frame = texture2D(fb, frame_z);
-	z = t_z;
+			//z = z_in;
+			%seed%
 
-  //z = z_in;
-  %seed%
-
-  // blend
-  accum += vec4(seed.a * seed.rgb + (1.0 - seed.a) * frame.rgb, seed.a);
-			z = z_in;
+			// blend
+			//accum += vec4(seed.a * seed.rgb + (1.0 - seed.a) * frame.rgb, seed.a);
+			//float a = seed.a;
+			accum += mix(frame, seed, seed.a);
 		}
 	}
 

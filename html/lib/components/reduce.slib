@@ -1,3 +1,8 @@
 reduce torus_reduce {{
-	z = torus_reduce(z);
+	z = grid_reduce(z);
+}}
+
+
+reduce grid_reduce {{
+	z = grid_reduce(z);
 }}

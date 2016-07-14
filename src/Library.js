@@ -41,7 +41,9 @@ exports.unsafeGenericObjectImpl = function(schema){
 				obj[name] = {};
 				break;
 			default:
-				alert("failure to parse generic - " + elt);
+				console.log(typ);
+				console.log(name);
+				//console.log("failure to parse generic - " + elt);
 			}
 		}
 		return obj;

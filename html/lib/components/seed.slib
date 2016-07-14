@@ -7,27 +7,14 @@ seed seed_analysis {{
   %t%
 	%reduce%
 
-  float w = VOID_W;
-  float wx = (z.x + @w@) / (2.0 * @w@);
-  float wy = (z.y + @w@) / (2.0 * @w@);
+	float wx = (abs(z.x) + @w@ - 1.0) / @w@;
+	float wy = (abs(z.y) + @w@ - 1.0) / @w@;
 
-  if(z.x >= z.y && z.x >= -1.0 * z.y && z.x > (1.0 - @w@)){
-    w = (z.x - (1.0 - @w@)) / @w@;
-    wy = z.y / (0.5 * @w@) - 0.5;
-  }else if(z.y >= z.x && z.y >= -1.0 * z.x && z.y > (1.0 - @w@)){
-    w = (z.y - (1.0 - @w@)) / @w@;
-    wy = z.x / (0.5 * @w@) - 0.5;
-  }else if(z.y >= z.x && z.y <= -1.0 * z.x && z.x < -1.0 * (1.0 - @w@)){
-    w = (-1.0 * (1.0 - @w@) - z.x) / @w@;
-    wy = z.y / (0.5 * @w@) - 0.5;
-  }else if(z.x >= z.y && z.x <= -1.0 * z.y && z.y < -1.0 * (1.0 - @w@)){
-    w = (-1.0 * (1.0 - @w@) - z.y) / @w@;
-    wy = z.x / (0.5 * @w@) - 0.5;
-  }
-  wx = w;
+  float w = max(0.0, max(wx, wy));
+	float mask = ceil(w);
 
-  vec4 frame_w;
-	if(abs(w-VOID_W) < 0.00001){
+	// could fix this if cared
+	if(w < 0.00001){
 		vec2 fr = fract((z + vec2(1,1)) / vec2(2,2));
 		seed = vec4(0, fr.x, fr.y, 1.0);
 	}else{
@@ -42,28 +29,17 @@ seed seed_border {{
   %t%
 	%reduce%
 
-  float w = VOID_W;
-  float wx = (z.x + @w@) / (2.0 * @w@);
-  float wy = (z.y + @w@) / (2.0 * @w@);
+	float wx = (abs(z.x) + @w@ - 1.0) / @w@;
+	float wy = (abs(z.y) + @w@ - 1.0) / @w@;
 
-  if(z.x >= z.y && z.x >= -1.0 * z.y && z.x > (1.0 - @w@)){
-    w = (z.x - (1.0 - @w@)) / @w@;
-    wy = z.y / (0.5 * @w@) - 0.5;
-  }else if(z.y >= z.x && z.y >= -1.0 * z.x && z.y > (1.0 - @w@)){
-    w = (z.y - (1.0 - @w@)) / @w@;
-    wy = z.x / (0.5 * @w@) - 0.5;
-  }else if(z.y >= z.x && z.y <= -1.0 * z.x && z.x < -1.0 * (1.0 - @w@)){
-    w = (-1.0 * (1.0 - @w@) - z.x) / @w@;
-    wy = z.y / (0.5 * @w@) - 0.5;
-  }else if(z.x >= z.y && z.x <= -1.0 * z.y && z.y < -1.0 * (1.0 - @w@)){
-    w = (-1.0 * (1.0 - @w@) - z.y) / @w@;
-    wy = z.x / (0.5 * @w@) - 0.5;
-  }
-  wx = w;
-  vec4 frame_w = vec4(w, (abs(w-VOID_W) < 0.00001 ? 0.0 : w * @alpha@), wx, wy);
-  seed = vec4(frame_w.x, 0, 0, frame_w.y);
+  float w = max(0.0, max(wx, wy));
+	float mask = ceil(w);
+
+	seed = vec4(w, 0.0, 0.0, w * @alpha@);
+
 	z = z_i;
 }}
+
 
 
 seed seed_simple_img {{
@@ -71,30 +47,20 @@ seed seed_simple_img {{
   %t%
 	%reduce%
 
-  float w = VOID_W;
-  float wx = (z.x + @w@) / (2.0 * @w@);
-  float wy = (z.y + @w@) / (2.0 * @w@);
+	float wx = (abs(z.x) + @w@ - 1.0) / @w@;
+	float wy = (abs(z.y) + @w@ - 1.0) / @w@;
 
-  if(z.x >= z.y && z.x >= -1.0 * z.y && z.x > (1.0 - @w@)){
-    w = (z.x - (1.0 - @w@)) / @w@;
-    wy = z.y / (0.5 * @w@) - 0.5;
-  }else if(z.y >= z.x && z.y >= -1.0 * z.x && z.y > (1.0 - @w@)){
-    w = (z.y - (1.0 - @w@)) / @w@;
-    wy = z.x / (0.5 * @w@) - 0.5;
-  }else if(z.y >= z.x && z.y <= -1.0 * z.x && z.x < -1.0 * (1.0 - @w@)){
-    w = (-1.0 * (1.0 - @w@) - z.x) / @w@;
-    wy = z.y / (0.5 * @w@) - 0.5;
-  }else if(z.x >= z.y && z.x <= -1.0 * z.y && z.y < -1.0 * (1.0 - @w@)){
-    w = (-1.0 * (1.0 - @w@) - z.y) / @w@;
-    wy = z.x / (0.5 * @w@) - 0.5;
-  }
-  wx = w;
-  vec4 frame_w = vec4(w, (abs(w-VOID_W) < 0.00001 ? 0.0 : 1.0), wx, wy);
+  float w = max(0.0, max(wx, wy));
+	float mask = ceil(w);
 
-	vec2 ofs = mod(0.25 * frame_w.zw, 1.0);
+	float sc = 0.25;
+	vec2 ofs = mod(sc * vec2(wx, wy), 1.0);
   seed = texture2D(aux[#0], ofs);
-	seed.w = seed.w * @alpha@ * frame_w.y;
 
+	// mask w
+	seed.w *= mask * @alpha@;
+
+	// preserve val
 	seed = rgb2hsv(seed);
 	seed.z *= w;
 	seed = hsv2rgb(seed);
@@ -150,6 +116,7 @@ seed seed_multi {{
 	if(a == 0.0)
 		seed = vec4(0.0, 0.0, 0.0, 0.0);
 	else
+		// damn. use mixes?
 		seed = 1.0 / a * (seed2.a * seed2 + (1.0 - seed2.a) * seed1.a * seed1 + (1.0 - seed2.a) * (1.0 - seed1.a) * seed0.a * seed0);
 	seed.a = a;
 	z = z_i;

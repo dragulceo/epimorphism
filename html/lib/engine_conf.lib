@@ -7,10 +7,10 @@ numAux 10
 fract 4
 kernelDim 512
 
---high_res < default
+--high < default
 fract 2
 kernelDim 2048
 
---uhr < default
+--ultra < default
 fract 2
 kernelDim 3072

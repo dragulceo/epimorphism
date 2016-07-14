@@ -12,7 +12,7 @@ import Data.Array (length, head, tail)
 import Data.List (fromList)
 import Data.Maybe (Maybe(Just))
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (insert, toList)
+import Data.StrMap (values, empty, insert, toList)
 import Data.String (joinWith, split)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
@@ -49,7 +49,10 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         lift $ modifySTRef pRef (\p -> p {tSpd = 1.0 - p.tSpd})
         return unit
       "killScripts" -> do
-        --lift $ modifySTRef ssRef (\s -> s {scriptRefPool = empty})
+        lift $ modifySTRef ssRef (\s -> s {scriptRefPool = empty})
+        let upd = (\r -> lift $ modifySTRef r (\m -> m {scripts = []}))
+        traverse upd (values systemST.moduleRefPool)
+
         return unit
       "scr" -> do
         parseAndImportScript ssRef pattern (joinWith " " args)

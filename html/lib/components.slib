@@ -761,13 +761,7 @@ switch switch{{
 	%m1%
 	v1 = $var$;
 
-	float x = @intrp@;
-	if(x <= 0.0)
-		x = 0.0;
-	else if(x >= 1.0)
-		x = 1.0;
-
-	$var$ = (1.0 - x) * v0 + x * v1;
+	$var$ = mix(v0, v1, clamp(0.0, 1.0, @intrp@));
 }}
 
 
@@ -782,15 +776,7 @@ switch smooth_switch{{
 	%m1%
 	v1 = $var$;
 
-	float x = @intrp@;
-	if(x <= 0.0)
-		x = 0.0;
-	else if(x >= 1.0)
-		x = 1.0;
-	else
-		x = x * x * (3.0 - 2.0 * x);
-
-	$var$ = (1.0 - x) * v0 + x * v1;
+	$var$ = mix(v0, v1, smoothstep(0.0, 1.0, @intrp@));
 }}
 
 

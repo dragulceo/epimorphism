@@ -5,32 +5,15 @@ import Config (EpiS, Module, Pattern, SystemST, Script)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, modifySTRef, newSTRef, readSTRef)
-import Data.Array (cons, snoc, delete, head, tail, sort) as A
+import Data.Array (cons, snoc, delete, head, tail) as A
 import Data.Maybe (Maybe(..), maybe)
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (member, StrMap, foldM, fold, delete, insert, values, lookup)
+import Data.StrMap (member, StrMap, foldM, fold, delete, insert, values)
 import Data.String (split)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import System (loadLib)
 import Util (lg, uuid)
-
--- PUBLIC
--- check if an object has a flag
-checkFlag :: forall r. {flags :: StrMap String | r} -> String -> String -> Boolean
-checkFlag {flags} flag val = (member flag flags) && (fromJust (lookup flag flags) == val)
-
-checkFlags :: forall r. {flags :: StrMap String | r} -> StrMap String -> Boolean
-checkFlags obj flags = fold (\dt k v -> dt && checkFlag obj k v) true flags
-
--- filter a family by specific flags, return the keys, sorted alphabetically
-flagFamily :: forall r. StrMap {flags :: StrMap String | r} -> StrMap String -> Array String
-flagFamily family flags = A.sort $ fold handle [] family
-  where
-    handle res k v = case (checkFlags v flags) of
-      true -> A.snoc res k
-      false -> res
-
 
 -- find a module given an address - ie main.main_body.t or a reference
 findModule :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> Boolean -> EpiS eff h String
@@ -56,7 +39,7 @@ findModule' mpool mid addr followSwitch = do
       child   <- lift $ readSTRef cRef
       addr'   <- return $ fromJust $ A.tail addr
 
-      case (checkFlag child "family" "switch" && followSwitch) of
+      case (child.family == "switch" && followSwitch) of
         true ->  findModule' mpool childId (A.cons "m1" addr') followSwitch
         false -> findModule' mpool childId addr' followSwitch
 

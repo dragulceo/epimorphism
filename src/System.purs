@@ -1,15 +1,18 @@
 module System where
 
+import Prelude ((==), ($), not, (&&), (++), return, bind)
 import SLibrary
 import Config (scriptSchema, moduleSchema, patternSchema, systemConfSchema, uiConfSchema, engineConfSchema, Schema, Epi, SystemST, defaultSystemST)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
+import Data.Array (sort, snoc)
 import Data.Either (Either(..))
+import Data.Foldable (foldl)
 import Data.Maybe (Maybe(..))
-import Data.StrMap (lookup, StrMap)
+import Data.Set (Set, member)
+import Data.StrMap (empty, insert, fold, lookup, StrMap)
 import Data.Tuple (Tuple)
 import Library (parseLib)
-import Prelude ((++), return, ($), bind)
 import Util (urlGet)
 
 data DataSource = LocalHTTP | LocalStorage | RemoteDB
@@ -64,3 +67,24 @@ loadLib name lib ctx = do
   case (lookup name lib) of
     (Just d) -> return d
     Nothing  -> throwError ("Load from lib - can't find: " ++ name ++ ": context :" ++ ctx)
+
+
+
+checkFlags :: forall r. {flags :: Set String | r} -> Array String -> Array String -> Boolean
+checkFlags obj inc exc = (foldl (\dt f -> dt && member f obj.flags) true inc) &&
+                         (foldl (\dt f -> dt && (not $ member f obj.flags)) true exc)
+
+-- filter a family by specific include & exclude flags, return the keys, sorted alphabetically
+flagFamily :: forall r. StrMap {flags :: Set String | r} -> Array String -> Array String -> Array String
+flagFamily col inc exc = sort $ fold handle [] col
+  where
+    handle res k v = case (checkFlags v inc exc) of
+      true -> snoc res k
+      false -> res
+
+family :: forall r. StrMap {family :: String, flags :: Set String | r} -> String -> Array String -> Array String -> Array String
+family col fam inc exc = flagFamily (fold handle empty col) inc exc
+  where
+    handle res k v = case (v.family == fam) of
+      true -> insert k v res
+      false -> res

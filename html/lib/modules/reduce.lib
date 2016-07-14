@@ -1,4 +1,4 @@
 --torus_reduce
-flags {default: true, family: reduce}
+family reduce
 component torus_reduce
 var z

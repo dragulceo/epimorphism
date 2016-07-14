@@ -10,9 +10,9 @@ import Data.Array (index, length, null, updateAt) as A
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.StrMap (fromFoldable, insert, member, union)
 import Data.Tuple (Tuple(..))
-import Pattern (purgeModule, ImportObj(ImportModule), replaceModule, findParent, importModule, purgeScript, flagFamily)
+import Pattern (purgeModule, ImportObj(ImportModule), replaceModule, findParent, importModule, purgeScript)
 import ScriptUtil (createScript, parseAndImportScript)
-import System (loadLib)
+import System (family, flagFamily, loadLib)
 import Util (inj, randInt, lg, numFromStringE, intFromStringE, gmod)
 
 incData :: forall eff h. SystemST h -> Script -> String -> (String -> String -> EpiS eff h (Array String)) -> EpiS eff h {childN :: String, nxt :: String, dim :: String, spd :: Number}
@@ -57,7 +57,7 @@ incMod ssRef pRef self t rootId sRef = do
   scr <- lift $ readSTRef sRef
 
   {childN, nxt, dim, spd} <- incData systemST scr rootId
-    \l' s' -> return $ flagFamily systemST.moduleLib $ fromFoldable [(Tuple "family" s'), (Tuple l' "true")]
+    \l' s' -> return $ family systemST.moduleLib s' [l'] []
 
   switchModules ssRef rootId childN nxt dim spd
 
@@ -103,7 +103,7 @@ incScript ssRef pRef self t rootId sRef = do
   scr <- lift $ readSTRef sRef
 
   {childN: idxS, nxt, dim, spd} <- incData systemST scr rootId
-    \l' s' -> return $ flagFamily systemST.scriptLib $ fromFoldable [(Tuple l' "true")]
+    \l' s' -> return $ flagFamily systemST.scriptLib [l'] []
 
   -- remove self (do this before duplicating module)
   purgeScript ssRef self

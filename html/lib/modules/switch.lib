@@ -1,9 +1,8 @@
 --id
-flags {family: id}
+family switch
 component id
 
 --switch
-flags {family: switch}
 component switch
 sub {var: v0, dim: float}
 par {intrp: 0.0}

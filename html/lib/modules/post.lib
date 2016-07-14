@@ -1,12 +1,12 @@
 --post_id
-flags {default: true, family: post, basic: true}
+family post
+flags {basic}
 component post_id
 var frame
 
---post_hlim1
-flags {family: post, post_hlim:true, basic: true}
+--post_hlim1 < post_id
+flags {basic, post_hlim}
 component post_hlim
-var frame
 par {gamma:2.0, hue:0.0, spread:0.5, lgv:0.5}
 
 --post_hlim2 < post_hlim1

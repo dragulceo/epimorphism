@@ -8,6 +8,7 @@ import Control.Monad.ST (STRef, ST)
 import DOM (DOM)
 import Data.Complex (Complex)
 import Data.Maybe (Maybe(..))
+import Data.Set (Set)
 import Data.StrMap (StrMap, empty)
 import Data.Tuple (Tuple)
 import Graphics.Canvas (Canvas)
@@ -139,7 +140,9 @@ type ModRef = String
 
 type Module = {
     component :: String
-  , flags     :: StrMap String
+  , family    :: String
+  , flags     :: Set String
+  , props     :: StrMap String
   , scripts   :: Array String
   , modules   :: StrMap ModRef
   , par       :: StrMap Number
@@ -152,7 +155,9 @@ type Module = {
 moduleSchema :: Schema
 moduleSchema = [
   SchemaEntry SE_St "component",
-  SchemaEntry SE_M_St "flags",
+  SchemaEntry SE_St "family",
+  SchemaEntry SE_S "flags",
+  SchemaEntry SE_M_St "props",
   SchemaEntry SE_A_St "scripts",
   SchemaEntry SE_M_St "modules",
   SchemaEntry SE_M_N "par",
@@ -166,7 +171,8 @@ type Pattern = {
     vert :: ModRef
   , main :: ModRef
   , disp :: ModRef
-  , flags :: StrMap String
+  , flags :: Set String
+  , props :: StrMap String
   , includes :: Array String
   -- , 3d shit
   , tPhase :: Number
@@ -178,7 +184,8 @@ patternSchema = [
   SchemaEntry SE_St "vert",
   SchemaEntry SE_St "main",
   SchemaEntry SE_St "disp",
-  SchemaEntry SE_M_St "flags",
+  SchemaEntry SE_S "flags",
+  SchemaEntry SE_M_St "props",
   SchemaEntry SE_A_St "includes",
   SchemaEntry SE_N "tPhase",
   SchemaEntry SE_N "tSpd"
@@ -191,7 +198,8 @@ type Script = {
     fn     :: String
   , dt     :: StrMap String
   , mid    :: String
-  , flags  :: StrMap String
+  , flags  :: Set String
+  , props  :: StrMap String
   , tPhase :: Number
 }
 
@@ -200,7 +208,8 @@ scriptSchema = [
   SchemaEntry SE_St "fn",
   SchemaEntry SE_M_St "dt",
   SchemaEntry SE_St "mid",
-  SchemaEntry SE_M_St "flags",
+  SchemaEntry SE_S "flags",
+  SchemaEntry SE_M_St "props",
   SchemaEntry SE_N "tPhase"
 ]
 

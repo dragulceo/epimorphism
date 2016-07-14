@@ -1,22 +1,19 @@
 --color_id
-flags {default: true, family: color, basic: true}
+family color
+flags {basic}
 component color_id
 var color
 
 --color_bgr < color_id
-flags {family: color, basic: true}
 component color_bgr
 
 --color_gbr < color_id
-flags {family: color, basic: true}
 component color_gbr
 
 --rotate_hsv0 < color_id
-flags {family: color, basic: true}
 component rotate_hsv
 par {rot: 0.06, len_sc:0.0, len_sc_amt:0.0, th_spd: 0.0}
 
 --rotate_hsv1 < color_id
-flags {family: color, basic: true}
 component rotate_hsv
 par {rot: 0.17, len_sc:1.0, len_sc_amt:0.5, th_spd: 0.0}

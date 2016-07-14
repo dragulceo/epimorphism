@@ -1,62 +1,58 @@
 --color_id
-flags {default: true, family: color, basic: true}
+family color
+flags {basic}
 component color_id
 var color
 
 --color_bgr < color_id
-flags {family: color, basic: true}
 component color_bgr
 
 --color_gbr < color_id
-flags {family: color, basic: true}
 component color_gbr
 
 --rotate_hsv0 < color_id
-flags {family: color, basic: true}
 component rotate_hsv
 par {rot: 0.06, len_sc:0.0, len_sc_amt:0.0, th_spd: 0.0}
 
 --rotate_hsv1 < color_id
-flags {family: color, basic: true}
 component rotate_hsv
 par {rot: 0.17, len_sc:1.0, len_sc_amt:0.5, th_spd: 0.0}
 
 
 --disp_id
-flags {family: post}
+family disp
+flags {basic}
 component disp
 modules {post: post_id}
 
 
 --default_main
-flags {default: true, family: main}
+family main
 component main
 modules {main_body: default_main_body}
 
 --analysis_main < default_main
-flags {family: main}
 modules {main_body: analysis_main_body}
 
 --default_main_body
-flags {default: true, family: main_body}
+family main_body
 component main_stc
 modules {seed: seed_border, t:t_wrap_zo, color: color_gbr, reduce: torus_reduce}
 var color
 
 --analysis_main_body < default_main_body
-flags {family: main_body}
 modules {seed: seed_analysis, t:t_wrap_zo, color: color_id, reduce: torus_reduce}
 
 
 --post_id
-flags {default: true, family: post, basic: true}
+family post
+flags {basic}
 component post_id
 var frame
 
---post_hlim1
-flags {family: post, post_hlim:true, basic: true}
+--post_hlim1 < post_id
+flags {basic, post_hlim}
 component post_hlim
-var frame
 par {gamma:2.0, hue:0.0, spread:0.5, lgv:0.5}
 
 --post_hlim2 < post_hlim1
@@ -70,24 +66,30 @@ scripts [hlim_h1, hlim_s1, hlim_l1]
 
 
 --torus_reduce
-flags {default: true, family: reduce}
+family reduce
 component torus_reduce
 var z
 
 
 --seed_nothing
-flags {family: seed}
+family seed
 component seed_nothing
 var seed
 
 --seed_border < seed_nothing
-flags {family: seed, basic: true}
+flags {basic}
 component seed_border
 par {w: 0.2, alpha: 1.0}
 modules {t: t_wrap}
 
+--seed_analysis < seed_border
+flags {analysis}
+par {w: 0.05}
+component seed_analysis
+
+
 --seed_border_img1 < seed_border
-flags {family: seed, basic: true, img: true}
+flags {basic, img}
 component seed_simple_img
 images [/textures/simplegeom/tile_grid1.png]
 
@@ -98,18 +100,11 @@ images [/textures/simplegeom/tile_grid6.png]
 images [/textures/simplegeom/tile_psych1.png]
 
 
---seed_analysis < seed_border
-flags {family: seed}
-par {w: 0.05}
-component seed_analysis
-
-
 --id
-flags {family: id}
+family switch
 component id
 
 --switch
-flags {family: switch}
 component switch
 sub {var: v0, dim: float}
 par {intrp: 0.0}
@@ -120,23 +115,21 @@ component smooth_switch
 
 
 --t_id
-flags {family: t}
+family t
 component t_id
 var z
 
---t_wrap
-flags {family: t, default: true}
+--t_wrap < t_id
 zn [1.0 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]
 component t_wrap
 sub {t_inner: z}
-var z
 
 --t_wrap_zo < t_wrap
 zn [1.1 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]
 
 
 --default_vert
-flags {default: true, family: vert}
+family vert
 component default_vert
 
 
@@ -146,19 +139,16 @@ component default_vert
 modules {main_body: main1_body}
 
 --main1_body < default_main_body
-flags {family: main_body}
 modules {t: t_main1, seed: seed_borderM, color: rotate_hsv1, reduce: torus_reduce}
 
---t_main1
-flags {family: t}
+--t_main1 < t_id
 component t_wrap
 zn [1.0 + 0.0i, 0.0 + 0.0i, 1.1 + 0.0i, 0.0 + 0.0i]
 sub {t_inner: sinh(z)}
-var z
 scripts [randomizeT1, circle_0, rose1_0, rose3_2]
 
 --seed_borderM < seed_border
-flags {family: seed}
+flags {}
 par {w: 0.5, alpha: 0.5}
 modules {t: ts_wrap_linx3', reduce: torus_reduce}
 scripts [ssc_w1, ssc_a1]
@@ -167,17 +157,14 @@ scripts [ssc_w1, ssc_a1]
 component seed_simple_img
 images [/textures/simplegeom/tile_grid1.png]
 
---ts_wrap_linx3'
-flags {family: t}
+--ts_wrap_linx3' < t_id
 zn [1.1 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]
 component t_wrap
 sub {t_inner: z}
-var z
 scripts [rose3_2]
 
---disp_main1
-flags {family: post}
-component disp
+--disp_main1 < disp_id
+flags {}
 modules {post: post_hlim1'}
 
 --post_hlim1' < post_hlim1

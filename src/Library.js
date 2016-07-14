@@ -9,7 +9,7 @@ exports.unsafeGenericObjectImpl = function(schema){
 
 		for(var i=0; i < schema.length; i++){
 			var elt = schema[i];
-			var typ = elt.value0.constructor.name;
+			var typ = elt.value0.constructor.name || functionName(elt.value0.constructor);
 			var name = elt.value1;
 
 			switch(typ){
@@ -41,11 +41,17 @@ exports.unsafeGenericObjectImpl = function(schema){
 				obj[name] = {};
 				break;
 			default:
-				console.log(typ);
-				console.log(name);
-				//console.log("failure to parse generic - " + elt);
+				console.log("failure to parse generic - " + elt);
 			}
 		}
 		return obj;
 	};
 };
+
+//ghetto bs for ie
+function functionName(fun) {
+  var ret = fun.toString();
+  ret = ret.substr('function '.length);
+  ret = ret.substr(0, ret.indexOf('('));
+  return ret;
+}

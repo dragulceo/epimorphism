@@ -450,7 +450,7 @@ post post_hlim {{
 
 
 reduce torus_reduce {{
-	z = grid_reduce(z);
+	z = torus_reduce(z);
 }}
 
 

@@ -2,6 +2,7 @@
 family seed
 component seed_nothing
 var seed
+dim vec4
 
 --seed_border < seed_nothing
 flags {basic}

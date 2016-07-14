@@ -15,7 +15,7 @@ import ScriptUtil (createScript, parseAndImportScript)
 import System (family, flagFamily, loadLib)
 import Util (inj, randInt, lg, numFromStringE, intFromStringE, gmod)
 
-incData :: forall eff h. SystemST h -> Script -> String -> (String -> String -> EpiS eff h (Array String)) -> EpiS eff h {childN :: String, nxt :: String, dim :: String, spd :: Number}
+incData :: forall eff h. SystemST h -> Script -> String -> (String -> String -> EpiS eff h (Array String)) -> EpiS eff h {childN :: String, nxt :: String, spd :: Number}
 incData systemST scr rootId loader = do
   let dt = scr.dt
 
@@ -24,7 +24,6 @@ incData systemST scr rootId loader = do
   spd    <- (loadLib "spd" dt "incMod spd") >>= numFromStringE
   childN <- loadLib "sub" dt "incMod sub"
   lib    <- loadLib "lib" dt "incMod lib"
-  dim    <- loadLib "dim" dt "incMod dim"
 
   --let a = lg lib
   --let b = lg childN
@@ -47,7 +46,7 @@ incData systemST scr rootId loader = do
 
   --let nul = lg $ "SWITCHING : " ++ rootId ++ ":" ++ childN ++ " to : " ++ nxt
 
-  return {childN, nxt, dim, spd}
+  return {childN, nxt, spd}
 
 
 -- increment a module within the specified families
@@ -56,10 +55,10 @@ incMod ssRef pRef self t rootId sRef = do
   systemST <- lift $ readSTRef ssRef
   scr <- lift $ readSTRef sRef
 
-  {childN, nxt, dim, spd} <- incData systemST scr rootId
+  {childN, nxt, spd} <- incData systemST scr rootId
     \l' s' -> return $ family systemST.moduleLib s' [l'] []
 
-  switchModules ssRef rootId childN nxt dim spd
+  switchModules ssRef rootId childN nxt spd
 
   -- remove self
   purgeScript ssRef self
@@ -73,7 +72,7 @@ incSub ssRef pRef self t rootId sRef = do
   systemST <- lift $ readSTRef ssRef
   scr <- lift $ readSTRef sRef
 
-  {childN: subVar, nxt, dim, spd} <- incData systemST scr rootId
+  {childN: subVar, nxt, spd} <- incData systemST scr rootId
     \l' s' -> loadLib l' systemST.indexLib "incSub index" >>= \x -> return x.lib
 
   -- remove self (do this before duplicating module)
@@ -89,7 +88,7 @@ incSub ssRef pRef self t rootId sRef = do
       root'id <- importModule ssRef (ImportModule root') -- this is kind of hackish, as its reimported
 
       (Tuple parent child) <- findParent systemST.moduleRefPool rootId
-      switchModules ssRef parent child root'id dim spd
+      switchModules ssRef parent child root'id spd
       purgeModule ssRef root'id --  THIS IS REALLY TRICKY!  WILL CAUSE MEMORY LEAK IF NOT PURGED
       return true
     false -> do  -- HRM, I think we can do better here
@@ -102,7 +101,7 @@ incScript ssRef pRef self t rootId sRef = do
   systemST <- lift $ readSTRef ssRef
   scr <- lift $ readSTRef sRef
 
-  {childN: idxS, nxt, dim, spd} <- incData systemST scr rootId
+  {childN: idxS, nxt, spd} <- incData systemST scr rootId
     \l' s' -> return $ flagFamily systemST.scriptLib [l'] []
 
   -- remove self (do this before duplicating module)
@@ -118,7 +117,7 @@ incScript ssRef pRef self t rootId sRef = do
       m'id <- importModule ssRef (ImportModule m') -- this is kind of hackish, as its reimported
 
       (Tuple parent childN) <- findParent systemST.moduleRefPool rootId
-      switchModules ssRef parent childN m'id dim spd
+      switchModules ssRef parent childN m'id spd
       purgeModule ssRef m'id --  THIS IS REALLY TRICKY!  WILL CAUSE MEMORY LEAK IF NOT PURGED
       return true
     Nothing -> do  -- HRM, maybe we want to be able to expand the number of existing scripts
@@ -132,7 +131,7 @@ incScript2 ssRef pRef self t rootId sRef = do
   pattern  <- lift $ readSTRef pRef
   scr <- lift $ readSTRef sRef
 
-  {childN: idxS, nxt, dim, spd} <- incData systemST scr rootId
+  {childN: idxS, nxt, spd} <- incData systemST scr rootId
     \l' s' -> loadLib l' systemST.indexLib "incScript index" >>= \x -> return x.lib
 
   -- remove self (do this before duplicating module)
@@ -149,7 +148,7 @@ incScript2 ssRef pRef self t rootId sRef = do
       --scr <- parseAndImportScript systemST m'id pattern nxt
 
       (Tuple parent childN) <- findParent systemST.moduleRefPool rootId
-      switchModules ssRef parent childN m'id dim spd
+      switchModules ssRef parent childN m'id spd
 
       return true
     false -> do  -- HRM, maybe we want to be able to expand the number of existing scripts
@@ -161,7 +160,7 @@ incImage ssRef pRef self t rootId sRef = do
   systemST <- lift $ readSTRef ssRef
   scr <- lift $ readSTRef sRef
 
-  {childN: idxS, nxt, dim, spd} <- incData systemST scr rootId
+  {childN: idxS, nxt, spd} <- incData systemST scr rootId
     \l' s' -> loadLib l' systemST.indexLib "incImage index" >>= \x -> return x.lib
 
   -- remove self (do this before duplicating module)
@@ -177,15 +176,16 @@ incImage ssRef pRef self t rootId sRef = do
       m'id <- importModule ssRef (ImportModule m') -- this is kind of hackish, as its reimported
 
       (Tuple parent childN) <- findParent systemST.moduleRefPool rootId
-      switchModules ssRef parent childN m'id dim spd
+      switchModules ssRef parent childN m'id spd
       return true
     Nothing -> do  -- HRM, maybe we want to be able to expand the number of existing images
       let nul' = lg "TEMP: don't have enough images!"
       return false
 
 
-switchModules :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> String -> Number -> EpiS eff h Unit
-switchModules ssRef rootId childN m1 dim spd = do
+-- should check if dim & var are the same across m0 & m1
+switchModules :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> Number -> EpiS eff h Unit
+switchModules ssRef rootId childN m1 spd = do
   systemST <- lift $ readSTRef ssRef
   mRef  <- loadLib rootId systemST.moduleRefPool "switch module"
   m     <- lift $ readSTRef mRef
@@ -197,8 +197,8 @@ switchModules ssRef rootId childN m1 dim spd = do
   switch <- loadLib "smooth_switch" systemST.moduleLib "switchModules"
 
   let modules = fromFoldable [(Tuple "m0" m0), (Tuple "m1" m1)]
-  let sub'    = union (fromFoldable [(Tuple "dim" dim), (Tuple "var" m0M.var)]) switch.sub
-  let switch' = switch {sub = sub', modules = modules, var = m0M.var}
+  let sub'    = union (fromFoldable [(Tuple "dim" m0M.dim), (Tuple "var" m0M.var)]) switch.sub
+  let switch' = switch {sub = sub', modules = modules, var = m0M.var, dim = m0M.dim}
 
   swid <- replaceModule ssRef rootId childN m0 (ImportModule switch')
 
@@ -251,7 +251,6 @@ randomize ssRef pRef self t mid sRef = do
   dly <- (loadLib "dly" scr.dt "randomComponent") >>= numFromStringE
   spd <-  loadLib "spd" scr.dt "randomComponent"
   lib <-  loadLib "lib" scr.dt "randomComponent"
-  dim <-  loadLib "dim" scr.dt "randomComponent"
   sub <-  loadLib "sub" scr.dt "randomComponent"
   typ <-  loadLib "typ" scr.dt "randomComponent"
   adr <-  loadLib "adr" scr.dt "randomComponent"
@@ -267,7 +266,7 @@ randomize ssRef pRef self t mid sRef = do
       let dt' = insert "nxt" (show (t + dly)) scr.dt
       lift $ modifySTRef sRef (\s -> s {dt = dt'})
 
-      parseAndImportScript ssRef pattern $ inj "inc%0 %1 sub:%2 lib:%3 dim:%4 spd:%5 idx:-1000000" [typ, adr, sub, lib, dim, spd]
+      parseAndImportScript ssRef pattern $ inj "inc%0 %1 sub:%2 lib:%3 spd:%4 idx:-1000000" [typ, adr, sub, lib, spd]
 
       return unit
     _ -> return unit

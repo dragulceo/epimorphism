@@ -1,8 +1,5 @@
---id
-family switch
-component id
-
 --switch
+family switch
 component switch
 sub {var: v0, dim: float}
 par {intrp: 0.0}

@@ -3,6 +3,7 @@ family color
 flags {basic}
 component color_id
 var color
+dim vec4
 
 --color_bgr < color_id
 component color_bgr
@@ -21,17 +22,19 @@ par {rot: 0.17, len_sc:1.0, len_sc_amt:0.5, th_spd: 0.0}
 
 --disp_id
 family disp
-flags {basic}
+flags {basic, root}
 component disp
 modules {post: post_id}
 
 
 --default_main
 family main
+flags {root}
 component main
 modules {main_body: default_main_body}
 
 --analysis_main < default_main
+flags {}
 modules {main_body: analysis_main_body}
 
 --default_main_body
@@ -39,6 +42,7 @@ family main_body
 component main_stc
 modules {seed: seed_border, t:t_wrap_zo, color: color_gbr, reduce: torus_reduce}
 var color
+dim vec4
 
 --analysis_main_body < default_main_body
 modules {seed: seed_analysis, t:t_wrap_zo, color: color_id, reduce: torus_reduce}
@@ -49,6 +53,7 @@ family post
 flags {basic}
 component post_id
 var frame
+dim vec4
 
 --post_hlim1 < post_id
 flags {basic, post_hlim}
@@ -69,12 +74,14 @@ scripts [hlim_h1, hlim_s1, hlim_l1]
 family reduce
 component torus_reduce
 var z
+dim vec2
 
 
 --seed_nothing
 family seed
 component seed_nothing
 var seed
+dim vec4
 
 --seed_border < seed_nothing
 flags {basic}
@@ -100,11 +107,8 @@ images [/textures/simplegeom/tile_grid6.png]
 images [/textures/simplegeom/tile_psych1.png]
 
 
---id
-family switch
-component id
-
 --switch
+family switch
 component switch
 sub {var: v0, dim: float}
 par {intrp: 0.0}
@@ -118,6 +122,7 @@ component smooth_switch
 family t
 component t_id
 var z
+dim vec2
 
 --t_wrap < t_id
 zn [1.0 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]
@@ -130,6 +135,7 @@ zn [1.1 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]
 
 --default_vert
 family vert
+flags {root}
 component default_vert
 
 

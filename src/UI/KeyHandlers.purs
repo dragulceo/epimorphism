@@ -8,6 +8,7 @@ import DOM (DOM)
 import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (insert, member, lookup)
 import Graphics.Canvas (Canvas)
+import Util (inj)
 
 -- converts key codes into command sequences
 type KeyHandler = forall eff h. STRef h UIConf -> STRef h UIST -> String -> Eff (canvas :: Canvas, dom :: DOM, st :: ST h | eff) String
@@ -30,21 +31,21 @@ devKeyHandler ucRef usRef char = do
 
   case char of
     "1" -> do
-      inc uiConf uiST "Sub" "main.main_body.t" "t_inner" "t_inner" "vec2" 1
+      inc uiConf uiST "Sub" "main.main_body.t" "t_inner" "t_inner" 1
     "q" -> do
-      inc uiConf uiST "Sub" "main.main_body.t" "t_inner" "t_inner" "vec2" (-1)
+      inc uiConf uiST "Sub" "main.main_body.t" "t_inner" "t_inner" (-1)
     "2" -> do
-      inc uiConf uiST "Mod" "disp" "post" "basic" "vec4" 1
+      inc uiConf uiST "Mod" "disp" "post" "basic" 1
     "w" -> do
-      inc uiConf uiST "Mod" "disp" "post" "basic" "vec4" (-1)
+      inc uiConf uiST "Mod" "disp" "post" "basic" (-1)
     "3" -> do
-      inc uiConf uiST "Mod" "main.main_body" "color" "basic" "vec4" 1
+      inc uiConf uiST "Mod" "main.main_body" "color" "basic" 1
     "e" -> do
-      inc uiConf uiST "Mod" "main.main_body" "color" "basic" "vec4" (-1)
+      inc uiConf uiST "Mod" "main.main_body" "color" "basic" (-1)
     "4" -> do
-      inc uiConf uiST "Mod" "main.main_body" "seed" "basic" "vec4" 1
+      inc uiConf uiST "Mod" "main.main_body" "seed" "basic" 1
     "r" -> do
-      inc uiConf uiST "Mod" "main.main_body" "seed" "basic" "vec4" (-1)
+      inc uiConf uiST "Mod" "main.main_body" "seed" "basic" (-1)
     "a" -> do
       return "scr incZn main.main_body.t idx:0 ofs:1"
     "z" -> do
@@ -79,13 +80,13 @@ devKeyHandler ucRef usRef char = do
       return "scr incZn main.main_body.t idx:3 ofs:-i"
     _   -> commonKeyHandler ucRef usRef char
   where
-    inc uiConf uiST typ adr sub lib dim ofs = do
+    inc uiConf uiST typ adr sub lib ofs = do
       let idn' = adr ++ sub
       let idx = if (member idn' uiST.incIdx) then ((fromJust $ lookup idn' uiST.incIdx) + ofs) else 0
       let dt = insert idn' idx uiST.incIdx
       modifySTRef usRef (\s -> s {incIdx = dt})
       let spd = show uiConf.keyboardSwitchSpd
-      return $ "scr inc" ++ typ ++ " " ++ adr ++ " sub:" ++ sub ++ " lib:" ++ lib ++ " dim:" ++ dim ++ " idx:" ++ (show idx) ++ " spd:" ++ spd
+      return $ inj "scr inc%0 %1 sub:%2 lib:%3 idx:%4 spd:%5" [typ, adr, sub, lib, (show idx), spd]
 
 prodKeyHandler :: KeyHandler
 prodKeyHandler ucRef usRef char = do

@@ -3,6 +3,7 @@ family color
 flags {basic}
 component color_id
 var color
+dim vec4
 
 --color_bgr < color_id
 component color_bgr

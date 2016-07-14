@@ -2,6 +2,7 @@
 family t
 component t_id
 var z
+dim vec2
 
 --t_wrap < t_id
 zn [1.0 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]

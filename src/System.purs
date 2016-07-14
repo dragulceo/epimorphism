@@ -69,12 +69,12 @@ loadLib name lib ctx = do
     Nothing  -> throwError ("Load from lib - can't find: " ++ name ++ ": context :" ++ ctx)
 
 
-
+-- FLAG FAMILYS & SO FORTH
 checkFlags :: forall r. {flags :: Set String | r} -> Array String -> Array String -> Boolean
 checkFlags obj inc exc = (foldl (\dt f -> dt && member f obj.flags) true inc) &&
                          (foldl (\dt f -> dt && (not $ member f obj.flags)) true exc)
 
--- filter a family by specific include & exclude flags, return the keys, sorted alphabetically
+-- filter a family by specific include & exclude flags, return the keys sorted alphabetically
 flagFamily :: forall r. StrMap {flags :: Set String | r} -> Array String -> Array String -> Array String
 flagFamily col inc exc = sort $ fold handle [] col
   where
@@ -82,6 +82,7 @@ flagFamily col inc exc = sort $ fold handle [] col
       true -> snoc res k
       false -> res
 
+-- filter a family by family, include & exclude flags, return the keys sorted alphabetically
 family :: forall r. StrMap {family :: String, flags :: Set String | r} -> String -> Array String -> Array String -> Array String
 family col fam inc exc = flagFamily (fold handle empty col) inc exc
   where

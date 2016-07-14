@@ -1,7 +1,9 @@
 --default_main
 family main
+flags {root}
 component main
 modules {main_body: default_main_body}
 
 --analysis_main < default_main
+flags {}
 modules {main_body: analysis_main_body}

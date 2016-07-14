@@ -1,3 +1,4 @@
 --default_vert
 family vert
+flags {root}
 component default_vert

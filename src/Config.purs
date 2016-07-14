@@ -150,6 +150,7 @@ type Module = {
   , images    :: Array String
   , sub       :: StrMap String
   , var       :: String
+  , dim       :: String
 }
 
 moduleSchema :: Schema
@@ -164,7 +165,8 @@ moduleSchema = [
   SchemaEntry SE_A_Cx "zn",
   SchemaEntry SE_A_St "images",
   SchemaEntry SE_M_St "sub",
-  SchemaEntry SE_St "var"
+  SchemaEntry SE_St "var",
+  SchemaEntry SE_St "dim"
 ]
 
 type Pattern = {

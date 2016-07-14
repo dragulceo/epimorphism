@@ -2,3 +2,4 @@
 family reduce
 component torus_reduce
 var z
+dim vec2

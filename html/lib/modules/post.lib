@@ -3,6 +3,7 @@ family post
 flags {basic}
 component post_id
 var frame
+dim vec4
 
 --post_hlim1 < post_id
 flags {basic, post_hlim}

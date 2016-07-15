@@ -68,7 +68,7 @@ exports.unsafeEval = function (s) {
 
 exports.winLog = function (x) {
   return function() {
-    window.document.body.innerHTML = "<pre>" + x.replace(new RegExp("\n", 'g'), "<br/>") + "</pre>";
+    $('#container')[0].innerHTML = "<pre>" + x.replace(new RegExp("\n", 'g'), "<br/>") + "</pre>";
   };
 }
 

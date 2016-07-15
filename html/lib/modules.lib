@@ -130,7 +130,13 @@ component t_wrap
 sub {t_inner: z}
 
 --t_wrap_zo < t_wrap
+flags {test}
 zn [1.1 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]
+scripts [linx_1]
+
+--t_wrap_zo' < t_wrap_zo
+sub {t_inner: tanh(z)}
+scripts []
 
 
 --default_vert

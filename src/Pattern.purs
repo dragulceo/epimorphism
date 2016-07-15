@@ -192,7 +192,7 @@ importScript ssRef obj mid = do
           lift $ readSTRef ref
         false -> do
           scr' <- loadLib n systemST.scriptLib "import script"
-          let tPhase' = systemST.t - scr'.tPhase
+          let tPhase' = systemST.t - scr'.tPhase  -- UPDATE PHASE
           return $ scr' {tPhase = tPhase'}
     ImportModule _ -> throwError "dont give me a module"
 
@@ -202,6 +202,7 @@ importScript ssRef obj mid = do
   lift $ modifySTRef ssRef (\s' -> s' {scriptRefPool = pool'})
 
   -- add script to module
+  let a = lg $ "importing scr for " ++ mid
   m' <- lift $ readSTRef mRef
   let scripts' = A.snoc m'.scripts id
   lift $ modifySTRef mRef (\m'' -> m'' {scripts = scripts'})

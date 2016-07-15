@@ -64,8 +64,10 @@ NEXT
   - remove mid from scripts?
 	- put pattern into systemST, patternRefPool.  remove createScript & stop passing pattern around
 	- interpolating between patterns?
+	- importing is a bit of a disaster.  orphans & integrity & so forth
 
 LATER
+  - for each pixel, define a normal vector, so we can do lighting & material effects
   - this -10000, etc shit is ghetto
 	- fract a sub on main body set in engine before compiling?
   - on windows menu disappears hovering over res selector

@@ -31,21 +31,21 @@ devKeyHandler ucRef usRef char = do
 
   case char of
     "1" -> do
-      inc uiConf uiST "Sub" "main.main_body.t" "t_inner" "t_inner" 1
+      inc uiConf uiST "Mod" "main.main_body" "t" "test" true 1
     "q" -> do
-      inc uiConf uiST "Sub" "main.main_body.t" "t_inner" "t_inner" (-1)
+      inc uiConf uiST "Mod" "main.main_body" "t" "test" true (-1)
     "2" -> do
-      inc uiConf uiST "Mod" "disp" "post" "basic" 1
+      inc uiConf uiST "Mod" "disp" "post" "basic" false 1
     "w" -> do
-      inc uiConf uiST "Mod" "disp" "post" "basic" (-1)
+      inc uiConf uiST "Mod" "disp" "post" "basic" false (-1)
     "3" -> do
-      inc uiConf uiST "Mod" "main.main_body" "color" "basic" 1
+      inc uiConf uiST "Mod" "main.main_body" "color" "basic" false 1
     "e" -> do
-      inc uiConf uiST "Mod" "main.main_body" "color" "basic" (-1)
+      inc uiConf uiST "Mod" "main.main_body" "color" "basic" false (-1)
     "4" -> do
-      inc uiConf uiST "Mod" "main.main_body" "seed" "basic" 1
+      inc uiConf uiST "Mod" "main.main_body" "seed" "basic" false 1
     "r" -> do
-      inc uiConf uiST "Mod" "main.main_body" "seed" "basic" (-1)
+      inc uiConf uiST "Mod" "main.main_body" "seed" "basic" false (-1)
     "a" -> do
       return "scr incZn main.main_body.t idx:0 ofs:1"
     "z" -> do
@@ -80,13 +80,13 @@ devKeyHandler ucRef usRef char = do
       return "scr incZn main.main_body.t idx:3 ofs:-i"
     _   -> commonKeyHandler ucRef usRef char
   where
-    inc uiConf uiST typ adr sub lib ofs = do
+    inc uiConf uiST typ adr sub lib presS ofs = do
       let idn' = adr ++ sub
       let idx = if (member idn' uiST.incIdx) then ((fromJust $ lookup idn' uiST.incIdx) + ofs) else 0
       let dt = insert idn' idx uiST.incIdx
       modifySTRef usRef (\s -> s {incIdx = dt})
       let spd = show uiConf.keyboardSwitchSpd
-      return $ inj "scr inc%0 %1 sub:%2 lib:%3 idx:%4 spd:%5" [typ, adr, sub, lib, (show idx), spd]
+      return $ inj "scr inc%0 %1 sub:%2 lib:%3 idx:%4 presS:%5 spd:%6" [typ, adr, sub, lib, (show idx), (show presS), spd]
 
 prodKeyHandler :: KeyHandler
 prodKeyHandler ucRef usRef char = do

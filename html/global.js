@@ -26,3 +26,10 @@ window.requestExitFullScreen = function() {
 		document.msExitFullscreen();
 	}
 }
+
+showTab = function(n) {
+  $('.debugTab').hide();
+	$('.debugTab.' + n).show();
+	$('.tab').removeClass("selected")
+  $('.tab.' + n).addClass("selected")
+}

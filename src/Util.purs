@@ -69,6 +69,10 @@ foreign import cxFromStringImpl :: (Number -> Number -> (Tuple Number Number))
 
 foreign import boolFromString :: String -> Boolean
 
+boolFromStringE :: forall eff. String -> Epi eff Boolean
+boolFromStringE s = return $ boolFromString s
+
+
 numFromStringE :: forall eff. String -> Epi eff Number
 numFromStringE s = case (numFromString s) of
   (Just n) -> return n

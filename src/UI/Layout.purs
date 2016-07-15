@@ -1,7 +1,7 @@
 module Layout where
 
 import Prelude
-import Config (EpiS, moduleSchema, Module, Pattern, SystemST, UIST, Epi, UIConf)
+import Config (Script, scriptSchema, EpiS, moduleSchema, Module, Pattern, SystemST, UIST, Epi, UIConf)
 import Control.Monad (when)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (readSTRef, STRef)
@@ -10,7 +10,7 @@ import Data.DOM.Simple.Element (classRemove, classAdd, setInnerHTML, setStyleAtt
 import Data.DOM.Simple.Unsafe.Element (HTMLElement)
 import Data.DOM.Simple.Window (innerHeight, innerWidth, document, globalWindow)
 import Data.Maybe (Maybe(Just, Nothing))
-import Data.StrMap (StrMap)
+import Data.StrMap (foldM, StrMap)
 import Data.String (joinWith, trim, split, replace)
 import Data.String.Regex (match, noFlags, regex)
 import Data.Traversable (traverse)
@@ -72,11 +72,30 @@ updateLayout uiConf uiST systemST pattern = do
 
     when (uiConf.windowState == "dev") do
       -- debug state
-      dsDiv <- findElt uiConf.debugStateId
-      str <- serializeDebugState systemST.moduleRefPool 0 pattern.main ("<span style='color:pink'>MAIN: " ++ pattern.main ++ "</span>")
-      lift $ setInnerHTML str dsDiv
+      dsmDiv <- findElt "debugMain"
+      str0 <- serializeDebugState systemST.moduleRefPool 0 pattern.main ("<span style='color:pink'>MAIN: " ++ pattern.main ++ "</span>")
+      lift $ setInnerHTML str0 dsmDiv
+
+      dsdDiv <- findElt "debugDisp"
+      str1 <- serializeDebugState systemST.moduleRefPool 0 pattern.disp ("<span style='color:pink'>DISP: " ++ pattern.disp ++ "</span>")
+      lift $ setInnerHTML str1 dsdDiv
+
+      dssDiv <- findElt "debugScripts"
+      str2 <- serializeScripts systemST.scriptRefPool
+      lift $ setInnerHTML ("<span style='color:pink'>SCRIPTS:</span>\n" ++ str2) dssDiv
 
     return unit
+
+-- serialize scripts for debug view
+serializeScripts :: forall eff h. StrMap (STRef h Script) -> EpiS eff h String
+serializeScripts pool = do
+  foldM handle "" pool
+  where
+    handle res k sRef = do
+      scr <- lift $ readSTRef sRef
+      let title = ("<span style='color:blue;font-weight:bold;'>" ++ k ++ "</span>")
+      str <- unsafeSerialize scriptSchema title scr
+      return $ str ++ "<br/><br/>" ++ res
 
 
 -- serializes the modRefPool into an html string for debugging

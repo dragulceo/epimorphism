@@ -1,11 +1,10 @@
 --default
 canvasId glcanvas
 consoleId console
-debugStateId debugState
 fpsId showFps
 showFps false
 windowState dev
-uiUpdateFreq 10
+uiUpdateFreq 1
 keyboardSwitchSpd 1.0
 keySet dev
 
@@ -14,4 +13,5 @@ windowState fullWindow
 
 --prod < default
 windowState fullWindow
+uiUpdateFreq 10
 keySet prod

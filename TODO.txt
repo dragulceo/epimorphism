@@ -8,6 +8,7 @@ RELEASE
 		- chopiness when at higher resolutions
 
 		- trying to render images before they're available.  chrome on windows. causes ie to crash. put dummy images in while others load?
+		- remove script removed :/
   CONTENTS:
 		:T
 		  - make a few more seeds, some with simple animations
@@ -65,6 +66,7 @@ NEXT
 	- interpolating between patterns?
 
 LATER
+  - this -10000, etc shit is ghetto
 	- fract a sub on main body set in engine before compiling?
   - on windows menu disappears hovering over res selector
   - zoom out performance problem.  unclear what the deal is
@@ -104,8 +106,8 @@ LATER
   - too many switches can cause par & zn overflow
 	- clean up Pattern.purs & Script.purs
   - findParent is kind of ghetto
-  - add dimension to component family (vec2, vec4, etc)
   - ModRef used inconsistiently
+	- component family => var & dim
   - investigate dsl for scripts
   - use fb as texture source
   - enforce integrity of pools & module references

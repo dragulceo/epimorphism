@@ -10,7 +10,7 @@ import Data.Array (index, length, null, updateAt) as A
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.StrMap (fromFoldable, insert, member, union)
 import Data.Tuple (Tuple(..))
-import Pattern (purgeModule, ImportObj(ImportModule), replaceModule, findParent, importModule, purgeScript)
+import Pattern (purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule, purgeScript)
 import ScriptUtil (createScript, parseAndImportScript)
 import System (family, flagFamily, loadLib)
 import Util (inj, randInt, lg, numFromStringE, intFromStringE, gmod)
@@ -58,7 +58,9 @@ incMod ssRef pRef self t rootId sRef = do
   {childN, nxt, spd} <- incData systemST scr rootId
     \l' s' -> return $ family systemST.moduleLib s' [l'] []
 
-  switchModules ssRef rootId childN nxt spd
+  nxt'id <- importModule ssRef (ImportRef nxt)
+  switchModules ssRef rootId childN nxt'id spd
+  purgeModule ssRef nxt'id --  THIS IS REALLY TRICKY!  WILL CAUSE MEMORY LEAK IF NOT PURGED
 
   -- remove self
   purgeScript ssRef self
@@ -89,7 +91,7 @@ incSub ssRef pRef self t rootId sRef = do
 
       (Tuple parent child) <- findParent systemST.moduleRefPool rootId
       switchModules ssRef parent child root'id spd
-      purgeModule ssRef root'id --  THIS IS REALLY TRICKY!  WILL CAUSE MEMORY LEAK IF NOT PURGED
+      --purgeModule ssRef root'id --  THIS IS REALLY TRICKY!  WILL CAUSE MEMORY LEAK IF NOT PURGED
       return true
     false -> do  -- HRM, I think we can do better here
       let nul' = lg "TEMP: can't find subVar!"
@@ -177,6 +179,8 @@ incImage ssRef pRef self t rootId sRef = do
 
       (Tuple parent childN) <- findParent systemST.moduleRefPool rootId
       switchModules ssRef parent childN m'id spd
+      --- SHOULDNT WE PURGE m'id HERE??????
+
       return true
     Nothing -> do  -- HRM, maybe we want to be able to expand the number of existing images
       let nul' = lg "TEMP: don't have enough images!"
@@ -184,6 +188,7 @@ incImage ssRef pRef self t rootId sRef = do
 
 
 -- should check if dim & var are the same across m0 & m1
+-- m1 is a reference id
 switchModules :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> Number -> EpiS eff h Unit
 switchModules ssRef rootId childN m1 spd = do
   systemST <- lift $ readSTRef ssRef
@@ -206,7 +211,6 @@ switchModules ssRef rootId childN m1 spd = do
   --parseAndImportScript ssRef $ inj "finishSwitch %0 delay:%1" [swid, (show spd)]
   --parseAndImportScript ssRef $ inj "finishSwitch %0 par:intrp path:linear spd:%1" [swid, show spd]
   createScript ssRef swid "default" "finishSwitch" $ fromFoldable [(Tuple "delay" (show spd))]
-
   createScript ssRef swid "default" "ppath" $ fromFoldable [(Tuple "par" "intrp"), (Tuple "path" "linear"), (Tuple "spd" (show spd))]
 
   return unit
@@ -262,7 +266,7 @@ randomize ssRef pRef self t mid sRef = do
   -- next iteration
   case t of
     t | t >= nxt -> do
-      let a = lg "ITERATE COMPONENT"
+      --let a = lg "ITERATE COMPONENT"
       let dt' = insert "nxt" (show (t + dly)) scr.dt
       lift $ modifySTRef sRef (\s -> s {dt = dt'})
 

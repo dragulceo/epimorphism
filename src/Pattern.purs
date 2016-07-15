@@ -90,7 +90,6 @@ importModule :: forall eff h. STRef h (SystemST h) -> ImportObj -> EpiS eff h St
 importModule ssRef obj = do
   systemST <- lift $ readSTRef ssRef
   id <- lift $ uuid
-
   -- find module
   mod <- case obj of
     ImportModule m -> return m
@@ -104,7 +103,8 @@ importModule ssRef obj = do
 
   -- update pool
   ref <- lift $ newSTRef mod
-  let mp' = insert id ref systemST.moduleRefPool  -- maybe check for duplicates here?
+  systemST' <- lift $ readSTRef ssRef
+  let mp' = insert id ref systemST'.moduleRefPool  -- maybe check for duplicates here?
   lift $ modifySTRef ssRef (\s -> s {moduleRefPool = mp'})
 
   -- import children
@@ -118,14 +118,13 @@ importModule ssRef obj = do
   where
     importChild :: STRef h (SystemST h) -> String -> String -> String -> EpiS eff h String
     importChild ssRef mid k v = do
-      systemSTC <- lift $ readSTRef ssRef
       systemST <- lift $ readSTRef ssRef
 
       -- import child
       child <- importModule ssRef (ImportRef v)
 
       -- update parent
-      mRef <- loadLib mid systemSTC.moduleRefPool "import module - update parent"
+      mRef <- loadLib mid systemST.moduleRefPool "import module - update parent"
       m <- lift $ readSTRef mRef
       let modules' = insert k child m.modules
       lift $ modifySTRef mRef (\m' -> m' {modules = modules'})

@@ -204,18 +204,8 @@ switchModules ssRef rootId childN m1 presS spd = do
   m1M   <- lift $ readSTRef m1Ref
 
   when presS do
-    -- purge original modules scripts?
-    traverse (purgeScript ssRef) m1M.scripts
-    --let a = lg $ "importing into m1M @"  ++ m1
-    scr <- traverse (\x -> importScript ssRef (ImportRef x) m1) m0M.scripts
-    --let b = lg m0M.scripts
-    --let a = lg scr
-    --lift $ modifySTRef m1Ref (\m' -> m' {scripts = scr})
-    --m1Ref' <- loadLib m1 systemST.moduleRefPool "switch m1"
-    --m1M    <- lift $ readSTRef m1Ref
-    --let b = lg m1M.scripts
-
-    --
+    --traverse (purgeScript ssRef) m1M.scripts
+    --traverse (\x -> importScript ssRef (ImportRef x) m1) m0M.scripts
     return unit
 
   -- create switch module

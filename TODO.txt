@@ -4,7 +4,6 @@ RELEASE
   	- mailing list
   	- upgrade hosting
 	SYSTEM:
-		- saving
 		- chopiness when at higher resolutions
 
 		- trying to render images before they're available.  chrome on windows. causes ie to crash. put dummy images in while others load?
@@ -91,15 +90,13 @@ LATER
 	- too many debug statements going on (in engine?)
 	- very minor glitch during image uploading
   - prevent default in ui.js
+  - make serializable a class
   - update flags on save (default != true)
   - check for duplicates when saving (id = hash of contents?)
-  - make serializable a class
 	- screenshots
-	- saving server
+	- save more than just images
 	- next config/library pass (maybe better error detection)
 	- pause only works if tSpd == 1.0
-  - how do we figure out the family of a submodle?  can't always use the name
-	  -  like if it's a multi_seed ie. @seed:0 @seed:1, etc?
   - namespace collision in modules.lib?
   - maybe pixel alignment issues with images
   - remote control (webui, websockets, etc)
@@ -135,7 +132,6 @@ LATER
   - programming guidelines document - i.e make sure all tree modifications rebuild mod ref lib
   - better kernel debug support
   - par, zn, and aux lengths are fixed
-  - save images
   - webcam input
   - benchmarking tools
   - image comparison testing

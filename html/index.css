@@ -38,7 +38,7 @@ body {
 }
 
 #debugTabs span:hover{
-		pointer:cursor;
+		cursor:pointer;
 }
 
 #debugTabs .tab.selected{

@@ -38,8 +38,9 @@ main_body main_stc {{
 
 			// blend
 			//accum += vec4(seed.a * seed.rgb + (1.0 - seed.a) * frame.rgb, seed.a);
-			//float a = seed.a;
-			accum += mix(frame, seed, seed.a);
+			//float x = (z_in.x + 1.0) / 2.0;
+			//float b = (1.0 - x) * seed.a + x * (1.0 - seed.a);
+				 accum += mix(frame, seed, seed.a);
 		}
 	}
 

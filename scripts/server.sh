@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 
-cd html
+cd save_server
+php -S localhost:9000 &
+
+cd ../html
 python -m SimpleHTTPServer

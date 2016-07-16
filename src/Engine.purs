@@ -25,7 +25,7 @@ import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple), snd, fst)
 import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
 import Graphics.WebGL (runWebgl, debug)
-import Graphics.WebGL.Context (getWebglContext)
+import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
 import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor, vertexAttribPointer, enableVertexAttribArray, bufferData, bindBuffer, createBuffer, createFramebuffer, createTexture)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram)
 import Graphics.WebGL.Types (WebGL, WebGLContext, WebGLProgram, WebGLTexture, WebGLFramebuffer, ArrayBufferType(ArrayBuffer), BufferData(DataSource), BufferUsage(StaticDraw), DataType(Float), DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
@@ -160,7 +160,13 @@ initEngineST sysConf engineConf sys pattern canvasId esRef' = do
     Just c -> return c
     Nothing -> throwError $ "init engine - canvas not found: " ++ canvasId
 
-  ctxM <- liftEff $ getWebglContext canvas
+  let attrs = defaultWebglContextAttrs {
+        alpha =                 false
+      , depth =                 false
+      , antialias =             false
+      , preserveDrawingBuffer = true}
+
+  ctxM <- liftEff $ getWebglContextWithAttrs canvas attrs
   ctx <- case ctxM of
     Just c -> return c
     Nothing -> throwError "Unable to get a webgl context!!!"

@@ -5,7 +5,7 @@ import Config (Pattern, ScriptFn, EpiS, SystemST)
 import Control.Monad.Except.Trans (throwError, lift)
 import Control.Monad.ST (STRef, readSTRef)
 import Data.Foldable (or)
-import Data.StrMap (size, member, keys)
+import Data.StrMap (member, keys)
 import Data.Traversable (traverse)
 import Path (incZn, zpath, ppath, zfix, pfix)
 import Switch (randomize, incScript, incImage, incMod, finishSwitch, incSub)
@@ -34,7 +34,6 @@ lookupScriptFN n = case n of
 runScripts :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Boolean
 runScripts ssRef pRef = do
   systemST <- lift $ readSTRef ssRef
-  let b = lg  (size systemST.scriptRefPool)
   res <- traverse (runScript ssRef pRef) (keys systemST.scriptRefPool)
   return $ or res
 
@@ -47,10 +46,11 @@ runScripts ssRef pRef = do
           sRef <- loadLib n systemST.scriptRefPool "runScripts"
           scr  <- lift $ readSTRef sRef
           fn   <- lookupScriptFN scr.fn
-          let t' = systemST.t - scr.tPhase
+
           case scr.mid of
             "" -> throwError $ "No module when running script: " ++ scr.fn
-            mid -> fn ssRef pRef n t' mid sRef
+            mid -> let t' = systemST.t - scr.tPhase in
+              fn ssRef pRef n t' mid sRef
         false -> do
           let g = lg "script removed" -- ghetto(script purged by previous script)
           return false

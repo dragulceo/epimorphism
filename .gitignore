@@ -15,3 +15,5 @@ log.txt*
 *.log
 
 *.png
+
+*.DS_Store

@@ -140,7 +140,7 @@ purgeModule ssRef mid = do
   mod <- lift $ readSTRef mRef
 
   -- purge scripts
-  traverse (purgeScript ssRef) mod.scripts
+  traverse (purgeScript ssRef mid) mod.scripts
 
   -- delete self
   let mp = delete mid systemST.moduleRefPool
@@ -197,7 +197,7 @@ importScript ssRef obj mid = do
     ImportModule _ -> throwError "dont give me a module"
 
   --update pool
-  ref <- lift $ newSTRef scr {mid = mid}
+  ref <- lift $ newSTRef scr
   let pool' = insert id ref systemST.scriptRefPool
   lift $ modifySTRef ssRef (\s' -> s' {scriptRefPool = pool'})
 
@@ -210,8 +210,8 @@ importScript ssRef obj mid = do
 
 
 -- remove a script from the ref pool
-purgeScript :: forall eff h. STRef h (SystemST h) -> String -> EpiS eff h Unit
-purgeScript ssRef sid = do
+purgeScript :: forall eff h. STRef h (SystemST h) -> String -> String -> EpiS eff h Unit
+purgeScript ssRef mid sid = do
   systemST <- lift $ readSTRef ssRef
   sRef <- loadLib sid systemST.scriptRefPool "purge script - find script"
   sc <- lift $ readSTRef sRef
@@ -220,12 +220,8 @@ purgeScript ssRef sid = do
   let sp = delete sid systemST.scriptRefPool
   lift $ modifySTRef ssRef (\s -> s {scriptRefPool = sp})
 
-  -- remove from module
-  case sc.mid of
-    "" -> throwError $ "wtf didn't this script have a module: " ++ sid
-    mid -> do
-      mRef <- loadLib mid systemST.moduleRefPool "purge script - find module"
-      mod <- lift $ readSTRef mRef
-      lift $ modifySTRef mRef (\m -> m {scripts = A.delete sid mod.scripts})
+  mRef <- loadLib mid systemST.moduleRefPool "purge script - find module"
+  mod <- lift $ readSTRef mRef
+  lift $ modifySTRef mRef (\m -> m {scripts = A.delete sid mod.scripts})
 
   return unit

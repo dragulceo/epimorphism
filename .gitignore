@@ -3,15 +3,13 @@
 /.pulp-cache/
 /output/
 /.psci*
-/src/.webpack.js
 /html/index.js
 
 *~
 *.cache
 *#*
 
-*log.txt
-log.txt*
+*log.txt*
 *.log
 
 *.png

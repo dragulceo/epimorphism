@@ -174,9 +174,9 @@ type Pattern = {
   , flags :: Set String
   , props :: StrMap String
   , includes :: Array String
-  -- , 3d shit
   , tPhase :: Number
   , tSpd :: Number
+  -- , 3d shit
 }
 
 patternSchema :: Schema
@@ -197,7 +197,6 @@ type ScriptFn eff h = STRef h (SystemST h) -> STRef h Pattern -> String -> Numbe
 type Script = {
     fn     :: String
   , dt     :: StrMap String
-  , mid    :: String
   , flags  :: Set String
   , props  :: StrMap String
   , tPhase :: Number
@@ -207,7 +206,6 @@ scriptSchema :: Schema
 scriptSchema = [
   SchemaEntry SE_St "fn",
   SchemaEntry SE_M_St "dt",
-  SchemaEntry SE_St "mid",
   SchemaEntry SE_S "flags",
   SchemaEntry SE_M_St "props",
   SchemaEntry SE_N "tPhase"

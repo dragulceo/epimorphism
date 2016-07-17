@@ -64,9 +64,17 @@ initTex dim = do
 
 
 -- initialize auxiliary textures
-initAux :: EngineConf -> WebGL (Array WebGLTexture)
-initAux engineConf = do
-  traverse (\_ -> getTex) (0..(engineConf.numAux - 1))
+--initAux :: EngineConf -> WebGL (Array WebGLTexture)
+initAux :: EngineConf -> WebGLContext -> GLT.TexImageSource -> WebGL (Array WebGLTexture)
+initAux engineConf ctx empty= do
+  --traverse (\_ -> getTex) (0..(engineConf.numAux - 1))
+  traverse handle (0..(engineConf.numAux - 1))
+  where
+    handle i = do
+      aux <- getTex
+      liftEff $ GL.bindTexture ctx GLE.texture2d aux
+      liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte empty
+      return aux
 
 
 -- upload aux textures
@@ -193,7 +201,7 @@ initEngineST sysConf engineConf sys pattern canvasId esRef' = do
   res <- execGL ctx do
     Tuple tex0 fb0 <- initTex dim
     Tuple tex1 fb1 <- initTex dim
-    aux <- initAux engineConf
+    aux <- initAux engineConf es.ctx empty
 
     clearColor 0.0 0.0 0.0 1.0
     liftEff $ GL.clear ctx GLE.colorBufferBit

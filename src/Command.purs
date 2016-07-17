@@ -2,7 +2,7 @@ module Command where
 
 import Prelude
 import Config (scriptSchema, Schema, patternSchema, moduleSchema, EpiS, Pattern, SystemST, SystemConf, EngineST, EngineConf, UIST, UIConf)
-import Control.Monad (unless)
+import Control.Monad (when, unless)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
@@ -57,8 +57,12 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
 
         return unit
       "scr" -> do
-        parseAndImportScript ssRef pattern (joinWith " " args)
-        return unit
+        when (length args >= 2) do -- check for errors here
+          let addr = fromJust $ head args
+          let rst = fromJust $ tail args
+
+          parseAndImportScript ssRef pattern addr (joinWith " " rst)
+          return unit
       "setP" -> do
         case args of
           [addr, par, val] -> do

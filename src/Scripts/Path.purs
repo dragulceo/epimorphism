@@ -137,7 +137,7 @@ zpath ssRef pRef self t mid sRef = do
 
   -- remove self
   when remove do
-    purgeScript ssRef self
+    purgeScript ssRef mid self
 
   -- modify data
   case (A.updateAt idx z' m.zn) of
@@ -186,9 +186,9 @@ incZn ssRef pRef self t mid sRef = do
       return $ (Polar new fromR)
     _ -> throwError "offset should be +-1 or +-i"
 
-  parseAndImportScript ssRef pattern $ inj "zpath %0 path:intrp idx:%1 spd:4.0 fromTh:%2 toTh:%3 fromR:%4 toR:%5" [mid, (show idx), (show fromTh), (show toTh), (show fromR), (show toR)]
+  parseAndImportScript ssRef pattern mid $ inj "zpath path:intrp idx:%0 spd:4.0 fromTh:%1 toTh:%2 fromR:%3 toR:%4" [(show idx), (show fromTh), (show toTh), (show fromR), (show toR)]
 
   -- remove self
-  purgeScript ssRef self
+  purgeScript ssRef mid self
 
   return false

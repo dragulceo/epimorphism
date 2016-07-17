@@ -1,19 +1,23 @@
 module System where
 
-import Prelude ((==), ($), not, (&&), (++), return, bind)
 import SLibrary
-import Config (scriptSchema, moduleSchema, patternSchema, systemConfSchema, uiConfSchema, engineConfSchema, Schema, Epi, SystemST, defaultSystemST)
+import Config (EpiS, scriptSchema, moduleSchema, patternSchema, systemConfSchema, uiConfSchema, engineConfSchema, Schema, Epi, SystemST, defaultSystemST)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
-import Data.Array (sort, snoc)
+import Control.Monad.ST (readSTRef, STRef)
+import Data.Array (concat, (:), sort, snoc)
 import Data.Either (Either(..))
 import Data.Foldable (foldl)
+import Data.List (fromList)
 import Data.Maybe (Maybe(..))
-import Data.Set (Set, member)
-import Data.StrMap (empty, insert, fold, lookup, StrMap)
+import Data.Set (Set)
+import Data.Set (member) as S
+import Data.StrMap (member, values, empty, insert, fold, lookup, StrMap)
+import Data.Traversable (traverse)
 import Data.Tuple (Tuple)
 import Library (parseLib)
-import Util (urlGet)
+import Prelude (show, (==), ($), not, (&&), (++), return, bind)
+import Util (stick, lg, urlGet)
 
 data DataSource = LocalHTTP | LocalStorage | RemoteDB
 
@@ -71,8 +75,8 @@ loadLib name lib ctx = do
 
 -- FLAG FAMILYS & SO FORTH
 checkFlags :: forall r. {flags :: Set String | r} -> Array String -> Array String -> Boolean
-checkFlags obj inc exc = (foldl (\dt f -> dt && member f obj.flags) true inc) &&
-                         (foldl (\dt f -> dt && (not $ member f obj.flags)) true exc)
+checkFlags obj inc exc = (foldl (\dt f -> dt && S.member f obj.flags) true inc) &&
+                         (foldl (\dt f -> dt && (not $ S.member f obj.flags)) true exc)
 
 -- filter a family by specific include & exclude flags, return the keys sorted alphabetically
 flagFamily :: forall r. StrMap {flags :: Set String | r} -> Array String -> Array String -> Array String
@@ -89,3 +93,20 @@ family col fam inc exc = flagFamily (fold handle empty col) inc exc
     handle res k v = case (v.family == fam) of
       true -> insert k v res
       false -> res
+
+
+
+type MFunc eff h a = String -> EpiS eff h a
+mSeq :: forall eff h a. STRef h (SystemST h) -> MFunc eff h a -> String -> EpiS eff h (Array a)
+mSeq ssRef f mid = do
+  v0 <- f mid
+
+  -- f mid mutates the module pool, so be careful
+  systemST <- lift $ readSTRef ssRef
+  case (member mid systemST.moduleRefPool) of
+    true -> do
+      mRef <- loadLib mid systemST.moduleRefPool "mid mSeq"
+      m <- lift $ readSTRef mRef
+      vC <- traverse (mSeq ssRef f) (values m.modules)
+      return $ v0 : (concat $  fromList vC)
+    false -> return [v0]

@@ -24,16 +24,19 @@ createScript ssRef mid parent fn dt = do
 
 
 -- recursively parse a script from a string
-data ScrPS = ScrFn | ScrMid | ScrDt
+data ScrPS = ScrFn | ScrDt
 
-parseAndImportScript :: forall eff h. STRef h (SystemST h) -> Pattern -> String -> EpiS eff h Script
-parseAndImportScript ssRef pattern dt = do
+parseAndImportScript :: forall eff h. STRef h (SystemST h) -> Pattern -> String -> String -> EpiS eff h Script
+parseAndImportScript ssRef pattern addr dt = do
   systemST <- lift $ readSTRef ssRef
+  mid <- case (member addr systemST.moduleRefPool) of
+    true -> return addr
+    false -> findModule systemST.moduleRefPool pattern addr true
 
   def <- loadLib "default" systemST.scriptLib "building script in inc"
   Tuple scr _ <- foldM (parseScript' systemST.moduleRefPool pattern) (Tuple def ScrFn) (split " " dt)
 
-  importScript ssRef (ImportScript scr) scr.mid
+  importScript ssRef (ImportScript scr) mid
 
   return scr
 
@@ -41,12 +44,7 @@ parseScript' :: forall eff h. StrMap (STRef h Module) -> Pattern -> (Tuple Scrip
 parseScript' mpool pattern (Tuple scr ps) dt = do
   case ps of
     ScrFn -> do
-      return $ Tuple scr {fn = dt} ScrMid
-    ScrMid -> do
-      mid <- case (member dt mpool) of
-        true -> return dt
-        false -> findModule mpool pattern dt true
-      return $ Tuple scr {mid = mid} ScrDt
+      return $ Tuple scr {fn = dt} ScrDt
     ScrDt -> do
       let tok = split ":" dt
       case (length tok) of

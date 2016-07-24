@@ -4,13 +4,12 @@ RELEASE
   	- mailing list
   	- upgrade hosting
 	SYSTEM:
+  - zoom out performance problem.  unclear what the deal is.  really bad with 1/z
 		- chopiness when at higher resolutions
-
 		- trying to render images before they're available.  chrome on windows. causes ie to crash. put dummy images in while others load?
   CONTENTS:
 		:T
 		  - make a few more seeds, some with simple animations
-			- stop using indexes for T, so we can flag functions.  need to maintain scripts then, possibly, when switching
 
 		  - BASIC IDEA
 			  - given a collection of constraints, generate a T
@@ -40,6 +39,7 @@ RELEASE
 		COLOR:
 		  - length_scale
 			- maintain val
+			- on iteration lighten val or something
 	  POST:
 		  - pay better attention to gamma
 		BLEND:
@@ -68,8 +68,9 @@ LATER
   - this -10000, etc shit is ghetto
 	- fract a sub on main body set in engine before compiling?
   - on windows menu disappears hovering over res selector
-  - zoom out performance problem.  unclear what the deal is
+  - zoom out performance problem.  unclear what the deal is.  really bad with 1/z
   - ppath, remove path if t > 1.0 when necessary
+	- add shader source to console
   - change zn & par through clicking on console
   - check for syntax errors in parseT
   - use git for deploy

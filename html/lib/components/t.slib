@@ -1,8 +1,14 @@
 t t_id {{
 }}
 
-t t_wrap {{
+t t_wrap_sub {{
   z = M(zn[#0], z) + zn[#1];
   z = $t_inner$;
+  z = M(zn[#2], z) + zn[#3];
+}}
+
+t t_wrap {{
+  z = M(zn[#0], z) + zn[#1];
+  %t_inner%
   z = M(zn[#2], z) + zn[#3];
 }}

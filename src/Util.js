@@ -146,6 +146,7 @@ exports.cxFromStringImpl = function (tuple) {
 };
 
 exports.halt = function() {
+	console.log("HALT");
 	halt = true;
 };
 

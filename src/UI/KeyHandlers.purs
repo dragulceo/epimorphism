@@ -31,9 +31,9 @@ devKeyHandler ucRef usRef char = do
 
   case char of
     "1" -> do
-      inc uiConf uiST "main.main_body" "Mod" "t" "test" 1
+      inc uiConf uiST "main.main_body.t" "Mod" "t_inner" "all" 1
     "q" -> do
-      inc uiConf uiST "main.main_body" "Mod" "t" "test" (-1)
+      inc uiConf uiST "main.main_body.t" "Mod" "t_inner" "all" (-1)
     "2" -> do
       inc uiConf uiST "disp" "Mod" "post" "basic" 1
     "w" -> do
@@ -43,9 +43,9 @@ devKeyHandler ucRef usRef char = do
     "e" -> do
       inc uiConf uiST "main.main_body" "Mod" "color" "basic" (-1)
     "4" -> do
-      inc uiConf uiST "main.main_body" "Mod" "seed" "basic" 1
+      inc uiConf uiST "main.main_body" "Mod" "seed" "t_test" 1
     "r" -> do
-      inc uiConf uiST "main.main_body" "Mod" "seed" "basic" (-1)
+      inc uiConf uiST "main.main_body" "Mod" "seed" "t_test" (-1)
     "a" -> do
       return "scr main.main_body.t incZn idx:0 ofs:1"
     "z" -> do

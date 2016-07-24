@@ -5,19 +5,27 @@ var seed
 dim vec4
 
 --seed_border < seed_nothing
-flags {basic}
+flags {t_test}
 component seed_border
 par {w: 0.2, alpha: 1.0}
 modules {t: t_wrap}
 
---seed_analysis < seed_border
-flags {analysis}
-par {w: 0.05}
-component seed_analysis
+--seed_circle < seed_nothing
+flags {t_test, img}
+component seed_circle
+par {w: 0.2, r: 0.5, sc: 1.0, alpha: 0.8, spd: 6.0}
+modules {t: t_wrap}
+images [/textures/simplegeom/tile_rainbow2.png]
 
+--seed_ball < seed_nothing
+flags {t_test, img}
+component seed_circle
+par {w: 0.5, r: 0.0, sc: 1.0, alpha: 0.7, spd:1.0}
+modules {t: t_wrap}
+images [/textures/misc/tile_oct1.png]
 
 --seed_border_img1 < seed_border
-flags {basic, img}
+flags {t_test, img}
 component seed_simple_img
 images [/textures/simplegeom/tile_grid1.png]
 
@@ -26,3 +34,11 @@ images [/textures/simplegeom/tile_grid6.png]
 
 --seed_border_img3 < seed_border_img1
 images [/textures/simplegeom/tile_psych1.png]
+
+
+
+
+--seed_analysis < seed_border
+flags {analysis}
+par {w: 0.05}
+component seed_analysis

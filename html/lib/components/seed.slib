@@ -41,6 +41,65 @@ seed seed_border {{
 }}
 
 
+seed seed_circle {{
+	vec2 z_i = z;
+  %t%
+	%reduce%
+
+	float r = length(z);
+	float wx = time / 2.0 + atan(z.y, z.x) * 3.0 / (2.0 * PI);
+	float wy = 1.0 - 2.0 * abs(r - @r@) / @w@;
+  float w = max(0.0, wy);
+	float mask = ceil(w);
+
+	//seed = vec4(w, 0.0, 0.0, w * @alpha@);
+
+	float sc = 1.0;
+	vec2 ofs = mod(sc * vec2(wx, wy), 1.0);
+  seed = texture2D(aux[#0], ofs);
+
+	// mask w
+	seed.w *= mask * @alpha@;
+
+	// preserve val
+	seed = rgb2hsv(seed);
+	seed.z *= w;
+	seed = hsv2rgb(seed);
+
+	z = z_i;
+}}
+
+
+
+seed seed_ball {{
+	vec2 z_i = z;
+  %t%
+	%reduce%
+
+	float r = length(z);
+	float wx = time / 2.0 + atan(z.y, z.x) * 3.0 / (2.0 * PI);
+	float wy = 1.0 - 2.0 * abs(r - @r@) / @w@;
+  float w = max(0.0, wy);
+	float mask = ceil(w);
+
+	//seed = vec4(w, 0.0, 0.0, w * @alpha@);
+
+	float sc = 1.0;
+	vec2 ofs = mod(sc * vec2(wx, wy), 1.0);
+  seed = texture2D(aux[#0], ofs);
+
+	// mask w
+	seed.w *= mask * @alpha@;
+
+	// preserve val
+	seed = rgb2hsv(seed);
+	seed.z *= w;
+	seed = hsv2rgb(seed);
+
+	z = z_i;
+}}
+
+
 
 seed seed_simple_img {{
 	vec2 z_i = z;

@@ -40,7 +40,7 @@
 				<button onclick="window.eventHandler('pause')"> Pause </button>
 				<button onclick="window.eventHandler('killScripts')"> Kill Scripts </button>
 				<button onclick="window.eventHandler('fullWindow')"> Exit Dev </button>
-				<button onclick="halt=true"> Halt </button>
+				<button onclick="halt=true;$(this).hide();console.log('HALT');"> Halt </button>
 			</div>
 			<div id="debugTabs">
 				<span class="tab main selected" onclick="showTab('main')">Main</span>

@@ -97,10 +97,10 @@ flattenParZn {lib, par, zn} n = do
 -- preprocess substitutions.  just parses t expressions
 preProcessSub :: forall eff. StrMap String -> Epi eff (StrMap String)
 preProcessSub sub = do
-  case (lookup "t_inner" sub) of
+  case (lookup "t_expr" sub) of
     (Just expr) -> do
       expr' <- parseTexp expr
-      let sub' = insert "t_inner" expr' sub
+      let sub' = insert "t_expr" expr' sub
       return sub'
     Nothing -> do
       return sub

@@ -4,7 +4,6 @@
 
 exports.saveCanvas = function() {
 	var dataURL = $("#glcanvas")[0].toDataURL();
-
 	$.ajax({
 		type: "POST",
 		url: "http://localhost:9000",
@@ -15,6 +14,3 @@ exports.saveCanvas = function() {
 		console.log('saved');
 	});
 };
-
-
-exports.saveCanvas = $.saveCanvas

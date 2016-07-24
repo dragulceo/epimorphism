@@ -1,0 +1,47 @@
+--t_z
+family t_inner
+flags {all}
+component t_sub
+var z
+dim vec2
+sub {t_expr: z}
+
+--t_inv < t_z
+flags {all, inv}
+sub {t_expr: 1.0 / z}
+
+--t_cos < t_z
+flags {all}
+sub {t_expr: cos(z)}
+
+--t_sin < t_z
+flags {all}
+sub {t_expr: sin(z)}
+
+--t_cosh < t_z
+flags {all}
+sub {t_expr: cosh(z)}
+
+--t_sinh < t_z
+flags {all}
+sub {t_expr: sinh(z)}
+
+--t_tan < t_z
+flags {all}
+sub {t_expr: tan(z)}
+
+--t_tanh < t_z
+flags {all}
+sub {t_expr: tanh(z)}
+
+--t_exp < t_z
+flags {all}
+sub {t_expr: exp(z)}
+
+--t_exp < t_z
+flags {all}
+sub {t_expr: exp(z)}
+
+--t_zti < t_z
+flags {all}
+sub {t_expr: z / tan (z * i)}

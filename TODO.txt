@@ -8,6 +8,7 @@ RELEASE
 		- chopiness when at higher resolutions
 		- trying to render images before they're available.  chrome on windows. causes ie to crash. put dummy images in while others load?
   CONTENTS:
+	  superformula - https://en.wikipedia.org/wiki/Superformula
 		:T
 		  - make a few more seeds, some with simple animations
 
@@ -64,6 +65,8 @@ NEXT
 	- importing is a bit of a disaster.  orphans & integrity & so forth. not to mention flakey & hard to debug :/
 
 LATER
+  - if there are too many aux buffers (texture units), we'll have an issue?
+  - saving images loses bit depth??
   - for each pixel, define a normal vector, so we can do lighting & material effects
   - this -10000, etc shit is ghetto
 	- fract a sub on main body set in engine before compiling?

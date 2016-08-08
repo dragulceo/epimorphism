@@ -337,12 +337,17 @@ uniform sampler2D fb;
 uniform float time;
 uniform float kernel_dim;
 uniform float par[50];
+uniform float par2[50];
 uniform vec2 zn[50];
 uniform sampler2D aux[10];
+
+uniform sampler2D audio;
 
 void main() {
   vec4 color;
   vec2 z, z_in;
+
+	vec4 tmp = texture2D(audio, vec2(0.0,0.0));
 
   // into z coordinates
   z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(kernel_dim, kernel_dim) - vec2(1.0, 1.0);
@@ -393,6 +398,14 @@ main_body main_stc {{
 			z = t_z;
 
 			//z = z_in;
+
+			float rad = mod(atan(z.y, z.x) / (2.0 * PI), 1.0);
+			float rad2 = (rad > 0.5 ? 2.0 * (1.0 - rad) : 2.0 * rad);
+			rad2 = rad < 0.5 ? 2.0 * (0.5 - rad) : 2.0 * (rad - 0.5);
+			float fdat = texture2D(audio, vec2(rad2, 0.0)).a;
+			float len = length(z) - 0.6 * fdat;
+			z = vec2(len * cos(2.0 * PI * rad), len * sin(2.0 * PI * rad));
+
 			%seed%
 
 			// blend
@@ -510,7 +523,7 @@ seed seed_circle {{
 	%reduce%
 
 	float r = length(z);
-	float wx = time / 2.0 + atan(z.y, z.x) * 3.0 / (2.0 * PI);
+	float wx = atan(z.y, z.x) * 3.0 / (2.0 * PI);
 	float wy = 1.0 - 2.0 * abs(r - @r@) / @w@;
   float w = max(0.0, wy);
 	float mask = ceil(w);
@@ -531,37 +544,6 @@ seed seed_circle {{
 
 	z = z_i;
 }}
-
-
-
-seed seed_ball {{
-	vec2 z_i = z;
-  %t%
-	%reduce%
-
-	float r = length(z);
-	float wx = time / 2.0 + atan(z.y, z.x) * 3.0 / (2.0 * PI);
-	float wy = 1.0 - 2.0 * abs(r - @r@) / @w@;
-  float w = max(0.0, wy);
-	float mask = ceil(w);
-
-	//seed = vec4(w, 0.0, 0.0, w * @alpha@);
-
-	float sc = 1.0;
-	vec2 ofs = mod(sc * vec2(wx, wy), 1.0);
-  seed = texture2D(aux[#0], ofs);
-
-	// mask w
-	seed.w *= mask * @alpha@;
-
-	// preserve val
-	seed = rgb2hsv(seed);
-	seed.z *= w;
-	seed = hsv2rgb(seed);
-
-	z = z_i;
-}}
-
 
 
 seed seed_simple_img {{

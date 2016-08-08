@@ -6,7 +6,7 @@ import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Graphics.WebGL.Raw.Types as GLT
 import Compiler (flattenParZn, compileShaders)
-import Config (Epi, EpiS, Module, Pattern, EngineST, EngineConf, SystemST, SystemConf)
+import Config (AudioAnalyser, Epi, EpiS, Module, Pattern, EngineST, EngineConf, SystemST, SystemConf)
 import Control.Monad (when)
 import Control.Monad.Eff (Eff, forE)
 import Control.Monad.Eff.Class (liftEff)
@@ -27,9 +27,13 @@ import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
 import Graphics.WebGL (runWebgl, debug)
 import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
 import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor, vertexAttribPointer, enableVertexAttribArray, bufferData, bindBuffer, createBuffer, createFramebuffer, createTexture)
+import Graphics.WebGL.Raw.Types (ArrayBufferView)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram)
 import Graphics.WebGL.Types (WebGL, WebGLContext, WebGLProgram, WebGLTexture, WebGLFramebuffer, ArrayBufferType(ArrayBuffer), BufferData(DataSource), BufferUsage(StaticDraw), DataType(Float), DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
-import Util (replaceAll, unsafeNull)
+import Util (lg, replaceAll, unsafeNull)
+
+foreign import audioData :: forall eff. AudioAnalyser -> Eff eff (ArrayBufferView)
+foreign import initAudioAnalyzer :: forall eff. Int -> Eff eff AudioAnalyser
 
 -- PUBLIC
 
@@ -64,9 +68,8 @@ initTex dim = do
 
 
 -- initialize auxiliary textures
---initAux :: EngineConf -> WebGL (Array WebGLTexture)
 initAux :: EngineConf -> WebGLContext -> GLT.TexImageSource -> WebGL (Array WebGLTexture)
-initAux engineConf ctx empty= do
+initAux engineConf ctx empty = do
   --traverse (\_ -> getTex) (0..(engineConf.numAux - 1))
   traverse handle (0..(engineConf.numAux - 1))
   where
@@ -75,6 +78,18 @@ initAux engineConf ctx empty= do
       liftEff $ GL.bindTexture ctx GLE.texture2d aux
       liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte empty
       return aux
+
+
+-- initialize audio texture
+initAudio :: EngineConf -> WebGLContext -> GLT.TexImageSource -> WebGL (Maybe (Tuple WebGLTexture AudioAnalyser))
+initAudio engineConf ctx empty = do
+  case engineConf.audioAnalysisEnabled of
+    false -> return Nothing
+    true -> do
+      audioTex <- getTex
+      analyser <- lift $ lift $ initAudioAnalyzer engineConf.audioBufferSize
+      return $ Just (Tuple audioTex analyser)
+
 
 
 -- upload aux textures
@@ -187,7 +202,7 @@ initEngineST sysConf engineConf sys pattern canvasId esRef' = do
       lift $ modifySTRef ref (\r -> r {empty = empty})
       return ref
     Nothing -> do
-      let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, auxImg: [], ctx: ctx, empty}
+      let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, audio: Nothing, auxImg: [], ctx: ctx, empty}
       lift $ newSTRef tmp
 
   es <- lift $ readSTRef esRef
@@ -202,6 +217,7 @@ initEngineST sysConf engineConf sys pattern canvasId esRef' = do
     Tuple tex0 fb0 <- initTex dim
     Tuple tex1 fb1 <- initTex dim
     aux <- initAux engineConf es.ctx empty
+    audio <- initAudio engineConf es.ctx empty
 
     clearColor 0.0 0.0 0.0 1.0
     liftEff $ GL.clear ctx GLE.colorBufferBit
@@ -211,6 +227,7 @@ initEngineST sysConf engineConf sys pattern canvasId esRef' = do
         fb  = Just (Tuple fb0 fb1)
       , tex = Just (Tuple tex0 tex1)
       , aux = Just aux
+      , audio = audio
     }
 
   -- set shaders
@@ -247,15 +264,7 @@ renderFrame systemST engineConf engineST pattern frameNum = do
   bindParZn systemST.moduleRefPool ctx disp pattern.disp
 
   execGL ctx do
-    -- ping pong buffers
-    let tm = if frameNum `mod` 2 == 0 then fst tex else snd tex
-    let td = if frameNum `mod` 2 == 1 then fst tex else snd tex
-    let fb = if frameNum `mod` 2 == 1 then fst fbs else snd fbs
-
-    -- main program
     liftEff $ GL.useProgram ctx main
-    liftEff $ GL.bindTexture ctx GLE.texture2d tm
-    liftEff $ GL.bindFramebuffer ctx GLE.framebuffer fb
 
     -- bind main uniforms
     mainUnif <- getUniformBindings main
@@ -273,22 +282,47 @@ renderFrame systemST engineConf engineST pattern frameNum = do
         GL.activeTexture ctx (GLE.texture1 + i')
         GL.bindTexture ctx GLE.texture2d $ fromJust (aux !! i')
 
+    --audio info
+    case engineST.audio of
+      Just (Tuple audioTex analyser) -> do
+        liftEff $ GL.bindTexture ctx GLE.texture2d audioTex
+        dta <- lift $ lift $ audioData analyser
+        liftEff $ GL.texImage2D_ ctx GLE.texture2d 0 GLE.alpha engineConf.audioBufferSize 2 0 GLE.alpha GLE.unsignedByte dta
+
+        audioU <- liftEff $ GL.getUniformLocation ctx main "audio"
+        case audioU of
+          Just audioU' -> do
+            let ofs = length engineST.auxImg + 1
+            liftEff $ GL.uniform1i ctx audioU' ofs
+            liftEff $ GL.activeTexture ctx (GLE.texture0 + ofs)
+            liftEff $ GL.bindTexture ctx GLE.texture2d audioTex
+          Nothing   -> throwError $ ShaderError "missing audio uniform!"
+      Nothing -> return unit
+
+
+    -- ping pong buffers
+    let tm = if frameNum `mod` 2 == 0 then fst tex else snd tex
+    let td = if frameNum `mod` 2 == 1 then fst tex else snd tex
+    let fb = if frameNum `mod` 2 == 1 then fst fbs else snd fbs
+
     -- draw
     liftEff $ GL.activeTexture ctx GLE.texture0
+    liftEff $ GL.bindTexture ctx GLE.texture2d tm
+    liftEff $ GL.bindFramebuffer ctx GLE.framebuffer fb
     drawArrays Triangles 0 6
 
     debug
 
     -- disp/post program
     liftEff $ GL.useProgram ctx disp
-    liftEff $ GL.bindTexture ctx GLE.texture2d td
-    liftEff $ GL.bindFramebuffer ctx GLE.framebuffer unsafeNull
 
     -- bind disp uniforms
     dispUnif <- getUniformBindings disp
     uniform1f dispUnif.kernel_dim (toNumber engineConf.kernelDim)
 
     -- draw
+    liftEff $ GL.bindTexture ctx GLE.texture2d td
+    liftEff $ GL.bindFramebuffer ctx GLE.framebuffer unsafeNull
     drawArrays Triangles 0 6
 
     debug

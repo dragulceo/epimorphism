@@ -4,9 +4,13 @@ consoleId console
 fpsId showFps
 showFps false
 windowState dev
-uiUpdateFreq 1
+uiUpdateFreq 10
 keyboardSwitchSpd 1.0
 keySet dev
+
+--debug
+uiUpdateFreq 1
+showFps true
 
 --full < default
 windowState fullWindow

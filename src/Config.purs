@@ -79,14 +79,20 @@ type EngineConf = {
     kernelDim :: Int
   , fract :: Int
   , numAux :: Int
+  , audioAnalysisEnabled :: Boolean
+  , audioBufferSize :: Int
 }
 
 engineConfSchema :: Schema
 engineConfSchema = [
-  SchemaEntry SE_I "kernelDim",
-  SchemaEntry SE_I "fract",
-  SchemaEntry SE_I "numAux"
+    SchemaEntry SE_I "kernelDim"
+  , SchemaEntry SE_I "fract"
+  , SchemaEntry SE_I "numAux"
+  , SchemaEntry SE_B "audioAnalysisEnabled"
+  , SchemaEntry SE_I "audioBufferSize"
 ]
+
+foreign import data AudioAnalyser :: *
 
 type EngineST = {
     dispProg :: Maybe WebGLProgram
@@ -94,6 +100,7 @@ type EngineST = {
   , tex :: Maybe (Tuple WebGLTexture WebGLTexture)
   , fb :: Maybe (Tuple WebGLFramebuffer WebGLFramebuffer)
   , aux :: Maybe (Array WebGLTexture)
+  , audio :: Maybe (Tuple WebGLTexture AudioAnalyser)
   , auxImg :: Array String
   , ctx :: WebGLContext
   , empty :: GLT.TexImageSource

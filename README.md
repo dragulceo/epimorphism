@@ -12,7 +12,7 @@ Epimorphism is a psychedelic virtualization of video feedback.  It is written in
 
 
 ## Useful Commands
-`~` - development console
+`~` - development panel
 `|` - show fps
 `1,2,3,..` - increment various components in component library
 `q,w,e,..` - decrement various components. for instance, 1 choses the next transformation in the library, while q will chose the previous one

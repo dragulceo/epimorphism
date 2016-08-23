@@ -30,7 +30,7 @@ import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, cl
 import Graphics.WebGL.Raw.Types (ArrayBufferView)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram)
 import Graphics.WebGL.Types (WebGL, WebGLContext, WebGLProgram, WebGLTexture, WebGLFramebuffer, ArrayBufferType(ArrayBuffer), BufferData(DataSource), BufferUsage(StaticDraw), DataType(Float), DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
-import Util (lg, replaceAll, unsafeNull)
+import Util (replaceAll, unsafeNull)
 
 foreign import audioData :: forall eff. AudioAnalyser -> Eff eff (ArrayBufferView)
 foreign import initAudioAnalyzer :: forall eff. Int -> Eff eff AudioAnalyser
@@ -271,6 +271,25 @@ renderFrame systemST engineConf engineST pattern frameNum = do
     uniform1f mainUnif.time (systemST.t - pattern.tPhase)
     uniform1f mainUnif.kernel_dim (toNumber engineConf.kernelDim)
 
+
+    -- BUG!!! audio has to be before aux???
+    --audio info
+    case engineST.audio of
+      Just (Tuple audioTex analyser) -> do
+        audioU <- liftEff $ GL.getUniformLocation ctx main "audio"
+        case audioU of
+          Just audioU' -> do
+            liftEff $ GL.bindTexture ctx GLE.texture2d audioTex
+            dta <- lift $ lift $ audioData analyser
+            liftEff $ GL.texImage2D_ ctx GLE.texture2d 0 GLE.alpha engineConf.audioBufferSize 1 0 GLE.alpha GLE.unsignedByte dta
+
+            let ofs = length engineST.auxImg + 1
+            liftEff $ GL.uniform1i ctx audioU' ofs
+            liftEff $ GL.activeTexture ctx (GLE.texture0 + ofs)
+            liftEff $ GL.bindTexture ctx GLE.texture2d audioTex
+          Nothing -> return unit
+      Nothing -> return unit
+
     -- aux
     when (length engineST.auxImg > 0) do
       auxU <- liftEff $ GL.getUniformLocation ctx main "aux"
@@ -281,24 +300,6 @@ renderFrame systemST engineConf engineST pattern frameNum = do
         let i' = fromJust $ fromNumber i
         GL.activeTexture ctx (GLE.texture1 + i')
         GL.bindTexture ctx GLE.texture2d $ fromJust (aux !! i')
-
-    --audio info
-    case engineST.audio of
-      Just (Tuple audioTex analyser) -> do
-        liftEff $ GL.bindTexture ctx GLE.texture2d audioTex
-        dta <- lift $ lift $ audioData analyser
-        liftEff $ GL.texImage2D_ ctx GLE.texture2d 0 GLE.alpha engineConf.audioBufferSize 2 0 GLE.alpha GLE.unsignedByte dta
-
-        audioU <- liftEff $ GL.getUniformLocation ctx main "audio"
-        case audioU of
-          Just audioU' -> do
-            let ofs = length engineST.auxImg + 1
-            liftEff $ GL.uniform1i ctx audioU' ofs
-            liftEff $ GL.activeTexture ctx (GLE.texture0 + ofs)
-            liftEff $ GL.bindTexture ctx GLE.texture2d audioTex
-          Nothing   -> throwError $ ShaderError "missing audio uniform!"
-      Nothing -> return unit
-
 
     -- ping pong buffers
     let tm = if frameNum `mod` 2 == 0 then fst tex else snd tex

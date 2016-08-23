@@ -1,3 +1,42 @@
+GOALS:
+  0. fix github issue for dude / README.md
+  1. conference presentation
+	  - make slides
+		- make sure UI is working
+		- 3-5m demo
+	2. performance
+	  - osc support
+		- soundanalyser plugin
+		- see what kind of outputs we get
+		- get in touch with artist/find some of her music
+		- plug outputs into system
+		- mvp for system
+	3. SOFT RELEASE
+    RELEASE: LAUNCH
+		mvp for system
+
+
+MVP FOR SYSTEM:
+  - T
+	  - create more of them
+		- animate them
+		- create final T component
+	- SEED
+	  - create more of them
+		- re-integrate images & maybe layers
+		- make sure we preserve values?
+		- create final seed component
+  - COLOR TRANS
+	  - fixed point vs oscilatory
+  - POST
+	  - better pallets
+	- SOUND
+	  - wtf are we doing here?
+		- various signals have 1
+
+
+
+
 RELEASE
   LAUNCH:
   	- about page / gallery
@@ -6,7 +45,7 @@ RELEASE
 	SYSTEM:
   - zoom out performance problem.  unclear what the deal is.  really bad with 1/z
 		- chopiness when at higher resolutions
-		- trying to render images before they're available.  chrome on windows. causes ie to crash. put dummy images in while others load?
+		- trying to render images before they're available.  chrome on windows. causes ie to crash. put dummy images in while others load? I think I already tried to fix this.
   CONTENTS:
 	  superformula - https://en.wikipedia.org/wiki/Superformula
 		:T

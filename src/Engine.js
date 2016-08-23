@@ -51,7 +51,7 @@ exports.audioData = function(analyser) {
 		var data = new Uint8Array(2.0 * analyser.frequencyBinCount);
 		data.set(freqData);
 		data.set(timeData, freqData.length);
-		return data;
+		return freqData;
 	}
 }
 

@@ -16,7 +16,7 @@
     "package.json"
   ],
   "dependencies": {
-    "purescript-webgl-monad": "/Users/gene/Programming/purescript-webgl-monad",
+    "purescript-webgl-monad": "git@github.com:geneshuman/purescript-webgl-monad.git",
     "purescript-extensions": "*",
     "purescript-console": "*",
     "purescript-jquery": "*",

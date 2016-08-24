@@ -1,6 +1,11 @@
---randomizeT1
+--randomizeTI1
 fn randomize
-dt {dly: 30, spd: 0.04, lib:t_inner, dim:vec2, sub:t_inner, typ:Sub, adr:main.main_body.t}
+dt {dly: 30, spd: 0.04, lib:all, dim:vec2, sub:t_inner, typ:Mod, adr:main.main_body.t}
+
+--randomizeZ
+fn randomize
+dt {dly: 30, spd: 0.04, lib:all', dim:vec2, sub:t, typ:Mod, adr:main.main_body}
+
 
 --default
 fn null

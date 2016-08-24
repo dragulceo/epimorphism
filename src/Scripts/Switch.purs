@@ -13,7 +13,7 @@ import Data.Tuple (Tuple(..))
 import Pattern (purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule, purgeScript)
 import ScriptUtil (createScript, parseAndImportScript)
 import System (family, flagFamily, loadLib)
-import Util (inj, randInt, lg, numFromStringE, intFromStringE, gmod)
+import Util (lg, inj, randInt, numFromStringE, intFromStringE, gmod)
 
 incData :: forall eff h. SystemST h -> Script -> String -> (String -> String -> EpiS eff h (Array String)) -> EpiS eff h {childN :: String, nxt :: String, spd :: Number}
 incData systemST scr rootId loader = do
@@ -269,6 +269,7 @@ randomize ssRef pRef self t mid sRef = do
   -- next iteration
   case t of
     t | t >= nxt -> do
+      let a = lg adr
       --let a = lg "ITERATE COMPONENT"
       let dt' = insert "nxt" (show (t + dly)) scr.dt
       lift $ modifySTRef sRef (\s -> s {dt = dt'})

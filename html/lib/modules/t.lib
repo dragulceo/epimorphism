@@ -20,8 +20,35 @@ component t_wrap
 modules {t_inner: t_z}
 
 --t_wrap_zo < t_wrap
+flags {wrap, all}
 zn [1.1 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]
 
---t_wrap_test < t_wrap_zo
-modules {t_inner: t_cos}
-zn [1.7 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]
+--t_wrap_zo' < t_wrap
+flags {wrap, all}
+zn [1.1 + 0.0i, 0.0 + 0.0i, 0.0 + 1.0i, 1.0 + 0.0i]
+
+--t_wrap_zo'1 < t_wrap
+flags {wrap, all'}
+zn [1.1 + 0.0i, 0.0 + 0.0i, 0.0 + 1.0i, 1.0 + 0.0i]
+scripts [circle_0]
+
+--t_wrap_zo'2 < t_wrap
+flags {wrap, all'}
+zn [1.1 + 0.0i, 0.0 + 0.0i, 0.0 + 1.0i, 1.0 + 0.0i]
+scripts [rose1_0]
+
+--t_wrap_zo'3 < t_wrap
+flags {wrap, all'}
+zn [1.1 + 0.0i, 0.0 + 0.0i, 0.0 + 1.0i, 1.0 + 0.0i]
+scripts [rose3_2]
+
+--t_wrap_zo'4 < t_wrap
+flags {wrap, all'}
+zn [1.1 + 0.0i, 0.0 + 0.0i, 0.0 + 1.0i, 1.0 + 0.0i]
+scripts [circle_0, rose3_2]
+
+--t_main1 < t_wrap
+flags {wrap, all''}
+zn [1.0 + 0.0i, 0.0 + 0.0i, 0.0 + 1.1i, 1.0 + 0.0i]
+modules {t_inner: t_sinh}
+scripts [randomizeTI1, circle_0, rose1_0, rose3_2]

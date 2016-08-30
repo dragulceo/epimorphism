@@ -6,13 +6,14 @@ import Control.Monad (when)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, STRef, readSTRef)
-import Data.Array (index, length, null, updateAt) as A
+import Data.Array (filter, index, length, null, updateAt) as A
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.StrMap (fromFoldable, insert, member, union)
-import Data.Tuple (Tuple(..))
+import Data.Traversable (traverse)
+import Data.Tuple (fst, snd, Tuple(..))
 import Pattern (purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule, purgeScript)
 import ScriptUtil (createScript, parseAndImportScript)
-import System (family, flagFamily, loadLib)
+import System (loadLib, checkFlags, family, flagFamily)
 import Util (lg, inj, randInt, numFromStringE, intFromStringE, gmod)
 
 incData :: forall eff h. SystemST h -> Script -> String -> (String -> String -> EpiS eff h (Array String)) -> EpiS eff h {childN :: String, nxt :: String, spd :: Number}
@@ -110,7 +111,7 @@ incScript ssRef pRef self t rootId sRef = do
   purgeScript ssRef rootId self
 
   -- duplicate & switch
-  mRef  <- loadLib rootId systemST.moduleRefPool "incScript2 module"
+  mRef  <- loadLib rootId systemST.moduleRefPool "incScript module"
   m     <- lift $ readSTRef mRef
   idx   <- intFromStringE idxS
   case (A.updateAt idx nxt m.scripts) of
@@ -140,22 +141,31 @@ incScript2 ssRef pRef self t rootId sRef = do
   purgeScript ssRef rootId self
 
   -- duplicate & switch
-  mRef  <- loadLib rootId systemST.moduleRefPool "incScript module"
+  mRef  <- loadLib rootId systemST.moduleRefPool "incScript2 module"
   m     <- lift $ readSTRef mRef
-  idx   <- intFromStringE idxS
-
-  case (idx < A.length m.scripts) of
+  --idx   <- intFromStringE idxS
+  let idx = 0
+  case (idx <= A.length m.scripts) of
     true -> do
-      m'id <- importModule ssRef (ImportModule m) -- this is kind of hackish, as its reimported
+      scrP <- traverse (handle systemST) m.scripts
+      let scripts' = map fst $ A.filter (\s -> not $ checkFlags (snd s) ["path"] []) scrP
+      let m' = m {scripts = scripts' ++ ["circle_0"]}
+      m'id <- importModule ssRef (ImportModule m') -- this is kind of hackish, as its reimported
       --scr <- parseAndImportScript systemST m'id pattern nxt
 
       (Tuple parent childN) <- findParent systemST.moduleRefPool rootId
       switchModules ssRef parent childN m'id spd
+      purgeModule ssRef m'id --  THIS IS REALLY TRICKY!  WILL CAUSE MEMORY LEAK IF NOT PURGED
 
       return true
     false -> do  -- HRM, maybe we want to be able to expand the number of existing scripts
       let nul' = lg "TEMP: don't have enough scripts!"
       return false
+  where
+    handle systemST scrId = do
+      scRef <- loadLib scrId systemST.scriptRefPool "incScript2 handle"
+      sc    <- lift $ readSTRef scRef
+      return $ Tuple scrId sc
 
 incImage :: forall eff h. ScriptFn eff h
 incImage ssRef pRef self t rootId sRef = do
@@ -273,8 +283,11 @@ randomize ssRef pRef self t mid sRef = do
       --let a = lg "ITERATE COMPONENT"
       let dt' = insert "nxt" (show (t + dly)) scr.dt
       lift $ modifySTRef sRef (\s -> s {dt = dt'})
+      adr' <- case (adr == "!") of
+        true -> return mid
+        false -> return adr
 
-      parseAndImportScript ssRef pattern adr $ inj "inc%0 sub:%1 lib:%2 spd:%3 idx:-1000000" [typ, sub, lib, spd]
+      parseAndImportScript ssRef pattern adr' $ inj "inc%0 sub:%1 lib:%2 spd:%3 idx:-1000000" [typ, sub, lib, spd]
 
       return unit
     _ -> return unit

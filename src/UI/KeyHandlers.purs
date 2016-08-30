@@ -34,6 +34,10 @@ devKeyHandler ucRef usRef char = do
       inc uiConf uiST "main.main_body.t" "Mod" "t_inner" "all" 1
     "q" -> do
       inc uiConf uiST "main.main_body.t" "Mod" "t_inner" "all" (-1)
+--    "1" -> do
+--      inc uiConf uiST "main.main_body.t" "Script2" "t_inner" "all" 1
+--    "q" -> do
+--      inc uiConf uiST "main.main_body.t" "Script2" "t_inner" "all" (-1)
     "!" -> do
       inc uiConf uiST "main.main_body" "Mod" "t" "all''" 1
     "Q" -> do

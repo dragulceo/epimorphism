@@ -1,6 +1,13 @@
---randomizeT1
+--randomizeTI1
 fn randomize
-dt {dly: 30, spd: 0.04, lib:t_inner, dim:vec2, sub:t_inner, typ:Sub, adr:main.main_body.t}
+dt {dly: 30, spd: 0.04, lib:all, dim:vec2, sub:t_inner, typ:Mod, adr:!}
+flags {evo}
+
+--randomizeZ
+fn randomize
+dt {dly: 30, spd: 0.04, lib:all', dim:vec2, sub:t, typ:Mod, adr:!}
+flags {evo}
+
 
 --default
 fn null
@@ -9,165 +16,170 @@ fn null
 --z0
 fn zfix
 dt {idx:0, x:1.0, y:0.0}
-flags {z0}
+flags {path, z0}
 
 --linx_0
 fn zpath
-flags {z0, lin}
+flags {path, z0, lin}
 dt {z0:true, idx:0, path:linx, spd:0.1}
 
 --liny_0
 fn zpath
-flags {z0, lin}
+flags {path, z0, lin}
 dt {z0:true, idx:0, path:liny, spd:0.1}
 
 --circle_0
 fn zpath
-flags {z0, circle}
+flags {path, z0, circle}
 dt {idx:0, path:circle, r:1.0, spd:0.005}
 
 --rose0_0
 fn zpath
-flags {z0, rose}
+flags {path, z0, rose}
 dt {idx:0, path:rose, spd:0.005, a:0.4, b:6.0, c:0.9}
 
 --rose0_1
 fn zpath
-flags {z0, rose}
+flags {path, z0, rose}
 dt {idx:0, path:rose, spd:0.006, a:0.4, b:6.0, c:-0.8}
 
 --rose0_2
 fn zpath
-flags {z0, rose}
+flags {path, z0, rose}
 dt {idx:0, path:rose, spd:-0.005, a:0.4, b:6.0, c:0.9}
 
 
 --z1
 fn zfix
 dt {idx:1, x:0.0, y:0.0}
-flags {z1}
+flags {path, z1}
 
 --linx_1
 fn zpath
-flags {z1, lin}
+flags {path, z1, lin}
 dt {z1:true, idx:1, path:linx, spd:0.1}
 
 --liny_1
 fn zpath
-flags {z1, lin}
+flags {path, z1, lin}
 dt {z1:true, idx:1, path:liny, spd:0.1}
 
 --circle_1
 fn zpath
-flags {z1, circle}
+flags {path, z1, circle}
 dt {idx:1, path:circle, r:1.0, spd:0.01}
 
 --rose1_0
 fn zpath
-flags {z1, rose}
+flags {path, z1, rose}
 dt {idx:1, path:rose, spd:0.006, a:0.8, b:5.0, c:-0.8}
 
 --rose1_1
 fn zpath
-flags {z1, rose}
+flags {path, z1, rose}
 dt {idx:1, path:rose, spd:0.004, a:0.8, b:5.0, c:-0.8}
 
 --rose1_2
 fn zpath
-flags {z1, rose}
+flags {path, z1, rose}
 dt {idx:1, path:rose, spd:-0.006, a:0.85, b:5.0, c:-0.7}
 
 
 --z2
 fn zfix
 dt {idx:2, x:1.0, y:0.0}
-flags {z2}
+flags {path, z2}
 
 --linx_2
 fn zpath
-flags {z2, lin}
+flags {path, z2, lin}
 dt {z2:true, idx:2, path:linx, spd:0.1}
 
 --liny_2
 fn zpath
-flags {z2, lin}
+flags {path, z2, lin}
 dt {z2:true, idx:2, path:liny, spd:0.1}
 
 --circle_2
 fn zpath
-flags {z2, circle}
+flags {path, z2, circle}
 dt {idx:3, path:circle, r:1.0, spd:0.01}
 
 --rose2_0
 fn zpath
-flags {z2, rose}
+flags {path, z2, rose}
 dt {idx:2, path:rose, spd:0.004, a:0.3, b:7.0, c:0.9}
 
 --rose2_1
 fn zpath
-flags {z2, rose}
+flags {path, z2, rose}
 dt {idx:2, path:rose, spd:0.002, a:0.3, b:7.0, c:0.9}
 
 --rose2_2
 fn zpath
-flags {z2, rose}
+flags {path, z2, rose}
 dt {idx:2, path:rose, spd:0.004, a:0.3, b:-7.0, c:0.9}
 
 
 --z3
 fn zfix
 dt {idx:3, x:0.0, y:0.0}
-flags {z3}
+flags {path, z3}
 
 --linx_3
 fn zpath
-flags {z3, lin}
+flags {path, z3, lin}
 dt {z3:true, idx:3, path:linx, spd:0.1}
 
 --liny_3
 fn zpath
-flags {z3, lin}
+flags {path, z3, lin}
 dt {z3:true, idx:3, path:liny, spd:0.1}
 
 --circle_3
 fn zpath
-flags {z3, circle}
+flags {path, z3, circle}
 dt {idx:3, path:circle, r:1.0, spd:0.01}
 
 --rose3_0
 fn zpath
-flags {z3, rose}
+flags {path, z3, rose}
 dt {idx:3, path:rose, spd:0.003, a:1.2, b:4.0, c:0.0}
 
 --rose3_1
 fn zpath
-flags {z3, rose}
+flags {path, z3, rose}
 dt {idx:3, path:rose, spd:-0.001, a:1.2, b:4.0, c:0.0}
 
 --rose3_2
 fn zpath
-flags {z3, rose}
+flags {path, z3, rose}
 dt {idx:3, path:rose, spd:0.0035, a:1.1, b:4.0, c:0.0}
 
 
 
 --hlim_h1
 fn ppath
+flags {path}
 dt {path:loop, par:hue, spd:0.01}
 
 --hlim_s1
 fn ppath
+flags {path}
 dt {path:wave, par:spread, a:0.35, b:1.5, spd:0.066}
 
 --hlim_l1
 fn ppath
+flags {path}
 dt {path:wave, par:lgv, a:0.125, b:0.5, spd:0.0045}
 
 
 --ssc_w1
 fn ppath
+flags {path}
 dt {path:wave, par:w, a:0.45, b:.55, spd:0.2}
 
 --ssc_a1
 fn ppath
+flags {path}
 dt {path:wave, par:alpha, a:0.35, b:.65, spd:0.3}

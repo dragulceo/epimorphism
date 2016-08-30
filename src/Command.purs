@@ -77,10 +77,10 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
           _ -> throwError "invalid format: setPar addr par val"
       "setT" -> do
         let tExp = joinWith "" args
-        mid <- findModule systemST.moduleRefPool pattern "main.main_body.t" true
-        mRef <- loadLib mid systemST.moduleRefPool "find module - setP"
+        mid <- findModule systemST.moduleRefPool pattern "main.main_body.t.t_inner" true
+        mRef <- loadLib mid systemST.moduleRefPool "find module - setT"
         mod <- lift $ readSTRef mRef
-        let sub' = insert "t_inner" tExp mod.sub
+        let sub' = insert "t_expr" tExp mod.sub
         lift $ modifySTRef mRef (\m -> m {sub = sub'})
         setShaders systemConf engineConf esRef systemST pattern
 

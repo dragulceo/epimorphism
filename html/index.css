@@ -54,8 +54,21 @@ body {
 		line-height:19px;
 }
 
+#consoleContents {
+		position:relative;
+		z-index:1;
+}
+
 .switchChild {
 		font-size:11px;
+}
+
+.componentUI{
+		color:#9aF;
+}
+
+.componentUI:hover{
+		cursor:pointer;
 }
 
 .extraData {

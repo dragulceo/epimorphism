@@ -17,4 +17,13 @@ exports.addEventListeners = function() {
 	}
 
 	$('.switchChild').on('change', switchChildHandler);
+
+	var componentClickHandler = function(){
+		var mid = this.dataset.mid;
+		var cnt = $('#' + mid).html();
+		$('#consoleInput').html(cnt);
+		showTab("input");
+	}
+
+	$(".componentUI").on('click', componentClickHandler);
 }

@@ -23,11 +23,11 @@ foreign import addEventListeners :: forall eff. Eff eff Unit
 renderConsole :: forall eff h. UIConf -> UIST -> SystemST h -> Pattern -> EpiS eff h Unit
 renderConsole uiConf uiST systemST pattern = do
   dsmDiv <- findElt "debugMain"
-  str0 <- renderModule systemST.moduleLib systemST.moduleRefPool pattern.main "MAIN" Nothing
+  str0 <- renderModule systemST pattern.main "MAIN" Nothing
   lift $ setInnerHTML str0 dsmDiv
 
   dsdDiv <- findElt "debugDisp"
-  str1 <- renderModule systemST.moduleLib systemST.moduleRefPool pattern.disp "DISP" Nothing
+  str1 <- renderModule systemST pattern.disp "DISP" Nothing
   lift $ setInnerHTML str1 dsdDiv
 
   dssDiv <- findElt "debugScripts"
@@ -50,8 +50,11 @@ serializeScripts pool = do
 
 
 -- serializes the modRefPool into an html string for debugging
-renderModule :: forall eff h. StrMap Module -> StrMap (STRef h Module) -> String -> String -> Maybe String -> EpiS eff h String
-renderModule lib pool mid title pid = do
+renderModule :: forall eff h. SystemST h -> String -> String -> Maybe String -> EpiS eff h String
+renderModule systemST mid title pid = do
+  let lib = systemST.moduleLib
+  let pool = systemST.moduleRefPool
+
   mRef <- loadLib mid pool "renderModule"
   mod <- lift $ readSTRef mRef
   str <- unsafeSerialize moduleSchema Nothing mod
@@ -102,13 +105,17 @@ renderModule lib pool mid title pid = do
         _ ->
           throwError "not a module line, dingus"
     exp [a, b] = do
-      renderModule lib pool (trim b) (trim a) (Just mid)
+      renderModule systemST (trim b) (trim a) (Just mid)
     exp _ = throwError $ "invalid map syntax in " ++ mid
     handleLine line = do
       let rgx = regex "^(component|par|zn|images|sub|scripts|--)\\s?(.*)$" noFlags
       res <- case (match rgx line) of
         (Just [(Just _), (Just m0), (Just m1)]) -> do
           case m0 of
+            "component" -> do
+              comp <- loadLib m1 systemST.componentLib "load component console"
+              let ui = inj "<span class='componentUI consoleUI' style='display:none;' data-mid='%1'>%0</span><div id='%1' class='hidden' style='display:none'><div>%2</div></div>" [line, m1, comp.body]
+              return $ "\n<span class='consoleUI'>" ++ line ++ "</span>" ++ ui
             _ -> return $ "\n" ++ line
         _ ->
           return $ "<span class='extraData'>\n" ++ line ++ "</span>"

@@ -1,5 +1,5 @@
 CONSOLE project
 
-click to change par, zn, sub, image, show component
+click to change par, zn, sub, image
 
 later, maintain scripts/paths

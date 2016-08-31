@@ -37,7 +37,7 @@
 		</div>
 		<div id="console" class="hide">
 			<div id="buttons">
-				<button onclick="window.eventHandler('pause')"> Pause </button>
+				<button id="pause">Pause</button>
 				<button onclick="window.eventHandler('killScripts')"> Kill Scripts </button>
 				<button onclick="window.eventHandler('fullWindow')"> Exit Dev </button>
 				<button onclick="halt=true;$(this).hide();console.log('HALT');"> Halt </button>
@@ -47,9 +47,12 @@
 				<span class="tab disp" onclick="showTab('disp')">Disp</span>
 				<span class="tab scripts" onclick="showTab('scripts')">Scripts</span>
 			</div>
-			<pre id="debugMain" class="debugTab main"> </pre>
-			<pre id="debugDisp" class="debugTab disp" style="display:none"> </pre>
-			<pre id="debugScripts" class="debugTab scripts" style="display:none"> </pre>
+			<span style="float:right;color:pink;font-size:20px;" onclick="$('.extraData').toggle()">*</span>
+			<div id="consoleContents">
+				<pre id="debugMain" class="debugTab main"> </pre>
+				<pre id="debugDisp" class="debugTab disp" style="display:none"> </pre>
+				<pre id="debugScripts" class="debugTab scripts" style="display:none"> </pre>
+			</div>
 		</div>
 
 		<!-- google analytics -->

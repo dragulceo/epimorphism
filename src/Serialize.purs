@@ -6,6 +6,7 @@ import Data.Array (null)
 import Data.Array (sortBy, foldM) as A
 import Data.Complex (inCartesian, Cartesian(Cartesian), Complex)
 import Data.List (fromList)
+import Data.Maybe (Maybe(Nothing, Just))
 import Data.Set (isEmpty, toList, Set)
 import Data.StrMap (StrMap)
 import Data.StrMap (toList, isEmpty) as S
@@ -15,10 +16,13 @@ import Text.Format (format, precision)
 import Util (unsafeCast, unsafeGetAttr)
 
 -- serializes an object.  will crase if object doesnt match schema
-unsafeSerialize :: forall eff a. Schema -> String -> a -> Epi eff String
+unsafeSerialize :: forall eff a. Schema -> Maybe String -> a -> Epi eff String
 unsafeSerialize schema name obj = do
   dt <- A.foldM (serializeEntry obj) "" (A.sortBy schemaSort schema)
-  return $ "--" ++ name ++ dt
+  case name of
+    Just n -> do return $ "--" ++ n ++ dt
+    Nothing -> return dt
+
 
 schemaSort :: SchemaEntry -> SchemaEntry -> Ordering
 schemaSort (SchemaEntry _ a) (SchemaEntry _ b) = compare a b
@@ -77,4 +81,4 @@ serializeCxArray ary = "[" ++ (joinWith ", " (map showCX ary)) ++ "]"
 
 showCX :: Complex -> String
 showCX z = case (inCartesian z) of
-    (Cartesian x y) -> (format (precision 3) x) ++ " + " ++ (format (precision 3) y) ++ "i"
+    (Cartesian x y) -> (format (precision 2) x) ++ " + " ++ (format (precision 2) y) ++ "i"

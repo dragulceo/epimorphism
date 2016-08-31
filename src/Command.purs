@@ -48,6 +48,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
     case cmd of
       "null" -> return unit
       "pause" -> do
+        lift $ modifySTRef ssRef (\s -> s {paused = not s.paused})
         lift $ modifySTRef pRef (\p -> p {tSpd = 1.0 - p.tSpd})
         return unit
       "killScripts" -> do
@@ -94,7 +95,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
 
         return unit
       "dev" -> do
-        lift $ modifySTRef ucRef (\ui -> ui {windowState = "dev", keySet = "dev"})
+        lift $ modifySTRef ucRef (\ui -> ui {windowState = "dev", keySet = "dev", showFps = true})
         uiConf' <- lift $ readSTRef ucRef
         initLayout uiConf' uiST
 
@@ -148,7 +149,7 @@ save :: forall eff h. (SystemST h) -> Pattern -> EpiS eff h Unit
 save systemST pattern = do
   -- pattern
   id <- lift $ uuid
-  ps <- unsafeSerialize patternSchema id pattern
+  ps <- unsafeSerialize patternSchema (Just id) pattern
 
   -- modules
   mods <- (traverse (serializeTup moduleSchema) $ fromList $ toList systemST.moduleRefPool) :: EpiS eff h (Array String)
@@ -169,5 +170,5 @@ save systemST pattern = do
     serializeTup :: forall a. Schema -> (Tuple String (STRef h a)) -> EpiS eff h String
     serializeTup schema (Tuple n ref) = do
       obj <- lift $ readSTRef ref
-      st <- unsafeSerialize schema n obj
+      st <- unsafeSerialize schema (Just n) obj
       return st

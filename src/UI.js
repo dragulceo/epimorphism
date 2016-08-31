@@ -32,6 +32,7 @@ exports.registerKeyHandler = function(handler) {
 
 exports.addGlobalEventListeners = function(handler) {
   return function() {
+		// FULL SCREEN
 		var fsHandler = function(event){
 			var isFullScreen = document.fullScreen ||
           document.mozFullScreen ||
@@ -48,7 +49,7 @@ exports.addGlobalEventListeners = function(handler) {
 
 		$(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', fsHandler);
 
-
+		// RESIZE
 		var resizeHandler = function(){
 			handler('initLayout')();
 		}
@@ -64,5 +65,18 @@ exports.addGlobalEventListeners = function(handler) {
 				};
 
 		$("#resolutionSel").on('change', resChangeHandler);
+
+		// PAUSE
+		var pauseHandler = function(){
+			var paused = this.innerHTML == "Pause";
+			console.log(this.innerHTML);
+			window.a = this.innerHTML;
+			this.innerHTML = (paused ? "Unpause" : "Pause");
+			$('.consoleUI').toggle();
+			handler('pause')();
+		}
+
+		$("button#pause").on('click', pauseHandler);
+
   }
 };

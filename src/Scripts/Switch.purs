@@ -21,10 +21,10 @@ incData systemST scr rootId loader = do
   let dt = scr.dt
 
   -- get data
-  idx    <- (loadLib "idx" dt "incDat idx") >>= intFromStringE
-  spd    <- (loadLib "spd" dt "incDat spd") >>= numFromStringE
-  childN <- loadLib "sub" dt "incMod sub"
-  lib    <- loadLib "lib" dt "incMod lib"
+  idx    <- (loadLib "idx" dt "incData idx") >>= intFromStringE
+  spd    <- (loadLib "spd" dt "incData spd") >>= numFromStringE
+  childN <- loadLib "sub" dt "incData sub"
+  lib    <- loadLib "lib" dt "incData lib"
 
   --let a = lg lib
   --let b = lg childN
@@ -195,6 +195,26 @@ incImage ssRef pRef self t rootId sRef = do
     Nothing -> do  -- HRM, maybe we want to be able to expand the number of existing images
       let nul' = lg "TEMP: don't have enough images!"
       return false
+
+switchChild :: forall eff h. ScriptFn eff h
+switchChild ssRef pRef self t rootId sRef = do
+  systemST <- lift $ readSTRef ssRef
+  scr <- lift $ readSTRef sRef
+
+  let dt = scr.dt
+
+  -- get data
+  spd    <- (loadLib "spd" dt "switchChild spd") >>= numFromStringE
+  childN <- loadLib "childN" dt "switchChild childN"
+  to     <- loadLib "to" dt "switchChild to"
+
+  m'id <- importModule ssRef (ImportRef to)
+
+  switchModules ssRef rootId childN m'id spd
+  purgeModule ssRef m'id --  THIS IS REALLY TRICKY!  WILL CAUSE MEMORY LEAK IF NOT PURGED
+
+  purgeScript ssRef rootId self
+  return true
 
 
 -- should check if dim & var are the same across m0 & m1

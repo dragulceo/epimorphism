@@ -43,6 +43,7 @@ type SystemST h = {
   , lastFpsTimeMS :: Maybe Number
   , fps :: Maybe Int
   , t :: Number
+  , paused :: Boolean
   , systemConfLib :: StrMap SystemConf
   , uiConfLib :: StrMap UIConf
   , engineConfLib :: StrMap EngineConf
@@ -62,6 +63,7 @@ defaultSystemST = {
   , lastFpsTimeMS: Nothing
   , fps: Nothing
   , t: 0.0
+  , paused: false
   , systemConfLib: empty
   , uiConfLib: empty
   , engineConfLib: empty
@@ -156,22 +158,24 @@ type Module = {
   , sub       :: StrMap String
   , var       :: String
   , dim       :: String
+  , libName   :: String
 }
 
 moduleSchema :: Schema
 moduleSchema = [
-  SchemaEntry SE_St "component",
-  SchemaEntry SE_St "family",
-  SchemaEntry SE_S "flags",
-  SchemaEntry SE_M_St "props",
-  SchemaEntry SE_A_St "scripts",
-  SchemaEntry SE_M_St "modules",
-  SchemaEntry SE_M_N "par",
-  SchemaEntry SE_A_Cx "zn",
-  SchemaEntry SE_A_St "images",
-  SchemaEntry SE_M_St "sub",
-  SchemaEntry SE_St "var",
-  SchemaEntry SE_St "dim"
+    SchemaEntry SE_St "component"
+  , SchemaEntry SE_St "family"
+  , SchemaEntry SE_S "flags"
+  , SchemaEntry SE_M_St "props"
+  , SchemaEntry SE_A_St "scripts"
+  , SchemaEntry SE_M_St "modules"
+  , SchemaEntry SE_M_N "par"
+  , SchemaEntry SE_A_Cx "zn"
+  , SchemaEntry SE_A_St "images"
+  , SchemaEntry SE_M_St "sub"
+  , SchemaEntry SE_St "var"
+  , SchemaEntry SE_St "dim"
+  , SchemaEntry SE_St "libName"
 ]
 
 type Pattern = {

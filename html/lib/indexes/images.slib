@@ -45,7 +45,28 @@ all_images {{
   textures/nontile/flowers3.png
   textures/nontile/tile_dodec.png
   textures/nontile/tile_spidro.png
-  textures/ponies/ponies_1.png
+  textures/simplegeom/grid_1.png
+  textures/simplegeom/grid_2.png
+  textures/simplegeom/tile_grid1.png
+  textures/simplegeom/tile_grid2.png
+  textures/simplegeom/tile_grid3.png
+  textures/simplegeom/tile_grid6.png
+  textures/simplegeom/tile_hexagons1.png
+  textures/simplegeom/tile_psych1.png
+  textures/simplegeom/tile_rainbow1.png
+  textures/simplegeom/tile_rainbow2.png
+  textures/stoopid/hamster.png
+  textures/stoopid/mouse.png
+  textures/stoopid/puppy.png
+  textures/stoopid/stoopid_1.png
+  textures/stoopid/stoopid_4.png
+  textures/stoopid/stoopid_6.png
+  textures/stoopid/suckit.png
+  textures/stoopid/tree.png
+}}
+
+ponies {{
+	textures/ponies/ponies_1.png
   textures/ponies/ponies_10.png
   textures/ponies/ponies_11.png
   textures/ponies/ponies_2.png
@@ -70,22 +91,4 @@ all_images {{
   textures/psych/psych_5.png
   textures/psych/psych_6.png
   textures/psych/psych_7.png
-  textures/simplegeom/grid_1.png
-  textures/simplegeom/grid_2.png
-  textures/simplegeom/tile_grid1.png
-  textures/simplegeom/tile_grid2.png
-  textures/simplegeom/tile_grid3.png
-  textures/simplegeom/tile_grid6.png
-  textures/simplegeom/tile_hexagons1.png
-  textures/simplegeom/tile_psych1.png
-  textures/simplegeom/tile_rainbow1.png
-  textures/simplegeom/tile_rainbow2.png
-  textures/stoopid/hamster.png
-  textures/stoopid/mouse.png
-  textures/stoopid/puppy.png
-  textures/stoopid/stoopid_1.png
-  textures/stoopid/stoopid_4.png
-  textures/stoopid/stoopid_6.png
-  textures/stoopid/suckit.png
-  textures/stoopid/tree.png
 }}

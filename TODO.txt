@@ -1,3 +1,8 @@
+TODO:
+
+catch errors when parsing t_exp
+
+
 GOALS:
   0. fix github issue for dude / README.md
   1. conference presentation

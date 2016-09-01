@@ -23,8 +23,10 @@ exports.registerKeyHandler = function(handler) {
 			var cmd = handler(chr)();
 // fix me
 //			if(cmd != "null")
-//				event.preventDefault();
-			window.eventHandler(cmd);
+			//				event.preventDefault();
+			if(handlerHasFocus){
+				window.eventHandler(cmd);
+			}
 		};
 	};
 };
@@ -79,4 +81,15 @@ exports.addGlobalEventListeners = function(handler) {
 		$("button#pause").on('click', pauseHandler);
 
   }
+};
+
+
+exports.registerAuxImages = function(images) {
+  return function() {
+		var imgDiv = $('#allImages');
+		for (var i = 0; i < images.length; i++) {
+			var src = images[i];
+			imgDiv.append($("<img onclick='consoleImageSelectHandler(this)' src='" + src +"' data-src='" + src +"'>"));
+		};
+	}
 };

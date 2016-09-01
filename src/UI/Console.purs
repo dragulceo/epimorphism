@@ -6,9 +6,10 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (readSTRef, STRef)
 import Control.Monad.Trans (lift)
-import Data.Array ((:), filter, partition)
+import Data.Array ((!!), length, (..), (:), filter, partition)
 import Data.DOM.Simple.Element (setInnerHTML)
 import Data.Maybe (Maybe(Just, Nothing))
+import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (foldM, StrMap)
 import Data.String (joinWith, trim, split, replace)
 import Data.String.Regex (match, noFlags, regex)
@@ -49,7 +50,7 @@ serializeScripts pool = do
       return $ str ++ "<br/><br/>" ++ res
 
 
--- serializes the modRefPool into an html string for debugging
+-- serializes the modRefPool into an html string for debugging.  shitcode
 renderModule :: forall eff h. SystemST h -> String -> String -> Maybe String -> EpiS eff h String
 renderModule systemST mid title pid = do
   let lib = systemST.moduleLib
@@ -114,7 +115,35 @@ renderModule systemST mid title pid = do
           case m0 of
             "component" -> do
               comp <- loadLib m1 systemST.componentLib "load component console"
-              let ui = inj "<span class='componentUI consoleUI' style='display:none;' data-mid='%1'>%0</span><div id='%1' class='hidden' style='display:none'><div>%2</div></div>" [line, m1, comp.body]
+              let ui = inj "<span class='consoleUI' style='display:none'>component </span><span class='componentUI consoleUI' style='display:none;' data-mid='%1'>%0</span><div id='%1' class='hidden' style='display:none'><div>%2</div></div>" [m1, m1, comp.body]
+              return $ "\n<span class='consoleUI'>" ++ line ++ "</span>" ++ ui
+            "sub" -> do
+              let rgx' = regex "^\\{(.*)\\}$" noFlags
+              uiCts <- case (match rgx' m1) of
+                (Just [(Just _), (Just cts)]) -> do
+                  let cmp = map trim $ split "," cts
+                  cmp' <- flip traverse cmp \x -> do
+                    let dt = map trim $ split ":" x
+                    case dt of
+                      [var, val] -> do
+                        let inp = inj "<input type='text' class='consoleSub' data-mid='%0' data-subN='%1' value='%2'>" [mid, var, val]
+                        return $ var ++ ": " ++ inp
+                      _ -> throwError "invalide sub fmt :"
+                  return $ joinWith ", " cmp'
+                _ -> throwError "invalid sub fmt {"
+              let ui = inj "<span class='consoleUI' style='display:none;'>sub {%0}</span>" [uiCts]
+              return $ "\n<span class='consoleUI'>" ++ line ++ "</span>" ++ ui
+            "images" -> do
+              let rgx' = regex "^\\[(.*)\\]$" noFlags
+              uiCts <- case (match rgx' m1) of
+                (Just [(Just _), (Just cts)]) -> do
+                  let cmp = map trim $ split "," cts
+                  let idxs = (0 .. (length cmp - 1))
+                  let cmp' = flip map idxs \x ->
+                    inj "<span class='consoleImage' data-mid='%0' data-idx='%1'>%2</span>" [mid, (show x), fromJust $ cmp !! x]
+                  return $ joinWith ", " cmp'
+                _ -> throwError "invalid images fmt ["
+              let ui = inj "<span class='consoleUI' style='display:none;'>images [%0]</span>" [uiCts]
               return $ "\n<span class='consoleUI'>" ++ line ++ "</span>" ++ ui
             _ -> return $ "\n" ++ line
         _ ->

@@ -2,7 +2,7 @@
 canvasId glcanvas
 consoleId console
 fpsId showFps
-showFps false
+showFps true
 windowState dev
 uiUpdateFreq 10
 keyboardSwitchSpd 1.0

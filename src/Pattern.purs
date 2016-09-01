@@ -98,7 +98,8 @@ importModule ssRef obj = do
         ref <- loadLib n systemST.moduleRefPool "reimport from pool"
         lift $ readSTRef ref
       false -> do
-        loadLib n systemST.moduleLib "import module lib"
+        minit <- loadLib n systemST.moduleLib "import module lib"
+        return $ minit {libName = n}
     ImportScript _ -> throwError "dont give me a script"
 
   -- update pool

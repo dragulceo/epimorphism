@@ -1,0 +1,5 @@
+CONSOLE project
+
+click to change par, zn, image
+
+later, maintain scripts/paths

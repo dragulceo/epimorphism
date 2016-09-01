@@ -1,5 +1,7 @@
 var __, __M, __D, __T, __S;
 var halt = false;
+var handlerHasFocus = true;
+var consoleImageSelectHandler;
 
 window.requestFullScreen = function(id) {
   var elem = document.getElementById(id);

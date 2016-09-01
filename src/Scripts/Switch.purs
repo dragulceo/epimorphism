@@ -21,10 +21,10 @@ incData systemST scr rootId loader = do
   let dt = scr.dt
 
   -- get data
-  idx    <- (loadLib "idx" dt "incDat idx") >>= intFromStringE
-  spd    <- (loadLib "spd" dt "incDat spd") >>= numFromStringE
-  childN <- loadLib "sub" dt "incMod sub"
-  lib    <- loadLib "lib" dt "incMod lib"
+  idx    <- (loadLib "idx" dt "incData idx") >>= intFromStringE
+  spd    <- (loadLib "spd" dt "incData spd") >>= numFromStringE
+  childN <- loadLib "sub" dt "incData sub"
+  lib    <- loadLib "lib" dt "incData lib"
 
   --let a = lg lib
   --let b = lg childN
@@ -195,6 +195,93 @@ incImage ssRef pRef self t rootId sRef = do
     Nothing -> do  -- HRM, maybe we want to be able to expand the number of existing images
       let nul' = lg "TEMP: don't have enough images!"
       return false
+
+-- ABSORB THIS INTO incMod
+switchChild :: forall eff h. ScriptFn eff h
+switchChild ssRef pRef self t rootId sRef = do
+  systemST <- lift $ readSTRef ssRef
+  scr <- lift $ readSTRef sRef
+
+  -- get data
+  let dt = scr.dt
+  spd    <- (loadLib "spd" dt "switchChild spd") >>= numFromStringE
+  childN <- loadLib "childN" dt "switchChild childN"
+  to     <- loadLib "to" dt "switchChild to"
+
+  m'id <- importModule ssRef (ImportRef to)
+
+  switchModules ssRef rootId childN m'id spd
+  purgeModule ssRef m'id --  THIS IS REALLY TRICKY!  WILL CAUSE MEMORY LEAK IF NOT PURGED
+
+  purgeScript ssRef rootId self
+  return true
+
+
+-- ABSORB THIS INTO incSub
+switchSub :: forall eff h. ScriptFn eff h
+switchSub ssRef pRef self t rootId sRef = do
+  systemST <- lift $ readSTRef ssRef
+  scr <- lift $ readSTRef sRef
+
+  -- get data
+  let dt = scr.dt
+  spd    <- (loadLib "spd" dt "switchSub spd") >>= numFromStringE
+  subN   <- loadLib "subN" dt "switchSub childN"
+  to     <- loadLib "to" dt "switchSub to"
+
+  -- remove self (do this before duplicating module)
+  purgeScript ssRef rootId self
+
+  -- duplicate & switch
+  rootRef <- loadLib rootId systemST.moduleRefPool "incSub module"
+  root    <- lift $ readSTRef rootRef
+  case (member subN root.sub) of
+    true -> do
+      let sub' = insert subN to root.sub
+      let root' = root {sub = sub'}
+      root'id <- importModule ssRef (ImportModule root') -- this is kind of hackish, as its reimported
+
+      (Tuple parent child) <- findParent systemST.moduleRefPool rootId
+      switchModules ssRef parent child root'id spd
+      --purgeModule ssRef root'id --  THIS IS REALLY TRICKY!  WILL CAUSE MEMORY LEAK IF NOT PURGED
+      return true
+    false -> do  -- HRM, I think we can do better here
+      let nul' = lg "TEMP: can't find subN!"
+      return false
+
+
+switchImage :: forall eff h. ScriptFn eff h
+switchImage ssRef pRef self t rootId sRef = do
+  systemST <- lift $ readSTRef ssRef
+  scr <- lift $ readSTRef sRef
+
+  -- get data
+  let dt = scr.dt
+  spd <- (loadLib "spd" dt "switchImage spd") >>= numFromStringE
+  idx <- (loadLib "idx" dt "switchImage idx") >>= intFromStringE
+  to  <- loadLib "to" dt "switchImage to"
+
+  -- remove self (do this before duplicating module)
+  purgeScript ssRef rootId self
+
+  -- duplicate & switch
+  mRef <- loadLib rootId systemST.moduleRefPool "incImage module"
+  m    <- lift $ readSTRef mRef
+
+  case (A.updateAt idx to m.images) of
+    Just images' -> do
+      let m' = m {images = images'}
+      m'id <- importModule ssRef (ImportModule m') -- this is kind of hackish, as its reimported
+
+      (Tuple parent childN) <- findParent systemST.moduleRefPool rootId
+      switchModules ssRef parent childN m'id spd
+      --- SHOULDNT WE PURGE m'id HERE??????
+
+      return true
+    Nothing -> do  -- HRM, maybe we want to be able to expand the number of existing images
+      let nul' = lg "TEMP: don't have enough images(switch)!"
+      return false
+
 
 
 -- should check if dim & var are the same across m0 & m1

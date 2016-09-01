@@ -8,9 +8,8 @@ import Data.Foldable (or)
 import Data.StrMap (member)
 import Data.Traversable (traverse)
 import Path (incZn, zpath, ppath, zfix, pfix)
-import Switch (randomize, incScript, incScript2, incImage, incMod, finishSwitch, incSub)
+import Switch (randomize, incScript, incScript2, incImage, incMod, finishSwitch, incSub, switchChild, switchSub, switchImage)
 import System (mSeq, loadLib)
-import Util (lg)
 
 -- find script fuction given name
 lookupScriptFN :: forall eff h. String -> EpiS eff h (ScriptFn eff h)
@@ -25,6 +24,9 @@ lookupScriptFN n = case n of
   "incImage"     -> return incImage
   "incScript"    -> return incScript
   "incScript2"   -> return incScript2
+  "switchChild"  -> return switchChild
+  "switchSub"    -> return switchSub
+  "switchImage"  -> return switchImage
   "incZn"        -> return incZn
   "finishSwitch" -> return finishSwitch
   "randomize"    -> return randomize

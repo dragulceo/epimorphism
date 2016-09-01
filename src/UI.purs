@@ -8,10 +8,12 @@ import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, readSTRef, newSTRef)
 import KeyHandlers (keyHandler)
 import Layout (initLayout)
+import System (loadLib)
 
 foreign import registerEventHandler :: forall eff. (String -> Eff eff Unit) -> Eff eff Unit
 foreign import registerKeyHandler :: forall eff. (String -> Eff eff String) -> Eff eff Unit
 foreign import addGlobalEventListeners :: forall eff. (String -> Eff eff Unit) -> Eff eff Unit
+foreign import registerAuxImages :: forall eff. Array String -> Eff eff Unit
 
 -- PUBLIC
 initUIST :: forall eff h. STRef h UIConf -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h SystemConf -> STRef h (SystemST h) -> EpiS eff h (STRef h UIST)
@@ -26,5 +28,10 @@ initUIST ucRef ecRef esRef pRef scRef ssRef = do
   lift $ addGlobalEventListeners handler
   lift $ registerEventHandler handler
   lift $ registerKeyHandler (keyHandler ucRef usRef)
+
+  systemST <- lift $ readSTRef ssRef
+  imgLib <- loadLib "all_images" systemST.indexLib "all_images registerAux"
+
+  lift $ registerAuxImages imgLib.lib
 
   return usRef

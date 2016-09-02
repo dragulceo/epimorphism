@@ -12,6 +12,7 @@ import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
 import Engine (initEngineST, renderFrame, setShaders)
 import Graphics.Canvas (Canvas)
 import Layout (updateLayout)
+import Paths (runPaths)
 import Pattern (importPattern)
 import Script (runScripts)
 import System (initSystemST, loadLib)
@@ -91,6 +92,7 @@ animate stateM = handleError do
     return unit
 
   -- update pattern
+  runPaths ssRef pRef
   recompile <- runScripts ssRef pRef
   systemST' <- lift $ readSTRef ssRef
 

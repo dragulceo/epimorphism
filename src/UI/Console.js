@@ -43,7 +43,8 @@ exports.addEventListeners = function() {
 	$(".consoleSub").on('keyup', subSubmitHandler);
 
 	// disable key commands while typing
-	$(".consoleSub").on('focus', 'focusout');
+	$(".consoleSub").off('focus');
+	$(".consoleSub").off('focusout');
 	$(".consoleSub").on('focus', function(){handlerHasFocus = false});
 	$(".consoleSub").on('focusout', function(){handlerHasFocus = true});
 
@@ -110,24 +111,27 @@ exports.addEventListeners = function() {
 			var val = $('#consoleVar #val').val();
 			var type = $('#consoleVar #type').val();
 
+			var cmd;
 			if (type == "par") {
-				var cmd = "setP " + mid + " " + v + " " + val
-				console.log(cmd);
-				window.eventHandler(cmd);
-				$("button#pause").click();
-				showTab("main");
+				cmd = "setP " + mid + " " + v + " " + val
 			}else{
 				var val1 = val.replace(/ /g,'');
-				var cmd = "setZn " + mid + " " + v + " " + val1
-				console.log(cmd);
-				window.eventHandler(cmd);
-				$("button#pause").click();
-				showTab("main");
+				cmd = "setZn " + mid + " " + v + " " + val1
 			}
+			window.eventHandler(cmd);
+
+			cmd = "setPath " + mid + " " + v + " " + path
+			console.log(cmd);
+			window.eventHandler(cmd);
+
+			$("button#pause").click();
+			showTab("main");
 		}
 	}
 
-	$("#consoleVar input").off('keypress, focus, focusout');
+	$("#consoleVar input").off('keypress');
+	$("#consoleVar input").off('focus');
+	$("#consoleVar input").off('focusout');
 	$("#consoleVar input").on('keypress', varSubmitHandler);
 	$("#consoleVar input").on('focus', function(){handlerHasFocus = false});
 	$("#consoleVar input").on('focusout', function(){handlerHasFocus = true});

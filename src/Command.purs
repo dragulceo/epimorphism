@@ -13,7 +13,7 @@ import Data.Complex (Cartesian(Cartesian), outCartesian)
 import Data.List (fromList)
 import Data.Maybe (Maybe(Just))
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (values, empty, insert, toList)
+import Data.StrMap (delete, values, empty, insert, toList)
 import Data.String (joinWith, split)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
@@ -95,6 +95,27 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
 
             return unit
           _ -> throwError "invalid format: setPar addr par val"
+      "setPath" -> do
+        when (length args >= 3) do -- check for errors here
+          let addr = fromJust $ head args
+          let var = fromJust $ head (fromJust $ tail args)
+
+          mid  <- findModule systemST.moduleRefPool pattern addr true
+          mRef <- loadLib mid systemST.moduleRefPool "find module - setP"
+          mod <- lift $ readSTRef mRef
+
+          let rst = fromJust $ tail (fromJust $ tail args)
+
+          paths' <- case (joinWith " " rst) of
+            "" -> do
+              return $ delete var mod.paths
+            path -> do
+              return $ insert var path mod.paths
+
+          lift $ modifySTRef mRef (\m -> m {paths = paths'})
+
+          return unit
+
       "setT" -> do
         let tExp = joinWith "" args
         mid <- findModule systemST.moduleRefPool pattern "main.main_body.t.t_inner" true

@@ -1,6 +1,8 @@
 TODO:
 
 catch errors when parsing t_exp
+ui for script/path modification
+phases for paths :/
 
 
 GOALS:

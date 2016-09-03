@@ -63,11 +63,11 @@ body {
 		border-bottom: solid 1px #aaa;
 }
 
-.consoleImage {
+.consoleImage, .consoleVar {
 	  color:#2da;
 }
 
-.consoleImage:hover {
+.consoleImage:hover, .consoleVar:hover {
 		cursor:pointer;
 }
 

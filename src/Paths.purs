@@ -8,13 +8,13 @@ import Control.Monad.Trans (lift)
 import Data.Array (updateAt, uncons)
 import Data.Complex (Cartesian(Cartesian), outCartesian, Polar(Polar), outPolar, Complex)
 import Data.Maybe (Maybe(Just))
-import Data.StrMap (delete, insert, toList)
+import Data.StrMap (StrMap, fold, empty, delete, insert, toList)
 import Data.String (trim, split)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
 import Math (pi, min, cos, floor)
 import System (loadLib, mSeq)
-import Util (numFromStringE, intFromStringE)
+import Util (numFromStringE, intFromStringE, isNumber)
 
 runPaths :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Unit
 runPaths ssRef pRef = do
@@ -32,11 +32,15 @@ runModPaths systemST mid = do
   mRef <- loadLib mid systemST.moduleRefPool "mid! runZnPaths"
   m <- lift $ readSTRef mRef
 
-  traverse (runZnPath' mRef systemST.t) (toList m.znPaths)
-  traverse (runParPath' mRef systemST.t) (toList m.parPaths)
+  {zn, par} <- return $ fold groupPaths {zn: empty, par: empty} m.paths
+
+  traverse (runZnPath' mRef systemST.t) (toList zn)
+  traverse (runParPath' mRef systemST.t) (toList par)
   return unit
   where
     runParPath' mRef t (Tuple idx path) = runParPath mRef t idx path
+    groupPaths :: {zn :: (StrMap String), par :: (StrMap String)} -> String -> String -> {zn :: (StrMap String), par :: (StrMap String)}
+    groupPaths {zn, par} k v = if (isNumber k) then {zn: insert k v zn, par} else {zn, par: insert k v par}
 
 runZnPath' :: forall eff h. STRef h Module -> Number -> Tuple String String -> EpiS eff h Unit
 runZnPath' mRef t (Tuple idx path) = do
@@ -60,9 +64,9 @@ runZnPath mRef t idx pathStr = do
     Just x -> return x
     _ -> throwError "idx out of bounds runZnPath"
 
-  let znPaths' = if remove then (delete (show idx) m.znPaths) else m.znPaths
+  let paths' = if remove then (delete (show idx) m.paths) else m.paths
 
-  lift $ modifySTRef mRef (\m' -> m' {zn = zn', znPaths = znPaths'})
+  lift $ modifySTRef mRef (\m' -> m' {zn = zn', paths = paths'})
   return unit
 
 runParPath :: forall eff h. STRef h Module -> Number -> String -> String -> EpiS eff h Unit
@@ -77,9 +81,9 @@ runParPath mRef t var pathStr = do
 
   m <- lift $ readSTRef mRef
   let par' = insert var val m.par
-  let parPaths' = if remove then (delete var m.parPaths) else m.parPaths
+  let paths' = if remove then (delete var m.paths) else m.paths
 
-  lift $ modifySTRef mRef (\m' -> m' {par = par', parPaths = parPaths'})
+  lift $ modifySTRef mRef (\m' -> m' {par = par', paths = paths'})
   return unit
 
 type PathFunc1D eff h = Number -> (Array Number) -> EpiS eff h (Tuple Number Boolean)

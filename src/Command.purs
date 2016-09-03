@@ -8,7 +8,8 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
-import Data.Array (length, head, tail)
+import Data.Array (updateAt, length, head, tail)
+import Data.Complex (Cartesian(Cartesian), outCartesian)
 import Data.List (fromList)
 import Data.Maybe (Maybe(Just))
 import Data.Maybe.Unsafe (fromJust)
@@ -23,7 +24,7 @@ import Pattern (findModule)
 import ScriptUtil (parseAndImportScript)
 import Serialize (unsafeSerialize)
 import System (loadLib)
-import Util (intFromStringE, numFromStringE, lg, uuid, handleError)
+import Util (cxFromString, intFromStringE, numFromStringE, lg, uuid, handleError)
 
 foreign import saveCanvas :: forall eff. Eff eff Unit
 
@@ -68,11 +69,29 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         case args of
           [addr, par, val] -> do
             val' <- numFromStringE val
-            mid <- findModule systemST.moduleRefPool pattern addr true
+            mid  <- findModule systemST.moduleRefPool pattern addr true
             mRef <- loadLib mid systemST.moduleRefPool "find module - setP"
-            mod <- lift $ readSTRef mRef
+            mod  <- lift $ readSTRef mRef
             let par' = insert par val' mod.par
             lift $ modifySTRef mRef (\m -> m {par = par'})
+
+            return unit
+          _ -> throwError "invalid format: setP addr par val"
+      "setZn" -> do
+        case args of
+          [addr, idx, val] -> do
+            val' <- case (cxFromString val) of
+              (Just (Tuple r i)) -> return $ outCartesian (Cartesian r i)
+              _ -> throwError $ "Expected " ++ val ++ " to be complex setZn"
+            idx' <- intFromStringE idx
+            mid  <- findModule systemST.moduleRefPool pattern addr true
+            mRef <- loadLib mid systemST.moduleRefPool "find module - setP"
+            mod <- lift $ readSTRef mRef
+
+            zn' <- case (updateAt idx' val' mod.zn) of
+              Just x -> return x
+              _ -> throwError "zn idx out of bounds setZn"
+            lift $ modifySTRef mRef (\m -> m {zn = zn'})
 
             return unit
           _ -> throwError "invalid format: setPar addr par val"

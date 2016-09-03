@@ -36,6 +36,7 @@ foreign import rndstr :: forall eff. Eff eff String
 foreign import gmod :: Int -> Int -> Int
 foreign import random :: forall eff. Eff eff Number
 foreign import randInt :: forall eff. Int -> Eff eff Int
+foreign import isNumber :: String -> Boolean
 
 foreign import unsafeSetAttr :: forall a b. a -> String -> b -> a
 foreign import unsafeGetAttr :: forall a b. a -> String -> b

@@ -154,8 +154,7 @@ type Module = {
   , modules   :: StrMap ModRef
   , par       :: StrMap Number
   , zn        :: Array Complex
-  , parPaths  :: StrMap String
-  , znPaths   :: StrMap String
+  , paths     :: StrMap String
   , images    :: Array String
   , sub       :: StrMap String
   , var       :: String
@@ -173,8 +172,7 @@ moduleSchema = [
   , SchemaEntry SE_M_St "modules"
   , SchemaEntry SE_M_N "par"
   , SchemaEntry SE_A_Cx "zn"
-  , SchemaEntry SE_M_St "parPaths"
-  , SchemaEntry SE_M_St "znPaths"
+  , SchemaEntry SE_M_St "paths"
   , SchemaEntry SE_A_St "images"
   , SchemaEntry SE_M_St "sub"
   , SchemaEntry SE_St "var"

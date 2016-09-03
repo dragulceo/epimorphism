@@ -196,3 +196,8 @@ exports.randInt = function(n) {
 		return Math.floor(n * Math.random());
 	};
 };
+
+
+exports.isNumber = function(s) {
+	return !isNaN(s);
+}

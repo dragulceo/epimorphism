@@ -18,13 +18,16 @@ import Util (lg, uuid)
 -- find a module given an address - ie main.main_body.t or a reference
 findModule :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> Boolean -> EpiS eff h String
 findModule mpool pattern dt followSwitch = do
-  let addr = split "." dt
-  case (A.head addr) of
-    Nothing -> throwError "we need data, chump"
-    Just "vert" -> findModule' mpool pattern.vert (fromJust $ A.tail addr) followSwitch
-    Just "disp" -> findModule' mpool pattern.disp (fromJust $ A.tail addr) followSwitch
-    Just "main" -> findModule' mpool pattern.main (fromJust $ A.tail addr) followSwitch
-    Just x      -> throwError $ "value should be main, vert, or disp : " ++ x
+  case (member dt mpool) of
+    true -> return dt
+    false -> do
+      let addr = split "." dt
+      case (A.head addr) of
+        Nothing -> throwError "we need data, chump"
+        Just "vert" -> findModule' mpool pattern.vert (fromJust $ A.tail addr) followSwitch
+        Just "disp" -> findModule' mpool pattern.disp (fromJust $ A.tail addr) followSwitch
+        Just "main" -> findModule' mpool pattern.main (fromJust $ A.tail addr) followSwitch
+        Just x      -> throwError $ "value should be main, vert, or disp : " ++ x
 
 
 findModule' :: forall eff h. StrMap (STRef h Module) -> String -> Array String -> Boolean -> EpiS eff h String

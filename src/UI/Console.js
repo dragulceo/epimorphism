@@ -14,6 +14,7 @@ exports.addEventListeners = function() {
 		$("button#pause").click();
 	}
 
+	$('.switchChild').off('change');
 	$('.switchChild').on('change', switchChildHandler);
 
 	var componentClickHandler = function(){
@@ -23,6 +24,7 @@ exports.addEventListeners = function() {
 		showTab("component");
 	}
 
+	$(".componentUI").off('click');
 	$(".componentUI").on('click', componentClickHandler);
 
 	var subSubmitHandler = function(e){
@@ -37,9 +39,11 @@ exports.addEventListeners = function() {
 		}
 	}
 
+	$(".consoleSub").off('keyup');
 	$(".consoleSub").on('keyup', subSubmitHandler);
 
 	// disable key commands while typing
+	$(".consoleSub").on('focus', 'focusout');
 	$(".consoleSub").on('focus', function(){handlerHasFocus = false});
 	$(".consoleSub").on('focusout', function(){handlerHasFocus = true});
 
@@ -56,6 +60,7 @@ exports.addEventListeners = function() {
 		showTab("images");
 	}
 
+	$(".consoleImage").off('click');
 	$(".consoleImage").on('click', consoleImageClickHandler);
 
 	// mad ghetto.  fuck it
@@ -69,5 +74,62 @@ exports.addEventListeners = function() {
 		$("button#pause").click();
 		showTab("main");
 	}
+
+	var consoleVarClickHandler = function(){
+		var mid = this.dataset.mid;
+		$('#consoleVar #mid').val(mid);
+
+		var v = this.dataset.var;
+		$('#consoleVar #var').val(v);
+		$('#consoleVar #label').html(v);
+
+		var path = this.dataset.path;
+		$('#consoleVar #path').val(path);
+
+		var val = this.dataset.val;
+		$('#consoleVar #val').val(val);
+
+		var type = this.dataset.type;
+		$('#consoleVar #type').val(type);
+
+		showTab("var");
+	}
+
+	$(".consoleVar").off('click');
+	$(".consoleVar").on('click', consoleVarClickHandler);
+
+
+	var varSubmitHandler = function(e){
+    if(e.which === 13){
+			e.preventDefault();
+
+			console.log('fart');
+			var mid = $('#consoleVar #mid').val();
+			var v = $('#consoleVar #var').val();
+			var path = $('#consoleVar #path').val();
+			var val = $('#consoleVar #val').val();
+			var type = $('#consoleVar #type').val();
+
+			if (type == "par") {
+				var cmd = "setP " + mid + " " + v + " " + val
+				console.log(cmd);
+				window.eventHandler(cmd);
+				$("button#pause").click();
+				showTab("main");
+			}else{
+				var val1 = val.replace(/ /g,'');
+				var cmd = "setZn " + mid + " " + v + " " + val1
+				console.log(cmd);
+				window.eventHandler(cmd);
+				$("button#pause").click();
+				showTab("main");
+			}
+		}
+	}
+
+	$("#consoleVar input").off('keypress, focus, focusout');
+	$("#consoleVar input").on('keypress', varSubmitHandler);
+	$("#consoleVar input").on('focus', function(){handlerHasFocus = false});
+	$("#consoleVar input").on('focusout', function(){handlerHasFocus = true});
 
 }

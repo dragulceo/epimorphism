@@ -8,9 +8,9 @@ import Control.Monad.ST (readSTRef, STRef)
 import Control.Monad.Trans (lift)
 import Data.Array ((!!), length, (..), (:), filter, partition)
 import Data.DOM.Simple.Element (setInnerHTML)
-import Data.Maybe (Maybe(Just, Nothing))
+import Data.Maybe (fromMaybe, Maybe(Just, Nothing))
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (foldM, StrMap)
+import Data.StrMap (lookup, foldM, StrMap)
 import Data.String (joinWith, trim, split, replace)
 import Data.String.Regex (match, noFlags, regex)
 import Data.Traversable (traverse)
@@ -70,7 +70,7 @@ renderModule systemST mid title pid = do
   -- parse other lines
   let rst' = filter (\x -> x /= "") rst
   let idLine = "id " ++ mid
-  lines' <- traverse handleLine (idLine : rst')
+  lines' <- traverse (handleLine mod) (idLine : rst')
   let res = joinWith "" $ lines'
 
   -- title
@@ -108,8 +108,8 @@ renderModule systemST mid title pid = do
     exp [a, b] = do
       renderModule systemST (trim b) (trim a) (Just mid)
     exp _ = throwError $ "invalid map syntax in " ++ mid
-    handleLine line = do
-      let rgx = regex "^(component|par|zn|images|sub|scripts|--)\\s?(.*)$" noFlags
+    handleLine mod line = do
+      let rgx = regex "^(component|par|zn|images|sub|scripts|paths|--)\\s?(.*)$" noFlags
       res <- case (match rgx line) of
         (Just [(Just _), (Just m0), (Just m1)]) -> do
           case m0 of
@@ -145,6 +145,37 @@ renderModule systemST mid title pid = do
                 _ -> throwError "invalid images fmt ["
               let ui = inj "<span class='consoleUI' style='display:none;'>images [%0]</span>" [uiCts]
               return $ "\n<span class='consoleUI'>" ++ line ++ "</span>" ++ ui
+            "par" -> do
+              let rgx' = regex "^\\{(.*)\\}$" noFlags
+              uiCts <- case (match rgx' m1) of
+                (Just [(Just _), (Just cts)]) -> do
+                  let cmp = map trim $ split "," cts
+                  cmp' <- flip traverse cmp \x -> do
+                    let dt = map trim $ split ":" x
+                    case dt of
+                      [var, val] -> do
+                        let path = fromMaybe "" (lookup var mod.paths)
+                        let inp = inj "<span class='consolePar consoleVar' data-mid='%0' data-var='%1' data-path='%2' data-val='%3' data-type='par'>%3</span>" [mid, var, path, val]
+                        return $ var ++ ": " ++ inp
+                      _ -> throwError "invalide par fmt :"
+                  return $ joinWith ", " cmp'
+                _ -> throwError "invalid par fmt {"
+              let ui = inj "<span class='consoleUI' style='display:none;'>par {%0}</span>" [uiCts]
+              return $ "\n<span class='consoleUI'>" ++ line ++ "</span>" ++ ui
+            "zn" -> do
+              let rgx' = regex "^\\[(.*)\\]$" noFlags
+              uiCts <- case (match rgx' m1) of
+                (Just [(Just _), (Just cts)]) -> do
+                  let cmp = map trim $ split "," cts
+                  let idxs = (0 .. (length cmp - 1))
+                  let cmp' = flip map idxs \x ->
+                    let path = fromMaybe "" (lookup (show x) mod.paths) in
+                    inj "<span class='consoleZn consoleVar' data-mid='%0' data-var='%1' data-path='%2' data-val='%3' data-type='zn'>%3</span>" [mid, (show x), path, fromJust $ cmp !! x]
+                  return $ joinWith ", " cmp'
+                _ -> throwError "invalid zn fmt ["
+
+              let ui = inj "<span class='consoleUI' style='display:none;'>zn [%0]</span>" [uiCts]
+              return $ "\n<span class='consoleUI'>" ++ line ++ "</span>" ++ ui
             "scripts" -> do
               let rgx' = regex "^\\[(.*)\\]$" noFlags
               case (match rgx' m1) of
@@ -154,8 +185,8 @@ renderModule systemST mid title pid = do
                     sRef <- loadLib sid systemST.scriptRefPool "console script"
                     scr <- lift $ readSTRef sRef
                     return scr.fn
-                  let res = joinWith "," cmp'
-                  let ui = inj "\n<span>scripts [%0]</span>" [res]
+                  let res' = joinWith ", " cmp'
+                  let ui = inj "\n<span>scripts [%0]</span>" [res']
                   return $ (inj "<span class='extraData'>\nscriptIds [%0] </span>" [cts]) ++ ui
 
                 _ -> throwError "invalid scripts ["

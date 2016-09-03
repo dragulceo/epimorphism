@@ -7,7 +7,7 @@ import Control.Monad.ST (readSTRef, STRef)
 import Control.Monad.Trans (lift)
 import Data.Array (length, (!!), foldM)
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (member, insert, union, StrMap)
+import Data.StrMap (insert, union, StrMap)
 import Data.String (split)
 import Data.Tuple (Tuple(Tuple))
 import Pattern (findModule, ImportObj(ImportScript), importScript)
@@ -29,9 +29,7 @@ data ScrPS = ScrFn | ScrDt
 parseAndImportScript :: forall eff h. STRef h (SystemST h) -> Pattern -> String -> String -> EpiS eff h Script
 parseAndImportScript ssRef pattern addr dt = do
   systemST <- lift $ readSTRef ssRef
-  mid <- case (member addr systemST.moduleRefPool) of
-    true -> return addr
-    false -> findModule systemST.moduleRefPool pattern addr true
+  mid <- findModule systemST.moduleRefPool pattern addr true
 
   def <- loadLib "default" systemST.scriptLib "building script in inc"
   Tuple scr _ <- foldM (parseScript' systemST.moduleRefPool pattern) (Tuple def ScrFn) (split " " dt)

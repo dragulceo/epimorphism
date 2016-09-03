@@ -1,4 +1,4 @@
-module Path where
+module ScriptPaths where
 
 import Prelude
 import Config (ScriptFn)

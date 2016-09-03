@@ -145,6 +145,20 @@ renderModule systemST mid title pid = do
                 _ -> throwError "invalid images fmt ["
               let ui = inj "<span class='consoleUI' style='display:none;'>images [%0]</span>" [uiCts]
               return $ "\n<span class='consoleUI'>" ++ line ++ "</span>" ++ ui
+            "scripts" -> do
+              let rgx' = regex "^\\[(.*)\\]$" noFlags
+              case (match rgx' m1) of
+                (Just [(Just _), (Just cts)]) -> do
+                  let cmp = map trim $ split "," cts
+                  cmp' <- flip traverse cmp \sid -> do
+                    sRef <- loadLib sid systemST.scriptRefPool "console script"
+                    scr <- lift $ readSTRef sRef
+                    return scr.fn
+                  let res = joinWith "," cmp'
+                  let ui = inj "\n<span>scripts [%0]</span>" [res]
+                  return $ (inj "<span class='extraData'>\nscriptIds [%0] </span>" [cts]) ++ ui
+
+                _ -> throwError "invalid scripts ["
             _ -> return $ "\n" ++ line
         _ ->
           return $ "<span class='extraData'>\n" ++ line ++ "</span>"

@@ -6,12 +6,13 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans (lift)
 import Data.Array (updateAt, uncons)
-import Data.Complex (Complex)
+import Data.Complex (Cartesian(Cartesian), outCartesian, Polar(Polar), outPolar, Complex)
 import Data.Maybe (Maybe(Just))
 import Data.StrMap (delete, insert, toList)
-import Data.String (split)
+import Data.String (trim, split)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
+import Math (pi, min, cos, floor)
 import System (loadLib, mSeq)
 import Util (numFromStringE, intFromStringE)
 
@@ -46,7 +47,7 @@ runZnPath' mRef t (Tuple idx path) = do
 
 runZnPath :: forall eff h. STRef h Module -> Number -> Int -> String -> EpiS eff h Unit
 runZnPath mRef t idx pathStr = do
-  PathAll func' conf {spd, args} <- parsePath pathStr
+  Path func' conf {spd, args} <- parsePath pathStr
 
   func <- case func' of
     PF2D f -> return f
@@ -66,7 +67,7 @@ runZnPath mRef t idx pathStr = do
 
 runParPath :: forall eff h. STRef h Module -> Number -> String -> String -> EpiS eff h Unit
 runParPath mRef t var pathStr = do
-  PathAll func' conf {spd, args} <- parsePath pathStr
+  Path func' conf {spd, args} <- parsePath pathStr
 
   func <- case func' of
     PF1D f -> return f
@@ -87,11 +88,11 @@ data PathFunc eff h = PF1D (PathFunc1D eff h) | PF2D (PathFunc2D eff h)
 
 type PathArgs = {spd :: Number, args :: Array Number}
 data PathConfig = PathConfig String
-data PathAll eff h = PathAll (PathFunc eff h) PathConfig PathArgs
+data Path eff h = Path (PathFunc eff h) PathConfig PathArgs
 
-parsePath :: forall eff h. String -> EpiS eff h (PathAll eff h)
+parsePath :: forall eff h. String -> EpiS eff h (Path eff h)
 parsePath dta = do
-  let dta' = split " " dta
+  let dta' = split " " $ trim dta
   Tuple name allargs <- case uncons dta' of
     Just { head: n, tail: rst } -> do
       args' <- traverse numFromStringE rst
@@ -104,16 +105,91 @@ parsePath dta = do
 
   Tuple func conf <- getPathObj name
 
-  return $ PathAll func conf {spd, args}
+  return $ Path func conf {spd, args}
 
 
 getPathObj :: forall eff h. String -> EpiS eff h (Tuple (PathFunc eff h) PathConfig)
 getPathObj name = do
   case name of
     "linear" -> return $ Tuple (PF1D linear1D) (PathConfig "")
+    "loop"   -> return $ Tuple (PF1D loop1D) (PathConfig "")
+    "smooth" -> return $ Tuple (PF1D smooth1D) (PathConfig "")
+    "wave"   -> return $ Tuple (PF1D wave1D) (PathConfig "")
+    "intrp"  -> return $ Tuple (PF2D intrp2D) (PathConfig "")
+    "linx"   -> return $ Tuple (PF2D linx2D) (PathConfig "")
+    "liny"   -> return $ Tuple (PF2D liny2D) (PathConfig "")
+    "circle" -> return $ Tuple (PF2D circle2D) (PathConfig "")
+    "rose"   -> return $ Tuple (PF2D rose2D) (PathConfig "")
+    -- ""   -> return $ Tuple (PFD ) (PathConfig "")
     _ -> throwError $ "unknown path: " ++ name
 
 
+
+-- 1D FUNCTIONS
 linear1D :: forall eff h. PathFunc1D eff h
 linear1D t args = do
-  return $ Tuple 1.0 false
+  let x = t
+  return $ Tuple x false
+
+loop1D :: forall eff h. PathFunc1D eff h
+loop1D t args = do
+  let x = (t - floor(t))
+  return $ Tuple x false
+
+smooth1D :: forall eff h. PathFunc1D eff h
+smooth1D t args = do
+  let x = t * t * (3.0 - 2.0 * t)
+  return $ Tuple x false
+
+wave1D :: forall eff h. PathFunc1D eff h
+wave1D t args = do
+  x <- case args of
+    [a, b] -> return $ a * cos(t) + b
+    _ -> throwError "invalid arguments for wave1D"
+  return $ Tuple x false
+
+
+-- 2D FUNCTIONS
+intrp2D :: forall eff h. PathFunc2D eff h
+intrp2D t args = do
+  z <- case args of
+    [fromR, fromTh, toR, toTh] -> do
+      let t' = min t 1.0
+      let r = toTh * t' + fromTh * (1.0 - t')
+      let th = toR * t' + fromR * (1.0 - t')
+      return $ outPolar $ Polar r th
+    _ -> throwError "invalid arguments for intrp2D"
+
+  return $ Tuple z (t >= 1.0)
+
+
+linx2D :: forall eff h. PathFunc2D eff h
+linx2D t args = do
+  let z = outCartesian $ Cartesian t 0.0
+  return $ Tuple z false
+
+
+liny2D :: forall eff h. PathFunc2D eff h
+liny2D t args = do
+  let z = outCartesian $ Cartesian 0.0 t
+  return $ Tuple z false
+
+
+circle2D :: forall eff h. PathFunc2D eff h
+circle2D t args = do
+  z <- case args of
+    [r] ->
+      return $ outPolar $ Polar (2.0 * pi * t) r
+    _ -> throwError "invalid arguments for circle2D"
+
+  return $ Tuple z false
+
+
+rose2D :: forall eff h. PathFunc2D eff h
+rose2D t args = do
+  z <- case args of
+    [a, b, c] -> do
+      return $ outPolar $ Polar (2.0 * pi * t) (a * cos(b * t) + c)
+    _ -> throwError "invalid arguments for rose2D"
+
+  return $ Tuple z false

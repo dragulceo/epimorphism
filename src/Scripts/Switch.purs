@@ -313,6 +313,15 @@ switchModules ssRef rootId childN m1 spd = do
   createScript ssRef swid "default" "finishSwitch" $ fromFoldable [(Tuple "delay" (show spd))]
   createScript ssRef swid "default" "ppath" $ fromFoldable [(Tuple "par" "intrp"), (Tuple "path" "linear"), (Tuple "spd" (show spd))]
 
+  --systemST' <- lift $ readSTRef ssRef
+  --swRef <- loadLib swid systemST'.moduleRefPool "switch module"
+  --swm <- lift $ readSTRef swRef
+
+  --let path = inj "linear %0" [show spd]
+  --let paths' = insert "intrp" path swm.parPaths
+  --lift $ modifySTRef swRef (\m' -> m' {parPaths = paths'})
+
+
   return unit
 
 
@@ -366,7 +375,6 @@ randomize ssRef pRef self t mid sRef = do
   -- next iteration
   case t of
     t | t >= nxt -> do
-      let a = lg adr
       --let a = lg "ITERATE COMPONENT"
       let dt' = insert "nxt" (show (t + dly)) scr.dt
       lift $ modifySTRef sRef (\s -> s {dt = dt'})

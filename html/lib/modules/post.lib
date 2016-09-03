@@ -16,5 +16,5 @@ par {gamma:2.0, hue:0.33, spread:0.5, lgv:0.5}
 --post_hlim3 < post_hlim1
 par {gamma:2.0, hue:0.66, spread:0.5, lgv:0.5}
 
---post_hlim1' < post_hlim1
-scripts [hlim_h1, hlim_s1, hlim_l1]
+--post_hlim1anim < post_hlim1
+parPaths {hue:loop 0.01, spread:wave 0.066 0.35 1.5, lgv:wave 0.045 0.125 0.5}

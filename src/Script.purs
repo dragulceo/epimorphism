@@ -7,7 +7,7 @@ import Control.Monad.ST (STRef, readSTRef)
 import Data.Foldable (or)
 import Data.StrMap (member)
 import Data.Traversable (traverse)
-import Path (incZn, zpath, ppath, zfix, pfix)
+import ScriptPaths (incZn, zpath, ppath, zfix, pfix)
 import Switch (randomize, incScript, incScript2, incImage, incMod, finishSwitch, incSub, switchChild, switchSub, switchImage)
 import System (mSeq, loadLib)
 

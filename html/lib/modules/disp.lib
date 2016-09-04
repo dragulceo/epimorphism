@@ -1,5 +1,5 @@
 --disp_id
 family disp
-flags {basic, root}
+flags {root}
 component disp
 modules {post: post_id}

@@ -1,5 +1,10 @@
---torus_reduce
+--grid_reduce
 family reduce
-component torus_reduce
+flags {lib}
+component reduce
+sub {reduce: grid_reduce(z)}
 var z
 dim vec2
+
+--torus_reduce < grid_reduce
+sub {reduce: torus_reduce(z)}

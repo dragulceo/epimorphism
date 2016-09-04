@@ -118,7 +118,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
 
       "setT" -> do
         let tExp = joinWith "" args
-        mid <- findModule systemST.moduleRefPool pattern "main.main_body.t.t_inner" true
+        mid <- findModule systemST.moduleRefPool pattern "main.application.t.t_inner" true
         mRef <- loadLib mid systemST.moduleRefPool "find module - setT"
         mod <- lift $ readSTRef mRef
         let sub' = insert "t_expr" tExp mod.sub

@@ -1,20 +1,21 @@
 --post_id
 family post
-flags {basic}
+flags {lib}
 component post_id
 var frame
 dim vec4
 
 --post_hlim1 < post_id
-flags {basic, post_hlim}
+flags {post_hlim, lib}
 component post_hlim
-par {gamma:2.0, hue:0.0, spread:0.5, lgv:0.5}
+par {gamma:1.5, hue:0.0, spread:0.5, lgv:0.5}
 
 --post_hlim2 < post_hlim1
-par {gamma:2.0, hue:0.33, spread:0.5, lgv:0.5}
+par {gamma:1.5, hue:0.33, spread:0.5, lgv:0.5}
 
 --post_hlim3 < post_hlim1
-par {gamma:2.0, hue:0.66, spread:0.5, lgv:0.5}
+par {gamma:1.5, hue:0.66, spread:0.5, lgv:0.5}
 
---post_hlim1anim < post_hlim1
+--post_hlim_anim < post_hlim1
+par {gamma:2.0, hue:0.0, spread:0.5, lgv:0.5}
 paths {hue:loop 0.01, spread:wave 0.066 0.35 1.5, lgv:wave 0.045 0.125 0.5}

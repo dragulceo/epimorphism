@@ -15,7 +15,7 @@ import Data.Tuple (Tuple(..))
 import System (loadLib)
 import Util (lg, uuid)
 
--- find a module given an address - ie main.main_body.t or a reference
+-- find a module given an address - ie main.application.t or a reference
 findModule :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> Boolean -> EpiS eff h String
 findModule mpool pattern dt followSwitch = do
   case (member dt mpool) of

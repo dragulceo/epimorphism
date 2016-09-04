@@ -1,91 +1,91 @@
 --t_z
 family t_inner
-flags {all}
+flags {lib, all}
 component t_sub
 var z
 dim vec2
 sub {t_expr: z}
 
 --t_cos < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: cos(z)}
 
 --t_sin < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: sin(z)}
 
 --t_cosh < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: cosh(z)}
 
 --t_sinh < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: sinh(z)}
 
 --t_tan < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: tan(z)}
 
 --t_tanh < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: tanh(z)}
 
 --t_exp < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: exp(z)}
 
 --t_p0 < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: z / (z + 1) + z / (z - 1)}
 
 --t_p1 < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: 1 - 5 * z * z * z / 3}
 
 --t_p2 < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: 1 - z * z}
 
 --t_p3 < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: z * (1 + z) / 2}
 
 --t_p4 < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: z * z}
 
 --t_tp0 < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: 1 - (z * z + tanh(z)) / 2}
 
 --t_tp1 < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: cos(z) - tanh(z)}
 
 --t_tp2 < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: (z + exp(z)) / 2}
 
 --t_tp3 < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: (sin(z) + tan(z)) / 2}
 
 --t_tp4 < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: cosh(z) + exp(z)}
 
 --t_tp5 < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: z * cos(z)}
 
 --t_tp6 < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: (cosh(z) + sinh(z)) / 2}
 
 --t_inv < t_z
-flags {all, inv}
+flags {lib, all, inv}
 sub {t_expr: 1.0 / z}
 
 --t_zti < t_z
-flags {all}
+flags {lib, all}
 sub {t_expr: 2.0 * z / tan (z * i)}

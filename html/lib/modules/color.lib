@@ -1,6 +1,6 @@
 --color_id
 family color
-flags {basic}
+flags {lib}
 component color_id
 var color
 dim vec4

@@ -22,4 +22,4 @@ paths {3:rose 0.0035 1.1 4.0 0.0}
 
 --disp_main1 < disp_id
 flags {}
-modules {post: post_hlim1anim}
+modules {post: post_hlim_anim}

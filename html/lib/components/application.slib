@@ -60,3 +60,27 @@ application epimorphism {{
 
   %color%
 }}
+
+
+application julia {{
+  int j = 0;
+  int max_iter = 600;
+  float escape_rad = 4.0;
+
+	for(int i = 0; i < 600; i++){
+		//while(i < 600){
+		if(z.x * z.x + z.y * z.y > escape_rad)
+			break;
+
+    z = zasdf + zn[0] * 0.0;
+		j += 1;
+  }
+
+  float mu = float(j) - (log(log(sqrt(z.x * z.x + z.y * z.y))))/ log(2.0);
+
+  if(j != max_iter)
+    color = vec4(0.0,0.0,1.0,1.0); //hsv2rgb(vec4(mu / 500.0 + 0.5, 1.0, 1.0, 1.0));
+	else
+		color = vec4(1.0,0.0,0.0,1.0);
+
+}}

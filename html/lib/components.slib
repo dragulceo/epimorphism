@@ -62,6 +62,30 @@ application epimorphism {{
 }}
 
 
+application julia {{
+  int j = 0;
+  int max_iter = 600;
+  float escape_rad = 4.0;
+
+	for(int i = 0; i < 600; i++){
+		//while(i < 600){
+		if(z.x * z.x + z.y * z.y > escape_rad)
+			break;
+
+    z = zasdf + zn[0] * 0.0;
+		j += 1;
+  }
+
+  float mu = float(j) - (log(log(sqrt(z.x * z.x + z.y * z.y))))/ log(2.0);
+
+  if(j != max_iter)
+    color = vec4(0.0,0.0,1.0,1.0); //hsv2rgb(vec4(mu / 500.0 + 0.5, 1.0, 1.0, 1.0));
+	else
+		color = vec4(1.0,0.0,0.0,1.0);
+
+}}
+
+
 
 color color_id {{
 }}
@@ -463,13 +487,8 @@ post post_hlim {{
 
 
 
-reduce torus_reduce {{
-	z = torus_reduce(z);
-}}
-
-
-reduce grid_reduce {{
-	z = grid_reduce(z);
+reduce reduce {{
+	z = $reduce$;
 }}
 
 
@@ -824,12 +843,6 @@ switch smooth_switch{{
 
 
 t t_id {{
-}}
-
-t t_wrap_sub {{
-  z = M(zn[#0], z) + zn[#1];
-  z = $t_inner$;
-  z = M(zn[#2], z) + zn[#3];
 }}
 
 t t_wrap {{

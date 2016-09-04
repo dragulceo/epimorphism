@@ -8,7 +8,7 @@ exports.registerEventHandler = function(handler) {
 
 		// a little ghetto
 		__  = function(msg) {handler(msg)();}
-		__M = function(msg) {handler("setP main.main_body." + msg)();}
+		__M = function(msg) {handler("setP main.application." + msg)();}
 		__D = function(msg) {handler("setP disp." + msg)();}
 		__T = function(msg) {handler("setT " + msg)();}
 		__S = function(msg) {handler("scr " + msg)();}

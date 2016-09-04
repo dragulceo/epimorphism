@@ -31,65 +31,65 @@ devKeyHandler ucRef usRef char = do
 
   case char of
     "1" -> do
-      inc uiConf uiST "main.main_body.t" "Mod" "t_inner" "all" 1
+      inc uiConf uiST "main.application.t" "Mod" "t_inner" "all" 1
     "q" -> do
-      inc uiConf uiST "main.main_body.t" "Mod" "t_inner" "all" (-1)
+      inc uiConf uiST "main.application.t" "Mod" "t_inner" "all" (-1)
 --    "1" -> do
---      inc uiConf uiST "main.main_body.t" "Script2" "t_inner" "all" 1
+--      inc uiConf uiST "main.application.t" "Script2" "t_inner" "all" 1
 --    "q" -> do
---      inc uiConf uiST "main.main_body.t" "Script2" "t_inner" "all" (-1)
+--      inc uiConf uiST "main.application.t" "Script2" "t_inner" "all" (-1)
     "!" -> do
-      inc uiConf uiST "main.main_body" "Mod" "t" "all''" 1
+      inc uiConf uiST "main.application" "Mod" "t" "all''" 1
     "Q" -> do
-      inc uiConf uiST "main.main_body" "Mod" "t" "all''" (-1)
+      inc uiConf uiST "main.application" "Mod" "t" "all''" (-1)
     "1" -> do
-      inc uiConf uiST "main.main_body.t" "Mod" "t_inner" "all" 1
+      inc uiConf uiST "main.application.t" "Mod" "t_inner" "all" 1
     "q" -> do
-      inc uiConf uiST "main.main_body.t" "Mod" "t_inner" "all" (-1)
+      inc uiConf uiST "main.application.t" "Mod" "t_inner" "all" (-1)
     "2" -> do
-      inc uiConf uiST "main.main_body" "Mod" "seed" "t_test" 1
+      inc uiConf uiST "main.application" "Mod" "seed" "t_test" 1
     "w" -> do
-      inc uiConf uiST "main.main_body" "Mod" "seed" "t_test" (-1)
+      inc uiConf uiST "main.application" "Mod" "seed" "t_test" (-1)
     "3" -> do
-      inc uiConf uiST "main.main_body" "Mod" "color" "basic" 1
+      inc uiConf uiST "main.application" "Mod" "color" "lib" 1
     "e" -> do
-      inc uiConf uiST "main.main_body" "Mod" "color" "basic" (-1)
+      inc uiConf uiST "main.application" "Mod" "color" "lib" (-1)
     "4" -> do
-      inc uiConf uiST "disp" "Mod" "post" "basic" 1
+      inc uiConf uiST "disp" "Mod" "post" "lib" 1
     "r" -> do
-      inc uiConf uiST "disp" "Mod" "post" "basic" (-1)
+      inc uiConf uiST "disp" "Mod" "post" "lib" (-1)
     "a" -> do
-      return "scr main.main_body.t incZn idx:0 ofs:1"
+      return "scr main.application.t incZn idx:0 ofs:1"
     "z" -> do
-      return "scr main.main_body.t incZn idx:0 ofs:-1"
+      return "scr main.application.t incZn idx:0 ofs:-1"
     "A" -> do
-      return "scr main.main_body.t incZn idx:0 ofs:i"
+      return "scr main.application.t incZn idx:0 ofs:i"
     "Z" -> do
-      return "scr main.main_body.t incZn idx:0 ofs:-i"
+      return "scr main.application.t incZn idx:0 ofs:-i"
     "s" -> do
-      return "scr main.main_body.t incZn idx:1 ofs:1"
+      return "scr main.application.t incZn idx:1 ofs:1"
     "x" -> do
-      return "scr main.main_body.t incZn idx:1 ofs:-1"
+      return "scr main.application.t incZn idx:1 ofs:-1"
     "S" -> do
-      return "scr main.main_body.t incZn idx:1 ofs:i"
+      return "scr main.application.t incZn idx:1 ofs:i"
     "X" -> do
-      return "scr main.main_body.t incZn idx:1 ofs:-i"
+      return "scr main.application.t incZn idx:1 ofs:-i"
     "d" -> do
-      return "scr main.main_body.t incZn idx:2 ofs:1"
+      return "scr main.application.t incZn idx:2 ofs:1"
     "c" -> do
-      return "scr main.main_body.t incZn idx:2 ofs:-1"
+      return "scr main.application.t incZn idx:2 ofs:-1"
     "D" -> do
-      return "scr main.main_body.t incZn idx:2 ofs:i"
+      return "scr main.application.t incZn idx:2 ofs:i"
     "C" -> do
-      return "scr main.main_body.t incZn idx:2 ofs:-i"
+      return "scr main.application.t incZn idx:2 ofs:-i"
     "f" -> do
-      return "scr main.main_body.t incZn idx:3 ofs:1"
+      return "scr main.application.t incZn idx:3 ofs:1"
     "v" -> do
-      return "scr main.main_body.t incZn idx:3 ofs:-1"
+      return "scr main.application.t incZn idx:3 ofs:-1"
     "F" -> do
-      return "scr main.main_body.t incZn idx:3 ofs:i"
+      return "scr main.application.t incZn idx:3 ofs:i"
     "V" -> do
-      return "scr main.main_body.t incZn idx:3 ofs:-i"
+      return "scr main.application.t incZn idx:3 ofs:-i"
     _   -> commonKeyHandler ucRef usRef char
   where
     inc uiConf uiST adr typ sub lib ofs = do

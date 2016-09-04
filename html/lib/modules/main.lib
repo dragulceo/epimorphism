@@ -1,5 +1,5 @@
 --epimorphism_main
 family main
-flags {epimorphism}
+flags {epimorphism, root}
 component main
 modules {application: epimorphism}

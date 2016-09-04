@@ -1,0 +1,13 @@
+--default_app
+component test_pattern
+family application
+flags {lib}
+var color
+dim vec4
+
+--epimorphism < default_app
+component epimorphism
+modules {seed: seed_border, t:t_wrap_zo, color: color_gbr, reduce: torus_reduce}
+
+--analysis < epimorphism
+modules {seed: seed_analysis, t:t_wrap_zo, color: color_id, reduce: torus_reduce}

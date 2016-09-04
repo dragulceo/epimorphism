@@ -1,6 +1,6 @@
 --default
 vert   default_vert
-main   default_main
+main   epimorphism_main
 disp   disp_id
 tPhase 0.0
 tSpd   1.0
@@ -11,5 +11,5 @@ main  analysis_main
 disp  disp_id
 
 --main1 < default
-main  main1
+main  epimorphism1_main
 disp  disp_main1

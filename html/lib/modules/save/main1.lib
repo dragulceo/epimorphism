@@ -1,7 +1,7 @@
---main1 < default_main
-modules {main_body: main1_body}
+--epimorphism1_main < epimorphism_main
+modules {application: epimorphism_auto1}
 
---main1_body < default_main_body
+--epimorphism_auto1 < epimorphism
 modules {t: t_main1, seed: seed_borderM, color: rotate_hsv1, reduce: torus_reduce}
 
 --seed_borderM < seed_border

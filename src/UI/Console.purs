@@ -198,7 +198,7 @@ renderModule systemST mid title pid = do
 
 renderSelect :: forall eff h. StrMap Module -> Module -> String -> String -> EpiS eff h String
 renderSelect lib mod pid cname = do
-  let fam = family lib mod.family [] []
+  let fam = family lib mod.family ["lib"] []
   let fam' = map (\x -> inj "<option value='%0'>%0</option>" [x]) fam
   let options = joinWith "\n" fam'
   let options' = (inj "<option selected disabled>%0</option>" [mod.libName]) ++ options

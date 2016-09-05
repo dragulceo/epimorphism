@@ -1,115 +1,109 @@
-seed_w w_nul {{
+w w_nul {{
 	wdt = vec4(0.0, 0.0, 0.0, 0.0);
 }}
-seed_w circle {{
-	float r = sqrt(z.x * z.x + z.y * z.y);
+
+w w_circle {{
+	float r = length(z);
 	wx = atan(z.y, z.x) * 3.0 / (2.0 * PI);
-	wy = 0.0;
-	if(r > @r@ - @seed_w@ / 2.0 && r  < @r@ + @seed_w@ / 2.0){
-    w = (1.0 - 2.0 * abs(r - @r@) / @seed_w@);
-		wy = (r - @r@ - @seed_w@ / 2.0) / @seed_w@;
-	}
-  wdt = vec4(w, (w < 0.0 ? 0.0 : 1.0), wx, wy);
+	wy = (r - @r@) / @w@ - 0.5;// - @w@ / 2
+  w = 1.0 - 2.0 * abs(r - @r@) / @w@;
+	w = max(0.0, w);
+	mask = ceil(w);
+
+	wdt = vec4(w, mask, wx, wy);
 }}
 
-seed_w lines_inner {{
-	wx = (z.x + @seed_w@) / (2.0 * @seed_w@);
-	wy = (z.y + @seed_w@) / (2.0 * @seed_w@);
-  if(abs(z.x) < @seed_w@)
-    w = (1.0 - abs(z.x) / @seed_w@);
-	if(abs(z.y) < @seed_w@)
-    w = max(1.0 - abs(z.x) / @seed_w@, 1.0 - abs(z.y) / @seed_w@);
-  wdt = vec4(w, (w < 0.0 ? 0.0 : 1.0), wx, wy);
+w w_lines_border {{
+	wx = (abs(z.x) + @w@ - 1.0) / @w@;
+	wy = (abs(z.y) + @w@ - 1.0) / @w@;
+
+  w = max(0.0, max(wx, wy));
+	mask = ceil(w);
+
+	wdt = vec4(w, mask, wx, wy);
 }}
 
-seed_w lines_box_stag {{
-	wx = (z.x + @seed_w@) / (2.0 * @seed_w@);
-	wy = (z.y + @seed_w@) / (2.0 * @seed_w@);
-  if(z.x > (1.0 - @seed_w@))
-    w = (z.x - (1.0 - @seed_w@)) / @seed_w@;
-  if(z.y > (1.0 - @seed_w@))
-    w = (z.y - (1.0 - @seed_w@)) / @seed_w@;
-  if(z.x < -1.0 * (1.0 - @seed_w@))
-    w = (-1.0 * (1.0 - @seed_w@) - z.x) / @seed_w@;
-  if(z.y < -1.0 * (1.0 - @seed_w@) && z.x < (1.0 - @seed_w@))
-    w = (-1.0 * (1.0 - @seed_w@) - z.y) / @seed_w@;
-  wdt = vec4(w, (w < 0.0 ? 0.0 : 1.0), wx, wy);
+w w_lines_inner {{
+	wx = (z.x + @w@) / (2.0 * @w@);
+	wy = (z.y + @w@) / (2.0 * @w@);
+	w = 0.0;
+  if(abs(z.x) < @w@)
+    w = (1.0 - abs(z.x) / @w@);
+	if(abs(z.y) < @w@)
+    w = max(1.0 - abs(z.x) / @w@, 1.0 - abs(z.y) / @w@);
+  wdt = vec4(w, ceil(w), wx, wy);
 }}
 
-seed_w anti_grid_fade {{
-	wx = 0.0;
-	wy = 0.0;
-  z = mod(floor(5.0 * @n@) / 2.0 * z, 1.0);
-  if((z.x > 0.5 * (1.0 - @seed_w@) && z.x < 0.5 * (1.0 + @seed_w@)) && (z.y < 0.5 * (1.0 + @seed_w@) && z.y > 0.5 * (1.0 - @seed_w@))){
-		wx = 0.5 * (2.0 * z.x - 1.0) / @seed_w@ + 0.5;
-		wy = 0.5 * (2.0 * z.y - 1.0) / @seed_w@ + 0.5;
-    w = min((1.0 - 2.0 * abs(z.y - 0.5) / @seed_w@), (1.0 - 2.0 * abs(z.x - 0.5) / @seed_w@));
-	}
-  wdt = vec4(w, (w < 0.0 ? 0.0 : 1.0), wx, wy);
+w w_lines_stag {{
+	wx = (z.x + @w@) / (2.0 * @w@);
+	wy = (z.y + @w@) / (2.0 * @w@);
+	w = 0.0;
+  if(z.x > (1.0 - @w@))
+    w = (z.x - (1.0 - @w@)) / @w@;
+  if(z.y > (1.0 - @w@))
+    w = (z.y - (1.0 - @w@)) / @w@;
+  if(z.x < -1.0 * (1.0 - @w@))
+    w = (-1.0 * (1.0 - @w@) - z.x) / @w@;
+  if(z.y < -1.0 * (1.0 - @w@) && z.x < (1.0 - @w@))
+    w = (-1.0 * (1.0 - @w@) - z.y) / @w@;
+  wdt = vec4(w, ceil(w), wx, wy);
 }}
 
-seed_w grid_fade {{
-	wx = 0.0;
-	wy = 0.0;
-  z = mod(floor(5.0 * @n@) / 2.0 * z, 1.0);
-  if((z.x > 0.5 * (1.0 - @seed_w@) && z.x < 0.5 * (1.0 + @seed_w@))){
-		wx = 0.5 * (2.0 * z.x - 1.0) / @seed_w@ + 0.5;
-		wy = 0.5 * (2.0 * z.y - 1.0) / @seed_w@ + 0.5;
-    w = (1.0 - 2.0 * abs(z.x - 0.5) / @seed_w@);
-	}
-  if((z.y < 0.5 * (1.0 + @seed_w@) && z.y > 0.5 * (1.0 - @seed_w@))){
-		wx = 0.5 * (2.0 * z.x - 1.0) / @seed_w@ + 0.5;
-		wy = 0.5 * (2.0 * z.y - 1.0) / @seed_w@ + 0.5;
-    w = max((1.0 - 2.0 * abs(z.x - 0.5) / @seed_w@), (1.0 - 2.0 * abs(z.y - 0.5) / @seed_w@));
-	}
-  wdt = vec4(w, (w < 0.0 ? 0.0 : 1.0), wx, wy);
-}}
-
-seed_w lines_box {{
-  wx = (z.x + @seed_w@) / (2.0 * @seed_w@);
-  wy = (z.y + @seed_w@) / (2.0 * @seed_w@);
-
-  if(z.x >= z.y && z.x >= -1.0 * z.y && z.x > (1.0 - @seed_w@)){
-    w = (z.x - (1.0 - @seed_w@)) / @seed_w@;
-    wy = z.y / (0.5 * @seed_w@) - 0.5;
-  }else if(z.y >= z.x && z.y >= -1.0 * z.x && z.y > (1.0 - @seed_w@)){
-    w = (z.y - (1.0 - @seed_w@)) / @seed_w@;
-    wy = z.x / (0.5 * @seed_w@) - 0.5;
-  }else if(z.y >= z.x && z.y <= -1.0 * z.x && z.x < -1.0 * (1.0 - @seed_w@)){
-    w = (-1.0 * (1.0 - @seed_w@) - z.x) / @seed_w@;
-    wy = z.y / (0.5 * @seed_w@) - 0.5;
-  }else if(z.x >= z.y && z.x <= -1.0 * z.y && z.y < -1.0 * (1.0 - @seed_w@)){
-    w = (-1.0 * (1.0 - @seed_w@) - z.y) / @seed_w@;
-    wy = z.x / (0.5 * @seed_w@) - 0.5;
-  }
-  wx = w;
-  wdt = vec4(w, (w < 0.0 ? 0.0 : 1.0), wx, wy);
-}}
-
-
-seed_w lines_lr {{
+w w_lines_lr {{
   wx = 0.0;
-  wy = z.y / (0.5 * @seed_w@) - 0.5;
+  wy = z.y / (0.5 * @w@) - 0.5;
+	w = 0.0;
 
-  if(z.x > (1.0 - @seed_w@)){
-    w = (z.x - (1.0 - @seed_w@)) / @seed_w@;
+  if(z.x > (1.0 - @w@)){
+    w = (z.x - (1.0 - @w@)) / @w@;
   }
-  else if(z.x < -1.0 * (1.0 - @seed_w@)){
-    w = (-1.0 * (1.0 - @seed_w@) - z.x) / @seed_w@;
+  else if(z.x < -1.0 * (1.0 - @w@)){
+    w = (-1.0 * (1.0 - @w@) - z.x) / @w@;
   }
   wx = w;
-  wdt = vec4(w, (w < 0.0 ? 0.0 : 1.0), wx, wy);
+  wdt = vec4(w, ceil(w), wx, wy);
 }}
 
 
-seed_w square {{
+w w_square {{
 	wx = 0.0;
 	wy = 0.0;
-  if(z.x < @seed_w@ && z.x > -1.0 * @seed_w@ && z.y < @seed_w@ && z.y > -1.0 * @seed_w@){
-    w = min((1.0 - abs(z.x) / @seed_w@), (1.0 - abs(z.y) / @seed_w@));
-		wx = 4.0 * (z.x + @seed_w@) / (2.0 * @seed_w@);
-		wy = 4.0 * (z.y + @seed_w@) / (2.0 * @seed_w@);
+	w = 0.0;
+  if(z.x < @w@ && z.x > -1.0 * @w@ && z.y < @w@ && z.y > -1.0 * @w@){
+    w = min((1.0 - abs(z.x) / @w@), (1.0 - abs(z.y) / @w@));
+		wx = 4.0 * (z.x + @w@) / (2.0 * @w@);
+		wy = 4.0 * (z.y + @w@) / (2.0 * @w@);
   }
 
-  wdt = vec4(w, (w < 0.0 ? 0.0 : 1.0), wx, -1.0 * wy);
+  wdt = vec4(w, ceil(w), wx, -1.0 * wy);
+}}
+
+
+w anti_grid_fade {{
+	wx = 0.0;
+	wy = 0.0;
+  z = mod(floor(5.0 * @n@) / 2.0 * z, 1.0);
+  if((z.x > 0.5 * (1.0 - @w@) && z.x < 0.5 * (1.0 + @w@)) && (z.y < 0.5 * (1.0 + @w@) && z.y > 0.5 * (1.0 - @w@))){
+		wx = 0.5 * (2.0 * z.x - 1.0) / @w@ + 0.5;
+		wy = 0.5 * (2.0 * z.y - 1.0) / @w@ + 0.5;
+    w = min((1.0 - 2.0 * abs(z.y - 0.5) / @w@), (1.0 - 2.0 * abs(z.x - 0.5) / @w@));
+	}
+  wdt = vec4(w, (w < 0.0 ? 0.0 : 1.0), wx, wy);
+}}
+
+w grid_fade {{
+	wx = 0.0;
+	wy = 0.0;
+  z = mod(floor(5.0 * @n@) / 2.0 * z, 1.0);
+  if((z.x > 0.5 * (1.0 - @w@) && z.x < 0.5 * (1.0 + @w@))){
+		wx = 0.5 * (2.0 * z.x - 1.0) / @w@ + 0.5;
+		wy = 0.5 * (2.0 * z.y - 1.0) / @w@ + 0.5;
+    w = (1.0 - 2.0 * abs(z.x - 0.5) / @w@);
+	}
+  if((z.y < 0.5 * (1.0 + @w@) && z.y > 0.5 * (1.0 - @w@))){
+		wx = 0.5 * (2.0 * z.x - 1.0) / @w@ + 0.5;
+		wy = 0.5 * (2.0 * z.y - 1.0) / @w@ + 0.5;
+    w = max((1.0 - 2.0 * abs(z.x - 0.5) / @w@), (1.0 - 2.0 * abs(z.y - 0.5) / @w@));
+	}
+  wdt = vec4(w, (w < 0.0 ? 0.0 : 1.0), wx, wy);
 }}

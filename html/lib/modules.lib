@@ -7,7 +7,7 @@ dim vec4
 
 --epimorphism < default_app
 component epimorphism
-modules {seed: seed_border, t:t_wrap_zo, color: color_gbr, reduce: torus_reduce}
+modules {seed: seed_multi, t:t_wrap_zo, color: color_gbr, reduce: torus_reduce}
 
 --analysis < epimorphism
 modules {seed: seed_analysis, t:t_wrap_zo, color: color_id, reduce: torus_reduce}
@@ -71,7 +71,7 @@ par {gamma:1.5, hue:0.66, spread:0.5, lgv:0.5}
 
 --post_hlim_anim < post_hlim1
 par {gamma:2.0, hue:0.0, spread:0.5, lgv:0.5}
-paths {hue:loop 0.01, spread:wave 0.066 0.35 1.5, lgv:wave 0.045 0.125 0.5}
+paths {hue:loop 0.01, spread:wave 0.011 0.35 1.5, lgv:wave 0.07 0.125 0.5}
 
 
 --grid_reduce
@@ -88,48 +88,118 @@ sub {reduce: torus_reduce(z)}
 
 --seed_nothing
 family seed
+flags {lib}
 component seed_nothing
 var seed
 dim vec4
 
+--seed_analysis < seed_nothing
+flags {analysis}
+par {w: 0.05}
+component seed_analysis
+
 --seed_border < seed_nothing
-flags {t_test}
+flags {lib, t_test}
 component seed_border
 par {w: 0.2, alpha: 1.0}
 modules {t: t_wrap}
-
---seed_circle < seed_nothing
-flags {t_test, img}
-component seed_circle
-par {w: 0.2, r: 0.5, sc: 1.0, alpha: 0.8, spd: 6.0}
-modules {t: t_wrap}
-images [/textures/simplegeom/tile_rainbow2.png]
-
---seed_ball < seed_nothing
-flags {t_test, img}
-component seed_circle
-par {w: 0.5, r: 0.0, sc: 1.0, alpha: 0.7, spd:1.0}
-modules {t: t_wrap}
-images [/textures/misc/tile_oct1.png]
 
 --seed_border_img1 < seed_border
 flags {t_test, img}
 component seed_simple_img
 images [/textures/simplegeom/tile_grid1.png]
 
---seed_border_img2 < seed_border_img1
-images [/textures/simplegeom/tile_grid6.png]
+--seed_wca < seed_nothing
+flags {lib,wca}
+component seed_wca
+modules {t: t_wrap, w:w_lines_border, wt:wt_id, a:alpha_id, color:simple_color}
 
---seed_border_img3 < seed_border_img1
-images [/textures/simplegeom/tile_psych1.png]
+--seed_multi < seed_nothing
+flags {lib,multi}
+component seed_multi
+modules {t:t_wrap, seed0:seed_wca, seed1:seed_nothing, seed2:seed_nothing}
 
 
+--wt_id
+family wt
+flags {lib}
+component wt_id
+var w
+dim float
+
+--wt_inv < wt_id
+component wt_inv
+
+--wt_circ < wt_id
+component wt_circ
+
+--wt_inv_circ < wt_id
+component wt_inv_circ
 
 
---seed_analysis < seed_border
-flags {analysis}
-par {w: 0.05}
-component seed_analysis
+--alpha_id
+family a
+flags {lib}
+component alpha_id
+var a
+dim float
+
+--alpha_no < alpha_id
+component alpha_no
+
+--alpha_solid < alpha_id
+par {alpha: 1.0}
+component alpha_solid
+
+--alpha_linear < alpha_id
+par {alpha: 1.0}
+component alpha_linear
+
+
+--simple_color
+family seed_color
+flags {lib}
+component simple_color
+par {spd: 0.0, rot: 0.15, sat:1.0, val:1.0}
+var seed
+dim vec4
+
+--tex_color < simple_color
+component tex_color
+par {scale: 1.0, spd: 0.0, rot: 0.0, sat:1.0, val:1.0}
+images [/textures/simplegeom/tile_grid1.png]
+
+
+--w_nul
+family w
+flags {lib}
+component w_nul
+var wdt
+dim vec4
+
+--w_circle < w_nul
+component w_circle
+par {w:0.2, r:0.7}
+
+--w_lines_inner < w_nul
+component w_lines_inner
+par {w:0.2}
+
+--w_lines_border < w_nul
+component w_lines_border
+par {w:0.2}
+
+--w_lines_lr < w_nul
+component w_lines_lr
+par {w:0.2}
+
+--w_lines_stag < w_nul
+component w_lines_stag
+par {w:0.2}
+
+--w_squre < w_nul
+component w_square
+par {w:0.3}
 
 
 --switch
@@ -301,7 +371,7 @@ modules {t: t_main1, seed: seed_borderM, color: rotate_hsv1, reduce: torus_reduc
 flags {}
 par {w: 0.5, alpha: 0.5}
 modules {t: ts_wrap_linx3', reduce: torus_reduce}
-paths {w:wave 0.2 0.45 0.55, alpha:wave 0.3 0.35 0.65}
+paths {w:wave 0.032 0.45 0.55, alpha:wave 0.048 0.35 0.65}
 
 --seed_borderM1 < seed_borderM
 component seed_simple_img

@@ -1,9 +1,0 @@
---default
-initEngineConf default
-initUIConf default
-initPattern main
-
---test
-initEngineConf default
-initUIConf default
-initPattern test

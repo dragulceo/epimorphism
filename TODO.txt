@@ -111,6 +111,7 @@ NEXT
 	- importing is a bit of a disaster.  orphans & integrity & so forth. not to mention flakey & hard to debug :/
 
 LATER
+  - reduce is a substition in seeds, but comes from appliction.  the order of "modules {x: .., y: ..}" matters :/
   - if there are too many aux buffers (texture units), we'll have an issue?
   - saving images loses bit depth??
   - for each pixel, define a normal vector, so we can do lighting & material effects

@@ -98,26 +98,29 @@ seed seed_simple_img {{
 
 
 seed seed_wca {{
-  vec4 wdt, color;
-  float w = VOID_W;
-	float a, wx, wy;
+	vec4 wdt;
 	vec2 z_i = z;
+	float w, a, wx, wy, mask;
   %t%
 	%reduce%
 
-  // wdt = (w, a, wx, wy)
-  %seed_w%
+	// w = (w, mask, wx, wy)
+	%w%
+	w = wdt.x;
 
-  w = min(wdt.x, 1.0);
-	if (w > 0.0)
-    %seed_wt%
+	%wt%
 
+	// mask w
+		 //	w *= wdt.y;
 	a = wdt.y;
-  %alpha%
 
-  %seed_color%
+	%a%
+
+	%color%
+
 	z = z_i;
 }}
+
 
 
 

@@ -1,0 +1,30 @@
+--w_nul
+family w
+flags {lib}
+component w_nul
+var wdt
+dim vec4
+
+--w_circle < w_nul
+component w_circle
+par {w:0.2, r:0.7}
+
+--w_lines_inner < w_nul
+component w_lines_inner
+par {w:0.2}
+
+--w_lines_border < w_nul
+component w_lines_border
+par {w:0.2}
+
+--w_lines_lr < w_nul
+component w_lines_lr
+par {w:0.2}
+
+--w_lines_stag < w_nul
+component w_lines_stag
+par {w:0.2}
+
+--w_squre < w_nul
+component w_square
+par {w:0.3}

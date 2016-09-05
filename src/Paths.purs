@@ -148,7 +148,7 @@ smooth1D t args = do
 wave1D :: forall eff h. PathFunc1D eff h
 wave1D t args = do
   x <- case args of
-    [a, b] -> return $ a * cos(2 * pi * t) + b
+    [a, b] -> return $ a * cos(2.0 * pi * t) + b
     _ -> throwError "invalid arguments for wave1D"
   return $ Tuple x false
 

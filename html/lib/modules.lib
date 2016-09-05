@@ -14,7 +14,8 @@ modules {seed: seed_analysis, t:t_wrap_zo, color: color_id, reduce: torus_reduce
 
 --julia < default_app
 component julia
-zn [0.0 + 5.0i]
+sub {t_expr: z * z + zn[0]}
+zn [-0.123 + 0.745i, 0.0+0.0i, 0.0+0.0i, 0.0+0.0i]
 
 --color_id
 family color
@@ -98,13 +99,13 @@ flags {analysis}
 par {w: 0.05}
 component seed_analysis
 
---seed_border < seed_nothing
+--seed_simple < seed_nothing
 flags {lib, t_test}
-component seed_border
+component seed_simple
 par {w: 0.2, alpha: 1.0}
 modules {t: t_wrap}
 
---seed_border_img1 < seed_border
+--seed_img1 < seed_simple
 flags {t_test, img}
 component seed_simple_img
 images [/textures/simplegeom/tile_grid1.png]
@@ -367,7 +368,7 @@ modules {application: epimorphism_auto1}
 --epimorphism_auto1 < epimorphism
 modules {t: t_main1, seed: seed_borderM, color: rotate_hsv1, reduce: torus_reduce}
 
---seed_borderM < seed_border
+--seed_borderM < seed_simple
 flags {}
 par {w: 0.5, alpha: 0.5}
 modules {t: ts_wrap_linx3', reduce: torus_reduce}

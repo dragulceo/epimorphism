@@ -4,7 +4,7 @@ modules {application: epimorphism_auto1}
 --epimorphism_auto1 < epimorphism
 modules {t: t_main1, seed: seed_borderM, color: rotate_hsv1, reduce: torus_reduce}
 
---seed_borderM < seed_border
+--seed_borderM < seed_simple
 flags {}
 par {w: 0.5, alpha: 0.5}
 modules {t: ts_wrap_linx3', reduce: torus_reduce}

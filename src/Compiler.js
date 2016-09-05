@@ -19,6 +19,9 @@ var parseN = function(node){
 		var args = $.map(node.args, function(n, i) {return parseN(n)});
 		return node.op + '(' + args.join(',') + ')'
 		break;
+	case 'AccessorNode':
+		return parseN(node.object) + node.index
+		break;
 	case 'ParenthesisNode':
 		return parseN(node.content);
 	}

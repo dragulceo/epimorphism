@@ -24,7 +24,7 @@ seed seed_analysis {{
 	z = z_i;
 }}
 
-seed seed_border {{
+seed seed_simple {{
 	vec2 z_i = z;
   %t%
 	%reduce%

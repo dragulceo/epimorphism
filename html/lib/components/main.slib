@@ -15,6 +15,10 @@ void main() {
   vec4 color;
   vec2 z, z_in;
 
+	// a bit hackish, we do this to make sure the uniforms aren't optimized out
+	float nul0 = zn[0].x;
+	float nul1 = par[0];
+
   // into z coordinates
   z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(kernel_dim, kernel_dim) - vec2(1.0, 1.0);
   z_in = z;

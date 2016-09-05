@@ -51,9 +51,10 @@ application epimorphism {{
 			//accum += vec4(seed.a * seed.rgb + (1.0 - seed.a) * frame.rgb, seed.a);
 			//float x = (z_in.x + 1.0) / 2.0;
 			//float b = (1.0 - x) * seed.a + x * (1.0 - seed.a);
-				 accum += mix(frame, seed, seed.a);
+			accum += mix(frame, seed, seed.a);
 		}
 	}
+	z = z_in;
 
 	float f2 = float($fract$ * $fract$);
 	color = accum / vec4(f2, f2, f2, f2);
@@ -68,21 +69,22 @@ application julia {{
   float escape_rad = 4.0;
 
 	for(int i = 0; i < 600; i++){
-		//while(i < 600){
 		if(z.x * z.x + z.y * z.y > escape_rad)
 			break;
 
-    z = zasdf + zn[0] * 0.0;
+    z = $t_expr$;
 		j += 1;
   }
 
-  float mu = float(j) - (log(log(sqrt(z.x * z.x + z.y * z.y))))/ log(2.0);
+  float mu = float(j) - log(log(length(z)))/ log(2.0);
 
   if(j != max_iter)
-    color = vec4(0.0,0.0,1.0,1.0); //hsv2rgb(vec4(mu / 500.0 + 0.5, 1.0, 1.0, 1.0));
+		//color = hsv2rgb(vec4(float(j) / 256.0, 1.0, 1.0, 1.0));
+    color = hsv2rgb(vec4(mu / 20.0, 1.0, 1.0, 1.0));
 	else
-		color = vec4(1.0,0.0,0.0,1.0);
+		color = vec4(0.0,0.0,0.0,1.0);
 
+	z = z_in;
 }}
 
 
@@ -435,6 +437,10 @@ void main() {
   vec4 color;
   vec2 z, z_in;
 
+	// a bit hackish, we do this to make sure the uniforms aren't optimized out
+	float nul0 = zn[0].x;
+	float nul1 = par[0];
+
   // into z coordinates
   z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(kernel_dim, kernel_dim) - vec2(1.0, 1.0);
   z_in = z;
@@ -479,9 +485,9 @@ post post_hlim {{
   }
   res = (1.0 - f) * r0 + f * r1;
 
+	// preserve value
   res = rgb2hsv(res);
   frame.x = res.x;
-
   frame = hsv2rgb(frame);
 }}
 
@@ -519,7 +525,7 @@ seed seed_analysis {{
 	z = z_i;
 }}
 
-seed seed_border {{
+seed seed_simple {{
 	vec2 z_i = z;
   %t%
 	%reduce%

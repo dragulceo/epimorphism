@@ -10,13 +10,13 @@ flags {analysis}
 par {w: 0.05}
 component seed_analysis
 
---seed_border < seed_nothing
+--seed_simple < seed_nothing
 flags {lib, t_test}
-component seed_border
+component seed_simple
 par {w: 0.2, alpha: 1.0}
 modules {t: t_wrap}
 
---seed_border_img1 < seed_border
+--seed_img1 < seed_simple
 flags {t_test, img}
 component seed_simple_img
 images [/textures/simplegeom/tile_grid1.png]

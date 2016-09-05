@@ -29,8 +29,8 @@ post post_hlim {{
   }
   res = (1.0 - f) * r0 + f * r1;
 
+	// preserve value
   res = rgb2hsv(res);
   frame.x = res.x;
-
   frame = hsv2rgb(frame);
 }}

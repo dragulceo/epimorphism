@@ -535,36 +535,6 @@ seed seed_border {{
 	z = z_i;
 }}
 
-
-seed seed_circle {{
-	vec2 z_i = z;
-  %t%
-	%reduce%
-
-	float r = length(z);
-	float wx = atan(z.y, z.x) * 3.0 / (2.0 * PI);
-	float wy = 1.0 - 2.0 * abs(r - @r@) / @w@;
-  float w = max(0.0, wy);
-	float mask = ceil(w);
-
-	//seed = vec4(w, 0.0, 0.0, w * @alpha@);
-
-	float sc = 1.0;
-	vec2 ofs = mod(sc * vec2(wx, wy), 1.0);
-  seed = texture2D(aux[#0], ofs);
-
-	// mask w
-	seed.w *= mask * @alpha@;
-
-	// preserve val
-	seed = rgb2hsv(seed);
-	seed.z *= w;
-	seed = hsv2rgb(seed);
-
-	z = z_i;
-}}
-
-
 seed seed_simple_img {{
 	vec2 z_i = z;
   %t%
@@ -591,7 +561,6 @@ seed seed_simple_img {{
 	z = z_i;
 }}
 
-
 seed seed_wca {{
 	vec4 wdt;
 	vec2 z_i = z;
@@ -599,16 +568,13 @@ seed seed_wca {{
   %t%
 	%reduce%
 
-	// w = (w, mask, wx, wy)
+	// w = (w, alpha, wx, wy)
 	%w%
-	w = wdt.x;
 
+	w = wdt.x;
 	%wt%
 
-	// mask w
-		 //	w *= wdt.y;
 	a = wdt.y;
-
 	%a%
 
 	%color%
@@ -616,24 +582,18 @@ seed seed_wca {{
 	z = z_i;
 }}
 
-
-
-
 seed seed_multi {{
 	vec4 seed0, seed1, seed2;
 	vec2 z_i = z;
   %t%
 	%reduce%
 
-	vec2 z_tmp = z;
 	%seed0%
 	seed0 = seed;
 
-	z = z_tmp;
 	%seed1%
 	seed1 = seed;
 
-	z = z_tmp;
 	%seed2%
 	seed2 = seed;
 
@@ -641,9 +601,11 @@ seed seed_multi {{
 
 	if(a == 0.0)
 		seed = vec4(0.0, 0.0, 0.0, 0.0);
-	else
-		// damn. use mixes?
-		seed = 1.0 / a * (seed2.a * seed2 + (1.0 - seed2.a) * seed1.a * seed1 + (1.0 - seed2.a) * (1.0 - seed1.a) * seed0.a * seed0);
+	else {
+		vec4 m1 = mix(seed0.a * seed0, seed1, seed1.a);
+		vec4 m2 = mix(m1, seed2, seed2.a);
+		seed = 1.0 / a * m2;
+	}
 	seed.a = a;
 	z = z_i;
 }}

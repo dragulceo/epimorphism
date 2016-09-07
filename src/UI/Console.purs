@@ -24,11 +24,11 @@ foreign import addEventListeners :: forall eff. Eff eff Unit
 renderConsole :: forall eff h. UIConf -> UIST -> SystemST h -> Pattern -> EpiS eff h Unit
 renderConsole uiConf uiST systemST pattern = do
   dsmDiv <- findElt "debugMain"
-  str0 <- renderModule systemST pattern.main "MAIN" Nothing
+  str0 <- renderModule systemST uiConf.uiCompLib pattern.main "MAIN" Nothing
   lift $ setInnerHTML str0 dsmDiv
 
   dsdDiv <- findElt "debugDisp"
-  str1 <- renderModule systemST pattern.disp "DISP" Nothing
+  str1 <- renderModule systemST uiConf.uiCompLib pattern.disp "DISP" Nothing
   lift $ setInnerHTML str1 dsdDiv
 
   dssDiv <- findElt "debugScripts"
@@ -51,8 +51,8 @@ serializeScripts pool = do
 
 
 -- serializes the modRefPool into an html string for debugging.  shitcode
-renderModule :: forall eff h. SystemST h -> String -> String -> Maybe String -> EpiS eff h String
-renderModule systemST mid title pid = do
+renderModule :: forall eff h. SystemST h -> String -> String -> String -> Maybe String -> EpiS eff h String
+renderModule systemST modLib mid title pid = do
   let lib = systemST.moduleLib
   let pool = systemST.moduleRefPool
 
@@ -77,7 +77,7 @@ renderModule systemST mid title pid = do
   let titlePre = "<span class='consoleModTitle'>" ++ title ++ ": </span>"
   sel <- case pid of
     Just pid' -> do
-      sel' <- renderSelect lib mod pid' title
+      sel' <- renderSelect modLib lib mod pid' title
       return $ sel' ++ "<span class='consoleModTitle consoleUI'>" ++ mod.libName ++ "</span>"
     _ -> return $ "<span class='consoleModTitle'>"  ++ mod.libName ++ "</span>"
 
@@ -106,7 +106,7 @@ renderModule systemST mid title pid = do
         _ ->
           throwError "not a module line, dingus"
     exp [a, b] = do
-      renderModule systemST (trim b) (trim a) (Just mid)
+      renderModule systemST modLib (trim b) (trim a) (Just mid)
     exp _ = throwError $ "invalid map syntax in " ++ mid
     handleLine mod line = do
       let rgx = regex "^(component|par|zn|images|sub|scripts|paths|--)\\s?(.*)$" noFlags
@@ -196,9 +196,9 @@ renderModule systemST mid title pid = do
 
       return res
 
-renderSelect :: forall eff h. StrMap Module -> Module -> String -> String -> EpiS eff h String
-renderSelect lib mod pid cname = do
-  let fam = family lib mod.family ["lib"] []
+renderSelect :: forall eff h. String -> StrMap Module -> Module -> String -> String -> EpiS eff h String
+renderSelect modLib lib mod pid cname = do
+  let fam = family lib mod.family [modLib] []
   let fam' = map (\x -> inj "<option value='%0'>%0</option>" [x]) fam
   let options = joinWith "\n" fam'
   let options' = (inj "<option selected disabled>%0</option>" [mod.libName]) ++ options

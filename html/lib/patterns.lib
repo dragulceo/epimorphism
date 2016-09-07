@@ -1,4 +1,4 @@
---default
+--dev
 vert   default_vert
 main   epimorphism_main
 disp   disp_id
@@ -6,14 +6,17 @@ tPhase 0.0
 tSpd   1.0
 includes [colorspace, math]
 
---analysis < default
+--farm1 < dev
+main   epimorphism_main_farm1
+
+--analysis < dev
 main  analysis_main
 disp  disp_id
 
---main1 < default
+--main1 < dev
 main  epimorphism1_main
 disp  disp_main1
 
---main2 < default
+--main2 < dev
 main  epimorphism2_main
 disp  disp_id

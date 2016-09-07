@@ -381,7 +381,7 @@ randomize ssRef pRef self t mid sRef = do
   -- next iteration
   case t of
     t | t >= nxt -> do
-      let a = lg "ITERATE COMPONENT"
+      --let a = lg "ITERATE COMPONENT"
       let dt' = insert "nxt" (show (t + dly)) scr.dt
       lift $ modifySTRef sRef (\s -> s {dt = dt'})
       adr' <- case (adr == "!") of

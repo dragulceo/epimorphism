@@ -62,11 +62,6 @@ exports.now = function () {
   return performance.now();
 };
 
-exports.timerNow = function () {
-  return performance.now();
-};
-
-
 exports.unsafeEval = function (s) {
   return function () {eval(s);};
 }
@@ -75,6 +70,24 @@ exports.winLog = function (x) {
   return function() {
     $('#container')[0].innerHTML = "<pre>" + x.replace(new RegExp("\n", 'g'), "<br/>") + "</pre>";
   };
+}
+
+exports.urlArgs = function() {
+	var get = {};
+
+	document.location.search.replace(/\??(?:([^=]+)=([^&]*)&?)/g, function () {
+    function decode(s) {
+      return decodeURIComponent(s.split("+").join(" "));
+    }
+
+    get[decode(arguments[1])] = decode(arguments[2]);
+	});
+
+	return get;
+}
+
+exports.isDev = function() {
+	return document.location.hostname == "localhost";
 }
 
 exports.replaceAll = function(search) {
@@ -187,6 +200,13 @@ exports.rndstr = function() {
 exports.gmod = function(n) {
 	return function(m) {
     return ((n%m)+m)%m;
+	};
+};
+
+
+exports.seedRandom = function(seed) {
+	return function(){
+		return Math.seedrandom(seed);
 	};
 };
 

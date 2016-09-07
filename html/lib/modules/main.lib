@@ -3,3 +3,9 @@ family main
 flags {epimorphism, root}
 component main
 modules {application: epimorphism}
+
+--epimorphism_main_farm1
+family main
+flags {epimorphism, root}
+component main
+modules {application: epimorphism_farm1}

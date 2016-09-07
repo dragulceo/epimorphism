@@ -1,4 +1,4 @@
---default
+--dev
 canvasId glcanvas
 consoleId console
 fpsId showFps
@@ -7,15 +7,19 @@ windowState dev
 uiUpdateFreq 50
 keyboardSwitchSpd 1.0
 keySet dev
+uiCompLib lib
 
 --debug
 uiUpdateFreq 1
 showFps true
 
---full < default
+--full < dev
 windowState fullWindow
 
---prod < default
+--prod < dev
 windowState fullWindow
 uiUpdateFreq 10
 keySet prod
+
+--farm1 < dev
+uiCompLib farm1

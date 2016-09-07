@@ -28,13 +28,15 @@ type SystemConf = {
   , initUIConf     :: String
   , initPattern    :: String
   , host           :: String
+  , seed           :: String
 }
 
 systemConfSchema :: Schema
 systemConfSchema = [
-  SchemaEntry SE_St "initEngineConf",
-  SchemaEntry SE_St "initUIConf",
-  SchemaEntry SE_St "initPattern"
+    SchemaEntry SE_St "initEngineConf"
+  , SchemaEntry SE_St "initUIConf"
+  , SchemaEntry SE_St "initPattern"
+  , SchemaEntry SE_St "seed"
 ]
 
 type SystemST h = {
@@ -120,18 +122,20 @@ type UIConf = {
   , uiUpdateFreq      :: Int
   , keyboardSwitchSpd :: Number
   , keySet            :: String
+  , uiCompLib         :: String
 }
 
 uiConfSchema :: Schema
 uiConfSchema = [
-  SchemaEntry SE_St "canvasId",
-  SchemaEntry SE_St "consoleId",
-  SchemaEntry SE_St "fpsId",
-  SchemaEntry SE_B  "showFps",
-  SchemaEntry SE_St "windowState",
-  SchemaEntry SE_I  "uiUpdateFreq",
-  SchemaEntry SE_N  "keyboardSwitchSpd",
-  SchemaEntry SE_St "keySet"
+    SchemaEntry SE_St "canvasId"
+  , SchemaEntry SE_St "consoleId"
+  , SchemaEntry SE_St "fpsId"
+  , SchemaEntry SE_B  "showFps"
+  , SchemaEntry SE_St "windowState"
+  , SchemaEntry SE_I  "uiUpdateFreq"
+  , SchemaEntry SE_N  "keyboardSwitchSpd"
+  , SchemaEntry SE_St "keySet"
+  , SchemaEntry SE_St "uiCompLib"
 ]
 
 type UIST = {

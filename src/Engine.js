@@ -14,10 +14,9 @@ exports.createImageImpl = function(s){
 				if(window.auxImagesLoaded[s])
 					callback(im)();
 				else{
-					console.log("CRAZY SHIT " + s);
+					//console.log("CRAZY SHIT " + s);
 					var func = im.onload;
 					im.onload = function(){
-						console.log("NEW ONLOAD  " + s);
 						func();
 						callback(im)();
 					}
@@ -26,41 +25,12 @@ exports.createImageImpl = function(s){
 			}
 			var im = new Image();
 			im.onload = function() {
-				console.log("OLD ONLOAD  " + s);
 				window.auxImagesLoaded[s] = true;
 				callback(im)();
 			};
 			im.src = s;
 			window.auxImages[s] = im;
 		};
-	};
-};
-
-
-exports.createImageImpl2 = function(s){
-	return function(){
-		if(!window.images)
-			window.images = {};
-		if(window.images[s]){
-			return window.images[s];
-		}
-		console.log("before load: " + s);
-		var im;
-		$.ajax({url:s, success: function() {
-			console.log('loaded');
-			im = new Image();
-			im.src = s;
-		}, async:false});
-
-		console.log("after load: " + s);
-		//var im = new Image();
-		//im.src = s;
-		//var loaded;
-//		im.onload = function() {loaded = true}
-		window.images[s] = im;
-		//while(loaded
-		$.im  = im;
-		return im;
 	};
 };
 

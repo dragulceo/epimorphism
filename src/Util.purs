@@ -11,6 +11,7 @@ import Data.Either (Either(..), either)
 import Data.Foldable (foldr)
 import Data.Int (fromString) as I
 import Data.Maybe (Maybe(..))
+import Data.StrMap (StrMap)
 import Data.String (split, joinWith)
 import Data.Tuple (fst, Tuple(..))
 import Graphics.Canvas (Canvas)
@@ -26,15 +27,17 @@ foreign import unsafeEval :: forall eff. String -> Eff eff Unit
 foreign import winLog :: forall a eff. a -> Eff eff Unit
 foreign import requestAnimationFrame :: forall eff. Eff eff Unit -> Eff eff Unit
 foreign import now :: forall eff. Eff (now :: Now | eff) Number
-foreign import timerNow :: forall eff. Eff eff Number
 foreign import replaceAll :: String -> String -> String -> String
 
 foreign import halt :: forall eff. Eff eff Unit
 foreign import isHalted :: forall eff. Eff eff Boolean
+foreign import urlArgs :: forall eff. Eff eff (StrMap String)
+foreign import isDev :: forall eff. Eff eff Boolean
 
 foreign import uuid   :: forall eff. Eff eff String
 foreign import rndstr :: forall eff. Eff eff String
 foreign import gmod :: Int -> Int -> Int
+foreign import seedRandom :: forall eff. String -> Eff eff Unit
 foreign import random :: forall eff. Eff eff Number
 foreign import randInt :: forall eff. Int -> Eff eff Int
 foreign import isNumber :: String -> Boolean

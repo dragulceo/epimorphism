@@ -26,7 +26,6 @@ foreign import parseT :: String -> String
 -- compile vertex, disp & main shaders
 compileShaders :: forall eff h. Pattern -> (SystemST h) -> EpiS eff h Shaders
 compileShaders pattern systemST = do
-  let a = lg "COMPILING"
   vertRef <- loadLib pattern.vert systemST.moduleRefPool "compileShaders vert"
   vert    <- lift $ readSTRef vertRef
   vertRes <- compile vert systemST 0 0 []

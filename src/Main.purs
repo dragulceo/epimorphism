@@ -9,6 +9,7 @@ import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
 import Data.Int (round, toNumber)
 import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
+import Data.StrMap (lookup)
 import Engine (initEngineST, renderFrame, setShaders)
 import Graphics.Canvas (Canvas)
 import Layout (updateLayout)
@@ -17,7 +18,7 @@ import Pattern (importPattern)
 import Script (runScripts)
 import System (initSystemST, loadLib)
 import UI (initUIST)
-import Util (isHalted, requestAnimationFrame, now, Now, handleError)
+import Util (lg, isHalted, requestAnimationFrame, now, Now, handleError, seedRandom, urlArgs, isDev)
 
 host :: String
 host = ""
@@ -32,6 +33,15 @@ type State h = {
   , pRef  :: STRef h Pattern
 }
 
+
+getSysConfName :: forall eff. Eff eff String
+getSysConfName = do
+  args <- urlArgs
+  dev <- isDev
+  let def = if dev then "dev" else "prod"
+  let conf = fromMaybe def (lookup "system" args)
+  return conf
+
 init :: forall eff h. EpiS eff h (State h)
 init = do
   -- init system
@@ -39,8 +49,12 @@ init = do
   ssRef <- lift $ newSTRef systemST
 
   -- init config
-  systemConf <- loadLib "default" systemST.systemConfLib "init system"
+  systemName <- lift $ getSysConfName
+  systemConf <- loadLib systemName systemST.systemConfLib "init system"
   let systemConf' = systemConf {host = host}
+
+  when (systemConf.seed /= "") do
+    lift $ seedRandom systemConf.seed
 
   engineConf <- loadLib systemConf'.initEngineConf systemST.engineConfLib "init engine"
   uiConf     <- loadLib systemConf'.initUIConf systemST.uiConfLib "init ui"

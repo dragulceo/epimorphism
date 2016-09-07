@@ -1,26 +1,21 @@
-TODO:
+MAKE THINGS BETTER/AUDIO1:
+- color stuff
+- more symmetry?
+- test on laptop
+- osc input
+- music pattern
+- choppiness/compiling/perf
+- that ghetto sleep thing when repausing :/
+- image popin
+- generally make better
+- julia set & maybe interference
 
+
+SOON:
+choppy in safari
 catch errors when parsing t_exp
 better ui for script/path modification
 phases for paths :/
-
-
-GOALS:
-  0. fix github issue for dude / README.md
-  1. conference presentation
-	  - make slides
-		- make sure UI is working
-		- 3-5m demo
-	2. performance
-	  - osc support
-		- soundanalyser plugin
-		- see what kind of outputs we get
-		- get in touch with artist/find some of her music
-		- plug outputs into system
-		- mvp for system
-	3. SOFT RELEASE
-    RELEASE: LAUNCH
-		mvp for system
 
 
 MVP FOR SYSTEM:

@@ -80,6 +80,7 @@ animate stateM = handleError do
   currentTimeMS <- lift $ now
   let lastTimeMS = fromMaybe currentTimeMS systemST.lastTimeMS
   let delta = (currentTimeMS - lastTimeMS) * pattern.tSpd / 1000.0
+  --let delta' = 0.05
   let delta' = if systemST.paused then 0.0 else delta
   let t' = systemST.t + delta'
   lift $ modifySTRef ssRef (\s -> s {t = t', lastTimeMS = Just currentTimeMS})
@@ -99,14 +100,20 @@ animate stateM = handleError do
   case recompile of -- when doesnt work here for some godforsaken reason
     true -> do
       setShaders systemConf engineConf esRef systemST' pattern
+      currentTimeMS2 <- lift $ now
+      lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS2})
+
+      return unit
     false -> return unit
+
   engineST' <- lift $ readSTRef esRef
+  systemST'' <- lift $ readSTRef ssRef
 
   -- render!
-  renderFrame systemST' engineConf engineST' pattern systemST'.frameNum
+  renderFrame systemST'' engineConf engineST' pattern systemST'.frameNum
 
   -- update ui
-  updateLayout uiConf uiST systemST' pattern
+  updateLayout uiConf uiST systemST'' pattern
 
   -- request next frame
   halted <- lift $ isHalted

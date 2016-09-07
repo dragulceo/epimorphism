@@ -82,7 +82,7 @@ seed seed_wca {{
 	a = wdt.y;
 	%a%
 
-	%color%
+	%seed_color%
 
 	z = z_i;
 }}

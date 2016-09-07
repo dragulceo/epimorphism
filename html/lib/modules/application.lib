@@ -7,7 +7,7 @@ dim vec4
 
 --epimorphism < default_app
 component epimorphism
-modules {seed: seed_multi, t:t_wrap_zo, color: color_gbr, reduce: torus_reduce}
+modules {seed: seed_wca, t:t_wrap_zo, color: color_gbr, reduce: torus_reduce}
 
 --analysis < epimorphism
 modules {seed: seed_analysis, t:t_wrap_zo, color: color_id, reduce: torus_reduce}

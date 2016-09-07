@@ -13,3 +13,7 @@ disp  disp_id
 --main1 < default
 main  epimorphism1_main
 disp  disp_main1
+
+--main2 < default
+main  epimorphism2_main
+disp  disp_id

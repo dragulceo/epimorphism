@@ -16,7 +16,7 @@ import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
 import Prelude (return, ($), bind, map, (++), (-), (+), show)
-import Util (replaceAll, indentLines)
+import Util (lg, replaceAll, indentLines)
 
 type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}
 type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array String}
@@ -26,6 +26,7 @@ foreign import parseT :: String -> String
 -- compile vertex, disp & main shaders
 compileShaders :: forall eff h. Pattern -> (SystemST h) -> EpiS eff h Shaders
 compileShaders pattern systemST = do
+  let a = lg "COMPILING"
   vertRef <- loadLib pattern.vert systemST.moduleRefPool "compileShaders vert"
   vert    <- lift $ readSTRef vertRef
   vertRes <- compile vert systemST 0 0 []
@@ -48,7 +49,7 @@ compileShaders pattern systemST = do
 -- compile a shader.  substitutions, submodules, par & zn
 compile :: forall eff h. Module -> SystemST h -> Int -> Int -> (Array String) -> EpiS eff h CompRes
 compile mod systemST zOfs parOfs images = do
-  -- substitutions
+  -- substitutions (make sure this is always first)
   comp <- loadLib mod.component systemST.componentLib "compile component"
   sub' <- preProcessSub mod.sub
   let component' = fold handleSub comp.body sub'

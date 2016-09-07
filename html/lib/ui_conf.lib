@@ -4,7 +4,7 @@ consoleId console
 fpsId showFps
 showFps true
 windowState dev
-uiUpdateFreq 10
+uiUpdateFreq 50
 keyboardSwitchSpd 1.0
 keySet dev
 

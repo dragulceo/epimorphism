@@ -25,6 +25,31 @@ par {w:0.2}
 component w_lines_stag
 par {w:0.2}
 
---w_squre < w_nul
+--w_square < w_nul
 component w_square
 par {w:0.3}
+
+
+--w_circle_anim < w_circle
+flags {anim}
+paths {w:wave 0.032 0.2 0.55, r: wave 0.02 0.15 0.65}
+
+--w_lines_inner_anim < w_lines_inner
+flags {anim}
+paths {w:wave 0.032 0.2 0.55}
+
+--w_lines_border_anim < w_lines_border
+flags {anim}
+paths {w:wave 0.032 0.2 0.55}
+
+--w_lines_lr_anim < w_lines_lr
+flags {anim}
+paths {w:wave 0.032 0.2 0.55}
+
+--w_lines_stag_anim < w_lines_stag
+flags {anim}
+paths {w:wave 0.032 0.2 0.55}
+
+--w_square_anim < w_square
+flags {anim}
+paths {w:wave 0.032 0.35 0.55}

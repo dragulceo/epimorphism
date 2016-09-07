@@ -26,6 +26,7 @@ foreign import unsafeEval :: forall eff. String -> Eff eff Unit
 foreign import winLog :: forall a eff. a -> Eff eff Unit
 foreign import requestAnimationFrame :: forall eff. Eff eff Unit -> Eff eff Unit
 foreign import now :: forall eff. Eff (now :: Now | eff) Number
+foreign import timerNow :: forall eff. Eff eff Number
 foreign import replaceAll :: String -> String -> String -> String
 
 foreign import halt :: forall eff. Eff eff Unit
@@ -41,6 +42,9 @@ foreign import isNumber :: String -> Boolean
 foreign import unsafeSetAttr :: forall a b. a -> String -> b -> a
 foreign import unsafeGetAttr :: forall a b. a -> String -> b
 foreign import unsafeCast :: forall a b. a -> b
+
+-- ghetto
+foreign import clickPause :: forall eff. Eff eff Unit
 
 urlGet :: forall eff. String -> Eff eff (Either String String)
 urlGet = urlGetImpl Left Right

@@ -5,7 +5,7 @@ precision mediump float;
 uniform sampler2D fb;
 uniform float time;
 uniform float kernel_dim;
-uniform float par[50];
+uniform float par[100];
 uniform vec2 zn[50];
 uniform sampler2D aux[10];
 

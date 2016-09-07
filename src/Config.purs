@@ -44,6 +44,7 @@ type SystemST h = {
   , fps :: Maybe Int
   , t :: Number
   , paused :: Boolean
+  , pauseAfterSwitch :: Boolean
   , systemConfLib :: StrMap SystemConf
   , uiConfLib :: StrMap UIConf
   , engineConfLib :: StrMap EngineConf
@@ -64,6 +65,7 @@ defaultSystemST = {
   , fps: Nothing
   , t: 0.0
   , paused: false
+  , pauseAfterSwitch: false
   , systemConfLib: empty
   , uiConfLib: empty
   , engineConfLib: empty
@@ -102,8 +104,8 @@ type EngineST = {
   , tex :: Maybe (Tuple WebGLTexture WebGLTexture)
   , fb :: Maybe (Tuple WebGLFramebuffer WebGLFramebuffer)
   , aux :: Maybe (Array WebGLTexture)
-  , audio :: Maybe (Tuple WebGLTexture AudioAnalyser)
   , auxImg :: Array String
+  , audio :: Maybe (Tuple WebGLTexture AudioAnalyser)
   , ctx :: WebGLContext
   , empty :: GLT.TexImageSource
 }

@@ -5,20 +5,65 @@
 exports.createImageImpl = function(s){
 	return function(callback){
 		return function(){
-			if(!window.images)
-				window.images = {};
-			if(window.images[s]){
-				callback(window.images[s])();
-				return window.images[s];
+			if(!window.auxImages){
+				window.auxImages = {};
+				window.auxImagesLoaded = {};
 			}
-
+			if(window.auxImages[s]){
+				var im = window.auxImages[s];
+				if(window.auxImagesLoaded[s])
+					callback(im)();
+				else{
+					console.log("CRAZY SHIT " + s);
+					var func = im.onload;
+					im.onload = function(){
+						console.log("NEW ONLOAD  " + s);
+						func();
+						callback(im)();
+					}
+				}
+				return window.auxImages[s];
+			}
 			var im = new Image();
-			im.onload = function() {callback(im)()};
+			im.onload = function() {
+				console.log("OLD ONLOAD  " + s);
+				window.auxImagesLoaded[s] = true;
+				callback(im)();
+			};
 			im.src = s;
-			window.images[s] = im;
+			window.auxImages[s] = im;
 		};
 	};
 };
+
+
+exports.createImageImpl2 = function(s){
+	return function(){
+		if(!window.images)
+			window.images = {};
+		if(window.images[s]){
+			return window.images[s];
+		}
+		console.log("before load: " + s);
+		var im;
+		$.ajax({url:s, success: function() {
+			console.log('loaded');
+			im = new Image();
+			im.src = s;
+		}, async:false});
+
+		console.log("after load: " + s);
+		//var im = new Image();
+		//im.src = s;
+		//var loaded;
+//		im.onload = function() {loaded = true}
+		window.images[s] = im;
+		//while(loaded
+		$.im  = im;
+		return im;
+	};
+};
+
 
 exports.emptyImage = function(dim){
 	return function(){
@@ -81,4 +126,20 @@ exports.initAudioAnalyzer = function(bufferSize){
 
 		return analyser;
 	}
+}
+
+
+exports.preloadImages = function(images) {
+	return function() {
+		//$.each(images, function(i,source) { $.get(source); });
+		window.images = {};
+
+		$.each(images, function(i,source) {
+			var im = new Image();
+			im.src = source;
+			window.images[source] = im;
+			$.ajax({url:source, async:false});
+		});
+		console.log("ASDSADSADASDSADS");
+	};
 }

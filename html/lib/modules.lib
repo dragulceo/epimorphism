@@ -7,7 +7,7 @@ dim vec4
 
 --epimorphism < default_app
 component epimorphism
-modules {seed: seed_multi, t:t_wrap_zo, color: color_gbr, reduce: torus_reduce}
+modules {seed: seed_wca, t:t_wrap_zo, color: color_gbr, reduce: torus_reduce}
 
 --analysis < epimorphism
 modules {seed: seed_analysis, t:t_wrap_zo, color: color_id, reduce: torus_reduce}
@@ -19,22 +19,26 @@ zn [-0.123 + 0.745i, 0.0+0.0i, 0.0+0.0i, 0.0+0.0i]
 
 --color_id
 family color
-flags {lib}
+flags {lib, color_main}
 component color_id
 var color
 dim vec4
 
 --color_bgr < color_id
+flags {lib}
 component color_bgr
 
 --color_gbr < color_id
+flags {lib}
 component color_gbr
 
 --rotate_hsv0 < color_id
+flags {lib, color_main}
 component rotate_hsv
 par {rot: 0.06, len_sc:0.0, len_sc_amt:0.0, th_spd: 0.0}
 
 --rotate_hsv1 < color_id
+flags {lib, color_main}
 component rotate_hsv
 par {rot: 0.17, len_sc:1.0, len_sc_amt:0.5, th_spd: 0.0}
 
@@ -113,7 +117,7 @@ images [/textures/simplegeom/tile_grid1.png]
 --seed_wca < seed_nothing
 flags {lib,wca}
 component seed_wca
-modules {t: t_wrap, w:w_lines_border, wt:wt_id, a:alpha_id, color:simple_color}
+modules {t: t_wrap, w:w_lines_border, wt:wt_id, a:alpha_id, seed_color:simple_color}
 
 --seed_multi < seed_nothing
 flags {lib,multi}
@@ -124,37 +128,48 @@ modules {t:t_wrap, seed0:seed_wca, seed1:seed_nothing, seed2:seed_nothing}
 --wt_id
 family wt
 flags {lib}
-component wt_id
+component wt
+sub {wt_exp: w}
 var w
 dim float
 
 --wt_inv < wt_id
-component wt_inv
+sub {wt_exp: 1.0 - w}
 
 --wt_circ < wt_id
-component wt_circ
+sub {wt_exp: sqrt(1.0 - (1.0 - w) * (1.0 - w))}
 
 --wt_inv_circ < wt_id
-component wt_inv_circ
+sub {wt_exp: 1.0 - sqrt(1.0 - (1.0 - w) * (1.0 - w))}
 
+--wt_anim < wt_id
+scripts [randomizeWT1]
 
 --alpha_id
 family a
 flags {lib}
-component alpha_id
+component alpha
+sub {a_exp: a}
+par {alpha: 1.0}
 var a
 dim float
 
 --alpha_no < alpha_id
-component alpha_no
+sub {a_exp: 1.0}
 
 --alpha_solid < alpha_id
-par {alpha: 1.0}
-component alpha_solid
+sub {a_exp: a * @alpha@}
 
 --alpha_linear < alpha_id
-par {alpha: 1.0}
-component alpha_linear
+sub {a_exp: w * a * @alpha@}
+
+--alpha_circ < alpha_id
+sub {a_exp: sqrt(1.0 - (1.0 - w) * (1.0 - w)) * a * @alpha@}
+
+--alpha_anim < alpha_solid
+paths {alpha:wave 0.048 0.3 0.7}
+scripts [randomizeA1]
+
 
 
 --simple_color
@@ -167,8 +182,24 @@ dim vec4
 
 --tex_color < simple_color
 component tex_color
-par {scale: 1.0, spd: 0.0, rot: 0.0, sat:1.0, val:1.0}
+par {scale: 0.333, spd: 0.0, rot: 0.0, sat:1.0, val:1.0}
 images [/textures/simplegeom/tile_grid1.png]
+
+--simple_color_anim1 < simple_color
+flags {anim1}
+par {spd: 0.05, rot: 0.15, sat:1.0, val:1.0}
+
+--tex_color_anim1 < tex_color
+scripts [randomizeImg1]
+flags {anim1}
+
+--tex_color_anim2 < tex_color
+scripts [randomizeImg2]
+flags {anim2}
+
+--tex_color_anim3 < tex_color
+scripts [randomizeImg3]
+flags {anim2}
 
 
 --w_nul
@@ -198,9 +229,34 @@ par {w:0.2}
 component w_lines_stag
 par {w:0.2}
 
---w_squre < w_nul
+--w_square < w_nul
 component w_square
 par {w:0.3}
+
+
+--w_circle_anim < w_circle
+flags {anim}
+paths {w:wave 0.032 0.2 0.55, r: wave 0.02 0.15 0.65}
+
+--w_lines_inner_anim < w_lines_inner
+flags {anim}
+paths {w:wave 0.032 0.2 0.55}
+
+--w_lines_border_anim < w_lines_border
+flags {anim}
+paths {w:wave 0.032 0.2 0.55}
+
+--w_lines_lr_anim < w_lines_lr
+flags {anim}
+paths {w:wave 0.032 0.2 0.55}
+
+--w_lines_stag_anim < w_lines_stag
+flags {anim}
+paths {w:wave 0.032 0.2 0.55}
+
+--w_square_anim < w_square
+flags {anim}
+paths {w:wave 0.032 0.35 0.55}
 
 
 --switch
@@ -260,29 +316,40 @@ modules {t_inner: t_sinh}
 paths {0:circle 0.005 1.0, 1:rose 0.006 0.8 5.0 -0.8, 3:rose 0.0035 1.1 4.0 0.0}
 scripts [randomizeTI1]
 
+--t_seed_anim1 < t_wrap
+flags {wrap}
+zn [1.0 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]
+modules {t_inner: t_id}
+paths {0:rose 0.004 0.4 6.0 0.9, 1:rose 0.0015 0.8 5.0 -0.8, 2:rose 0.0035 0.3 7.0 0.9, 3:rose 0.0045 1.2 4.0 0.0}
+scripts [randomizeTI2]
+
+--t_seed_anim2 < t_seed_anim1
+paths {0:rose 0.025 0.4 6.0 0.9, 1:rose 0.001 0.8 5.0 -0.8, 2:rose 0.003 0.3 7.0 0.9, 3:rose 0.004 1.2 4.0 0.0}
+scripts [randomizeTI3]
+
 
 --t_z
 family t_inner
-flags {lib, all}
+flags {lib, all, all_seed}
 component t_sub
 var z
 dim vec2
 sub {t_expr: z}
 
 --t_cos < t_z
-flags {lib, all}
+flags {lib, all, all_seed}
 sub {t_expr: cos(z)}
 
 --t_sin < t_z
-flags {lib, all}
+flags {lib, all, all_seed}
 sub {t_expr: sin(z)}
 
 --t_cosh < t_z
-flags {lib, all}
+flags {lib, all, all_seed}
 sub {t_expr: cosh(z)}
 
 --t_sinh < t_z
-flags {lib, all}
+flags {lib, all, all_seed}
 sub {t_expr: sinh(z)}
 
 --t_tan < t_z
@@ -294,7 +361,7 @@ flags {lib, all}
 sub {t_expr: tanh(z)}
 
 --t_exp < t_z
-flags {lib, all}
+flags {lib, all, all_seed}
 sub {t_expr: exp(z)}
 
 --t_p0 < t_z
@@ -302,19 +369,19 @@ flags {lib, all}
 sub {t_expr: z / (z + 1) + z / (z - 1)}
 
 --t_p1 < t_z
-flags {lib, all}
+flags {lib, all, all_seed}
 sub {t_expr: 1 - 5 * z * z * z / 3}
 
 --t_p2 < t_z
-flags {lib, all}
+flags {lib, all, all_seed}
 sub {t_expr: 1 - z * z}
 
 --t_p3 < t_z
-flags {lib, all}
+flags {lib, all, all_seed}
 sub {t_expr: z * (1 + z) / 2}
 
 --t_p4 < t_z
-flags {lib, all}
+flags {lib, all, all_seed}
 sub {t_expr: z * z}
 
 --t_tp0 < t_z
@@ -326,7 +393,7 @@ flags {lib, all}
 sub {t_expr: cos(z) - tanh(z)}
 
 --t_tp2 < t_z
-flags {lib, all}
+flags {lib, all, all_seed}
 sub {t_expr: (z + exp(z)) / 2}
 
 --t_tp3 < t_z
@@ -334,15 +401,15 @@ flags {lib, all}
 sub {t_expr: (sin(z) + tan(z)) / 2}
 
 --t_tp4 < t_z
-flags {lib, all}
+flags {lib, all, all_seed}
 sub {t_expr: cosh(z) + exp(z)}
 
 --t_tp5 < t_z
-flags {lib, all}
+flags {lib, all, all_seed}
 sub {t_expr: z * cos(z)}
 
 --t_tp6 < t_z
-flags {lib, all}
+flags {lib, all, all_seed}
 sub {t_expr: (cosh(z) + sinh(z)) / 2}
 
 --t_inv < t_z
@@ -387,4 +454,31 @@ paths {3:rose 0.0035 1.1 4.0 0.0}
 --disp_main1 < disp_id
 flags {}
 modules {post: post_hlim_anim}
+
+--epimorphism2_main < epimorphism_main
+modules {application: epimorphism_auto2}
+
+--epimorphism_auto2 < epimorphism
+scripts [randomizeC1]
+modules {seed: seed_multi_anim, t:t_main1, color: rotate_hsv1, reduce: torus_reduce}
+
+--seed_wca_anim < seed_wca
+modules {t: t_wrap, w:w_lines_border, wt:wt_anim, a:alpha_id, seed_color:simple_color}
+
+
+--seed_wca_anim1 < seed_wca
+scripts [randomizeW1, randomizeSC1]
+modules {t: t_seed_anim1, w:w_lines_border_anim, wt:wt_anim, a:alpha_anim, seed_color:simple_color_anim1}
+
+--seed_wca_anim2 < seed_wca
+scripts [randomizeW1]
+modules {t: t_seed_anim2, w:w_lines_border_anim, wt:wt_anim, a:alpha_anim, seed_color:tex_color_anim2}
+
+--seed_multi_anim < seed_nothing
+flags {multi}
+component seed_multi
+modules {t:t_wrap, seed0:seed_wca_anim1, seed1:seed_wca_anim2, seed2:seed_nothing}
+
+
+--color_anim
 

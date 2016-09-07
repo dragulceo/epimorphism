@@ -10,7 +10,8 @@ exports.addEventListeners = function() {
 		var mn = this.value;
 
 		var cmd = "scr " + mid + " switchChild childN:" + cname + " to:" + mn + " spd:1.0"
-		window.eventHandler(cmd)
+		window.eventHandler("pauseAfterSwitch");
+		window.eventHandler(cmd);
 		$("button#pause").click();
 	}
 
@@ -34,6 +35,7 @@ exports.addEventListeners = function() {
 			var value = this.value.replace(/ /g,'');
 
 			var cmd = "scr " + mid + " switchSub subN:" + subN + " to:" + value + " spd:1.0"
+			window.eventHandler("pauseAfterSwitch");
 			window.eventHandler(cmd);
 			$("button#pause").click();
 		}
@@ -71,6 +73,7 @@ exports.addEventListeners = function() {
 		var src = elt.dataset.src;
 
 		var cmd = "scr " + mid + " switchImage idx:" + idx + " to:" + src + " spd:1.0"
+		window.eventHandler("pauseAfterSwitch");
 		window.eventHandler(cmd);
 		$("button#pause").click();
 		showTab("main");
@@ -104,7 +107,6 @@ exports.addEventListeners = function() {
     if(e.which === 13){
 			e.preventDefault();
 
-			console.log('fart');
 			var mid = $('#consoleVar #mid').val();
 			var v = $('#consoleVar #var').val();
 			var path = $('#consoleVar #path').val();
@@ -121,7 +123,7 @@ exports.addEventListeners = function() {
 			window.eventHandler(cmd);
 
 			cmd = "setPath " + mid + " " + v + " " + path
-			console.log(cmd);
+
 			window.eventHandler(cmd);
 
 			$("button#pause").click();

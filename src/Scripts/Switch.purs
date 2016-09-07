@@ -14,7 +14,7 @@ import Data.Tuple (fst, snd, Tuple(..))
 import Pattern (purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule, purgeScript)
 import ScriptUtil (createScript, parseAndImportScript)
 import System (loadLib, checkFlags, family, flagFamily)
-import Util (lg, inj, randInt, numFromStringE, intFromStringE, gmod)
+import Util (lg, inj, randInt, numFromStringE, intFromStringE, gmod, clickPause)
 
 incData :: forall eff h. SystemST h -> Script -> String -> (String -> String -> EpiS eff h (Array String)) -> EpiS eff h {childN :: String, nxt :: String, spd :: Number}
 incData systemST scr rootId loader = do
@@ -76,7 +76,7 @@ incSub ssRef pRef self t rootId sRef = do
   scr <- lift $ readSTRef sRef
 
   {childN: subVar, nxt, spd} <- incData systemST scr rootId
-    \l' s' -> loadLib l' systemST.indexLib "incSub index" >>= \x -> return x.lib
+    \l' s' -> loadLib s' systemST.indexLib "incSub index" >>= \x -> return x.lib
 
   -- remove self (do this before duplicating module)
   purgeScript ssRef rootId self
@@ -92,7 +92,7 @@ incSub ssRef pRef self t rootId sRef = do
 
       (Tuple parent child) <- findParent systemST.moduleRefPool rootId
       switchModules ssRef parent child root'id spd
-      --purgeModule ssRef root'id --  THIS IS REALLY TRICKY!  WILL CAUSE MEMORY LEAK IF NOT PURGED
+      purgeModule ssRef root'id --  THIS IS REALLY TRICKY!  WILL CAUSE MEMORY LEAK IF NOT PURGED
       return true
     false -> do  -- HRM, I think we can do better here
       let nul' = lg "TEMP: can't find subVar!"
@@ -173,7 +173,7 @@ incImage ssRef pRef self t rootId sRef = do
   scr <- lift $ readSTRef sRef
 
   {childN: idxS, nxt, spd} <- incData systemST scr rootId
-    \l' s' -> loadLib l' systemST.indexLib "incImage index" >>= \x -> return x.lib
+    \l' s' -> loadLib s' systemST.indexLib "incImage index" >>= \x -> return x.lib
 
   -- remove self (do this before duplicating module)
   purgeScript ssRef rootId self
@@ -350,6 +350,12 @@ finishSwitch ssRef pRef self t rootId sRef = do
       -- replace.  this removes all scripts wrt this as well
       replaceModule ssRef parent subN rootId (ImportModule m1)
 
+      -- this is pretty ghetto.  its for the dev ui
+      when systemST.pauseAfterSwitch do
+        lift $ modifySTRef ssRef (\s -> s {pauseAfterSwitch = false})
+        lift $ clickPause
+        return unit
+
       return true
     _ -> do
       return false
@@ -375,7 +381,7 @@ randomize ssRef pRef self t mid sRef = do
   -- next iteration
   case t of
     t | t >= nxt -> do
-      --let a = lg "ITERATE COMPONENT"
+      let a = lg "ITERATE COMPONENT"
       let dt' = insert "nxt" (show (t + dly)) scr.dt
       lift $ modifySTRef sRef (\s -> s {dt = dt'})
       adr' <- case (adr == "!") of

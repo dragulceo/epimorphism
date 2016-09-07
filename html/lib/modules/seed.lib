@@ -24,7 +24,7 @@ images [/textures/simplegeom/tile_grid1.png]
 --seed_wca < seed_nothing
 flags {lib,wca}
 component seed_wca
-modules {t: t_wrap, w:w_lines_border, wt:wt_id, a:alpha_id, color:simple_color}
+modules {t: t_wrap, w:w_lines_border, wt:wt_id, a:alpha_id, seed_color:simple_color}
 
 --seed_multi < seed_nothing
 flags {lib,multi}

@@ -62,6 +62,11 @@ exports.now = function () {
   return performance.now();
 };
 
+exports.timerNow = function () {
+  return performance.now();
+};
+
+
 exports.unsafeEval = function (s) {
   return function () {eval(s);};
 }
@@ -201,3 +206,8 @@ exports.randInt = function(n) {
 exports.isNumber = function(s) {
 	return !isNaN(s);
 }
+
+
+exports.clickPause = function() {
+	setTimeout(function(){$("button#pause").click();}, 200);
+};

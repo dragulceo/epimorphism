@@ -3,8 +3,44 @@ fn null
 
 --randomizeTI1
 fn randomize
-dt {dly: 30, spd: 0.04, lib:all, dim:vec2, sub:t_inner, typ:Mod, adr:!}
+dt {dly: 50, spd: 0.04, lib:all, dim:vec2, sub:t_inner, typ:Mod, adr:!}
 
---randomizeZ
+--randomizeTI2
 fn randomize
-dt {dly: 30, spd: 0.04, lib:all', dim:vec2, sub:t, typ:Mod, adr:!}
+dt {dly: 35, spd: 0.04, lib:all_seed, dim:vec2, sub:t_inner, typ:Mod, adr:!}
+
+--randomizeTI3
+fn randomize
+dt {dly: 45, spd: 0.04, lib:all_seed, dim:vec2, sub:t_inner, typ:Mod, adr:!}
+
+--randomizeA1
+fn randomize
+dt {dly: 40, spd: 0.5, lib:seed_a_main, dim:float, sub:a_exp, typ:Sub, adr:!}
+
+--randomizeWT1
+fn randomize
+dt {dly: 45, spd: 0.1, lib:seed_wt_main, dim:float, sub:wt_exp, typ:Sub, adr:!}
+
+--randomizeW1
+fn randomize
+dt {dly: 55, spd: 0.3, lib:anim, dim:vec4, sub:w, typ:Mod, adr:!}
+
+--randomizeSC1
+fn randomize
+dt {dly: 65, spd: 0.3, lib:anim1, dim:vec4, sub:seed_color, typ:Mod, adr:!}
+
+--randomizeImg1
+fn randomize
+dt {dly: 55, spd: 0.05, lib:images1, dim:vec4, sub:0, typ:Image, adr:!}
+
+--randomizeImg2
+fn randomize
+dt {dly: 65, spd: 0.05, lib:images2, dim:vec4, sub:0, typ:Image, adr:!}
+
+--randomizeImg3
+fn randomize
+dt {dly: 15, spd: 0.3, lib:images3, dim:vec4, sub:0, typ:Image, adr:!}
+
+--randomizeC1
+fn randomize
+dt {dly: 15, spd: 0.3, lib:color_main, dim:vec4, sub:color, typ:Mod, adr:!}

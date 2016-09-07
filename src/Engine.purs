@@ -23,17 +23,20 @@ import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (StrMap)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple), snd, fst)
-import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
+import Graphics.Canvas (Canvas, setCanvasHeight, setCanvasWidth, getCanvasElementById)
 import Graphics.WebGL (runWebgl, debug)
 import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
 import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor, vertexAttribPointer, enableVertexAttribArray, bufferData, bindBuffer, createBuffer, createFramebuffer, createTexture)
 import Graphics.WebGL.Raw.Types (ArrayBufferView)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram)
 import Graphics.WebGL.Types (WebGL, WebGLContext, WebGLProgram, WebGLTexture, WebGLFramebuffer, ArrayBufferType(ArrayBuffer), BufferData(DataSource), BufferUsage(StaticDraw), DataType(Float), DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
-import Util (replaceAll, unsafeNull)
+import System (loadLib)
+import Util (lg, timerNow, replaceAll, unsafeNull)
 
 foreign import audioData :: forall eff. AudioAnalyser -> Eff eff (ArrayBufferView)
 foreign import initAudioAnalyzer :: forall eff. Int -> Eff eff AudioAnalyser
+
+foreign import preloadImages :: forall eff. Array String -> Eff eff Unit
 
 -- PUBLIC
 
@@ -101,18 +104,62 @@ uploadAux es host names = do
       when (length aux < length names) do
         throwError "not enough aux textures"
 
-      foldM (createImage es.ctx host) 0 (zip aux names)
+      foldM (createImage es.ctx es.auxImg host) 0 (zip aux names)
       return names
 
 
 -- create an image object. can throw error if images missing!  also some synchronization issues
-createImage :: forall eff. WebGLContext -> String -> Int -> (Tuple WebGLTexture String) -> Epi eff Int
-createImage ctx host c (Tuple aux name) = do
-  lift $ createImageImpl (host ++ name) \img -> do
-    runWebgl (do
+createImage :: forall eff. WebGLContext -> (Array String) -> String  -> Int -> (Tuple WebGLTexture String) -> Epi eff Int
+createImage ctx currentImages host c (Tuple aux name) = do
+  let currentImage = currentImages !! c
+  let doUpload = case currentImage of
+        Nothing -> true
+        Just cn -> (cn /= name)
+  when doUpload do
+    if doUpload then let g = lg $ "UPLOADING: " ++ name in return unit else return unit
+    m <- lift $ timerNow
+    lift $ createImageImpl (host ++ name) \img -> do
+      runWebgl (do
+        n <- lift $ lift  $ timerNow
+        let asdf = lg $ "in callback " ++ name
+        liftEff $ GL.bindTexture ctx GLE.texture2d aux
+        liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte img
+        n' <- lift $ lift  $ timerNow
+        let y = lg $ "  UPLOAD TO GPU: " ++ name ++ " " ++ (show (n' - n))
+        return unit
+      ) ctx
+      return unit
+    m' <- lift $ timerNow
+    let y' = lg $ "  TOTAL: " ++ name ++ " " ++ (show (m' - m))
+    return unit
+  return $ c + 1
+
+
+createImage2 :: forall eff. WebGLContext -> (Array String) -> String  -> Int -> (Tuple WebGLTexture String) -> Epi eff Int
+createImage2 ctx currentImages host c (Tuple aux name) = do
+  let currentImage = currentImages !! c
+  let doUpload = case currentImage of
+        Nothing -> true
+        Just cn -> (cn /= name)
+  when doUpload do
+    if doUpload then let g = lg $ "UPLOADING: " ++ name in return unit else return unit
+    m <- lift $ timerNow
+    img <- lift $ createImageImpl2 (host ++ name)
+    m' <- lift $ timerNow
+    let y' = lg $ "  IMG FROM SERVER: " ++ name ++ " " ++ (show (m' - m))
+
+    lift $ runWebgl (do
+      n <- lift $ lift  $ timerNow
+      let asdf = lg $ "in callback " ++ name
       liftEff $ GL.bindTexture ctx GLE.texture2d aux
       liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte img
+      n' <- lift $ lift  $ timerNow
+      let y = lg $ "  UPLOAD TO GPU: " ++ name ++ " " ++ (show (n' - n))
+      return unit
     ) ctx
+
+
+
     return unit
   return $ c + 1
 
@@ -120,6 +167,10 @@ createImage ctx host c (Tuple aux name) = do
 foreign import createImageImpl :: forall eff. String ->
                                   (GLT.TexImageSource -> Eff eff Unit) ->
                                   Eff eff Unit
+
+foreign import createImageImpl2 :: forall eff. String ->
+                                  Eff eff GLT.TexImageSource
+
 
 
 clearFB :: forall eff h. EngineConf -> EngineST -> EpiS eff h Unit
@@ -137,18 +188,30 @@ foreign import emptyImage :: forall eff. Int -> Eff eff GLT.TexImageSource
 -- compile shaders and load into systemST
 setShaders :: forall eff h. SystemConf -> EngineConf -> STRef h EngineST -> SystemST h -> Pattern -> EpiS eff h Unit
 setShaders sysConf engineConf esRef sys pattern = do
+  l <- lift $ timerNow
   es <- lift $ readSTRef esRef
 
   -- load & compile shaders
+  a <- lift $ timerNow
   {main, disp, vert, aux} <- compileShaders pattern sys
   let mainF = replaceAll "\\$fract\\$" (show engineConf.fract) main -- a little ghetto, we need this in a for loop
+  a' <- lift $ timerNow
+  let x = lg $ "COMPILE STRINGS: " ++ (show (a' - a))
 
+  c <- lift $ timerNow
+  let d' = lg es.auxImg
+  let d = lg aux
   auxImg <- uploadAux es sysConf.host aux
+  c' <- lift $ timerNow
+  let x = lg $ "UPLOAD AUX: " ++ (show (c' - c))
 
   Tuple main' disp' <- execGL es.ctx ( do
     -- create programs
+    b <- lift $ lift $ timerNow
     mainProg <- compileShadersIntoProgram vert mainF
     dispProg <- compileShadersIntoProgram vert disp
+    b' <- lift $ lift $ timerNow
+    let x' = lg $ "COMPILE PROG: " ++ (show (b' - b))
 
     -- vertex coords
     pos <- createBuffer
@@ -170,13 +233,17 @@ setShaders sysConf engineConf esRef sys pattern = do
   )
 
   lift $ modifySTRef esRef (\s -> s {dispProg = Just disp', mainProg = Just main', auxImg = auxImg})
+
+  l' <- lift $ timerNow
+  let x' = lg $ "COMPILE ALL: " ++ (show (l' - l))
+
   return unit
 
 
 -- initialize the rendering engine & create state.  updates an existing state if passed
 -- maybe validate that kernelDim > 0?
 initEngineST :: forall eff h. SystemConf -> EngineConf -> SystemST h -> Pattern -> String -> Maybe (STRef h EngineST) -> EpiS eff h (STRef h EngineST)
-initEngineST sysConf engineConf sys pattern canvasId esRef' = do
+initEngineST sysConf engineConf systemST pattern canvasId esRef' = do
   -- find canvas & create context
   canvasM <- liftEff $ getCanvasElementById canvasId
   canvas <- case canvasM of
@@ -212,6 +279,10 @@ initEngineST sysConf engineConf sys pattern canvasId esRef' = do
   lift $ setCanvasWidth (toNumber dim) canvas
   lift $ setCanvasHeight (toNumber dim) canvas
 
+  -- preload aux
+  --allImages <- loadLib "all_images" systemST.indexLib "preload aux all_images"
+  -- lift $ preloadImages allImages.lib
+
   -- webgl initialization
   res <- execGL ctx do
     Tuple tex0 fb0 <- initTex dim
@@ -232,7 +303,7 @@ initEngineST sysConf engineConf sys pattern canvasId esRef' = do
 
   -- set shaders
   lift $ writeSTRef esRef res
-  setShaders sysConf engineConf esRef sys pattern
+  setShaders sysConf engineConf esRef systemST pattern
 
   return esRef
 

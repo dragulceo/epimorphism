@@ -1,31 +1,9 @@
-wt wt_id {{
+wt wt {{
+	w = $wt_exp$;
 }}
 
-wt wt_inv {{
-	w = 1.0 - w;
-}}
-
-wt wt_circ {{
-	w = sqrt(1.0 - (1.0 - w) * (1.0 - w));
-}}
-
-wt wt_inv_circ {{
-	w = 1.0 - sqrt(1.0 - (1.0 - w) * (1.0 - w));
-}}
-
-alpha alpha_id {{
-}}
-
-alpha alpha_no {{
-	a = 1.0;
-}}
-
-alpha alpha_solid {{
-	a *= @alpha@;
-}}
-
-alpha alpha_linear {{
-	a *= w * @alpha@;
+alpha alpha {{
+	a = $a_exp$;
 }}
 
 color simple_color {{

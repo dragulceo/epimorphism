@@ -52,6 +52,9 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         lift $ modifySTRef ssRef (\s -> s {paused = not s.paused})
         lift $ modifySTRef pRef (\p -> p {tSpd = 1.0 - p.tSpd})
         return unit
+      "pauseAfterSwitch" -> do
+        lift $ modifySTRef ssRef (\s -> s {pauseAfterSwitch = true})
+        return unit
       "killScripts" -> do
         lift $ modifySTRef ssRef (\s -> s {scriptRefPool = empty})
         let upd = (\r -> lift $ modifySTRef r (\m -> m {scripts = []}))

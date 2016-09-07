@@ -84,11 +84,11 @@ exports.addGlobalEventListeners = function(handler) {
 };
 
 
-exports.registerAuxImages = function(images) {
+exports.registerAuxImages = function(imgs) {
   return function() {
 		var imgDiv = $('#allImages');
-		for (var i = 0; i < images.length; i++) {
-			var src = images[i];
+		for (var i = 0; i < imgs.length; i++) {
+			var src = imgs[i];
 			imgDiv.append($("<img onclick='consoleImageSelectHandler(this)' src='" + src +"' data-src='" + src +"'>"));
 		};
 	}

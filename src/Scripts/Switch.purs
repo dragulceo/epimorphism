@@ -189,7 +189,7 @@ incImage ssRef pRef self t rootId sRef = do
 
       (Tuple parent childN) <- findParent systemST.moduleRefPool rootId
       switchModules ssRef parent childN m'id spd
-      --- SHOULDNT WE PURGE m'id HERE??????
+      purgeModule ssRef m'id --  THIS IS REALLY TRICKY!  WILL CAUSE MEMORY LEAK IF NOT PURGED
 
       return true
     Nothing -> do  -- HRM, maybe we want to be able to expand the number of existing images

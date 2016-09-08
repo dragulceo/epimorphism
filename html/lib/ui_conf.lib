@@ -16,7 +16,7 @@ showFps true
 --prod < dev
 windowState fullWindow
 keySet prod
-showFps true
+showFps false
 
 --farm1 < dev
 uiCompLib farm1

@@ -1,4 +1,5 @@
 MAKE THINGS BETTER/AUDIO1:
+- setup farm system (ui, pattern, etc)
 - color stuff
 - more symmetry?
 - test on laptop

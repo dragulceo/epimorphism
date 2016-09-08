@@ -13,13 +13,10 @@ uiCompLib lib
 uiUpdateFreq 1
 showFps true
 
---full < dev
-windowState fullWindow
-
 --prod < dev
 windowState fullWindow
-uiUpdateFreq 10
 keySet prod
+showFps true
 
 --farm1 < dev
 uiCompLib farm1

@@ -1,13 +1,14 @@
 MAKE THINGS BETTER/AUDIO1:
-- setup farm system (ui, pattern, etc)
-- color stuff
-- more symmetry?
-- test on laptop
-- osc input
-- music pattern
+- image loading has to be asynchronous :/
 - choppiness/compiling/perf
 - that ghetto sleep thing when repausing :/
 - image popin
+
+- setup farm system (ui, pattern, etc)
+- color stuff
+- more symmetry?
+- osc input
+- music pattern
 - generally make better
 - julia set & maybe interference
 

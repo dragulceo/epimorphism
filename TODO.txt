@@ -1,6 +1,4 @@
 MAKE THINGS BETTER/AUDIO1:
-- that ghetto sleep thing when repausing :/
-
 - setup farm system (ui, pattern, etc)
 - color stuff
 - more symmetry?

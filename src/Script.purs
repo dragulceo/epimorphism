@@ -8,7 +8,7 @@ import Data.Foldable (or)
 import Data.StrMap (member)
 import Data.Traversable (traverse)
 import ScriptPaths (incZn, zpath, ppath, zfix, pfix)
-import Switch (randomize, incScript, incScript2, incImage, incMod, finishSwitch, incSub, switchChild, switchSub, switchImage)
+import Switch (randomize, incScript, incScript2, incImage, incMod, finishSwitch, incSub, switchChild, switchSub, switchImage, pause)
 import System (mSeq, loadLib)
 
 -- find script fuction given name
@@ -29,6 +29,7 @@ lookupScriptFN n = case n of
   "switchImage"  -> return switchImage
   "incZn"        -> return incZn
   "finishSwitch" -> return finishSwitch
+  "pause"        -> return pause
   "randomize"    -> return randomize
   _              -> throwError $ "script function not found: " ++ n
 

@@ -19,7 +19,7 @@ import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Engine (setShaders, initEngineST, clearFB)
 import Graphics.Canvas (Canvas)
-import Layout (initLayout)
+import Layout (updateLayout, initLayout)
 import Pattern (findModule)
 import ScriptUtil (parseAndImportScript)
 import Serialize (unsafeSerialize)
@@ -146,6 +146,8 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
       "initLayout" -> do
         initLayout uiConf uiST
         return unit
+      "updateLayout" -> do
+        updateLayout uiConf uiST systemST pattern true
       "showFps" -> do
         lift $ modifySTRef ucRef (\ui -> ui {showFps = not ui.showFps})
         uiConf' <- lift $ readSTRef ucRef

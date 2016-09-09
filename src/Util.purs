@@ -25,7 +25,7 @@ foreign import stick :: forall a b. a -> b
 foreign import tLg :: forall a b. a -> b
 foreign import unsafeEval :: forall eff. String -> Eff eff Unit
 foreign import winLog :: forall a eff. a -> Eff eff Unit
-foreign import requestAnimationFrame :: forall eff. Eff eff Unit -> Eff eff Unit
+foreign import requestAnimationFrame :: forall eff a. (a -> Eff eff Unit) -> a -> Eff eff Unit
 foreign import now :: forall eff. Eff (now :: Now | eff) Number
 foreign import replaceAll :: String -> String -> String -> String
 

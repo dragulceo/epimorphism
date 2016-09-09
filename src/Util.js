@@ -24,22 +24,23 @@ exports.unsafeCast = function(obj){
 };
 
 
-exports.requestAnimationFrame = function(x){
-  if (typeof rAF === 'undefined') {
-    var rAF = (function(){
-      return  window.requestAnimationFrame ||
-        window.webkitRequestAnimationFrame ||
-        window.mozRequestAnimationFrame    ||
-        function( callback ){
-          window.setTimeout(callback, 1000 / 60);
-        };
-    })();
-  }
-  return function(){
-    return rAF(x);
-  };
+exports.requestAnimationFrame = function(func){
+	return function(args){
+		if (typeof rAF === 'undefined') {
+			var rAF = (function(){
+				return window.requestAnimationFrame ||
+					window.webkitRequestAnimationFrame ||
+					window.mozRequestAnimationFrame    ||
+					function( callback ){
+						window.setTimeout(callback, 1000 / 60);
+					};
+			})();
+		}
+		return function(){
+			return rAF(func(args));
+		};
+	};
 };
-
 
 window.lgCnt = 0;
 exports.tLg = function tLg(x) {
@@ -229,5 +230,6 @@ exports.isNumber = function(s) {
 
 
 exports.clickPause = function() {
-	setTimeout(function(){$("button#pause").click();}, 200);
+	$("button#pause").click();
+	window.eventHandler("updateLayout");
 };

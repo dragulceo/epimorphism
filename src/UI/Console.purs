@@ -23,6 +23,7 @@ foreign import addEventListeners :: forall eff. Eff eff Unit
 
 renderConsole :: forall eff h. UIConf -> UIST -> SystemST h -> Pattern -> EpiS eff h Unit
 renderConsole uiConf uiST systemST pattern = do
+  let a = lg "Update Console"
   dsmDiv <- findElt "debugMain"
   str0 <- renderModule systemST uiConf.uiCompLib pattern.main "MAIN" Nothing
   lift $ setInnerHTML str0 dsmDiv

@@ -126,13 +126,13 @@ animate state = handleError do
   renderFrame systemST'' engineConf engineST' pattern systemST'.frameNum
 
   -- update ui
-  updateLayout uiConf uiST systemST'' pattern
+  updateLayout uiConf uiST systemST'' pattern false
 
   -- request next frame
   halted <- lift $ isHalted
   unless halted do
     lift $ modifySTRef ssRef (\s -> s {frameNum = s.frameNum + 1})
-    lift $ requestAnimationFrame $ animate $ state
+    lift $ requestAnimationFrame animate state
 
   return unit
 

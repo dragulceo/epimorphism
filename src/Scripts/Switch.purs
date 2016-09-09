@@ -8,7 +8,7 @@ import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, STRef, readSTRef)
 import Data.Array (filter, index, length, null, updateAt) as A
 import Data.Maybe (Maybe(Just, Nothing))
-import Data.StrMap (fromFoldable, insert, member, union)
+import Data.StrMap (empty, fromFoldable, insert, member, union)
 import Data.Traversable (traverse)
 import Data.Tuple (fst, snd, Tuple(..))
 import Pattern (purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule, purgeScript)
@@ -353,13 +353,19 @@ finishSwitch ssRef pRef self t rootId sRef = do
       -- this is pretty ghetto.  its for the dev ui
       when systemST.pauseAfterSwitch do
         lift $ modifySTRef ssRef (\s -> s {pauseAfterSwitch = false})
-        lift $ clickPause
+        createScript ssRef parent "default" "pause" empty
         return unit
 
       return true
     _ -> do
       return false
 
+
+pause :: forall eff h. ScriptFn eff h
+pause ssRef pRef self t rootId sRef = do
+  lift $ clickPause
+  purgeScript ssRef rootId self
+  return false
 
 randomize :: forall eff h. ScriptFn eff h
 randomize ssRef pRef self t mid sRef = do

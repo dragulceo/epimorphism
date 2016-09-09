@@ -56,7 +56,7 @@ dim vec4
 --tex_color < simple_color
 component tex_color
 par {scale: 0.333, spd: 0.0, rot: 0.0, sat:1.0, val:1.0}
-images [/textures/simplegeom/tile_grid1.png]
+images [textures/simplegeom/tile_grid1.png]
 
 --simple_color_anim1 < simple_color
 flags {anim1}

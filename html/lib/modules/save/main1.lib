@@ -12,7 +12,7 @@ paths {w:wave 0.032 0.45 0.55, alpha:wave 0.048 0.35 0.65}
 
 --seed_borderM1 < seed_borderM
 component seed_simple_img
-images [/textures/simplegeom/tile_grid1.png]
+images [textures/simplegeom/tile_grid1.png]
 
 --ts_wrap_linx3' < t_id
 zn [1.1 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]

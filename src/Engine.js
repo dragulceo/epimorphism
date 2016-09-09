@@ -23,6 +23,8 @@ exports.createImageImpl = function(s){
 				return window.auxImages[s];
 			}else{
 				console.log("COULDN'T FIND IMAGE? " + s);
+				console.log(window.auxImages);
+				console.log(window.auxImages[s]);
 				var im = new Image();
 				im.onload = function() {
 					window.auxImagesLoaded[s] = true;
@@ -119,28 +121,26 @@ exports.preloadImages = function(images) {
 
 exports.preloadImages = function(images) {
 	return function(callback){
-		//return function(arg){
-  		return function() {
-  			window.auxImages = {};
-  			window.auxImagesLoaded = {};
-  			var promises = [];
-  			for (var i = 0; i < images.length; i++) {
-  				(function(url, promise) {
-						var img = new Image();
-  					window.auxImages[url] = img;
-						img.onload = function() {
-							promise.resolve();
-							window.auxImagesLoaded[url] = true;
-						};
-						img.src = url;
-  				})(images[i], promises[i] = $.Deferred());
-  			}
-  			$.when.apply($, promises).done(function() {
-					console.log("DONE PRELOADING AUX");
-					//callback();//arg);
-					$("#loading").hide();
-  			});
-			//};
+  	return function() {
+  		window.auxImages = {};
+  		window.auxImagesLoaded = {};
+  		var promises = [];
+  		for (var i = 0; i < images.length; i++) {
+  			(function(url, promise) {
+					var img = new Image();
+  				window.auxImages[url] = img;
+					img.onload = function() {
+						promise.resolve();
+						window.auxImagesLoaded[url] = true;
+					};
+					img.src = url;
+  			})(images[i], promises[i] = $.Deferred());
+  		}
+  		$.when.apply($, promises).done(function() {
+				console.log("DONE PRELOADING AUX");
+				callback();
+				$("#loading").hide();
+  		});
   	};
 	};
 };

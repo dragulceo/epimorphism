@@ -19,7 +19,7 @@ modules {t: t_wrap}
 --seed_img1 < seed_simple
 flags {t_test, img}
 component seed_simple_img
-images [/textures/simplegeom/tile_grid1.png]
+images [textures/simplegeom/tile_grid1.png]
 
 --seed_wca < seed_nothing
 flags {lib,wca}

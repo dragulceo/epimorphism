@@ -1,7 +1,7 @@
 module Main where
 
 import Prelude
-import Config (UIST, EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf, UIConf)
+import Config (SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, SystemConf, UIConf)
 import Control.Monad (unless, when)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (runExceptT, lift)
@@ -19,7 +19,7 @@ import Pattern (importPattern)
 import Script (runScripts)
 import System (initSystemST, loadLib)
 import UI (initUIST)
-import Util (lg, isHalted, requestAnimationFrame, now, Now, handleError, seedRandom, urlArgs, isDev)
+import Util (handleError, lg, isHalted, requestAnimationFrame, now, Now, seedRandom, urlArgs, isDev)
 
 host :: String
 host = ""
@@ -43,12 +43,8 @@ getSysConfName = do
   let conf = fromMaybe def (lookup "system" args)
   return conf
 
-initState :: forall eff h. EpiS eff h (State h)
-initState = do
-  -- init system
-  systemST <- initSystemST host
-  ssRef <- lift $ newSTRef systemST
-
+initState :: forall eff h. SystemST h -> EpiS eff h (State h)
+initState systemST = do
   -- init config
   systemName <- lift $ getSysConfName
   systemConf <- loadLib systemName systemST.systemConfLib "init system"
@@ -62,6 +58,7 @@ initState = do
   pattern    <- loadLib systemConf'.initPattern systemST.patternLib "init pattern"
 
   -- build strefs
+  ssRef <- lift $ newSTRef systemST
   scRef <- lift $ newSTRef systemConf'
   ecRef <- lift $ newSTRef engineConf
   ucRef <- lift $ newSTRef uiConf
@@ -81,10 +78,9 @@ initState = do
 
 animate :: forall h. (State h) -> Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
 animate state = handleError do
-  let a = lg "animating?"
   -- unpack state
-
   {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef} <- return state
+
   uiConf     <- lift $ readSTRef ucRef
   uiST       <- lift $ readSTRef usRef
   systemST   <- lift $ readSTRef ssRef
@@ -135,19 +131,17 @@ animate state = handleError do
   -- request next frame
   halted <- lift $ isHalted
   unless halted do
-    let a = lg "requestin??"
     lift $ modifySTRef ssRef (\s -> s {frameNum = s.frameNum + 1})
     lift $ requestAnimationFrame $ animate $ state
 
   return unit
 
 
-preloadAux :: forall h. (State h) ->
+preloadAux :: forall h. (SystemST h) ->
               Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit ->
               Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
-preloadAux st callback = do
+preloadAux systemST callback = do
   let a = lg "1"
-  systemST <- readSTRef st.ssRef
   case (lookup "all_images" systemST.indexLib) of
     (Just imgs) -> do
       let a = lg "2"
@@ -160,8 +154,12 @@ preloadAux st callback = do
 main :: Eff (canvas :: Canvas, dom :: DOM, now :: Now) Unit
 main = do
   runST do
-    res <- runExceptT initState
-    case res of
-      Right st -> do
-        --animate st
-        preloadAux st (animate st)
+    r1 <- runExceptT $ initSystemST host
+    case r1 of
+      Right ss -> do
+        preloadAux ss do
+          res <- runExceptT $ initState ss
+          case res of
+            Right st -> do
+                  -- animate st is executed immediately.  this is incorrect, but we dont have laziness
+              animate st

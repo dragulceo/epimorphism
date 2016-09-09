@@ -122,7 +122,7 @@ modules {t: t_wrap}
 --seed_img1 < seed_simple
 flags {t_test, img}
 component seed_simple_img
-images [/textures/simplegeom/tile_grid1.png]
+images [textures/simplegeom/tile_grid1.png]
 
 --seed_wca < seed_nothing
 flags {lib,wca}
@@ -193,7 +193,7 @@ dim vec4
 --tex_color < simple_color
 component tex_color
 par {scale: 0.333, spd: 0.0, rot: 0.0, sat:1.0, val:1.0}
-images [/textures/simplegeom/tile_grid1.png]
+images [textures/simplegeom/tile_grid1.png]
 
 --simple_color_anim1 < simple_color
 flags {anim1}
@@ -453,7 +453,7 @@ paths {w:wave 0.032 0.45 0.55, alpha:wave 0.048 0.35 0.65}
 
 --seed_borderM1 < seed_borderM
 component seed_simple_img
-images [/textures/simplegeom/tile_grid1.png]
+images [textures/simplegeom/tile_grid1.png]
 
 --ts_wrap_linx3' < t_id
 zn [1.1 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]

@@ -102,7 +102,6 @@ exports.initAudioAnalyzer = function(bufferSize){
 exports.preloadImages = function(images) {
 	return function(callback){
   	return function() {
-			console.log("PRELOADING AUX");
   		window.auxImages = {};
 			window.auxImagesLoaded = {};
   		var promises = [];
@@ -118,9 +117,8 @@ exports.preloadImages = function(images) {
   			})(images[i], promises[i] = $.Deferred());
   		}
   		$.when.apply($, promises).done(function() {
-			console.log("DONE PRELOADING AUX");
 				callback();
-				$("#loading").hide();
+				$("#loading").fadeOut("slow");
   		});
   	};
 	};

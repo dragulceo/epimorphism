@@ -34,9 +34,7 @@ import Util (lg, replaceAll, unsafeNull)
 
 foreign import audioData :: forall eff. AudioAnalyser -> Eff eff (ArrayBufferView)
 foreign import initAudioAnalyzer :: forall eff. Int -> Eff eff AudioAnalyser
-foreign import preloadImages :: forall eff. Array String ->
-                                (Eff eff Unit) ->
-                                Eff eff Unit
+foreign import preloadImages :: forall eff. Array String -> Eff eff Unit -> Eff eff Unit
 
 -- PUBLIC
 

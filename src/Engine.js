@@ -2,13 +2,10 @@
 
 // module Engine
 
+// clean up
 exports.createImageImpl = function(s){
 	return function(callback){
 		return function(){
-			if(!window.auxImages){
-				window.auxImages = {};
-				window.auxImagesLoaded = {};
-			}
 			if(window.auxImages[s]){
 				var im = window.auxImages[s];
 				if(window.auxImagesLoaded[s])
@@ -102,28 +99,12 @@ exports.initAudioAnalyzer = function(bufferSize){
 }
 
 
-/*
-exports.preloadImages = function(images) {
-	return function() {
-		window.auxImages = {};
-		window.auxImagesLoaded = {};
-
-		$.each(images, function(i,source) {
-			var im = new Image();
-			im.src = source;
-			im.onload = function() {
-				window.auxImagesLoaded[source] = true;
-			}
-			window.auxImages[source] = im;
-		});
-	};
-*/
-
 exports.preloadImages = function(images) {
 	return function(callback){
   	return function() {
+			console.log("PRELOADING AUX");
   		window.auxImages = {};
-  		window.auxImagesLoaded = {};
+			window.auxImagesLoaded = {};
   		var promises = [];
   		for (var i = 0; i < images.length; i++) {
   			(function(url, promise) {
@@ -137,7 +118,7 @@ exports.preloadImages = function(images) {
   			})(images[i], promises[i] = $.Deferred());
   		}
   		$.when.apply($, promises).done(function() {
-				console.log("DONE PRELOADING AUX");
+			console.log("DONE PRELOADING AUX");
 				callback();
 				$("#loading").hide();
   		});

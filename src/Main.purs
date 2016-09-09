@@ -9,7 +9,7 @@ import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
 import Data.Either (Either(Left, Right))
 import Data.Int (round, toNumber)
-import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
+import Data.Maybe (maybe, fromMaybe, Maybe(Nothing, Just))
 import Data.StrMap (lookup)
 import Engine (preloadImages, initEngineST, renderFrame, setShaders)
 import Graphics.Canvas (Canvas)
@@ -42,6 +42,7 @@ getSysConfName = do
   let def = if dev then "dev" else "prod"
   let conf = fromMaybe def (lookup "system" args)
   return conf
+
 
 initState :: forall eff h. SystemST h -> EpiS eff h (State h)
 initState systemST = do
@@ -141,25 +142,18 @@ preloadAux :: forall h. (SystemST h) ->
               Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit ->
               Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
 preloadAux systemST callback = do
-  let a = lg "1"
-  case (lookup "all_images" systemST.indexLib) of
-    (Just imgs) -> do
-      let a = lg "2"
-      preloadImages imgs.lib callback
-      let b = lg "3"
-      return unit
+  maybe (return unit)
+    (\x -> preloadImages x.lib callback)
+    (lookup "all_images" systemST.indexLib)
 
-  return unit
 
 main :: Eff (canvas :: Canvas, dom :: DOM, now :: Now) Unit
 main = do
   runST do
     r1 <- runExceptT $ initSystemST host
     case r1 of
-      Right ss -> do
-        preloadAux ss do
-          res <- runExceptT $ initState ss
-          case res of
-            Right st -> do
-                  -- animate st is executed immediately.  this is incorrect, but we dont have laziness
-              animate st
+      Right sys -> do
+        preloadAux sys do
+          r2 <- runExceptT $ initState sys
+          case r2 of
+            Right st -> do animate st

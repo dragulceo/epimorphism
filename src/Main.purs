@@ -4,13 +4,14 @@ import Prelude
 import Config (UIST, EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf, UIConf)
 import Control.Monad (unless, when)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Except.Trans (lift)
+import Control.Monad.Except.Trans (runExceptT, lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
+import Data.Either (Either(Left, Right))
 import Data.Int (round, toNumber)
 import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
 import Data.StrMap (lookup)
-import Engine (initEngineST, renderFrame, setShaders)
+import Engine (preloadImages, initEngineST, renderFrame, setShaders)
 import Graphics.Canvas (Canvas)
 import Layout (updateLayout)
 import Paths (runPaths)
@@ -42,8 +43,8 @@ getSysConfName = do
   let conf = fromMaybe def (lookup "system" args)
   return conf
 
-init :: forall eff h. EpiS eff h (State h)
-init = do
+initState :: forall eff h. EpiS eff h (State h)
+initState = do
   -- init system
   systemST <- initSystemST host
   ssRef <- lift $ newSTRef systemST
@@ -78,10 +79,12 @@ init = do
   return {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef}
 
 
-animate :: forall h. EpiS (now :: Now) h (State h) -> Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
-animate stateM = handleError do
+animate :: forall h. (State h) -> Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
+animate state = handleError do
+  let a = lg "animating?"
   -- unpack state
-  state@{ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef} <- stateM
+
+  {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef} <- return state
   uiConf     <- lift $ readSTRef ucRef
   uiST       <- lift $ readSTRef usRef
   systemST   <- lift $ readSTRef ssRef
@@ -132,12 +135,33 @@ animate stateM = handleError do
   -- request next frame
   halted <- lift $ isHalted
   unless halted do
+    let a = lg "requestin??"
     lift $ modifySTRef ssRef (\s -> s {frameNum = s.frameNum + 1})
-    lift $ requestAnimationFrame $ animate $ return state
+    lift $ requestAnimationFrame $ animate $ state
 
   return unit
 
 
+preloadAux :: forall h. (State h) ->
+              Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit ->
+              Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
+preloadAux st callback = do
+  let a = lg "1"
+  systemST <- readSTRef st.ssRef
+  case (lookup "all_images" systemST.indexLib) of
+    (Just imgs) -> do
+      let a = lg "2"
+      preloadImages imgs.lib callback
+      let b = lg "3"
+      return unit
+
+  return unit
+
 main :: Eff (canvas :: Canvas, dom :: DOM, now :: Now) Unit
-main = runST do
-  animate init
+main = do
+  runST do
+    res <- runExceptT initState
+    case res of
+      Right st -> do
+        --animate st
+        preloadAux st (animate st)

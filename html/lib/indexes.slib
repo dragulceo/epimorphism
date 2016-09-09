@@ -55,6 +55,14 @@ all_images {{
   textures/simplegeom/tile_psych1.png
   textures/simplegeom/tile_rainbow1.png
   textures/simplegeom/tile_rainbow2.png
+  textures/psych/psych_12.png
+  textures/psych/psych_13.png
+  textures/psych/psych_5.png
+  textures/psych/psych_6.png
+  textures/psych/psych_7.png
+}}
+
+stoopid {{
   textures/stoopid/hamster.png
   textures/stoopid/mouse.png
   textures/stoopid/puppy.png

@@ -14,7 +14,6 @@ exports.createImageImpl = function(s){
 				if(window.auxImagesLoaded[s])
 					callback(im)();
 				else{
-					//console.log("CRAZY SHIT " + s);
 					var func = im.onload;
 					im.onload = function(){
 						func();
@@ -22,14 +21,16 @@ exports.createImageImpl = function(s){
 					}
 				}
 				return window.auxImages[s];
-			}
-			var im = new Image();
-			im.onload = function() {
-				window.auxImagesLoaded[s] = true;
-				callback(im)();
+			}else{
+				console.log("COULDN'T FIND IMAGE? " + s);
+				var im = new Image();
+				im.onload = function() {
+					window.auxImagesLoaded[s] = true;
+					callback(im)();
+				};
+				im.src = s;
+				window.auxImages[s] = im;
 			};
-			im.src = s;
-			window.auxImages[s] = im;
 		};
 	};
 };
@@ -99,17 +100,47 @@ exports.initAudioAnalyzer = function(bufferSize){
 }
 
 
+/*
 exports.preloadImages = function(images) {
 	return function() {
-		//$.each(images, function(i,source) { $.get(source); });
-		window.images = {};
+		window.auxImages = {};
+		window.auxImagesLoaded = {};
 
 		$.each(images, function(i,source) {
 			var im = new Image();
 			im.src = source;
-			window.images[source] = im;
-			$.ajax({url:source, async:false});
+			im.onload = function() {
+				window.auxImagesLoaded[source] = true;
+			}
+			window.auxImages[source] = im;
 		});
-		console.log("ASDSADSADASDSADS");
 	};
-}
+*/
+
+exports.preloadImages = function(images) {
+	return function(callback){
+		//return function(arg){
+  		return function() {
+  			window.auxImages = {};
+  			window.auxImagesLoaded = {};
+  			var promises = [];
+  			for (var i = 0; i < images.length; i++) {
+  				(function(url, promise) {
+						var img = new Image();
+  					window.auxImages[url] = img;
+						img.onload = function() {
+							promise.resolve();
+							window.auxImagesLoaded[url] = true;
+						};
+						img.src = url;
+  				})(images[i], promises[i] = $.Deferred());
+  			}
+  			$.when.apply($, promises).done(function() {
+					console.log("DONE PRELOADING AUX");
+					//callback();//arg);
+					$("#loading").hide();
+  			});
+			//};
+  	};
+	};
+};

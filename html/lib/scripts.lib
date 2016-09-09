@@ -43,4 +43,4 @@ dt {dly: 15, spd: 0.3, lib:images3, dim:vec4, sub:0, typ:Image, adr:!}
 
 --randomizeC1
 fn randomize
-dt {dly: 15, spd: 0.3, lib:color_main, dim:vec4, sub:color, typ:Mod, adr:!}
+dt {dly: 35, spd: 0.3, lib:color_main, dim:vec4, sub:color, typ:Mod, adr:!}

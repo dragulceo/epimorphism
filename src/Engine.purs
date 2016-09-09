@@ -23,20 +23,20 @@ import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (StrMap)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple), snd, fst)
-import Graphics.Canvas (Canvas, setCanvasHeight, setCanvasWidth, getCanvasElementById)
+import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
 import Graphics.WebGL (runWebgl, debug)
 import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
 import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor, vertexAttribPointer, enableVertexAttribArray, bufferData, bindBuffer, createBuffer, createFramebuffer, createTexture)
 import Graphics.WebGL.Raw.Types (ArrayBufferView)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram)
 import Graphics.WebGL.Types (WebGL, WebGLContext, WebGLProgram, WebGLTexture, WebGLFramebuffer, ArrayBufferType(ArrayBuffer), BufferData(DataSource), BufferUsage(StaticDraw), DataType(Float), DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
-import System (loadLib)
 import Util (lg, replaceAll, unsafeNull)
 
 foreign import audioData :: forall eff. AudioAnalyser -> Eff eff (ArrayBufferView)
 foreign import initAudioAnalyzer :: forall eff. Int -> Eff eff AudioAnalyser
-
-foreign import preloadImages :: forall eff. Array String -> Eff eff Unit
+foreign import preloadImages :: forall eff. Array String ->
+                                (Eff eff Unit) ->
+                                Eff eff Unit
 
 -- PUBLIC
 
@@ -226,10 +226,6 @@ initEngineST sysConf engineConf systemST pattern canvasId esRef' = do
   let dim = engineConf.kernelDim
   lift $ setCanvasWidth (toNumber dim) canvas
   lift $ setCanvasHeight (toNumber dim) canvas
-
-  -- preload aux
-  --allImages <- loadLib "all_images" systemST.indexLib "preload aux all_images"
-  -- lift $ preloadImages allImages.lib
 
   -- webgl initialization
   res <- execGL ctx do

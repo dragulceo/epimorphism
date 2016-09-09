@@ -4,10 +4,9 @@ import Prelude
 import Config (SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, SystemConf, UIConf)
 import Control.Monad (unless, when)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Except.Trans (runExceptT, lift)
+import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
-import Data.Either (Either(Left, Right))
 import Data.Int (round, toNumber)
 import Data.Maybe (maybe, fromMaybe, Maybe(Nothing, Just))
 import Data.StrMap (lookup)
@@ -147,13 +146,13 @@ preloadAux systemST callback = do
     (lookup "all_images" systemST.indexLib)
 
 
+-- clean this shit up yo
 main :: Eff (canvas :: Canvas, dom :: DOM, now :: Now) Unit
 main = do
   runST do
-    r1 <- runExceptT $ initSystemST host
-    case r1 of
-      Right sys -> do
-        preloadAux sys do
-          r2 <- runExceptT $ initState sys
-          case r2 of
-            Right st -> do animate st
+    handleError do
+      sys <- initSystemST host
+      lift $ preloadAux sys do
+        handleError do
+          st <- initState sys
+          lift $ animate st

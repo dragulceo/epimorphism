@@ -75,7 +75,7 @@ application julia {{
 			break;
 
     z = $t_expr$;
-		j += 1;adsf
+		j += 1;
   }
 
   float mu = float(j) - log(log(length(z)))/ log(2.0);

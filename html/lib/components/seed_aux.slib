@@ -13,8 +13,8 @@ color simple_color {{
 color tex_color {{
 	vec2 ofs = mod(@scale@ * wdt.zw, 1.0);
   seed = texture2D(aux[#0], ofs);
-
   seed = rgb2hsv(seed);
+
 	// multiplying the value by w makes things look nice
 	// should possibly put this in a flag
   seed = hsv2rgb(vec4(time * @spd@ + @rot@ + seed.x, @sat@ * seed.y, @val@ * seed.z * w, a * seed.a));

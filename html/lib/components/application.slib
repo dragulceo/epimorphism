@@ -33,8 +33,6 @@ application epimorphism {{
 			frame = texture2D(fb, frame_z);
 			z = t_z;
 
-			z = z_in;
-
 			// test audio shiz
 			/*
 			float rad = mod(atan(z.y, z.x) / (2.0 * PI), 1.0);

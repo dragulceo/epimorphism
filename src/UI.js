@@ -70,8 +70,10 @@ exports.addGlobalEventListeners = function(handler) {
 
 		// PAUSE
 		var pauseHandler = function(){
+			// a little sketchy, the order wrt update layout, pause, is important
+			// and I'm not sure its guaranteed
+			handler('updateLayout')();
 			var paused = this.innerHTML == "Pause";
-			console.log(this.innerHTML);
 			window.a = this.innerHTML;
 			this.innerHTML = (paused ? "Unpause" : "Pause");
 			$('.consoleUI').toggle();

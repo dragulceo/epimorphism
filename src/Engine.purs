@@ -114,7 +114,6 @@ createImage ctx currentImages host c (Tuple aux name) = do
         Nothing -> true
         Just cn -> (cn /= name)
   when doUpload do
-    --if doUpload then let g = lg $ "UPLOADING: " ++ name in return unit else return unit
     lift $ createImageImpl (host ++ name) \img -> do
       runWebgl (do
         liftEff $ GL.bindTexture ctx GLE.texture2d aux
@@ -212,7 +211,7 @@ initEngineST sysConf engineConf systemST pattern canvasId esRef' = do
   -- get reference
   esRef <- case esRef' of
     Just ref -> do
-      lift $ modifySTRef ref (\r -> r {empty = empty})
+      lift $ modifySTRef ref (\r -> r {empty = empty, auxImg = []})
       return ref
     Nothing -> do
       let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, audio: Nothing, auxImg: [], ctx: ctx, empty}

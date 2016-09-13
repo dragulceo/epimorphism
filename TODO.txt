@@ -103,6 +103,7 @@ NEXT
 	- importing is a bit of a disaster.  orphans & integrity & so forth. not to mention flakey & hard to debug :/
 
 LATER
+  - javascript files are all over the place
   - reduce is a substition in seeds, but comes from appliction.  the order of "modules {x: .., y: ..}" matters :/
   - if there are too many aux buffers (texture units), we'll have an issue?
   - saving images loses bit depth??

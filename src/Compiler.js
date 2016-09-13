@@ -20,7 +20,12 @@ var parseN = function(node){
 		return node.op + '(' + args.join(',') + ')'
 		break;
 	case 'AccessorNode':
-		return parseN(node.object) + node.index
+		var struct = parseN(node.object);
+		var index = node.index;
+		if (struct == 'zn' || struct == 'par' || struct == 'aux'){
+			index = "[#" + node.index.dimensions[0].value + "]";
+		}
+		return struct + index;
 		break;
 	case 'ParenthesisNode':
 		return parseN(node.content);

@@ -18,7 +18,7 @@ modules {seed: seed_analysis, t:t_wrap_zo, color: color_id, reduce: torus_reduce
 
 --julia < default_app
 component julia
-sub {t_expr: z * z + zn[#0]}
+sub {t_expr: z * z + zn[0]}
 zn [-0.123 + 0.745i, 0.0+0.0i, 0.0+0.0i, 0.0+0.0i]
 
 --color_id

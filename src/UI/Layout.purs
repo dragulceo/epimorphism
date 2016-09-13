@@ -9,6 +9,7 @@ import Data.DOM.Simple.Element (classRemove, classAdd, setInnerHTML, setStyleAtt
 import Data.DOM.Simple.Window (innerHeight, innerWidth, document, globalWindow)
 import Data.Maybe (Maybe(Just, Nothing))
 import UIUtil (findElt)
+import Util (lg)
 
 initLayout :: forall eff. UIConf -> UIST -> Epi eff Unit
 initLayout uiConf uiST = do
@@ -56,6 +57,7 @@ updateLayout :: forall eff h. UIConf -> UIST -> SystemST h -> Pattern -> Boolean
 updateLayout uiConf uiST systemST pattern force = do
   when (force ||
         (systemST.frameNum `mod` uiConf.uiUpdateFreq == 0 && not systemST.paused)) do
+
     when uiConf.showFps do
       case systemST.fps of
         (Just fps) -> do

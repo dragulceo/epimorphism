@@ -228,8 +228,6 @@ exports.isNumber = function(s) {
 	return !isNaN(s);
 }
 
-
 exports.clickPause = function() {
 	$("button#pause").click();
-	window.eventHandler("updateLayout");
 };

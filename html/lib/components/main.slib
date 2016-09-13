@@ -5,11 +5,18 @@ precision mediump float;
 uniform sampler2D fb;
 uniform float time;
 uniform float kernel_dim;
-uniform float par[100];
-uniform vec2 zn[50];
+uniform float par[50];
+uniform vec2 zn[25];
 uniform sampler2D aux[10];
-
 uniform sampler2D audioData;
+
+float freqData(float x){
+	 return texture2D(audioData, vec2(x, 0.0)).a;
+}
+
+float timeData(float x){
+	 return texture2D(audioData, vec2(x, 2.0)).a;
+}
 
 void main() {
   vec4 color;

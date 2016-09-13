@@ -289,7 +289,7 @@ renderFrame systemST engineConf engineST pattern frameNum = do
     --audio info
     case engineST.audio of
       Just (Tuple audioTex analyser) -> do
-        audioU <- liftEff $ GL.getUniformLocation ctx main "audio"
+        audioU <- liftEff $ GL.getUniformLocation ctx main "audioData"
         case audioU of
           Just audioU' -> do
             liftEff $ GL.bindTexture ctx GLE.texture2d audioTex

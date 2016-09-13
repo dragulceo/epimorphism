@@ -33,7 +33,7 @@ application epimorphism {{
 			frame = texture2D(fb, frame_z);
 			z = t_z;
 
-			//z = z_in;
+			z = z_in;
 
 			// test audio shiz
 			/*
@@ -68,12 +68,14 @@ application julia {{
   int max_iter = 600;
   float escape_rad = 4.0;
 
+	z = z_in;
+
 	for(int i = 0; i < 600; i++){
 		if(z.x * z.x + z.y * z.y > escape_rad)
 			break;
 
     z = $t_expr$;
-		j += 1;
+		j += 1;adsf
   }
 
   float mu = float(j) - log(log(length(z)))/ log(2.0);

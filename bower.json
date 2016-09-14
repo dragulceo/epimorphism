@@ -20,7 +20,7 @@
     "purescript-extensions": "*",
     "purescript-console": "*",
     "purescript-jquery": "~0.6.1",
-    "purescript-simple-dom": "*",
+    "purescript-simple-dom": "git@github.com:geneshuman/purescript-simple-dom.git#0.1.4",
     "purescript-math": "*",
     "purescript-complex": "*",
     "purescript-sets": "*",

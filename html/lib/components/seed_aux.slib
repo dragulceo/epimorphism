@@ -2,10 +2,6 @@ wt wt {{
 	w = $wt_exp$;
 }}
 
-wt wt_freq {{
-    w = w;//+= 0.25 * freqData(wx);
-}}
-
 alpha alpha {{
 	a = $a_exp$;
 }}

@@ -18,9 +18,6 @@ sub {wt_exp: 1.0 - sqrt(1.0 - (1.0 - w) * (1.0 - w))}
 --wt_anim < wt_id
 scripts [randomizeWT1]
 
---wt_freq < wt_id
-component wt_freq
-
 --alpha_id
 family a
 flags {lib}

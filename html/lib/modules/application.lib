@@ -7,7 +7,7 @@ dim vec4
 
 --epimorphism < default_app
 component epimorphism
-modules {seed: seed_wca_freq, t:t_wrap_zo, color: rotate_hsv1, reduce: torus_reduce}
+modules {seed: seed_wca, t:t_wrap_zo, color: rotate_hsv1, reduce: torus_reduce}
 
 --epimorphism_farm1 < epimorphism
 flags {farm1}

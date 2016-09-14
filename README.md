@@ -1,6 +1,8 @@
 # Epimorphism
 
-Epimorphism is a psychedelic virtualization of video feedback.  It is written in `pure_script` and compiles to javascript.  This is a port of the software from a previous version, and is currenty in development.
+Epimorphism is a psychedelic virtualization of video feedback.  It is written in `pure_script` and compiles to javascript.
+
+The project is live on the web here http://www.epimorphism.com
 
 ## Setup
 

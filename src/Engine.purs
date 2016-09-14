@@ -284,12 +284,11 @@ renderFrame systemST engineConf engineST pattern frameNum = do
     uniform1f mainUnif.time (systemST.t - pattern.tPhase)
     uniform1f mainUnif.kernel_dim (toNumber engineConf.kernelDim)
 
-
     -- BUG!!! audio has to be before aux???
     --audio info
     case engineST.audio of
       Just (Tuple audioTex analyser) -> do
-        audioU <- liftEff $ GL.getUniformLocation ctx main "audio"
+        audioU <- liftEff $ GL.getUniformLocation ctx main "audioData"
         case audioU of
           Just audioU' -> do
             liftEff $ GL.bindTexture ctx GLE.texture2d audioTex

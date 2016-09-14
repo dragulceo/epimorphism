@@ -56,19 +56,32 @@ exports.emptyImage = function(dim){
 };
 
 
-exports.audioData = function(analyser) {
-	return function() {
-		var freqData = new Uint8Array(analyser.frequencyBinCount);
-		var timeData = new Uint8Array(analyser.frequencyBinCount);
-		analyser.getByteFrequencyData(freqData);
-		analyser.getByteTimeDomainData(timeData);
-
-		var data = new Uint8Array(2.0 * analyser.frequencyBinCount);
-		data.set(freqData);
-		data.set(timeData, freqData.length);
-		return freqData;
-	}
-}
+exports.preloadImages = function(images) {
+	return function(callback){
+  	return function() {
+			console.log("PRELOADING AUX");
+  		window.auxImages = {};
+			window.auxImagesLoaded = {};
+  		var promises = [];
+  		for (var i = 0; i < images.length; i++) {
+  			(function(url, promise) {
+					var img = new Image();
+  				window.auxImages[url] = img;
+					img.onload = function() {
+						promise.resolve();
+						window.auxImagesLoaded[url] = true;
+					};
+					img.src = url;
+  			})(images[i], promises[i] = $.Deferred());
+  		}
+  		$.when.apply($, promises).done(function() {
+			console.log("DONE PRELOADING AUX");
+				callback();
+				$("#loading").hide();
+  		});
+  	};
+	};
+};
 
 
 
@@ -99,29 +112,16 @@ exports.initAudioAnalyzer = function(bufferSize){
 }
 
 
-exports.preloadImages = function(images) {
-	return function(callback){
-  	return function() {
-			console.log("PRELOADING AUX");
-  		window.auxImages = {};
-			window.auxImagesLoaded = {};
-  		var promises = [];
-  		for (var i = 0; i < images.length; i++) {
-  			(function(url, promise) {
-					var img = new Image();
-  				window.auxImages[url] = img;
-					img.onload = function() {
-						promise.resolve();
-						window.auxImagesLoaded[url] = true;
-					};
-					img.src = url;
-  			})(images[i], promises[i] = $.Deferred());
-  		}
-  		$.when.apply($, promises).done(function() {
-			console.log("DONE PRELOADING AUX");
-				callback();
-				$("#loading").hide();
-  		});
-  	};
-	};
-};
+exports.audioData = function(analyser) {
+	return function() {
+		var freqData = new Uint8Array(analyser.frequencyBinCount);
+		var timeData = new Uint8Array(analyser.frequencyBinCount);
+		analyser.getByteFrequencyData(freqData);
+		analyser.getByteTimeDomainData(timeData);
+
+		var data = new Uint8Array(2.0 * analyser.frequencyBinCount);
+		data.set(freqData);
+		data.set(timeData, freqData.length);
+		return freqData;
+	}
+}

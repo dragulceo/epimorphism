@@ -1,5 +1,4 @@
 main_frag main {{
-#define VOID_W -0.000001
 
 precision mediump float;
 uniform sampler2D fb;
@@ -10,6 +9,16 @@ uniform vec2 zn[50];
 uniform sampler2D aux[10];
 
 uniform sampler2D audioData;
+
+
+float freqData(float x){
+  return texture2D(audioData, vec2(x, 0.5)).a;
+}
+/*
+float timeData(float x){
+  return texture2D(audioData, vec2(x, 2.0)).a;
+}
+*/
 
 void main() {
   vec4 color;

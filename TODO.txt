@@ -1,8 +1,6 @@
 MAKE THINGS BETTER/AUDIO1:
 - setup farm system (ui, pattern, etc)
 - color stuff
-- more symmetry?
-- osc input
 - music pattern
 - generally make better
 - julia set coloring & maybe interference

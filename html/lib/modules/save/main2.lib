@@ -2,7 +2,7 @@
 modules {application: epimorphism_auto2}
 
 --epimorphism_auto2 < epimorphism
-scripts [randomizeC1]
+scripts [randomizeC1, randomizeP1]
 modules {seed: seed_multi_anim, t:t_main2, color: rotate_hsv1, reduce: torus_reduce}
 
 --seed_wca_anim < seed_wca

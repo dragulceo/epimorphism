@@ -72,7 +72,7 @@ modules {application: epimorphism_farm1}
 
 --post_id
 family post
-flags {lib}
+flags {lib, post_main}
 component post_id
 var frame
 dim vec4
@@ -89,8 +89,14 @@ par {gamma:1.5, hue:0.33, spread:0.5, lgv:0.5}
 par {gamma:1.5, hue:0.66, spread:0.5, lgv:0.5}
 
 --post_hlim_anim < post_hlim1
+flags {lib}
 par {gamma:2.0, hue:0.0, spread:0.5, lgv:0.5}
 paths {hue:loop 0.01, spread:wave 0.011 0.35 1.5, lgv:wave 0.07 0.125 0.5}
+
+--post_hlim_anim2 < post_hlim1
+flags {lib, post_main}
+par {gamma:1.8, hue:0.0, spread:0.5, lgv:0.5}
+paths {hue:loop 0.01, spread:wave 0.011 0.35 1.5, lgv:wave 0.07 0.125 0.5, gamma:wave 0.03 0.3 1.8}
 
 
 
@@ -452,40 +458,6 @@ component default_vert
 
 
 
-
-
-
---epimorphism1_main < epimorphism_main
-modules {application: epimorphism_auto1}
-
---epimorphism_auto1 < epimorphism
-modules {t: t_main1, seed: seed_borderM, color: rotate_hsv1, reduce: torus_reduce}
-
---seed_borderM < seed_simple
-flags {}
-par {w: 0.5, alpha: 0.5}
-modules {t: ts_wrap_linx3', reduce: torus_reduce}
-paths {w:wave 0.032 0.45 0.55, alpha:wave 0.048 0.35 0.65}
-
---seed_borderM1 < seed_borderM
-component seed_simple_img
-images [textures/simplegeom/tile_grid1.png]
-
---ts_wrap_linx3' < t_id
-zn [1.1 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]
-component t_wrap
-modules {t_inner: t_z}
-paths {3:rose 0.0035 1.1 4.0 0.0}
-
---disp_main1 < disp_id
-flags {}
-modules {post: post_hlim_anim}
-
-
-
-
-
-
 --epimorphism1_main < epimorphism_main
 modules {application: epimorphism_auto1}
 
@@ -518,7 +490,7 @@ modules {post: post_hlim_anim}
 modules {application: epimorphism_auto2}
 
 --epimorphism_auto2 < epimorphism
-scripts [randomizeC1]
+scripts [randomizeC1, randomizeP1]
 modules {seed: seed_multi_anim, t:t_main2, color: rotate_hsv1, reduce: torus_reduce}
 
 --seed_wca_anim < seed_wca
@@ -546,92 +518,3 @@ scripts [randomizeTI1]
 
 
 
---epimorphism1_main < epimorphism_main
-modules {application: epimorphism_auto1}
-
---epimorphism_auto1 < epimorphism
-modules {t: t_main1, seed: seed_borderM, color: rotate_hsv1, reduce: torus_reduce}
-
---seed_borderM < seed_simple
-flags {}
-par {w: 0.5, alpha: 0.5}
-modules {t: ts_wrap_linx3', reduce: torus_reduce}
-paths {w:wave 0.032 0.45 0.55, alpha:wave 0.048 0.35 0.65}
-
---seed_borderM1 < seed_borderM
-component seed_simple_img
-images [textures/simplegeom/tile_grid1.png]
-
---ts_wrap_linx3' < t_id
-zn [1.1 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]
-component t_wrap
-modules {t_inner: t_z}
-paths {3:rose 0.0035 1.1 4.0 0.0}
-
---disp_main1 < disp_id
-flags {}
-modules {post: post_hlim_anim}
-
-
-
---epimorphism2_main < epimorphism_main
-modules {application: epimorphism_auto2}
-
---epimorphism_auto2 < epimorphism
-scripts [randomizeC1]
-modules {seed: seed_multi_anim, t:t_main2, color: rotate_hsv1, reduce: torus_reduce}
-
---seed_wca_anim < seed_wca
-modules {t: t_wrap, w:w_lines_border, wt:wt_anim, a:alpha_id, seed_color:simple_color}
-
-
---seed_wca_anim1 < seed_wca
-scripts [randomizeW1, randomizeSC1]
-modules {t: t_seed_anim1, w:w_lines_border_anim, wt:wt_anim, a:alpha_anim, seed_color:simple_color_anim1}
-
---seed_wca_anim2 < seed_wca
-scripts [randomizeW1]
-modules {t: t_seed_anim2, w:w_lines_border_anim, wt:wt_anim, a:alpha_anim, seed_color:tex_color_anim2}
-
---seed_multi_anim < seed_nothing
-flags {multi}
-component seed_multi
-modules {t:t_wrap, seed0:seed_wca_anim1, seed1:seed_wca_anim2, seed2:seed_nothing}
-
---t_main2 < t_wrap
-flags {wrap, lib}
-zn [1.0 + 0.0i, 0.0 + 0.0i, 0.0 + 1.1i, 1.0 + 0.0i]
-modules {t_inner: t_sinh}
-scripts [randomizeTI1]
-
-
-
---epimorphism2_main < epimorphism_main
-modules {application: epimorphism_auto2}
-
---epimorphism_auto2 < epimorphism
-scripts [randomizeC1]
-modules {seed: seed_multi_anim, t:t_main2, color: rotate_hsv1, reduce: torus_reduce}
-
---seed_wca_anim < seed_wca
-modules {t: t_wrap, w:w_lines_border, wt:wt_anim, a:alpha_id, seed_color:simple_color}
-
-
---seed_wca_anim1 < seed_wca
-scripts [randomizeW1, randomizeSC1]
-modules {t: t_seed_anim1, w:w_lines_border_anim, wt:wt_anim, a:alpha_anim, seed_color:simple_color_anim1}
-
---seed_wca_anim2 < seed_wca
-scripts [randomizeW1]
-modules {t: t_seed_anim2, w:w_lines_border_anim, wt:wt_anim, a:alpha_anim, seed_color:tex_color_anim2}
-
---seed_multi_anim < seed_nothing
-flags {multi}
-component seed_multi
-modules {t:t_wrap, seed0:seed_wca_anim1, seed1:seed_wca_anim2, seed2:seed_nothing}
-
---t_main2 < t_wrap
-flags {wrap, lib}
-zn [1.0 + 0.0i, 0.0 + 0.0i, 0.0 + 1.1i, 1.0 + 0.0i]
-modules {t_inner: t_sinh}
-scripts [randomizeTI1]

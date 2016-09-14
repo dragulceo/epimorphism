@@ -19,12 +19,12 @@
     "purescript-webgl-monad": "git@github.com:geneshuman/purescript-webgl-monad.git",
     "purescript-extensions": "*",
     "purescript-console": "*",
-    "purescript-jquery": "*",
+    "purescript-jquery": "~0.6.1",
     "purescript-simple-dom": "*",
     "purescript-math": "*",
     "purescript-complex": "*",
     "purescript-sets": "*",
-		"purescript-format": "^0.1.1"
+    "purescript-format": "^0.1.1"
   },
   "resolutions": {
     "purescript-math": "~0.2.0",
@@ -47,6 +47,16 @@
     "purescript-identity": "^0.4.0",
     "purescript-control": "^0.3.0",
     "purescript-invariant": "^0.3.0",
-    "purescript-lazy": "^0.4.0"
+    "purescript-lazy": "^0.4.0",
+    "purescript-integers": "^0.2.1",
+    "purescript-dom": "^0.2.8",
+    "purescript-foreign": "^0.7.0",
+    "purescript-exceptions": "^0.3.1",
+    "purescript-media-types": "~0.1.1",
+    "purescript-unsafe-coerce": "^0.1.0",
+    "purescript-enums": "^0.7.0",
+    "purescript-datetime": "~0.9.1",
+    "purescript-nullable": "~0.2.1",
+    "purescript-distributive": "^0.5.0"
   }
 }

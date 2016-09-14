@@ -283,7 +283,6 @@ renderFrame systemST engineConf engineST pattern frameNum = do
     uniform1f mainUnif.time (systemST.t - pattern.tPhase)
     uniform1f mainUnif.kernel_dim (toNumber engineConf.kernelDim)
 
-
     -- BUG!!! audio has to be before aux???
     --audio info
     case engineST.audio of

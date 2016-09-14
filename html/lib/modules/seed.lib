@@ -30,3 +30,8 @@ modules {t: t_wrap, w:w_lines_border, wt:wt_id, a:alpha_id, seed_color:simple_co
 flags {lib,multi}
 component seed_multi
 modules {t:t_wrap, seed0:seed_wca, seed1:seed_nothing, seed2:seed_nothing}
+
+--seed_wca_freq < seed_nothing
+flags {lib,wca}
+component seed_wca
+modules {t: t_wrap, w:w_circle, wt:wt_freq, a:alpha_id, seed_color:simple_color}

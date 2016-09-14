@@ -150,11 +150,13 @@ images2 {{
 }}
 
 
+
 t_1 {{
 	zpath main.application.t idx:1 path:linx spd:0.0
 	zpath main.application.t idx:1 path:linx spd:0.1
 	zpath main.application.t idx:1 path:circle r:1.0 spd:0.01
 }}
+
 
 
 seed_a_main {{
@@ -168,6 +170,7 @@ seed_wt_main {{
 	sqrt(1.0 - (1.0 - w) * (1.0 - w))
   1.0 - sqrt(1.0 - (1.0 - w) * (1.0 - w))
 }}
+
 
 
 t_inner {{
@@ -190,5 +193,6 @@ t_inner {{
   z * cos(z)
   (cosh(z) + sinh(z)) / 2
 }}
+
 
 

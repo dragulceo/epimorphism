@@ -21,8 +21,8 @@ application epimorphism {{
 
  	for(int i=0; i<$fract$; i++){
 		for(int j=0; j<$fract$; j++){
-			z = z_in;
-			z = z - vec2(ofs, ofs) + vec2(2.0 * delta * float(i), 2.0 * delta * float(j));
+      z = z_in;
+      z = z - vec2(ofs, ofs) + vec2(2.0 * delta * float(i), 2.0 * delta * float(j));
 
 			%t%
 
@@ -34,14 +34,15 @@ application epimorphism {{
 			z = t_z;
 
 			// test audio shiz
-			/*
+
+      /*
 			float rad = mod(atan(z.y, z.x) / (2.0 * PI), 1.0);
 			float rad2 = (rad > 0.5 ? 2.0 * (1.0 - rad) : 2.0 * rad);
 			rad2 = rad2 < 0.5 ? 2.0 * (0.5 - rad2) : 2.0 * (rad2 - 0.5);
 			float fdat = texture2D(audioData, vec2(rad2, 0.5)).a;
 			float len = length(z) - 0.6 * fdat;
 			z = vec2(len * cos(2.0 * PI * rad), len * sin(2.0 * PI * rad));
-			*/
+      */
 
 			%seed%
 
@@ -93,21 +94,21 @@ color color_id {{
 }}
 
 color color_bgr {{
-	color = color.bgra;
+  color = color.bgra;
 }}
 
 color color_gbr {{
-	color = color.gbra;
+  color = color.gbra;
 }}
 
 color rotate_hsv {{
   color = rgb2hsv(color);
 
-	float l = sqrt(z_in.x * z_in.x + z_in.y * z_in.y);
-	l = (4.0 * @len_sc@ + 1.0) * l / (l + 4.0 * @len_sc@);
+  float l = sqrt(z_in.x * z_in.x + z_in.y * z_in.y);
+  l = (4.0 * @len_sc@ + 1.0) * l / (l + 4.0 * @len_sc@);
   l = @len_sc_amt@ * log(l + 1.0);
 
-	float th = (@rot@ + l + time * @th_spd@);
+  float th = (@rot@ + l + time * @th_spd@);
   color.x += th;
 
   color = hsv2rgb(color);
@@ -120,8 +121,8 @@ color rotate_hsls {{
   color = rgb2hsls(color);
 
   // compute l
-	float l = sqrt(z_in.x * z_in.x + z_in.y * z_in.y);
-	l = (4.0 * @len_sc@ + 1.0) * l / (1.0 + 4.0 * @len_sc@ *l);
+  float l = sqrt(z_in.x * z_in.x + z_in.y * z_in.y);
+  l = (4.0 * @len_sc@ + 1.0) * l / (1.0 + 4.0 * @len_sc@ *l);
   l = @len_sc_amt@ * log(l + 1.0);
 
   // compute rotation axis
@@ -133,7 +134,7 @@ color rotate_hsls {{
   float th = 2.0 * PI * (l + time * @th_spd@);
 
   //th = remf(CX(th, 0.0), 2.0 * PI).x;
-	vec3 tmp = rotate3D(color.xyz, axis, th);
+  vec3 tmp = rotate3D(color.xyz, axis, th);
 
   // compute rotation 2
   th = 2.0 * PI * @rot@;
@@ -421,7 +422,6 @@ vec2 grid_reduce(vec2 z){
 
 
 main_frag main {{
-#define VOID_W -0.000001
 
 precision mediump float;
 uniform sampler2D fb;
@@ -627,6 +627,10 @@ seed seed_multi {{
 
 wt wt {{
 	w = $wt_exp$;
+}}
+
+wt wt_freq {{
+    w = w;//+= 0.25 * freqData(wx);
 }}
 
 alpha alpha {{

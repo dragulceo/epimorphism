@@ -49,9 +49,14 @@ body {
 
 .consoleModTitle {
 		color:red;
-		text-transform: uppercase;
 		font-size:14px;
 		line-height:19px;
+}
+
+.consoleModTitle.prefix {
+		font-weight:bold;
+		color: #f0a;
+		text-transform: uppercase;
 }
 
 .consoleSub {

@@ -73,3 +73,9 @@ flags {anim2}
 --tex_color_anim3 < tex_color
 scripts [randomizeImg3]
 flags {anim2}
+
+
+--fb_color < simple_color
+component fb_color
+par {scale: 0.333, spd: 0.0, rot: 0.0, sat:1.0, val:1.0}
+modules {bg: simple_color}

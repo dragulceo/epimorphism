@@ -18,7 +18,7 @@ import Pattern (importPattern)
 import Script (runScripts)
 import System (initSystemST, loadLib)
 import UI (initUIST)
-import Util (handleError, lg, isHalted, requestAnimationFrame, now, Now, seedRandom, urlArgs, isDev)
+import Util (Now, handleError, lg, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
 
 host :: String
 host = ""
@@ -43,7 +43,7 @@ getSysConfName = do
   return conf
 
 
-initState :: forall eff h. SystemST h -> EpiS eff h (State h)
+initState :: forall eff h. SystemST h -> EpiS (now :: Now | eff) h (State h)
 initState systemST = do
   -- init config
   systemName <- lift $ getSysConfName

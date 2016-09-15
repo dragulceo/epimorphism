@@ -20,3 +20,18 @@ color tex_color {{
 	float hofs = 0.0;//  freqData(z.x + wx + wy + w);
   seed = hsv2rgb(vec4(time * @spd@ + @rot@ + seed.x + hofs, @sat@ * seed.y, @val@ * seed.z * w, a * seed.a));
 }}
+
+
+color fb_color {{
+	vec2 ofs = mod(@scale@ * wdt.zw, 1.0);
+
+	%bg%
+	vec4 bg_seed = seed;
+
+  seed = texture2D(fb, ofs);
+  seed = rgb2hsv(seed);
+
+  seed = hsv2rgb(vec4(time * @spd@ + @rot@ + seed.x, @sat@ * seed.y, @val@ * seed.z * w, a * seed.a));
+
+	seed = bg_seed * 0.2 + seed * 0.8;
+}}

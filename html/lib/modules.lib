@@ -96,7 +96,7 @@ paths {hue:loop 0.01, spread:wave 0.011 0.35 1.5, lgv:wave 0.07 0.125 0.5}
 --post_hlim_anim2 < post_hlim1
 flags {lib, post_main}
 par {gamma:1.8, hue:0.0, spread:0.5, lgv:0.5}
-paths {hue:loop 0.01, spread:wave 0.011 0.35 1.5, lgv:wave 0.07 0.125 0.5, gamma:wave 0.03 0.3 1.8}
+paths {hue:loop 0.01, spread:wave 0.011 0.35 1.5, lgv:wave 0.07 0.125 0.5, gamma:wave 0.03 0.3 1.7}
 
 
 
@@ -223,6 +223,11 @@ flags {anim2}
 scripts [randomizeImg3]
 flags {anim2}
 
+
+--fb_color < simple_color
+component fb_color
+par {scale: 0.333, spd: 0.0, rot: 0.0, sat:1.0, val:1.0}
+modules {bg: simple_color}
 
 
 --w_nul

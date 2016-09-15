@@ -142,8 +142,8 @@ precision mediump float;
 uniform sampler2D fb;
 uniform float kernel_dim;
 
-uniform float par[50];
-uniform vec2 zn[20];
+uniform float par[100];
+uniform vec2 zn[50];
 
 void main() {
   vec4 frame;
@@ -823,6 +823,3 @@ void main() {
   gl_Position = vec4(a_position, 0, 1);
 }
 }}
-
-
-

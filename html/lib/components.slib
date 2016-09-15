@@ -33,17 +33,6 @@ application epimorphism {{
 			frame = texture2D(fb, frame_z);
 			z = t_z;
 
-			// test audio shiz
-
-      /*
-			float rad = mod(atan(z.y, z.x) / (2.0 * PI), 1.0);
-			float rad2 = (rad > 0.5 ? 2.0 * (1.0 - rad) : 2.0 * rad);
-			rad2 = rad2 < 0.5 ? 2.0 * (0.5 - rad2) : 2.0 * (rad2 - 0.5);
-			float fdat = texture2D(audioData, vec2(rad2, 0.5)).a;
-			float len = length(z) - 0.6 * fdat;
-			z = vec2(len * cos(2.0 * PI * rad), len * sin(2.0 * PI * rad));
-      */
-
 			%seed%
 
 			// blend
@@ -646,6 +635,21 @@ color tex_color {{
 	// should possibly put this in a flag
 	float hofs = 0.0;//  freqData(z.x + wx + wy + w);
   seed = hsv2rgb(vec4(time * @spd@ + @rot@ + seed.x + hofs, @sat@ * seed.y, @val@ * seed.z * w, a * seed.a));
+}}
+
+
+color fb_color {{
+	vec2 ofs = mod(@scale@ * wdt.zw, 1.0);
+
+	%bg%
+	vec4 bg_seed = seed;
+
+  seed = texture2D(fb, ofs);
+  seed = rgb2hsv(seed);
+
+  seed = hsv2rgb(vec4(time * @spd@ + @rot@ + seed.x, @sat@ * seed.y, @val@ * seed.z * w, a * seed.a));
+
+	seed = bg_seed * 0.2 + seed * 0.8;
 }}
 
 

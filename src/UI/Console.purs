@@ -74,7 +74,7 @@ renderModule systemST modLib mid title pid = do
   let res = joinWith "" $ lines'
 
   -- title
-  let titlePre = "<span class='consoleModTitle'>" ++ title ++ ": </span>"
+  let titlePre = "<span class='consoleModTitle prefix'>" ++ title ++ ": </span>"
   sel <- case pid of
     Just pid' -> do
       sel' <- renderSelect modLib lib mod pid' title

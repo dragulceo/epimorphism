@@ -30,7 +30,7 @@ import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, cl
 import Graphics.WebGL.Raw.Types (ArrayBufferView)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram)
 import Graphics.WebGL.Types (WebGL, WebGLContext, WebGLProgram, WebGLTexture, WebGLFramebuffer, ArrayBufferType(ArrayBuffer), BufferData(DataSource), BufferUsage(StaticDraw), DataType(Float), DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
-import Util (lg, replaceAll, unsafeNull)
+import Util (now, Now, lg, replaceAll, unsafeNull)
 
 foreign import audioData :: forall eff. AudioAnalyser -> Eff eff (ArrayBufferView)
 foreign import initAudioAnalyzer :: forall eff. Int -> Eff eff AudioAnalyser
@@ -107,13 +107,14 @@ uploadAux es host names = do
 
 
 -- create an image object. can throw error if images missing!  also some synchronization issues
-createImage :: forall eff. WebGLContext -> (Array String) -> String  -> Int -> (Tuple WebGLTexture String) -> Epi eff Int
+createImage :: forall eff. WebGLContext -> (Array Strin4g) -> String  -> Int -> (Tuple WebGLTexture String) -> Epi eff Int
 createImage ctx currentImages host c (Tuple aux name) = do
   let currentImage = currentImages !! c
   let doUpload = case currentImage of
         Nothing -> true
         Just cn -> (cn /= name)
   when doUpload do
+    let a = if doUpload then (lg "uploading") else unit
     lift $ createImageImpl (host ++ name) \img -> do
       runWebgl (do
         liftEff $ GL.bindTexture ctx GLE.texture2d aux
@@ -143,8 +144,9 @@ clearFB engineConf engineST = do
 foreign import emptyImage :: forall eff. Int -> Eff eff GLT.TexImageSource
 
 -- compile shaders and load into systemST
-setShaders :: forall eff h. SystemConf -> EngineConf -> STRef h EngineST -> SystemST h -> Pattern -> EpiS eff h Unit
+setShaders :: forall eff h. SystemConf -> EngineConf -> STRef h EngineST -> SystemST h -> Pattern -> EpiS (now :: Now | eff) h Unit
 setShaders sysConf engineConf esRef sys pattern = do
+  --a <- lift now
   es <- lift $ readSTRef esRef
 
   -- load & compile shaders
@@ -181,13 +183,15 @@ setShaders sysConf engineConf esRef sys pattern = do
   )
 
   lift $ modifySTRef esRef (\s -> s {dispProg = Just disp', mainProg = Just main', auxImg = auxImg})
+  --a' <- lift now
 
+  --let a'' = lg $ "SET SHADERS: " ++ show (a' - a)
   return unit
 
 
 -- initialize the rendering engine & create state.  updates an existing state if passed
 -- maybe validate that kernelDim > 0?
-initEngineST :: forall eff h. SystemConf -> EngineConf -> SystemST h -> Pattern -> String -> Maybe (STRef h EngineST) -> EpiS eff h (STRef h EngineST)
+initEngineST :: forall eff h. SystemConf -> EngineConf -> SystemST h -> Pattern -> String -> Maybe (STRef h EngineST) -> EpiS (now :: Now | eff) h (STRef h EngineST)
 initEngineST sysConf engineConf systemST pattern canvasId esRef' = do
   -- find canvas & create context
   canvasM <- liftEff $ getCanvasElementById canvasId

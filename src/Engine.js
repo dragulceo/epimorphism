@@ -103,7 +103,9 @@ exports.initAudioAnalyzer = function(bufferSize){
 		analyser.smoothingTimeConstant = 0.9;
 		analyser.minDecibels = -85;
 
-		navigator.webkitGetUserMedia({audio:true}, gotStream(ctx, analyser), streamError);
+		if(navigator.webkitGetUserMedia){
+			navigator.webkitGetUserMedia({audio:true}, gotStream(ctx, analyser), streamError);
+		}
 
 		return analyser;
 	}

@@ -107,7 +107,7 @@ uploadAux es host names = do
 
 
 -- create an image object. can throw error if images missing!  also some synchronization issues
-createImage :: forall eff. WebGLContext -> (Array Strin4g) -> String  -> Int -> (Tuple WebGLTexture String) -> Epi eff Int
+createImage :: forall eff. WebGLContext -> (Array String) -> String  -> Int -> (Tuple WebGLTexture String) -> Epi eff Int
 createImage ctx currentImages host c (Tuple aux name) = do
   let currentImage = currentImages !! c
   let doUpload = case currentImage of

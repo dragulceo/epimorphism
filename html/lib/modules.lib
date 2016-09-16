@@ -507,7 +507,7 @@ scripts [randomizeW1, randomizeSC1]
 modules {t: t_seed_anim1, w:w_lines_border_anim, wt:wt_anim, a:alpha_anim, seed_color:simple_color_anim1}
 
 --seed_wca_anim2 < seed_wca
-scripts [randomizeW1]
+scripts [randomizeW2]
 modules {t: t_seed_anim2, w:w_lines_border_anim, wt:wt_anim, a:alpha_anim, seed_color:tex_color_anim2}
 
 --seed_multi_anim < seed_nothing
@@ -524,6 +524,39 @@ scripts [randomizeTI1]
 --disp_main2 < disp_id
 flags {}
 modules {post: post_hlim_anim2}
+
+
+
+--epimorphism_ponies < epimorphism_main
+modules {application: epimorphism_ponies_app}
+
+--epimorphism_ponies_app < epimorphism
+scripts [randomizeC1]
+modules {seed: seed_multi_anim_ponies, t:t_main2, color: rotate_hsv1, reduce: torus_reduce}
+
+--seed_multi_anim_ponies < seed_nothing
+flags {multi}
+component seed_multi
+modules {t:t_wrap, seed0:seed_wca_anim1_ponies, seed1:seed_wca_anim2_ponies, seed2:seed_nothing}
+
+--seed_wca_anim1_ponies < seed_wca
+flags {}
+scripts [randomizeW1]
+modules {t: t_seed_anim1, w:w_lines_border_anim, wt:wt_id, a:alpha_id, seed_color:tex_color_ponies1}
+
+--seed_wca_anim2_ponies < seed_wca
+scripts [randomizeW2]
+flags {}
+modules {t: t_seed_anim2, w:w_lines_border_anim, wt:wt_anim, a:alpha_anim, seed_color:tex_color_ponies2}
+
+--tex_color_ponies1 < tex_color
+scripts [randomizePonies1]
+images [textures/ponies/ponies_1.png]
+flags {}
+
+--tex_color_ponies2 < tex_color_ponies1
+scripts [randomizePonies2]
+images [textures/ponies/ponies_9.png]
 
 
 

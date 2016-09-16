@@ -14,7 +14,7 @@ scripts [randomizeW1, randomizeSC1]
 modules {t: t_seed_anim1, w:w_lines_border_anim, wt:wt_anim, a:alpha_anim, seed_color:simple_color_anim1}
 
 --seed_wca_anim2 < seed_wca
-scripts [randomizeW1]
+scripts [randomizeW2]
 modules {t: t_seed_anim2, w:w_lines_border_anim, wt:wt_anim, a:alpha_anim, seed_color:tex_color_anim2}
 
 --seed_multi_anim < seed_nothing

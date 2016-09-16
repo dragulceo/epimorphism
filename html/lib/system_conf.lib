@@ -17,3 +17,6 @@ initPattern dev
 initEngineConf default
 initUIConf farm1
 initPattern farm1
+
+--ponies < prod
+initPattern ponies

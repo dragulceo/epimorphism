@@ -137,22 +137,24 @@ animate state = handleError do
   return unit
 
 
-preloadAux :: forall h. (SystemST h) ->
+preloadAux :: forall h. (SystemST h) -> String ->
               Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit ->
               Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
-preloadAux systemST callback = do
+preloadAux systemST libName callback = do
   maybe (return unit)
     (\x -> preloadImages x.lib callback)
-    (lookup "all_images" systemST.indexLib)
+    (lookup libName systemST.indexLib)
 
 
 -- clean this shit up yo
 main :: Eff (canvas :: Canvas, dom :: DOM, now :: Now) Unit
 main = do
+  confn <- getSysConfName -- hack!!!!!
+
   runST do
     handleError do
       sys <- initSystemST host
-      lift $ preloadAux sys do
+      lift $ preloadAux sys (if confn =="ponies" then "ponies" else "all_images") do
         handleError do
           st <- initState sys
           lift $ animate st

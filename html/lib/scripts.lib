@@ -25,6 +25,10 @@ dt {dly: 45, spd: 0.1, lib:seed_wt_main, dim:float, sub:wt_exp, typ:Sub, adr:!}
 fn randomize
 dt {dly: 55, spd: 0.3, lib:anim, dim:vec4, sub:w, typ:Mod, adr:!}
 
+--randomizeW2
+fn randomize
+dt {dly: 65, spd: 0.3, lib:anim, dim:vec4, sub:w, typ:Mod, adr:!}
+
 --randomizeSC1
 fn randomize
 dt {dly: 65, spd: 0.3, lib:anim1, dim:vec4, sub:seed_color, typ:Mod, adr:!}
@@ -40,6 +44,14 @@ dt {dly: 65, spd: 0.05, lib:images2, dim:vec4, sub:0, typ:Image, adr:!}
 --randomizeImg3
 fn randomize
 dt {dly: 15, spd: 0.3, lib:images3, dim:vec4, sub:0, typ:Image, adr:!}
+
+--randomizePonies1
+fn randomize
+dt {dly: 55, spd: 0.05, lib:ponies, dim:vec4, sub:0, typ:Image, adr:!}
+
+--randomizePonies2
+fn randomize
+dt {dly: 45, spd: 0.05, lib:ponies, dim:vec4, sub:0, typ:Image, adr:!}
 
 --randomizeC1
 fn randomize

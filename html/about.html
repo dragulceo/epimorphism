@@ -3,14 +3,16 @@
   <head>
     <title>Epimorphism</title>
 		<style>
-			body {background-color:lightgrey; font-family: Arial, Helvetica, sans-serif;}
+			body {background-color:#555; font-family: Verdana, Geneva, sans-serif;}
 			img {width:260px; height:260px;padding:5px 9px;}
-			#center {margin: 0 auto;width: 800px;box-shadow: 10px 10px 5px #888888;background-color:#fff;padding:0px 6px 6px 6px;text-align:justify;text-justify: inter-word;}
+			#center {margin: 0 auto;width: 750px;box-shadow: 10px 10px 5px #333;background-color:#fff;padding:10px 25px 25px 25px;text-align:justify;text-justify: inter-word;}
+			h1, h2, h3 {color: #21c;}
 		</style>
   </head>
   <body>
 		<div id="center">
-			<h1 style="padding:5px;padding-left:0px;"> What is this thing? </h1>
+			<h2 style="padding:5px;padding-left:0px;"> What is this thing? </h2>
+			<img style="width:280px;height:280px;float:right;padding-left:15px;" src="http://i.imgur.com/URvrHuW.jpg"/>
 			<p>
 				Epimorphism is a digital simulation of video feeback, a recursive process where a video animation is fed back into itself.  Video feedback is a pretty straightforward concept.  Just take a webcam & hook it up so that it's displaying on your computer, and then point the webcam at the display.  What happens is that in your display window you see what the camera is pointed at - the display  But you've just created an infinte loop!  In the display, you see a picture of the display.  In that display, you see another picture of the display...
 			</p>
@@ -24,9 +26,9 @@
 			</p>
 
 			<h3> Technical details </h3>
-			<img style="float:left;"src="http://i.imgur.com/1urWDRi.jpg"/>
+			<img style="float:left;padding-right:15px;"src="http://i.imgur.com/1urWDRi.jpg"/>
 			<p>
-				The current iteration of the project is written largely in PureScript, a dialect of Haskell.  The project is open source and can be found <a href="https://github.com/geneshuman/pure_morph"> here</a>.  The PureScript component of Epimorphism acts as the front end for a parallel/high performance computing application which runs directly on the clients graphics hardware via pixel shaders & WebGL.  The frontend of the application is responsible for the WebGL interface, application UI, pixel shader compilation, state evolution, and maintaining and modulating the pattern library.  The backend of the application is responsible for implementing the feedback transfer function above.  It is a highly parallel application, where the color value of each pixel is computed in its own thread directly on the graphics hardware.  The backend of the application is a highly parameterized system.  The default mode of operation of the system is a random walk through the parameter space; numerical parameters, as well as transfer functions themselves are animated and interpolated by the front end of the software.  Interactive modes of the software are also available, exposing the parameter space to the user.
+				The current iteration of the project is written largely in PureScript, a dialect of Haskell.  The project is open source and can be found <a href="https://github.com/geneshuman/pure_morph"> here</a>.  The PureScript component of Epimorphism acts as the front end for a parallel/high performance computing application which runs directly on the clients graphics hardware via pixel shaders & WebGL.  The frontend of the application is responsible for the WebGL interface, application UI, pixel shader compilation, state evolution, and maintaining and modulating the pattern library.  The backend of the application is responsible for implementing the feedback transfer function.  It is a highly parallel application, where the color value of each pixel is computed in its own thread directly on the graphics hardware.  The backend of the application is a highly parameterized system, and the default mode of operation of the system is a random walk through the parameter space; numerical parameters, as well as transfer functions themselves are animated and interpolated by the front end of the software.  Interactive modes of the software are also available, exposing the parameter space to the user.
 			</p>
 
 
@@ -35,18 +37,20 @@
 				The software has been in development in some form for ~15 years.  It originally started off as a geodesic dome covered in leds at burning man(in 2001!) and some how organically morphed into this. Significant near term plans for the software include audio responsiveness, a more detailed & user accessible creation UI, and implementing machine learning algorithms to more adeptly navigate the phase space of the software, possibly even tailoring the results to users individual tastes.  An algorithm to ray trace a generalized version of the software in 3 dimensions using distance fields has also been developed but technology is currently lacking.  However back of the envelope calculations suggest that consumer hardware is only about 2 generations away from being able to support this idea :)
 			</p>
 			<h2> Gallery </h2>
-			<img style="width:360px;height:360px;" src="http://i.imgur.com/BHS1Zy9.jpg"/>
-			<img style="width:360px;height:360px;" src="http://i.imgur.com/DgvY2W6.jpg"/>
-			<img style="width:360px;height:360px;" src="http://i.imgur.com/cMA7yJm.jpg"/>
-			<img style="width:360px;height:360px;" src="http://i.imgur.com/uSfHr6k.jpg"/>
-			<img style="width:360px;height:360px;" src="http://i.imgur.com/LwTzRFz.jpg"/>
-			<img style="width:360px;height:360px;" src="http://i.imgur.com/FemRReH.jpg"/>
-			<img style="width:360px;height:360px;" src="http://i.imgur.com/jIZeQ2h.jpg"/>
-			<img style="width:360px;height:360px;" src="http://i.imgur.com/URvrHuW.jpg"/>
+			<img style="width:345px;height:345px;" src="http://i.imgur.com/BHS1Zy9.jpg"/>
+			<img style="width:345px;height:345px;" src="http://i.imgur.com/DgvY2W6.jpg"/>
+			<img style="width:345px;height:345px;" src="http://i.imgur.com/cMA7yJm.jpg"/>
+			<img style="width:345px;height:345px;" src="http://i.imgur.com/uSfHr6k.jpg"/>
+			<img style="width:345px;height:345px;" src="http://i.imgur.com/LwTzRFz.jpg"/>
+			<img style="width:345px;height:345px;" src="http://i.imgur.com/FemRReH.jpg"/>
+			<img style="width:345px;height:345px;" src="http://i.imgur.com/jIZeQ2h.jpg"/>
 			<br style="clear:both;" />
 
 			<h3> About Me </h3>
 			<a href="/me.html">Me</a>
+			<br/><br/><br/><br/><br/><br/>
+
+			<p style='font-size:10px;'> Congratulations, you've found <a href="/ponies"> this </a></p>
 
 		</div>
 	</body>

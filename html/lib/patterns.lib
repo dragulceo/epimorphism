@@ -7,7 +7,7 @@ tSpd   1.0
 includes [colorspace, math]
 
 --farm1 < dev
-main   epimorphism_main_farm1
+main   farm_main
 
 --analysis < dev
 main  analysis_main

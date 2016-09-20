@@ -1,6 +1,6 @@
 --w_nul
 family w
-flags {lib}
+flags {lib, farm1, farm2}
 component w_nul
 var wdt
 dim vec4

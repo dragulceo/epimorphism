@@ -523,7 +523,6 @@ seed seed_analysis {{
 
 seed seed_simple {{
 	vec2 z_i = z;
-  %t%
 	%reduce%
 
 	float wx = (abs(z.x) + @w@ - 1.0) / @w@;
@@ -532,8 +531,8 @@ seed seed_simple {{
   float w = max(0.0, max(wx, wy));
 	float mask = ceil(w);
 
-	seed = vec4(w, 0.0, 0.0, w * @alpha@);
 
+	seed = hsv2rgb(vec4(0.0, 1.0, w, mask * @alpha@));
 	z = z_i;
 }}
 
@@ -633,7 +632,8 @@ color tex_color {{
 
 	// multiplying the value by w makes things look nice
 	// should possibly put this in a flag
-	float hofs = 0.0;//  freqData(z.x + wx + wy + w);
+	//float hofs = 0.5 * freqData(z.x + wx + wy + w);
+	float hofs = 0.0;
   seed = hsv2rgb(vec4(time * @spd@ + @rot@ + seed.x + hofs, @sat@ * seed.y, @val@ * seed.z * w, a * seed.a));
 }}
 

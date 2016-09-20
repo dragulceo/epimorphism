@@ -14,7 +14,6 @@ component seed_analysis
 flags {lib, t_test}
 component seed_simple
 par {w: 0.2, alpha: 1.0}
-modules {t: t_wrap}
 
 --seed_img1 < seed_simple
 flags {t_test, img}

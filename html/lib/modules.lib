@@ -9,44 +9,41 @@ dim vec4
 component epimorphism
 modules {seed: seed_wca, t:t_wrap_zo, color: rotate_hsv1, reduce: torus_reduce}
 
---epimorphism_farm1 < epimorphism
-flags {farm1}
-modules {seed: seed_wca, t:t_wrap, color: rotate_hsv1, reduce: torus_reduce}
-
 --analysis < epimorphism
 modules {seed: seed_analysis, t:t_wrap_zo, color: color_id, reduce: torus_reduce}
 
 --julia < default_app
 component julia
+flags {lib, farm1}
 sub {t_expr: z * z + zn[0]}
 zn [-0.123 + 0.745i, 0.0+0.0i, 0.0+0.0i, 0.0+0.0i]
 
 
+
 --color_id
 family color
-flags {lib, color_main}
+flags {lib, color_main, farm1}
 component color_id
 var color
 dim vec4
 
 --color_bgr < color_id
-flags {lib}
+flags {lib, farm1}
 component color_bgr
 
 --color_gbr < color_id
-flags {lib}
+flags {lib, farm1}
 component color_gbr
 
 --rotate_hsv0 < color_id
-flags {lib, color_main}
+flags {lib, color_main, farm1}
 component rotate_hsv
 par {rot: 0.06, len_sc:0.0, len_sc_amt:0.0, th_spd: 0.0}
 
 --rotate_hsv1 < color_id
-flags {lib, color_main}
+flags {lib, color_main, farm1}
 component rotate_hsv
-par {rot: 0.17, len_sc:1.0, len_sc_amt:0.5, th_spd: 0.0}
-
+par {rot: 0.17, len_sc:1.0, len_sc_amt:0.5, th_spd: 0.02}
 
 
 --disp_id
@@ -63,33 +60,35 @@ flags {epimorphism, root}
 component main
 modules {application: epimorphism}
 
---epimorphism_main_farm1
+--farm_main
 family main
 flags {epimorphism, root}
 component main
-modules {application: epimorphism_farm1}
+modules {application: farm_epimorphism}
 
 
 --post_id
 family post
-flags {lib, post_main}
+flags {lib, post_main, farm1, farm2}
 component post_id
 var frame
 dim vec4
 
 --post_hlim1 < post_id
-flags {post_hlim, lib}
+flags {post_hlim, lib, farm1, farm2}
 component post_hlim
 par {gamma:1.5, hue:0.0, spread:0.5, lgv:0.5}
 
 --post_hlim2 < post_hlim1
+flags {post_hlim, lib}
 par {gamma:1.5, hue:0.33, spread:0.5, lgv:0.5}
 
 --post_hlim3 < post_hlim1
+flags {post_hlim, lib}
 par {gamma:1.5, hue:0.66, spread:0.5, lgv:0.5}
 
 --post_hlim_anim < post_hlim1
-flags {lib}
+flags {lib, farm1, farm2}
 par {gamma:2.0, hue:0.0, spread:0.5, lgv:0.5}
 paths {hue:loop 0.01, spread:wave 0.011 0.35 1.5, lgv:wave 0.07 0.125 0.5}
 
@@ -129,7 +128,6 @@ component seed_analysis
 flags {lib, t_test}
 component seed_simple
 par {w: 0.2, alpha: 1.0}
-modules {t: t_wrap}
 
 --seed_img1 < seed_simple
 flags {t_test, img}
@@ -149,7 +147,7 @@ modules {t:t_wrap, seed0:seed_wca, seed1:seed_nothing, seed2:seed_nothing}
 
 --wt_id
 family wt
-flags {lib}
+flags {lib, farm1, farm2}
 component wt
 sub {wt_exp: w}
 var w
@@ -165,11 +163,12 @@ sub {wt_exp: sqrt(1.0 - (1.0 - w) * (1.0 - w))}
 sub {wt_exp: 1.0 - sqrt(1.0 - (1.0 - w) * (1.0 - w))}
 
 --wt_anim < wt_id
+flags {lib}
 scripts [randomizeWT1]
 
 --alpha_id
 family a
-flags {lib}
+flags {lib, farm1, farm2}
 component alpha
 sub {a_exp: a}
 par {alpha: 1.0}
@@ -189,6 +188,7 @@ sub {a_exp: w * a * @alpha@}
 sub {a_exp: sqrt(1.0 - (1.0 - w) * (1.0 - w)) * a * @alpha@}
 
 --alpha_anim < alpha_solid
+flags {lib}
 paths {alpha:wave 0.048 0.3 0.7}
 scripts [randomizeA1]
 
@@ -196,7 +196,7 @@ scripts [randomizeA1]
 
 --simple_color
 family seed_color
-flags {lib}
+flags {lib,farm1, farm2}
 component simple_color
 par {spd: 0.0, rot: 0.15, sat:1.0, val:1.0}
 var seed
@@ -225,6 +225,7 @@ flags {anim2}
 
 
 --fb_color < simple_color
+flags {lib}
 component fb_color
 par {scale: 0.333, spd: 0.0, rot: 0.0, sat:1.0, val:1.0}
 modules {bg: simple_color}
@@ -232,7 +233,7 @@ modules {bg: simple_color}
 
 --w_nul
 family w
-flags {lib}
+flags {lib, farm1, farm2}
 component w_nul
 var wdt
 dim vec4
@@ -361,26 +362,26 @@ scripts [randomizeTI3]
 
 --t_z
 family t_inner
-flags {lib, all, all_seed}
+flags {lib, all, all_seed, farm1, farm2}
 component t_sub
 var z
 dim vec2
 sub {t_expr: z}
 
 --t_cos < t_z
-flags {lib, all, all_seed}
+flags {lib, all, all_seed, farm1, farm2}
 sub {t_expr: cos(z)}
 
 --t_sin < t_z
-flags {lib, all, all_seed}
+flags {lib, all, all_seed, farm1, farm2}
 sub {t_expr: sin(z)}
 
 --t_cosh < t_z
-flags {lib, all, all_seed}
+flags {lib, all, all_seed, farm1, farm2}
 sub {t_expr: cosh(z)}
 
 --t_sinh < t_z
-flags {lib, all, all_seed}
+flags {lib, all, all_seed, farm1, farm2}
 sub {t_expr: sinh(z)}
 
 --t_tan < t_z
@@ -392,7 +393,7 @@ flags {lib, all}
 sub {t_expr: tanh(z)}
 
 --t_exp < t_z
-flags {lib, all, all_seed}
+flags {lib, all, all_seed, farm1, farm2}
 sub {t_expr: exp(z)}
 
 --t_p0 < t_z
@@ -400,19 +401,19 @@ flags {lib, all}
 sub {t_expr: z / (z + 1) + z / (z - 1)}
 
 --t_p1 < t_z
-flags {lib, all, all_seed}
+flags {lib, all, all_seed, farm1, farm2}
 sub {t_expr: 1 - 5 * z * z * z / 3}
 
 --t_p2 < t_z
-flags {lib, all, all_seed}
+flags {lib, all, all_seed, farm1, farm2}
 sub {t_expr: 1 - z * z}
 
 --t_p3 < t_z
-flags {lib, all, all_seed}
+flags {lib, all, all_seed, farm1, farm2}
 sub {t_expr: z * (1 + z) / 2}
 
 --t_p4 < t_z
-flags {lib, all, all_seed}
+flags {lib, all, all_seed, farm1, farm2}
 sub {t_expr: z * z}
 
 --t_tp0 < t_z
@@ -424,7 +425,7 @@ flags {lib, all}
 sub {t_expr: cos(z) - tanh(z)}
 
 --t_tp2 < t_z
-flags {lib, all, all_seed}
+flags {lib, all, all_seed, farm1, farm2}
 sub {t_expr: (z + exp(z)) / 2}
 
 --t_tp3 < t_z
@@ -432,15 +433,15 @@ flags {lib, all}
 sub {t_expr: (sin(z) + tan(z)) / 2}
 
 --t_tp4 < t_z
-flags {lib, all, all_seed}
+flags {lib, all, all_seed, farm1, farm2}
 sub {t_expr: cosh(z) + exp(z)}
 
 --t_tp5 < t_z
-flags {lib, all, all_seed}
+flags {lib, all, all_seed, farm1, farm2}
 sub {t_expr: z * cos(z)}
 
 --t_tp6 < t_z
-flags {lib, all, all_seed}
+flags {lib, all, all_seed, farm1, farm2}
 sub {t_expr: (cosh(z) + sinh(z)) / 2}
 
 --t_inv < t_z
@@ -460,6 +461,58 @@ component default_vert
 
 
 
+
+
+
+--farm_epimorphism < epimorphism
+flags {farm1}
+modules {seed: seed_frame, t:t_wrap, color: color_id, reduce: torus_reduce}
+
+--tex_color1 < tex_color
+images [textures/simplegeom/tile_hexagons1.png]
+
+--tex_color2 < tex_color
+par {scale: 0.5, spd: 0.0, rot: 0.0, sat:0.4, val:1.0}
+images [textures/simplegeom/tile_grid3.png]
+
+--tex_color3 < tex_color
+par {scale: 0.25, spd: 0.0, rot: 0.0, sat:1.0, val:1.0}
+images [textures/Vasarely/tile_vasarely8.png]
+
+
+--seed_frame < seed_simple
+flags {farm1}
+
+--seed_farm1 < seed_wca
+flags {farm1}
+modules {t: t_wrap, w:w_lines_lr, wt:wt_inv, a:alpha_id, seed_color:tex_color}
+
+--seed_farm2 < seed_farm1
+modules {t: t_wrap, w:w_lines_inner, wt:wt_id, a:alpha_solid1, seed_color:simple_color}
+
+--seed_farm3 < seed_farm1
+modules {t: t_wrap, w:w_lines_border, wt:wt_inv, a:alpha_id, seed_color:tex_color1}
+
+--seed_farm4 < seed_farm1
+modules {t: t_wrap, w:w_square, wt:wt_id, a:alpha_id, seed_color:tex_color3}
+
+--seed_farm5 < seed_farm1
+modules {t: t_wrap1, w:w_lines_lr, wt:wt_id, a:alpha_linear, seed_color:simple_color}
+
+--seed_farm6 < seed_farm1
+modules {t: t_wrap2, w:w_circle, wt:wt_id, a:alpha_id, seed_color:tex_color2}
+
+--t_wrap1 < t_wrap
+flags {}
+modules {t_inner: t_cos}
+
+--t_wrap2 < t_wrap
+flags {}
+modules {t_inner: t_p5}
+
+--alpha_solid1 < alpha_solid
+flags {}
+par {alpha: 0.7}
 
 
 

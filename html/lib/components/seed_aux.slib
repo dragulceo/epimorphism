@@ -17,7 +17,8 @@ color tex_color {{
 
 	// multiplying the value by w makes things look nice
 	// should possibly put this in a flag
-	float hofs = 0.0;//  freqData(z.x + wx + wy + w);
+	//float hofs = 0.5 * freqData(z.x + wx + wy + w);
+	float hofs = 0.0;
   seed = hsv2rgb(vec4(time * @spd@ + @rot@ + seed.x + hofs, @sat@ * seed.y, @val@ * seed.z * w, a * seed.a));
 }}
 

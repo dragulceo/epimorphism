@@ -1,6 +1,6 @@
 --wt_id
 family wt
-flags {lib}
+flags {lib, farm1, farm2}
 component wt
 sub {wt_exp: w}
 var w
@@ -16,11 +16,12 @@ sub {wt_exp: sqrt(1.0 - (1.0 - w) * (1.0 - w))}
 sub {wt_exp: 1.0 - sqrt(1.0 - (1.0 - w) * (1.0 - w))}
 
 --wt_anim < wt_id
+flags {lib}
 scripts [randomizeWT1]
 
 --alpha_id
 family a
-flags {lib}
+flags {lib, farm1, farm2}
 component alpha
 sub {a_exp: a}
 par {alpha: 1.0}
@@ -40,6 +41,7 @@ sub {a_exp: w * a * @alpha@}
 sub {a_exp: sqrt(1.0 - (1.0 - w) * (1.0 - w)) * a * @alpha@}
 
 --alpha_anim < alpha_solid
+flags {lib, farm1}
 paths {alpha:wave 0.048 0.3 0.7}
 scripts [randomizeA1]
 
@@ -47,7 +49,7 @@ scripts [randomizeA1]
 
 --simple_color
 family seed_color
-flags {lib}
+flags {lib,farm1, farm2}
 component simple_color
 par {spd: 0.0, rot: 0.15, sat:1.0, val:1.0}
 var seed
@@ -76,6 +78,7 @@ flags {anim2}
 
 
 --fb_color < simple_color
+flags {lib}
 component fb_color
 par {scale: 0.333, spd: 0.0, rot: 0.0, sat:1.0, val:1.0}
 modules {bg: simple_color}

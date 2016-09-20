@@ -9,14 +9,11 @@ dim vec4
 component epimorphism
 modules {seed: seed_wca, t:t_wrap_zo, color: rotate_hsv1, reduce: torus_reduce}
 
---epimorphism_farm1 < epimorphism
-flags {farm1}
-modules {seed: seed_wca, t:t_wrap, color: rotate_hsv1, reduce: torus_reduce}
-
 --analysis < epimorphism
 modules {seed: seed_analysis, t:t_wrap_zo, color: color_id, reduce: torus_reduce}
 
 --julia < default_app
 component julia
+flags {lib, farm1}
 sub {t_expr: z * z + zn[0]}
 zn [-0.123 + 0.745i, 0.0+0.0i, 0.0+0.0i, 0.0+0.0i]

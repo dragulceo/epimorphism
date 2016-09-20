@@ -1,24 +1,24 @@
 --color_id
 family color
-flags {lib, color_main}
+flags {lib, color_main, farm1}
 component color_id
 var color
 dim vec4
 
 --color_bgr < color_id
-flags {lib}
+flags {lib, farm1}
 component color_bgr
 
 --color_gbr < color_id
-flags {lib}
+flags {lib, farm1}
 component color_gbr
 
 --rotate_hsv0 < color_id
-flags {lib, color_main}
+flags {lib, color_main, farm1}
 component rotate_hsv
 par {rot: 0.06, len_sc:0.0, len_sc_amt:0.0, th_spd: 0.0}
 
 --rotate_hsv1 < color_id
-flags {lib, color_main}
+flags {lib, color_main, farm1}
 component rotate_hsv
-par {rot: 0.17, len_sc:1.0, len_sc_amt:0.5, th_spd: 0.0}
+par {rot: 0.17, len_sc:1.0, len_sc_amt:0.5, th_spd: 0.02}

@@ -13,7 +13,6 @@ images [textures/simplegeom/tile_grid3.png]
 par {scale: 0.25, spd: 0.0, rot: 0.0, sat:1.0, val:1.0}
 images [textures/Vasarely/tile_vasarely8.png]
 
-
 --seed_frame < seed_simple
 flags {farm1}
 
@@ -47,3 +46,11 @@ modules {t_inner: t_p5}
 --alpha_solid1 < alpha_solid
 flags {}
 par {alpha: 0.7}
+
+--t_farm_anim < t_main1
+flags {farm1}
+scripts []
+
+--t_farm_scripts < t_main1
+paths {}
+flags {farm1}

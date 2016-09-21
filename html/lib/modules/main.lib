@@ -2,7 +2,7 @@
 family main
 flags {epimorphism, root}
 component main
-modules {application: interference}
+modules {application: epimorphism}
 
 --farm_main
 family main

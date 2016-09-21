@@ -3,7 +3,7 @@ kernelDim 1024
 fract 3
 numAux 10
 audioAnalysisEnabled false
-audioBufferSize 32
+audioBufferSize 128
 
 --low < default
 fract 4

@@ -111,6 +111,24 @@ exports.initAudioAnalyzer = function(bufferSize){
 	}
 }
 
+exports.initAudioAnalyzer2 = function(bufferSize){
+	return function(){
+		var ctx = new AudioContext();
+		var audio = document.getElementById('myAudio');
+		var audioSrc = ctx.createMediaElementSource(audio);
+		var analyser = ctx.createAnalyser();
+		analyser.fftSize = bufferSize * 2;
+		analyser.smoothingTimeConstant = 0.9;
+		analyser.minDecibels = -85;
+
+		audioSrc.connect(analyser);
+		audioSrc.connect(ctx.destination);
+
+		return analyser;
+	}
+}
+
+
 
 exports.audioData = function(analyser) {
 	return function() {

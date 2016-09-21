@@ -3,48 +3,38 @@ application interference {{
 
 	const int max_waves = 10;
 	float waves[max_waves + 1];
-
 	%t%
 
   // compute val
+	float sum = 0.0;
   for(int i = 0; i <= max_waves; i++){
 		float th = float(i) * PI / @waves@;
 		th += (float(i) - @waves@ / 2.0) * time * @spd@;
 
 		vec2 k = vec2(cos(th), sin(th));
 		waves[i] = plane_wave(@N@ * k, z, @N@, time * @spd@);
+		if(float(i) <= @waves@)
+			sum += waves[i];
   }
-
-  float sum = 0.0;
-  for(int i = 0; i < max_waves + 1; i++){
-		if(float(i) > @waves@)
-			break;
-    sum += waves[i];
-	}
 
 	sum = mod(sum / 2.0, 1.0);
 	float val = (sum < 0.5 ? 2.0 * sum : 2.0 - 2.0 * sum);
 
 
   // compute hue
+	sum = 0.0;
   for(int i = 0; i <= max_waves; i++){
 		float th = float(i) * PI / @waves@;
 		th += (float(i) - @waves@ / 2.0) * time * @spd@;
 
 		vec2 k = vec2(cos(th), sin(th));
 		waves[i] = plane_wave(@N@ * k, z, @N@, 2.0 * time * @spd@) / 6.0;
+		if(float(i) <= @waves@)
+			sum += waves[i];
   }
-
-  sum = 0.0;
-  for(int i = 0; i < max_waves+1; i++){
-		if(float(i) > @waves@)
-			break;
-    sum += waves[i];
-	}
 
 	sum = mod(sum / 2.0, 1.0);
 	float hue = (sum < 0.5 ? 2.0 * sum : 2.0 - 2.0 * sum);
-
 
   color = hsv2rgb(vec4(hue, 1.0, val, 1.0));
 	z = z_in;

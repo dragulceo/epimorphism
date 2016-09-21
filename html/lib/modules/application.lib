@@ -17,3 +17,9 @@ component julia
 flags {lib, farm1}
 sub {t_expr: z * z + zn[0]}
 zn [-0.123 + 0.745i, 0.0+0.0i, 0.0+0.0i, 0.0+0.0i]
+
+--interference < default_app
+component interference
+flags {lib, farm1}
+modules {t: t_wrap}
+par {N: 2.0, waves: 4.0, spd: 0.02}

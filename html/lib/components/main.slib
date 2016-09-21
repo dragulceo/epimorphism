@@ -17,6 +17,15 @@ float timeData(float x){
 	return texture2D(audioData, vec2(mod(x, 1.0), 2.0)).a;
 }
 
+float plane_wave(vec2 k, vec2 z, float w, float time){
+
+  float th = (k.x * z.x + k.y * z.y) - w * time;
+	th = mod(th, 1.0);
+  float v = sin(2.0 * PI * th);
+
+  return v;
+}
+
 void main() {
   vec4 color;
   vec2 z, z_in;

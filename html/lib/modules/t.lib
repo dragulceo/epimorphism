@@ -54,3 +54,8 @@ scripts [randomizeTI2]
 --t_seed_anim2 < t_seed_anim1
 paths {0:rose 0.025 0.4 6.0 0.9, 1:rose 0.001 0.8 5.0 -0.8, 2:rose 0.003 0.3 7.0 0.9, 3:rose 0.004 1.2 4.0 0.0}
 scripts [randomizeTI3]
+
+--t_julia < t_wrap
+zn [1.0 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, -0.162 + 1.04i]
+modules {t_inner: t_p4}
+paths {3: circle 0.035 1.0}

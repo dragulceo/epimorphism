@@ -2,7 +2,7 @@
 family main
 flags {epimorphism, root}
 component main
-modules {application: epimorphism}
+modules {application: julia}
 
 --farm_main
 family main

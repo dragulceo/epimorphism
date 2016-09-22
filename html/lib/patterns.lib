@@ -21,6 +21,10 @@ disp  disp_main1
 main  epimorphism2_main
 disp  disp_id
 
+--main3 < dev
+main  epimorphism3_main
+disp  disp_main3
+
 --ponies < dev
 main  epimorphism_ponies
 disp  disp_id

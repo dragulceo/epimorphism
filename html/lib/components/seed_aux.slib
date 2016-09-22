@@ -7,7 +7,7 @@ alpha alpha {{
 }}
 
 color simple_color {{
-  seed = hsv2rgb(vec4(time * @spd@ + @rot@, @sat@, w * @val@, a));
+  seed = hsv2rgb(vec4(time * @spd@ + @rot@, w * @sat@, w * @val@, a));
 }}
 
 color tex_color {{
@@ -26,7 +26,6 @@ color tex_color {{
 color fb_color {{
 	vec2 ofs = mod(@scale@ * wdt.zw, 1.0);
 
-	%bg%
 	vec4 bg_seed = seed;
 
   seed = texture2D(fb, ofs);

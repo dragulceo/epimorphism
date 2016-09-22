@@ -20,3 +20,9 @@ initPattern farm1
 
 --ponies < prod
 initPattern ponies
+
+--farm2
+initEngineConf default
+initUIConf prod
+initPattern main3
+seed iBxKdteaFS

@@ -1,0 +1,19 @@
+--epimorphism3_main < epimorphism_main
+modules {application: epimorphism_auto3}
+
+--epimorphism_auto3 < epimorphism
+scripts [randomizeC1]
+modules {seed: seed_multi_anim2, t:t_main2, color: rotate_hsv1, reduce: torus_reduce}
+
+--seed_wca_anim3 < seed_wca
+scripts [randomizeW3, randomizeSC2]
+modules {t: t_seed_anim1, w:w_lines_border_anim, wt:wt_id, a:alpha_anim, seed_color:simple_color_anim1}
+
+--seed_wca_anim4 < seed_wca
+scripts [randomizeW4]
+modules {t: t_seed_anim2, w:w_lines_border_anim, wt:wt_anim, a:alpha_anim, seed_color:tex_color_anim5}
+
+--seed_multi_anim2 < seed_nothing
+flags {multi}
+component seed_multi
+modules {t:t_wrap, seed0:seed_wca_anim3, seed1:seed_wca_anim4, seed2:seed_nothing}

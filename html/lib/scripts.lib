@@ -29,9 +29,21 @@ dt {dly: 55, spd: 0.3, lib:anim, dim:vec4, sub:w, typ:Mod, adr:!}
 fn randomize
 dt {dly: 65, spd: 0.3, lib:anim, dim:vec4, sub:w, typ:Mod, adr:!}
 
+--randomizeW3
+fn randomize
+dt {dly: 27, spd: 0.3, lib:anim, dim:vec4, sub:w, typ:Mod, adr:!}
+
+--randomizeW4
+fn randomize
+dt {dly: 40, spd: 0.3, lib:anim, dim:vec4, sub:w, typ:Mod, adr:!}
+
 --randomizeSC1
 fn randomize
 dt {dly: 65, spd: 0.3, lib:anim1, dim:vec4, sub:seed_color, typ:Mod, adr:!}
+
+--randomizeSC2
+fn randomize
+dt {dly: 30, spd: 0.3, lib:anim3, dim:vec4, sub:seed_color, typ:Mod, adr:!}
 
 --randomizeImg1
 fn randomize
@@ -44,6 +56,14 @@ dt {dly: 65, spd: 0.05, lib:images2, dim:vec4, sub:0, typ:Image, adr:!}
 --randomizeImg3
 fn randomize
 dt {dly: 15, spd: 0.3, lib:images3, dim:vec4, sub:0, typ:Image, adr:!}
+
+--randomizeImg4
+fn randomize
+dt {dly: 35, spd: 0.05, lib:images1, dim:vec4, sub:0, typ:Image, adr:!}
+
+--randomizeImg5
+fn randomize
+dt {dly: 40, spd: 0.05, lib:images2, dim:vec4, sub:0, typ:Image, adr:!}
 
 --randomizePonies1
 fn randomize

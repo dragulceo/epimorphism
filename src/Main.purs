@@ -18,7 +18,7 @@ import Pattern (importPattern)
 import Script (runScripts)
 import System (initSystemST, loadLib)
 import UI (initUIST)
-import Util (Now, handleError, lg, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
+import Util (rndstr, Now, handleError, lg, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
 
 host :: String
 host = ""
@@ -48,10 +48,16 @@ initState systemST = do
   -- init config
   systemName <- lift $ getSysConfName
   systemConf <- loadLib systemName systemST.systemConfLib "init system"
-  let systemConf' = systemConf {host = host}
 
-  when (systemConf.seed /= "") do
-    lift $ seedRandom systemConf.seed
+  seed <- case systemConf.seed of
+    "" -> do
+      newSeed <- lift rndstr
+      let xxx = lg $ "GENERATING SEED: " ++ newSeed
+      return newSeed
+    _ -> return systemConf.seed
+
+  let systemConf' = systemConf {host = host, seed = seed}
+  lift $ seedRandom systemConf'.seed
 
   engineConf <- loadLib systemConf'.initEngineConf systemST.engineConfLib "init engine"
   uiConf     <- loadLib systemConf'.initUIConf systemST.uiConfLib "init ui"

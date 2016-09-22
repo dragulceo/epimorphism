@@ -1,5 +1,5 @@
 --prod
-initEngineConf default
+initEngineConf low
 initUIConf prod
 initPattern main2
 

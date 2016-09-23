@@ -6,3 +6,9 @@ t t_wrap {{
   %t_inner%
   z = M(zn[#2], z) + zn[#3];
 }}
+
+
+t t_affine {{
+  z = M(zn[#0], z) + zn[#1];
+  %t_inner%
+}}

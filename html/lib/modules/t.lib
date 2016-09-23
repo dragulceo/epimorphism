@@ -10,6 +10,12 @@ zn [1.0 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]
 component t_wrap
 modules {t_inner: t_z}
 
+--t_affine < t_wrap
+flags {wrap, lib, farm1}
+zn [1.0 + 0.0i, 0.0 + 0.0i]
+component t_affine
+modules {t_inner: t_z}
+
 --t_wrap_zo < t_wrap
 flags {wrap, all, lib}
 zn [1.1 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, 0.0 + 0.0i]

@@ -42,7 +42,7 @@ sub {a_exp: sqrt(1.0 - (1.0 - w) * (1.0 - w)) * a * @alpha@}
 
 --alpha_anim < alpha_solid
 flags {lib, farm1}
-paths {alpha:wave 0.048 0.3 0.7}
+paths {alpha:wave 0.048 0.25 0.7}
 scripts [randomizeA1]
 
 

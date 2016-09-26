@@ -50,7 +50,6 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
       "null" -> return unit
       "pause" -> do
         lift $ modifySTRef ssRef (\s -> s {paused = not s.paused})
-        lift $ modifySTRef pRef (\p -> p {tSpd = 1.0 - p.tSpd})
         return unit
       "pauseAfterSwitch" -> do
         lift $ modifySTRef ssRef (\s -> s {pauseAfterSwitch = true})

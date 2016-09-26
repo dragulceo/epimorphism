@@ -1,194 +1,119 @@
-MAKE THINGS BETTER/AUDIO1:
-- setup farm system (ui, pattern, etc)
-- color stuff
-- music pattern
-- generally make better
-- julia set coloring & maybe interference
+POST FARM:
+  - clean up after farm
+	  - clean up main
+	- inline scripts + script/path phases
+	- fix importing
+    - enforce integrity of pools & module references
+    - module/submodule cycles??
+    - limit to tree size?
+    - par & zn & aux dimension overflow
+	- compiler performance
+	- components have meta information, modules just have a component & variables
+	  - components specify a default instance
+	  - component family => var & dim
+	- REFACTOR UI - its super ghetto now
+		- make ui reactive to pattern/ui conf, etc?
+	  - no more text files. entirely done via web - patterns, scripts config, etc
+	- move everything to a database
+	  - put textures there too?
+		- update flags on save (default != true)
+  	- check for duplicates when saving (id = hash of contents?)
+	  - next config/library pass (maybe better error detection)
+    - namespace collision in modules.lib?
 
-
-SOON:
-choppy in safari
-catch errors when parsing t_exp
-better ui for script/path modification
-phases for paths :/
-
-
-MVP FOR SYSTEM:
-  - T
-	  - create more of them
-		- animate them
-		- create final T component
-	- SEED
-	  - create more of them
-		- re-integrate images & maybe layers
-		- make sure we preserve values?
-		- create final seed component
-  - COLOR TRANS
-	  - fixed point vs oscilatory
-  - POST
-	  - better pallets
-	- SOUND
-	  - wtf are we doing here?
-		- various signals have 1
+  - just release it?
+  - kickstarter for audio responsiveness?
+	  - make main pattern a little better
 
 
 
 
-RELEASE
-  LAUNCH:
-  	- about page / gallery
-  	- mailing list
-  	- upgrade hosting
-	SYSTEM:
-  - zoom out performance problem.  unclear what the deal is.  really bad with 1/z
-		- chopiness when at higher resolutions
-		- trying to render images before they're available.  chrome on windows. causes ie to crash. put dummy images in while others load? I think I already tried to fix this.
-  CONTENTS:
-	  superformula - https://en.wikipedia.org/wiki/Superformula
-		:T
-		  - make a few more seeds, some with simple animations
-
-		  - BASIC IDEA
-			  - given a collection of constraints, generate a T
-				- CONSTRAINTS:
-				  - animation type: none, symmetric X/Y, inner/outer, 0 vs 1, etc
-					- constrain scale
-					- maybe some interesting properties
-				- first, generate t_inner, then add animations
-			- EXPAND LIBRARY
-			  - catagorize transformations:
-				  - symmetries, is_inversion, scale, periodic?, rational?, accumulation points, empty regions?, elementary, custom?
-			- ANIMATIONS
-			  - make sure paths/animations dont zoom out/in too much? - constraint system
-				- seed animations vs t animations
-				- various classes of animations. non-animated, symmetric
-			- MISC
-			  - use images(self????) as transformations
-			  - random idea - different Ts on different frames?????
-			  - when interpolating between t's, are different zns handled correctly? yes, because incSub preserves scripts
-			  - vector fields
-		SEED:
-		  - impulses
-			- wca & multi seed
-			- images, use w for value
-			- outline seeds
-			- expand library
-		COLOR:
-		  - length_scale
-			- maintain val
-			- on iteration lighten val or something
-	  POST:
-		  - pay better attention to gamma
-		BLEND:
-		  - blend maps!! variable interpolation
-		MISC:
-		  - initial state
-			- master pattern
-
-
-NEXT
+NEXT 2
  SYSTEM
-  - scripts
-    - way of switching modules while keeping phase/scripts.  isn't recompiling ghetto(what?)
-	  - keep scripts when switching modules?
-		- inline scripts
 	- patternRefPool?
   - make patterns modules/pattern level scripts
   - mainRef refernece in randomMain seems ghetto
   - module.modules should be [SubModule = SubLib String | SubPool String] or something
 	- put pattern into systemST, patternRefPool.  remove createScript & stop passing pattern around
 	- interpolating between patterns?
-	- importing is a bit of a disaster.  orphans & integrity & so forth. not to mention flakey & hard to debug :/
 
-LATER
+
+
+BUGS:
+	- complex parsing - currently need both components i.e 0.0 + 1.3i
+  - catch errors when parsing t_exp
   - no error message when image texture doesnt exist
-  - javascript files are all over the place
   - reduce is a substition in seeds, but comes from appliction.  the order of "modules {x: .., y: ..}" matters :/
   - if there are too many aux buffers (texture units), we'll have an issue?
-  - saving images loses bit depth??
-  - for each pixel, define a normal vector, so we can do lighting & material effects
-  - this -10000, etc shit is ghetto
-	- fract a sub on main body set in engine before compiling?
   - on windows menu disappears hovering over res selector
-  - zoom out performance problem.  unclear what the deal is.  really bad with 1/z
-  - ppath, remove path if t > 1.0 when necessary
-	- add shader source to console
-  - change zn & par through clicking on console
-  - check for syntax errors in parseT
-  - use git for deploy
   - weird when opening console in fullscreen
-  - really choppy at higher resolutions
-  - addGlobalEventListeners is a bit ghetto
-  - weird divide by zero issue - glitch in content
-  - choppiness when doing a bunch of switching.  might be image uploading.  there is a error "texImage2D: invalid image" when a bunch of image switches happen
+  - shader indentation issues with switching & in general
+  - error handling for failing to enter fullscreen mode
+  - number parsing flakey? how so?
 
-  - limit to tree size?
-  - more debugState info
-  - hard pause button (do nothing at all, not just tSpd=0)
-	- finish importScript2
-  - BETA INFRASTRUCTURE PASS
+PERF:
+  - zoom out performance problem.  unclear what the deal is.  really bad with 1/z
+	- chopiness when at higher resolutions
+  - choppy in safari
+  - switch stuttering. it's compile speed + texutre upload
+
+SYSTEM:
+  - scripts
+    - way of switching modules while keeping phase/scripts.
+	  - keep scripts when switching modules?
+  - javascript files are all over the place
+  - this -10000(for random), etc shit is ghetto
+	- fract a sub on main body set in engine before compiling?
+  - use git for deploy
+  - addGlobalEventListeners is a bit ghetto
   - more work on fract.  more specific fracts.  like for seed vs T.  can possibly also increase quality
 	- too many debug statements going on (in engine?)
-	- very minor glitch during image uploading
   - prevent default in ui.js
   - make serializable a class
-  - update flags on save (default != true)
-  - check for duplicates when saving (id = hash of contents?)
-	- screenshots
-	- save more than just images
-	- next config/library pass (maybe better error detection)
-	- pause only works if tSpd == 1.0
-  - namespace collision in modules.lib?
-  - maybe pixel alignment issues with images
+  - detect system/perf profile
   - remote control (webui, websockets, etc)
   - currently manually implementing GL.repeat for aux
-  - shader indentation issues with switching
-  - too many switches can cause par & zn overflow
-	- clean up Pattern.purs & Script.purs
   - findParent is kind of ghetto
   - ModRef used inconsistiently
-	- component family => var & dim
-  - investigate dsl for scripts
-  - use fb as texture source
-  - enforce integrity of pools & module references
-	- scripts conflicting with each other
-  - module/submodule cycles??
-  - error handling for failing to enter fullscreen mode
-  - ERROR HANDLING for createImage - missing images & sync issues & the unusable image issue
-  - engine stability/lost context - https://www.khronos.org/registry/webgl/extensions/WEBGL_lose_context/
-  - compiler performance
-  - database support
   - compiler substitutions %XXXX%, etc can still cause errors?  dont remember what kind
-  - check out setTimeout vs requestAminFrame
-  - video rendering
-	- old style (automation) scripts
-  - config/ lib file comments
-  - detect system/perf profile
-  - test on windows
+  - investigate dsl for scripts
+  - engine stability/lost context - https://www.khronos.org/registry/webgl/extensions/WEBGL_lose_context/
+  - main & disp share includes
+  - preprocesser malfunctions give weird errors
+	- https://www.khronos.org/registry/webgl/extensions/WEBGL_debug_shaders/
+  - scripts conflicting with each other?  who has priority
+  - better data organization
+	  - merge configs & states?
+		- what goes in config, what goes into states?
+		- put ref pools in pattern? why did I think of that?
+  - better engine error checking/handling
+
+FEATURE IDEAS:
+  - blend maps!! variable interpolation
+	- catagorize transformations:
+  	- symmetries, is_inversion, scale, periodic?, rational?, accumulation points, empty regions?, elementary, custom?
+	- use images(self????) as transformations
+	- vector fields
+  - seed impulses
+	- graphically outline seeds?
+	- superformula - https://en.wikipedia.org/wiki/Superformula
+  - for each pixel, define a normal vector, so we can do lighting & material effects
+  - investigate dsl for scripts
+  - webcam input
+
+FUTURE:
   - test on ipad
   - test on android
-	- https://www.khronos.org/registry/webgl/extensions/WEBGL_debug_shaders/
 	- unit tests
   - logging system
   - programming guidelines document - i.e make sure all tree modifications rebuild mod ref lib
-  - better kernel debug support
-  - par, zn, and aux lengths are fixed
-  - webcam input
   - benchmarking tools
   - image comparison testing
-  - preprocesser malfunctions give weird errors
-  - passing context to loadLib is annoying
-  - main & disp share includes
-  - number parsing flakey?
-  - complex numbers library?
-	- complex parsing - currently need both components i.e 0.0 + 1.3i
-  - better engine error checking/handling
-  - texture organization
-  - better data organization
-	  - put configs in states?
-		- where do things go?
-		- put ref pools in pattern?
-		- some kind of reactive data tree?
+
+NO CLUE:
+  - saving images loses bit depth??
+  - weird divide by zero issue - glitch in content
+  - maybe pixel alignment issues with images?
 
 
 
@@ -196,9 +121,8 @@ LATER
 
 
 
-MATH!!!!!
-t_inner:z / (z + 1) + z / (z - 1)}
-zn [1.500 + 0.000i, 0.000 + 0.000i, 0.800 + 0.000i, 0.200 + 0.000i]
-
-creates a legitimate fractal!!!!!!!!
-g
+MATH:
+  t_inner:z / (z + 1) + z / (z - 1)}
+  zn [1.500 + 0.000i, 0.000 + 0.000i, 0.800 + 0.000i, 0.200 + 0.000i]
+  creates a legitimate fractal
+	I saw something that might explain it

@@ -1,19 +1,96 @@
+IMPORTING/SYSTEM TASKS:
+  - new/simpler switching model
+	- refactor switch.purs
+	- script/path cleanup
+	- merge paths into par/zn
+	- after first script updates tree, stop executing scripts
+	- failing import/dynamic par/zn/aux count
+	- asynchronous compiling
+
+
+
+
+
+
+MAJOR FEATURES
+  - compiler performance
+	  - best idea right now is to compile over multiple frames
+		- problem with that is that moduleRefPool changes before compilation is complete
+		- SO:
+		  - consider compilation asynchronous?
+		- also, batch compilation?  only happens once every n ms?
+
+  - async asset loading?
+	  - what do we do when we dont have the asset yet?
+		- which images are loaded?
+
+	- importing
+	  - we have the modRefPool, which is local references to library modules.
+		  - everything here is in the state tree(until things get asynchronous)
+		- how about we have to import a module into a specific place
+		  - insted of importing & then sticking it somewhere
+	  - various imports, MODULE:
+		  - incMod - get module from library
+			- incSub - clone module, but with new sub from sub library
+			- incScript - clone module, new script from scr library
+			- incImage - clone module, new image from img library
+		- various imports, SCRIPT:
+		  - we parse scripts from txt -> data, so they can have state
+			- we import them, so our modules have references instead of actual objects
+			  - is this smart?
+				- should be fine
+		- importing can FAIL?
+		  - to many variables?
+			- tree too big
+    - this -10000(for random), etc shit is ghetto
+		- MISC
+		  - module.modules should be [SubModule = SubLib String | SubPool String] or something
+      - module/submodule cycles??
+	  - RELATIONSHIP BETWEEN IMPORT & COMPILE
+		  - right now import => immediate recompile
+			- assume recompile is asynchronous
+			- keep using old modRefPool until compilation done?  do we really need to clone the pool?
+			  - then switch out pool & shader when compilation is done
+				- what about additional imports while compiling? do they affect new or old tree?
+				- stop all imports until compile done? imports currently only happen from scripts or UI?
+
+
+	- restructure data
+	  - scripts inlined
+		  - parsed to data with state
+			- maintain phases when switching
+		- bundle paths & variables? - ie a variable is always on a path, sometimes its just static?
+		- modules are instances of components - specific values for variables & scripts
+		- components are instances of families.
+		  - contain code
+			- variable specifications ie how many par, how many images, & default values
+		- families are variable names & dimensions.  basically where this object fits.
+		- scripts could use some more thought.
+		  - which module do they belong to?
+			- how to syncronize multiple scripts? i.e, color & disp?
+
+	- database support
+	  - which database?
+		- how are things stored/serialized?
+		- search by family, component, flags, props, id
+		- what about things like libName?
+		- sync local & remote dbs
+
+	- UI
+	  - basic idea is that all db & data modifications happen through UI
+		- but we need to completely rework how the ui happens.
+		  - dont want to have to pause to update tree, that's kind of ghetto
+			- individually pause paths/modules?
+
+
 POST FARM:
   - clean up after farm
 	  - clean up main
-	- inline scripts + script/path phases
-	- fix importing
-    - enforce integrity of pools & module references
-    - module/submodule cycles??
-    - limit to tree size?
-    - par & zn & aux dimension overflow
-	- compiler performance
-	- components have meta information, modules just have a component & variables
-	  - components specify a default instance
-	  - component family => var & dim
+
 	- REFACTOR UI - its super ghetto now
 		- make ui reactive to pattern/ui conf, etc?
 	  - no more text files. entirely done via web - patterns, scripts config, etc
+
 	- move everything to a database
 	  - put textures there too?
 		- update flags on save (default != true)
@@ -31,12 +108,12 @@ POST FARM:
 NEXT 2
  SYSTEM
 	- patternRefPool?
-  - make patterns modules/pattern level scripts
-  - mainRef refernece in randomMain seems ghetto
-  - module.modules should be [SubModule = SubLib String | SubPool String] or something
+  - make patterns modules/pattern level scripts?
+
 	- put pattern into systemST, patternRefPool.  remove createScript & stop passing pattern around
 	- interpolating between patterns?
-
+  - findParent is kind of ghetto
+  - ModRef used inconsistiently
 
 
 BUGS:
@@ -62,7 +139,6 @@ SYSTEM:
     - way of switching modules while keeping phase/scripts.
 	  - keep scripts when switching modules?
   - javascript files are all over the place
-  - this -10000(for random), etc shit is ghetto
 	- fract a sub on main body set in engine before compiling?
   - use git for deploy
   - addGlobalEventListeners is a bit ghetto
@@ -73,8 +149,6 @@ SYSTEM:
   - detect system/perf profile
   - remote control (webui, websockets, etc)
   - currently manually implementing GL.repeat for aux
-  - findParent is kind of ghetto
-  - ModRef used inconsistiently
   - compiler substitutions %XXXX%, etc can still cause errors?  dont remember what kind
   - investigate dsl for scripts
   - engine stability/lost context - https://www.khronos.org/registry/webgl/extensions/WEBGL_lose_context/

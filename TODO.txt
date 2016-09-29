@@ -1,11 +1,13 @@
 IMPORTING/SYSTEM TASKS:
-  - new/simpler switching model
-	- refactor switch.purs
+	- failing import/dynamic par/zn/aux count
+
+  - new/simpler switching model?
+
 	- script/path cleanup
 	- merge paths into par/zn
-	- after first script updates tree, stop executing scripts
-	- failing import/dynamic par/zn/aux count
+
 	- asynchronous compiling
+	- after first script updates tree, stop executing scripts
 
 
 

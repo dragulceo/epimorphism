@@ -1,7 +1,7 @@
 module Compiler where
 
 import System
-import Config (Epi, Module, EpiS, ModRef, SystemST, Pattern)
+import Config (Epi, Module, EpiS, SystemST, Pattern)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, readSTRef)
 import Data.Array (sort, length, foldM, (..)) as A
@@ -119,7 +119,7 @@ parseTexp expr = do
 
 
 -- Bulk load a list of modules
-loadModules :: forall eff h. StrMap ModRef -> (StrMap (STRef h Module)) -> EpiS eff h (StrMap Module)
+loadModules :: forall eff h. StrMap String -> (StrMap (STRef h Module)) -> EpiS eff h (StrMap Module)
 loadModules mr lib = do
   foldM handle empty mr
   where

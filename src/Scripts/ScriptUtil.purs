@@ -13,16 +13,6 @@ import Data.Tuple (Tuple(Tuple))
 import Pattern (findModule, ImportObj(ImportScript), importScript)
 import System (loadLib)
 
--- create a script dynamically & import it (depricated)
-createScript :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> StrMap String -> EpiS eff h String
-createScript ssRef mid parent fn dt = do
-  systemST <- lift $ readSTRef ssRef
-  scr      <- loadLib parent systemST.scriptLib "create script"
-
-  let scr' = scr {fn = fn, dt = union dt scr.dt}
-  importScript ssRef (ImportScript scr') mid
-
-
 -- recursively parse a script from a string
 data ScrPS = ScrFn | ScrDt
 

@@ -1,45 +1,50 @@
-IMPORTING/SYSTEM TASKS:
+CURRENT PROJECTS:
 	- script/path cleanup
-	- merge paths into par/zn
+	  - inline scripts
+		- combine scripts & paths again?
+	  - merge paths into par/zn
+		- phases
+
+  - detect system/perf profile
+    - if there are too many aux buffers (texture units), we'll have an issue?
+		- dynamic par/zn/aux count
 
 	- asynchronous compiling
-	- after first script updates tree, stop executing scripts
-
-
-
-
-MAJOR FEATURES
-  - compiler performance
-	  - best idea right now is to compile over multiple frames
-		- problem with that is that moduleRefPool changes before compilation is complete
-		- SO:
-		  - consider compilation asynchronous?
+	  - after first script updates tree, stop executing scripts
+	  - when switching, clone root(both main & disp?), get new modId
+		- return true, new application root
+		- compile wrt new root
+		- freeze scripts
+		- when compiling done, switch out root, unfreeze scripts
 		- also, batch compilation?  only happens once every n ms?
+
+	- cleanup
+	  - findParent is kind of ghetto
+	  - complex parsing - currently need both components i.e 0.0 + 1.3i
+		- scripts conflicting with each other?  who has priority?
+    - better data organization
+	    - merge configs & states?
+		  - what goes in config, what goes into states?
+		  - put ref pools in pattern? why did I think of that?
+
+
+NEXT PROJECTS:
+  - release?
+    - kickstarter for audio responsiveness?
+	  - make main pattern a little better
 
   - async asset loading?
 	  - what do we do when we dont have the asset yet?
-		- which images are loaded?
+		- which images are loaded (also, clean up main)?
 
 	- importing/compiling
 		- MISC
-		  - could maybe clean up switch a bit more
-			- dynamic par/zn/aux count
-		  - module.modules should be [SubModule = SubLib String | SubPool String] or something
+		  - could maybe clean up switch a bit more (remove imports/purges, combine methods)
+		  - maybe module.modules should be [SubModule = SubLib String | SubPool String] or something
       - module/submodule cycles??
-	  - RELATIONSHIP BETWEEN IMPORT & COMPILE
-		  - right now import => immediate recompile
-			- assume recompile is asynchronous
-			- keep using old modRefPool until compilation done?  do we really need to clone the pool?
-			  - then switch out pool & shader when compilation is done
-				- what about additional imports while compiling? do they affect new or old tree?
-				- stop all imports until compile done? imports currently only happen from scripts or UI?
-
+			- only way to modify tree is via switch?
 
 	- restructure data
-	  - scripts inlined
-		  - parsed to data with state
-			- maintain phases when switching
-		- bundle paths & variables? - ie a variable is always on a path, sometimes its just static?
 		- modules are instances of components - specific values for variables & scripts
 		- components are instances of families.
 		  - contain code
@@ -49,59 +54,38 @@ MAJOR FEATURES
 		  - which module do they belong to?
 			- how to syncronize multiple scripts? i.e, color & disp?
 
+	- pattern:
+		- patternRefPool?
+    - make patterns modules/pattern level scripts?
+	  - put pattern into systemST, patternRefPool.  stop passing pattern around
+	  - interpolating between patterns?
+
 	- database support
 	  - which database?
 		- how are things stored/serialized?
 		- search by family, component, flags, props, id
 		- what about things like libName?
 		- sync local & remote dbs
+		- put textures in db
+		- misc:
+		  - update flags on save (default != true)
+  	  - check for duplicates when saving (id = hash of contents?)
+      - namespace collisions detection
 
 	- UI
 	  - basic idea is that all db & data modifications happen through UI
 		- but we need to completely rework how the ui happens.
 		  - dont want to have to pause to update tree, that's kind of ghetto
 			- individually pause paths/modules?
+			- reactive UI?
 
-
-POST FARM:
-  - clean up after farm
-	  - clean up main
-
-	- REFACTOR UI - its super ghetto now
-		- make ui reactive to pattern/ui conf, etc?
-	  - no more text files. entirely done via web - patterns, scripts config, etc
-
-	- move everything to a database
-	  - put textures there too?
-		- update flags on save (default != true)
-  	- check for duplicates when saving (id = hash of contents?)
-	  - next config/library pass (maybe better error detection)
-    - namespace collision in modules.lib?
-
-  - just release it?
-  - kickstarter for audio responsiveness?
-	  - make main pattern a little better
-
-
-
-
-NEXT 2
- SYSTEM
-	- patternRefPool?
-  - make patterns modules/pattern level scripts?
-
-	- put pattern into systemST, patternRefPool.  remove createScript & stop passing pattern around
-	- interpolating between patterns?
-  - findParent is kind of ghetto
-  - ModRef used inconsistiently
-
+-------------------------------- BACKLOG --------------------------------
 
 BUGS:
-	- complex parsing - currently need both components i.e 0.0 + 1.3i
   - catch errors when parsing t_exp
   - no error message when image texture doesnt exist
   - reduce is a substition in seeds, but comes from appliction.  the order of "modules {x: .., y: ..}" matters :/
-  - if there are too many aux buffers (texture units), we'll have an issue?
+
   - on windows menu disappears hovering over res selector
   - weird when opening console in fullscreen
   - shader indentation issues with switching & in general
@@ -126,7 +110,6 @@ SYSTEM:
 	- too many debug statements going on (in engine?)
   - prevent default in ui.js
   - make serializable a class
-  - detect system/perf profile
   - remote control (webui, websockets, etc)
   - currently manually implementing GL.repeat for aux
   - compiler substitutions %XXXX%, etc can still cause errors?  dont remember what kind
@@ -135,11 +118,6 @@ SYSTEM:
   - main & disp share includes
   - preprocesser malfunctions give weird errors
 	- https://www.khronos.org/registry/webgl/extensions/WEBGL_debug_shaders/
-  - scripts conflicting with each other?  who has priority
-  - better data organization
-	  - merge configs & states?
-		- what goes in config, what goes into states?
-		- put ref pools in pattern? why did I think of that?
   - better engine error checking/handling
 
 FEATURE IDEAS:

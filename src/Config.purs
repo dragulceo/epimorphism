@@ -149,15 +149,13 @@ defaultUIST = {
 
 
 -- Pattern
-type ModRef = String
-
 type Module = {
     component :: String
   , family    :: String
   , flags     :: Set String
   , props     :: StrMap String
   , scripts   :: Array String
-  , modules   :: StrMap ModRef
+  , modules   :: StrMap String
   , par       :: StrMap Number
   , zn        :: Array Complex
   , paths     :: StrMap String
@@ -187,9 +185,9 @@ moduleSchema = [
 ]
 
 type Pattern = {
-    vert :: ModRef
-  , main :: ModRef
-  , disp :: ModRef
+    vert :: String
+  , main :: String
+  , disp :: String
   , flags :: Set String
   , props :: StrMap String
   , includes :: Array String

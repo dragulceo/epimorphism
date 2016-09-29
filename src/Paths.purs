@@ -5,16 +5,16 @@ import Config (Module, EpiS, Pattern, SystemST)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans (lift)
-import Data.Array (length, updateAt, uncons)
-import Data.Complex (Complex, Cartesian(Cartesian), outCartesian, Polar(Polar), outPolar)
+import Data.Array (updateAt, uncons)
+import Data.Complex (Cartesian(Cartesian), outCartesian, Polar(Polar), outPolar, Complex)
 import Data.Maybe (Maybe(Just))
-import Data.StrMap (fromFoldable, foldM, StrMap, fold, empty, delete, insert, toList)
+import Data.StrMap (StrMap, fold, empty, delete, insert, toList)
 import Data.String (trim, split)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
 import Math (pi, min, cos, floor)
 import System (loadLib, mSeq)
-import Util (cxFromStringE, numFromStringE, intFromStringE, isNumber)
+import Util (numFromStringE, intFromStringE, isNumber)
 
 runPaths :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Unit
 runPaths ssRef pRef = do
@@ -47,6 +47,8 @@ runZnPath' mRef t (Tuple idx path) = do
   idx' <- intFromStringE idx
   runZnPath mRef t idx' path
 
+
+
 runZnPath :: forall eff h. STRef h Module -> Number -> Int -> String -> EpiS eff h Unit
 runZnPath mRef t idx pathStr = do
   Path func' conf {spd, args} <- parsePath pathStr
@@ -69,9 +71,7 @@ runZnPath mRef t idx pathStr = do
 
 runParPath :: forall eff h. STRef h Module -> Number -> String -> String -> EpiS eff h Unit
 runParPath mRef t var pathStr = do
-  Path func' conf args <- parsePath pathStr
-
-  ArgN spd <- loadLib "spd" args "need speed in path"
+  Path func' conf {spd, args} <- parsePath pathStr
 
   func <- case func' of
     PF1D f -> return f
@@ -86,66 +86,44 @@ runParPath mRef t var pathStr = do
   lift $ modifySTRef mRef (\m' -> m' {par = par', paths = paths'})
   return unit
 
------------------ PARSING -----------------
-
-type PathFunc1D eff h = Number -> PathArgs -> EpiS eff h (Tuple Number Boolean)
-type PathFunc2D eff h = Number -> PathArgs -> EpiS eff h (Tuple Complex Boolean)
+type PathFunc1D eff h = Number -> (Array Number) -> EpiS eff h (Tuple Number Boolean)
+type PathFunc2D eff h = Number -> (Array Number) -> EpiS eff h (Tuple Complex Boolean)
 data PathFunc eff h = PF1D (PathFunc1D eff h) | PF2D (PathFunc2D eff h)
 
-data PathArg = ArgS String | ArgI Int | ArgN Number | ArgN Complex
-type PathArgs = StrMap PathArg
-
-data ArgType = ArgTS | ArgTI | ArgTN | ArgTC
-data ArgInfo = ArgInfo String ArgType String -- name, info, default
-data PathConfig = PathConfig String (Array ArgInfo)
-
+type PathArgs = {spd :: Number, args :: Array Number}
+data PathConfig = PathConfig String
 data Path eff h = Path (PathFunc eff h) PathConfig PathArgs
 
 parsePath :: forall eff h. String -> EpiS eff h (Path eff h)
 parsePath dta = do
   let dta' = split " " $ trim dta
-
-  {head: name, allargs: rst} <- case uncons dta' of
-    Just x -> return x
+  Tuple name allargs <- case uncons dta' of
+    Just { head: n, tail: rst } -> do
+      args' <- traverse numFromStringE rst
+      return $ Tuple n args'
     _ -> throwError "invalid path syntax"
 
-  Tuple func (conf@(PathConfig _ argsconf)) <- getPathObj name
+  {head: spd, tail: args} <- case uncons allargs of
+    Just x -> return x
+    _ -> throwError "first arg must be spd"
 
-  when (length allargs /= length argsconf) do
-    throwError $ "wrong number of args for: " ++ name
+  Tuple func conf <- getPathObj name
 
-  argsT <- traverse parseArg $ zip args argsconf
-  let args = fromFoldable argsT
-
-  return $ Path func conf args
-
-  where
-    parseArg (Tuple val (ArgInfo name ArgTS _)) = do return $ Tuple name (ArgS val)
-    parseArg (Tuple val (ArgInfo name ArgTI _)) = do
-      val' <- intFromStringE val
-      return $ Tuple name (ArgI val')
-    parseArg (Tuple val (ArgInfo name ArgTN _)) = do
-      val' <- numFromStringE val
-      return $ Tuple name (ArgN val')
-    parseArg (Tuple val (ArgInfo name ArgTC _)) = do
-      val' <- cxFromStringE val
-      return $ Tuple name (ArgC val')
+  return $ Path func conf {spd, args}
 
 
 getPathObj :: forall eff h. String -> EpiS eff h (Tuple (PathFunc eff h) PathConfig)
 getPathObj name = do
   case name of
-    "linear" -> return $ Tuple (PF1D linear1D) (PathConfig "" [ArgInfo "spd" ArgTN "1.0"])
-    "loop"   -> return $ Tuple (PF1D loop1D) (PathConfig "" [ArgInfo "spd" ArgTN "1.0"])
-    "smooth" -> return $ Tuple (PF1D smooth1D) (PathConfig "" [ArgInfo "spd" ArgTN "1.0"])
-    "wave"   -> return $ Tuple (PF1D wave1D) (PathConfig "" [ArgInfo "spd" ArgTN "1.0", ArgInfo "a" ArgTN "1.0", ArgInfo "b" ArgTN "0.0"])
-    "intrp"  -> return $ Tuple (PF2D intrp2D) (PathConfig "" [ArgInfo "spd" ArgTN "1.0",
-                                                              ArgInfo "fromR" ArgTN "1.0", ArgInfo "fromTh" ArgTN "0.0",
-                                                              ArgInfo "toR" ArgTN "1.0", ArgInfo "toTh" ArgTN "0.0"])
-    "linx"   -> return $ Tuple (PF2D linx2D) (PathConfig "" [ArgInfo "spd" ArgTN "1.0"])
-    "liny"   -> return $ Tuple (PF2D liny2D) (PathConfig "" [ArgInfo "spd" ArgTN "1.0"])
-    "circle" -> return $ Tuple (PF2D circle2D) (PathConfig "" [ArgInfo "spd" ArgTN "1.0", ArgInfo "r" ArgTN "1.0"])
-    "rose"   -> return $ Tuple (PF2D rose2D) (PathConfig "" [ArgInfo "spd" ArgTN "1.0", ArgInfo "a" ArgTN "1.0", ArgInfo "b" ArgTN "1.0", ArgInfo "c" ArgTN "0.0"])
+    "linear" -> return $ Tuple (PF1D linear1D) (PathConfig "")
+    "loop"   -> return $ Tuple (PF1D loop1D) (PathConfig "")
+    "smooth" -> return $ Tuple (PF1D smooth1D) (PathConfig "")
+    "wave"   -> return $ Tuple (PF1D wave1D) (PathConfig "")
+    "intrp"  -> return $ Tuple (PF2D intrp2D) (PathConfig "")
+    "linx"   -> return $ Tuple (PF2D linx2D) (PathConfig "")
+    "liny"   -> return $ Tuple (PF2D liny2D) (PathConfig "")
+    "circle" -> return $ Tuple (PF2D circle2D) (PathConfig "")
+    "rose"   -> return $ Tuple (PF2D rose2D) (PathConfig "")
     -- ""   -> return $ Tuple (PFD ) (PathConfig "")
     _ -> throwError $ "unknown path: " ++ name
 

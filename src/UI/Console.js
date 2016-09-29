@@ -88,9 +88,6 @@ exports.addEventListeners = function() {
 		$('#consoleVar #var').val(v);
 		$('#consoleVar #label').html(v);
 
-		var path = this.dataset.path;
-		$('#consoleVar #path').val(path);
-
 		var val = this.dataset.val;
 		$('#consoleVar #val').val(val);
 
@@ -110,7 +107,6 @@ exports.addEventListeners = function() {
 
 			var mid = $('#consoleVar #mid').val();
 			var v = $('#consoleVar #var').val();
-			var path = $('#consoleVar #path').val();
 			var val = $('#consoleVar #val').val();
 			var type = $('#consoleVar #type').val();
 
@@ -121,10 +117,6 @@ exports.addEventListeners = function() {
 				var val1 = val.replace(/ /g,'');
 				cmd = "setZn " + mid + " " + v + " " + val1
 			}
-			window.eventHandler(cmd);
-
-			cmd = "setPath " + mid + " " + v + " " + path
-
 			window.eventHandler(cmd);
 
 			$("button#pause").click();

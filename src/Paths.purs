@@ -7,14 +7,13 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans (lift)
 import Data.Array (updateAt, uncons)
-import Data.Complex (Cartesian(Cartesian), outCartesian, Polar(Polar), outPolar, Complex)
+import Data.Complex (outCartesian, Cartesian(Cartesian), Polar(Polar), outPolar, Complex)
 import Data.Maybe (Maybe(Just))
 import Data.StrMap (insert)
 import Data.String (trim, split)
 import Data.Tuple (Tuple(Tuple))
 import Math (pi, min, cos, floor)
-import Serialize (showCX)
-import Util (lg, real, cxFromStringE, numFromStringE, intFromStringE)
+import Util (cxFromString, lg, real, cxFromStringE, numFromStringE, intFromStringE)
 
 
 runPath :: forall eff h. Boolean -> STRef h Module -> Number -> String -> String -> EpiS eff h Complex
@@ -35,7 +34,7 @@ runPath isPar mRef t idx pathStr = do
       when remove do
         m <- lift $ readSTRef mRef
         idx' <- intFromStringE idx
-        zn' <- case updateAt idx' (showCX val) m.zn of
+        zn' <- case updateAt idx' (show val) m.zn of
           Just x -> return x
           _ -> throwError "idx out of bounds runPath"
         lift $ modifySTRef mRef (\m' -> m' {zn = zn'})
@@ -57,9 +56,9 @@ parsePath dta = do
   let dta' = split " " $ trim dta
 
   --let a = lg dta'
-  {head: name, tail: allargs} <- case dta' of
-    [x] -> do
-      return {head: "const", tail: ["0.0", x]}
+  {head: name, tail: allargs} <- case (cxFromString dta) of
+    Just (Tuple r i) -> do
+      return {head: "const", tail: ["0.0", show $ outCartesian (Cartesian r i)]}
     _ -> do
       case uncons dta' of
         Just x -> return x

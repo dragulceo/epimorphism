@@ -154,8 +154,7 @@ renderModule systemST modLib mid title pid = do
                     let dt = map trim $ split ":" x
                     case dt of
                       [var, val] -> do
-                        let path = val
-                        let inp = inj "<span class='consolePar consoleVar' data-mid='%0' data-var='%1' data-path='%2' data-val='%3' data-type='par'>%3</span>" [mid, var, path, val]
+                        let inp = inj "<span class='consolePar consoleVar' data-mid='%0' data-var='%1' data-val='%2' data-type='par'>%2</span>" [mid, var, val]
                         return $ var ++ ": " ++ inp
                       _ -> throwError "invalide par fmt :"
                   return $ joinWith ", " cmp'
@@ -169,8 +168,7 @@ renderModule systemST modLib mid title pid = do
                   let cmp = map trim $ split "," cts
                   let idxs = (0 .. (length cmp - 1))
                   let cmp' = flip map idxs \x ->
-                    let path = fromMaybe "" (index mod.zn x) in
-                    inj "<span class='consoleZn consoleVar' data-mid='%0' data-var='%1' data-path='%2' data-val='%3' data-type='zn'>%3</span>" [mid, (show x), path, fromJust $ cmp !! x]
+                    inj "<span class='consoleZn consoleVar' data-mid='%0' data-var='%1'  data-val='%2' data-type='zn'>%2</span>" [mid, (show x), fromJust $ cmp !! x]
                   return $ joinWith ", " cmp'
                 _ -> throwError "invalid zn fmt ["
 

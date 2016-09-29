@@ -4,7 +4,7 @@ import System
 import Config (Epi, Module, EpiS, SystemST, Pattern)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, readSTRef)
-import Data.Array (concatMap, elemIndex)
+import Data.Array (elemIndex)
 import Data.Array (sort, length, foldM, (..)) as A
 import Data.Complex (Complex)
 import Data.Foldable (foldl)
@@ -12,13 +12,13 @@ import Data.Int (fromNumber)
 import Data.List (fromList)
 import Data.Maybe (Maybe(Nothing, Just))
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (toList, lookup, StrMap, fold, empty, keys, size, foldM, insert, values)
+import Data.StrMap (lookup, StrMap, fold, empty, keys, size, foldM, insert, values)
 import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
 import Paths (runPath)
 import Prelude (return, ($), bind, map, (++), (-), (+), show)
-import Util (imag, real, lg, replaceAll, indentLines)
+import Util (real, lg, replaceAll, indentLines)
 
 type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}
 type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array String}
@@ -90,14 +90,17 @@ flattenParZn :: forall eff h. Number -> LibParZn h -> String -> EpiS eff h (LibP
 flattenParZn t {lib, par, zn} n = do
   mRef <- loadLib n lib "flattenParZn"
   mod <- lift $ readSTRef mRef
+
   znV <- traverse (\x -> runPath false mRef t (showPos mod.zn x) x) mod.zn
   let zn' = zn ++ znV
 
-  parV <- traverse (\(Tuple k v) -> runPath true mRef t k v) $ toList mod.par
-  let parV' = map (\x -> real x) parV
-  let par' = par ++ (fromList parV')
+  parV <- traverse (get mRef mod.par) (A.sort $ keys mod.par)
+  let parV' = map real parV
+  let par' = par ++ parV'
+
   A.foldM (flattenParZn t) {lib, par: par', zn: zn'} (fromList $ values mod.modules)
   where
+    get mRef dt k = runPath true mRef t k (fromJust $ lookup k dt)
     showPos dt x = show $ fromJust $ elemIndex x dt
 
 -- preprocess substitutions.  just parses t expressions

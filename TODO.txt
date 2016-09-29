@@ -5,11 +5,7 @@ CURRENT PROJECTS:
 
 	- script/path cleanup
 	  - STEPS
-			- merge paths into par/zn
-			  - need complex numbers in path args
-
 		  - update path to new syntax
-			- merge runParPath & parZnPath
 			- give paths phases
 			- use PathConfig objects
 
@@ -50,7 +46,6 @@ CURRENT PROJECTS:
 
 	- cleanup
 	  - findParent is kind of ghetto
-	  - complex parsing - currently need both components i.e 0.0 + 1.3i
 		- scripts conflicting with each other?  who has priority?
     - better data organization
 	    - merge configs & states?

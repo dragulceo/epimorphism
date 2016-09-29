@@ -350,8 +350,6 @@ bindParZn lib t ctx prog n = do
   {lib: _, par, zn} <- flattenParZn t {lib, par: [], zn: []} n
   let znC = map inCartesian zn
   let znA = concatMap fn znC
-  let a = lg par
-  let b = lg znA
 
   execGL ctx do
     liftEff $ GL.useProgram ctx prog

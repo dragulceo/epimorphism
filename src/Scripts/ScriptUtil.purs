@@ -13,7 +13,7 @@ import Data.Tuple (Tuple(Tuple))
 import Pattern (findModule, ImportObj(ImportScript), importScript)
 import System (loadLib)
 
--- create a script dynamically & import it
+-- create a script dynamically & import it (depricated)
 createScript :: forall eff h. STRef h (SystemST h) -> String -> String -> String -> StrMap String -> EpiS eff h String
 createScript ssRef mid parent fn dt = do
   systemST <- lift $ readSTRef ssRef

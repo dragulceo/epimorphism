@@ -105,7 +105,7 @@ devKeyHandler ucRef usRef char = do
       let dt = insert idn' idx uiST.incIdx
       modifySTRef usRef (\s -> s {incIdx = dt})
       let spd = show uiConf.keyboardSwitchSpd
-      return $ inj "scr %0 switch childN:%1 op:load typ:mod by:query query:%2 accs:%3 spd:%4" [adr, childN, lib, (show idx), spd]
+      return $ inj "scr %0 switch childN:%1 op:load by:query typ:mod query:%2 accs:%3 spd:%4" [adr, childN, lib, (show idx), spd]
 
 
 prodKeyHandler :: KeyHandler

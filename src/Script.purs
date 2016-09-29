@@ -8,7 +8,8 @@ import Data.Foldable (or)
 import Data.StrMap (member)
 import Data.Traversable (traverse)
 import ScriptPaths (incZn, zpath, ppath, zfix, pfix)
-import Switch (switch, randomize, incScript, incScript2, incImage, incMod, finishSwitch, incSub, switchChild, switchSub, switchImage, pause)
+import Switch (switch, finishSwitch)
+import Scripts (randomize, pause)
 import System (mSeq, loadLib)
 
 -- find script fuction given name
@@ -20,14 +21,6 @@ lookupScriptFN n = case n of
   "ppath"        -> return ppath
   "zpath"        -> return zpath
   "switch"       -> return switch
-  "incMod"       -> return incMod
-  "incSub"       -> return incSub
-  "incImage"     -> return incImage
-  "incScript"    -> return incScript
-  "incScript2"   -> return incScript2
-  "switchChild"  -> return switchChild
-  "switchSub"    -> return switchSub
-  "switchImage"  -> return switchImage
   "incZn"        -> return incZn
   "finishSwitch" -> return finishSwitch
   "pause"        -> return pause

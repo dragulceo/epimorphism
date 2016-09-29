@@ -7,6 +7,7 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (runExceptT)
 import DOM (DOM)
 import Data.Array (length)
+import Data.Complex (Cartesian(Cartesian), outCartesian, Complex)
 import Data.Either (Either(..), either)
 import Data.Foldable (foldr)
 import Data.Int (fromString) as I
@@ -91,6 +92,12 @@ intFromStringE :: forall eff. String -> Epi eff Int
 intFromStringE s = case (I.fromString s) of
   (Just i) -> return i
   _ -> throwError $ "Expected : " ++ s ++ " : to be an int"
+
+
+cxFromStringE :: forall eff. String -> Epi eff Complex
+cxFromStringE s = case (cxFromString s) of
+  (Just (Tuple r i)) -> return $ outCartesian (Cartesian r i)
+  _ -> throwError $ "Expected : " ++ s ++ " : to be an cx"
 
 
 handleError :: forall eff. Epi eff Unit -> Eff (canvas :: Canvas, dom :: DOM | eff) Unit

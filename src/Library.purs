@@ -5,8 +5,7 @@ import Config (Epi, Schema, SchemaEntry(..), SchemaEntryType(..))
 import Control.Monad (when)
 import Control.Monad.Except.Trans (throwError)
 import Data.Array (tail, head, cons, foldM, reverse, filter, length, index) as A
-import Data.Complex (outCartesian, Complex, Cartesian(Cartesian))
-import Data.Int (fromString) as I
+import Data.Complex (Complex)
 import Data.Maybe (Maybe(..))
 import Data.Maybe.Unsafe (fromJust)
 import Data.Set (Set, fromFoldable, empty) as S
@@ -15,7 +14,7 @@ import Data.String (joinWith, null, trim, stripPrefix, split)
 import Data.String.Regex (match, noFlags, regex)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Util (numFromString, cxFromString, boolFromString, unsafeSetAttr)
+import Util (cxFromStringE, numFromStringE, intFromStringE, boolFromStringE, unsafeSetAttr)
 
 foreign import unsafeGenericObjectImpl :: forall a. Schema -> S.Set String -> a
 
@@ -84,13 +83,13 @@ parseLine schema obj line = do
         SE_St -> do
           return $ unsafeSetAttr obj attrn val
         SE_N -> do
-          n <- parseNum val
+          n <- numFromStringE val
           return $ unsafeSetAttr obj attrn n
         SE_I -> do
-          i <- parseInt val
+          i <- intFromStringE val
           return $ unsafeSetAttr obj attrn i
         SE_B -> do
-          b <- parseBool val
+          b <- boolFromStringE val
           return $ unsafeSetAttr obj attrn b
         SE_S -> do
           s <- parseSet val
@@ -113,31 +112,10 @@ parseLine schema obj line = do
 
 
 -- ELEMENT PARSERS
-parseNum :: forall eff. String -> Epi eff Number
-parseNum s = do
-  case (numFromString s) of
-    (Just n) -> return n
-    _ -> throwError $ "Expected " ++ s ++ " to be a number"
-
-parseInt :: forall eff. String -> Epi eff Int
-parseInt s = do
-  case (I.fromString s) of
-    (Just i) -> return i
-    _ -> throwError $ "Expected " ++ s ++ " to be a int"
-
-parseBool :: forall eff. String -> Epi eff Boolean
-parseBool s = do
-  return $ boolFromString s
-
 parseMString :: forall eff. String -> Epi eff (Maybe String)
 parseMString s = do
   return $ if (s == "Nothing") then Nothing else Just s
 
-parseCX :: forall eff. String -> Epi eff Complex
-parseCX s = do
-  case (cxFromString s) of
-    (Just (Tuple r i)) -> return $ outCartesian (Cartesian r i)
-    _ -> throwError $ "Expected " ++ s ++ " to be complex"
 
 parseSet :: forall eff. String -> Epi eff (S.Set String)
 parseSet st = do
@@ -166,7 +144,7 @@ parseNMp :: forall eff. StrMap String -> Epi eff (StrMap Number)
 parseNMp sm = foldM handle empty sm
   where
     handle dt k v = do
-      nv <- parseNum v
+      nv <- numFromStringE v
       return $ insert k nv dt
 
 parseLst :: forall eff. String -> Epi eff (Array String)
@@ -181,5 +159,5 @@ parseCLst :: forall eff. Array String -> Epi eff (Array Complex)
 parseCLst st = A.reverse <$> A.foldM handle [] st
   where
     handle dt v = do
-      cv <- parseCX v
+      cv <- cxFromStringE v
       return $ A.cons cv dt

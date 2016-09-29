@@ -24,7 +24,7 @@ import Pattern (findModule)
 import ScriptUtil (parseAndImportScript)
 import Serialize (unsafeSerialize)
 import System (loadLib)
-import Util (halt, Now, cxFromString, intFromStringE, numFromStringE, lg, uuid, handleError)
+import Util (halt, Now, cxFromStringE, intFromStringE, numFromStringE, lg, uuid, handleError)
 
 foreign import saveCanvas :: forall eff. Eff eff Unit
 
@@ -85,9 +85,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
       "setZn" -> do
         case args of
           [addr, idx, val] -> do
-            val' <- case (cxFromString val) of
-              (Just (Tuple r i)) -> return $ outCartesian (Cartesian r i)
-              _ -> throwError $ "Expected " ++ val ++ " to be complex setZn"
+            val' <- cxFromStringE val
             idx' <- intFromStringE idx
             mid  <- findModule systemST.moduleRefPool pattern addr true
             mRef <- loadLib mid systemST.moduleRefPool "find module - setP"

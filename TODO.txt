@@ -4,6 +4,17 @@ CURRENT PROJECTS:
 		- chopiness when at higher resolutions
 
 	- script/path cleanup
+	  - STEPS
+			- merge paths into par/zn
+			  - need complex numbers in path args
+
+		  - update path to new syntax
+			- merge runParPath & parZnPath
+			- give paths phases
+			- use PathConfig objects
+
+      - update scripts/remove pools, etc
+
     - paths & scripts live as strings
       - on each frame, decompile obj, execute, & possibly update
 
@@ -23,11 +34,6 @@ CURRENT PROJECTS:
 		- combine scripts & paths again?
 		  - unique(but related?) serializer, deserializer, to same internal format
 			- unique executors
-
-
-	  - merge paths into par/zn
-      - normal variables are const path
-
 
   - detect system/perf profile
     - if there are too many aux buffers (texture units), we'll have an issue?

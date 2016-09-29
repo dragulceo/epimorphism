@@ -14,7 +14,7 @@ import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
 import Math (pi, min, cos, floor)
 import System (loadLib, mSeq)
-import Util (numFromStringE, intFromStringE, isNumber)
+import Util (cxFromStringE, numFromStringE, intFromStringE, isNumber)
 
 runPaths :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Unit
 runPaths ssRef pRef = do
@@ -115,10 +115,12 @@ parsePath dta = do
 getPathObj :: forall eff h. String -> EpiS eff h (Tuple (PathFunc eff h) PathConfig)
 getPathObj name = do
   case name of
+    "const1" -> return $ Tuple (PF1D const1D) (PathConfig "")
     "linear" -> return $ Tuple (PF1D linear1D) (PathConfig "")
     "loop"   -> return $ Tuple (PF1D loop1D) (PathConfig "")
     "smooth" -> return $ Tuple (PF1D smooth1D) (PathConfig "")
     "wave"   -> return $ Tuple (PF1D wave1D) (PathConfig "")
+    "const2" -> return $ Tuple (PF2D const2D) (PathConfig "")
     "intrp"  -> return $ Tuple (PF2D intrp2D) (PathConfig "")
     "linx"   -> return $ Tuple (PF2D linx2D) (PathConfig "")
     "liny"   -> return $ Tuple (PF2D liny2D) (PathConfig "")
@@ -130,6 +132,17 @@ getPathObj name = do
 
 
 -- 1D FUNCTIONS
+const1D :: forall eff h. PathFunc1D eff h
+const1D t args = do
+  n <- case args of
+    [x] -> return x
+    _ -> throwError "invalid arguments for circle2D"
+
+  n' <- numFromStringE n
+
+  return $ Tuple n' false
+
+
 linear1D :: forall eff h. PathFunc1D eff h
 linear1D t args = do
   let x = t
@@ -157,6 +170,17 @@ wave1D t args = do
 
 
 -- 2D FUNCTIONS
+const2D :: forall eff h. PathFunc2D eff h
+const2D t args = do
+  z <- case args of
+    [x] -> return x
+    _ -> throwError "invalid arguments for circle2D"
+
+  z' <- cxFromStringE z
+
+  return $ Tuple z' false
+
+
 intrp2D :: forall eff h. PathFunc2D eff h
 intrp2D t args = do
   z <- case args of

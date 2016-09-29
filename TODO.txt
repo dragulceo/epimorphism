@@ -1,15 +1,9 @@
 IMPORTING/SYSTEM TASKS:
-	- failing import/dynamic par/zn/aux count
-
-  - new/simpler switching model?
-
 	- script/path cleanup
 	- merge paths into par/zn
 
 	- asynchronous compiling
 	- after first script updates tree, stop executing scripts
-
-
 
 
 
@@ -26,26 +20,10 @@ MAJOR FEATURES
 	  - what do we do when we dont have the asset yet?
 		- which images are loaded?
 
-	- importing
-	  - we have the modRefPool, which is local references to library modules.
-		  - everything here is in the state tree(until things get asynchronous)
-		- how about we have to import a module into a specific place
-		  - insted of importing & then sticking it somewhere
-	  - various imports, MODULE:
-		  - incMod - get module from library
-			- incSub - clone module, but with new sub from sub library
-			- incScript - clone module, new script from scr library
-			- incImage - clone module, new image from img library
-		- various imports, SCRIPT:
-		  - we parse scripts from txt -> data, so they can have state
-			- we import them, so our modules have references instead of actual objects
-			  - is this smart?
-				- should be fine
-		- importing can FAIL?
-		  - to many variables?
-			- tree too big
-    - this -10000(for random), etc shit is ghetto
+	- importing/compiling
 		- MISC
+		  - could maybe clean up switch a bit more
+			- dynamic par/zn/aux count
 		  - module.modules should be [SubModule = SubLib String | SubPool String] or something
       - module/submodule cycles??
 	  - RELATIONSHIP BETWEEN IMPORT & COMPILE

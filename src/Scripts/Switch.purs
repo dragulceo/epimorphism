@@ -68,15 +68,15 @@ switch ssRef pRef scrId t modId scrRef = do
     x -> throwError $ "invalid 'by' for switch, must be query | val : " ++ x
 
 
-
-  -- remove self (do this so as not to be duplicated)
+  -- remove self (do this so as not to be duplicated
   purgeScript ssRef modId scrId
 
   let nxtN = if (op == "load") then name else modId
   nxtId <- importModule ssRef (ImportRef nxtN)
+  -- mutate module here
 
   switchModules ssRef rootId childN nxtId spd
-  purgeModule ssRef nxtId
+  purgeModule ssRef nxtId -- this module is imported 2x currently, so delete this version
 
   return true
 

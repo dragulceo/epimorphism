@@ -85,9 +85,14 @@ data Path eff h = Path (PathFunc eff h) PathConfig PathArgs
 parsePath :: forall eff h. String -> EpiS eff h (Path eff h)
 parsePath dta = do
   let dta' = split " " $ trim dta
-  {head: name, tail: allargs} <- case uncons dta' of
-    Just x -> return x
-    _ -> throwError "invalid path syntax"
+
+  {head: name, tail: allargs} <- case dta' of
+    [x] -> do
+      return {head: "const", tail: ["0.0", x]}
+    _ -> do
+      case uncons dta' of
+        Just x -> return x
+        _ -> throwError "invalid path syntax"
 
   {head: spd, tail: args} <- case uncons allargs of
     Just x -> return x

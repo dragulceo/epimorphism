@@ -32,24 +32,24 @@ par {w:0.3}
 
 --w_circle_anim < w_circle
 flags {anim}
-paths {w:wave 0.034 0.1 0.35, r: wave 0.02 0.15 0.65}
+par {w:wave 0.034 0.1 0.35, r: wave 0.02 0.15 0.65}
 
 --w_lines_inner_anim < w_lines_inner
 flags {anim}
-paths {w:wave 0.03 0.1 0.35}
+par {w:wave 0.03 0.1 0.35}
 
 --w_lines_border_anim < w_lines_border
 flags {anim}
-paths {w:wave 0.028 0.1 0.35}
+par {w:wave 0.028 0.1 0.35}
 
 --w_lines_lr_anim < w_lines_lr
 flags {anim}
-paths {w:wave 0.025 0.1 0.35}
+par {w:wave 0.025 0.1 0.35}
 
 --w_lines_stag_anim < w_lines_stag
 flags {anim}
-paths {w:wave 0.039 0.1 0.35}
+par {w:wave 0.039 0.1 0.35}
 
 --w_square_anim < w_square
 flags {anim}
-paths {w:wave 0.043 0.20 0.50}
+par {w:wave 0.043 0.20 0.50}

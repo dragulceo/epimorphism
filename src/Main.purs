@@ -13,7 +13,6 @@ import Data.StrMap (lookup)
 import Engine (preloadImages, initEngineST, renderFrame, setShaders)
 import Graphics.Canvas (Canvas)
 import Layout (updateLayout)
-import Paths (runPaths)
 import Pattern (importPattern)
 import Script (runScripts)
 import System (initSystemST, loadLib)
@@ -113,7 +112,6 @@ animate state = handleError do
     return unit
 
   --t1 <- lift $ now
-  runPaths ssRef pRef
   --t2 <- lift $ now
   --let a = lg (t2 - t1)
 

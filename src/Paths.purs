@@ -1,77 +1,47 @@
 module Paths where
 
 import Prelude
-import Config (Module, EpiS, Pattern, SystemST)
+import Config (Module, EpiS)
+import Control.Monad (when)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans (lift)
 import Data.Array (updateAt, uncons)
-import Data.Complex (inCartesian, Cartesian(Cartesian), outCartesian, Polar(Polar), outPolar, Complex)
+import Data.Complex (Cartesian(Cartesian), outCartesian, Polar(Polar), outPolar, Complex)
 import Data.Maybe (Maybe(Just))
-import Data.StrMap (StrMap, fold, empty, delete, insert, toList)
+import Data.StrMap (insert)
 import Data.String (trim, split)
-import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
 import Math (pi, min, cos, floor)
-import System (loadLib, mSeq)
-import Util (cxFromStringE, numFromStringE, intFromStringE, isNumber)
-
-runPaths :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Unit
-runPaths ssRef pRef = do
-  pattern  <- lift $ readSTRef pRef
-  systemST <- lift $ readSTRef ssRef
-
-  mSeq ssRef (runModPaths systemST) pattern.main
-  mSeq ssRef (runModPaths systemST) pattern.disp
-  mSeq ssRef (runModPaths systemST) pattern.vert
-
-  return unit
-
-runModPaths :: forall eff h. SystemST h -> String -> EpiS eff h Unit
-runModPaths systemST mid = do
-  mRef <- loadLib mid systemST.moduleRefPool "mid! runZnPaths"
-  m <- lift $ readSTRef mRef
-
-  {zn, par} <- return $ fold groupPaths {zn: empty, par: empty} m.paths
-
-  traverse (runZnPath' mRef systemST.t) (toList zn)
-  traverse (runParPath' mRef systemST.t) (toList par)
-  return unit
-  where
-    runParPath' mRef t (Tuple idx path) = runPath true mRef t idx path
-    runZnPath' mRef t (Tuple idx path)  = runPath false mRef t idx path
-    groupPaths :: {zn :: (StrMap String), par :: (StrMap String)} -> String -> String -> {zn :: (StrMap String), par :: (StrMap String)}
-    groupPaths {zn, par} k v = if (isNumber k) then {zn: insert k v zn, par} else {zn, par: insert k v par}
+import Serialize (showCX)
+import Util (lg, real, cxFromStringE, numFromStringE, intFromStringE)
 
 
-runPath :: forall eff h. Boolean -> STRef h Module -> Number -> String -> String -> EpiS eff h Unit
+runPath :: forall eff h. Boolean -> STRef h Module -> Number -> String -> String -> EpiS eff h Complex
 runPath isPar mRef t idx pathStr = do
   Path func conf {spd, args} <- parsePath pathStr
   spd' <- numFromStringE spd
 
   (Tuple val remove) <- func (t * spd') args
 
-  m <- lift $ readSTRef mRef
-
   case isPar of
     true -> do
-      Cartesian x y <- return $ inCartesian val
-
-      let par' = insert idx x m.par
-      let paths' = if remove then (delete idx m.paths) else m.paths
-
-      lift $ modifySTRef mRef (\m' -> m' {par = par', paths = paths'})
-      return unit
+      when remove do
+        m <- lift $ readSTRef mRef
+        let par' = insert idx (show (real val)) m.par
+        lift $ modifySTRef mRef (\m' -> m' {par = par'})
+        return unit
     false -> do
-      idx' <- intFromStringE idx
-      zn' <- case updateAt idx' val m.zn of
-        Just x -> return x
-        _ -> throwError "idx out of bounds runZnPath"
+      when remove do
+        m <- lift $ readSTRef mRef
+        idx' <- intFromStringE idx
+        zn' <- case updateAt idx' (showCX val) m.zn of
+          Just x -> return x
+          _ -> throwError "idx out of bounds runPath"
+        lift $ modifySTRef mRef (\m' -> m' {zn = zn'})
+        return unit
 
-      let paths' = if remove then (delete (show idx) m.paths) else m.paths
-
-      lift $ modifySTRef mRef (\m' -> m' {zn = zn', paths = paths'})
-      return unit
+  return val
 
 
 ------------------------------ PARSING ------------------------------
@@ -86,6 +56,7 @@ parsePath :: forall eff h. String -> EpiS eff h (Path eff h)
 parsePath dta = do
   let dta' = split " " $ trim dta
 
+  --let a = lg dta'
   {head: name, tail: allargs} <- case dta' of
     [x] -> do
       return {head: "const", tail: ["0.0", x]}
@@ -129,7 +100,6 @@ cnst t args = do
     _ -> throwError "invalid arguments for const"
 
   z' <- cxFromStringE z
-
   return $ Tuple z' false
 
 

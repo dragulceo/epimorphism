@@ -156,9 +156,8 @@ type Module = {
   , props     :: StrMap String
   , scripts   :: Array String
   , modules   :: StrMap String
-  , par       :: StrMap Number
-  , zn        :: Array Complex
-  , paths     :: StrMap String
+  , par       :: StrMap String
+  , zn        :: Array String
   , images    :: Array String
   , sub       :: StrMap String
   , var       :: String
@@ -174,9 +173,8 @@ moduleSchema = [
   , SchemaEntry SE_M_St "props"
   , SchemaEntry SE_A_St "scripts"
   , SchemaEntry SE_M_St "modules"
-  , SchemaEntry SE_M_N "par"
-  , SchemaEntry SE_A_Cx "zn"
-  , SchemaEntry SE_M_St "paths"
+  , SchemaEntry SE_M_St "par"
+  , SchemaEntry SE_A_St "zn"
   , SchemaEntry SE_A_St "images"
   , SchemaEntry SE_M_St "sub"
   , SchemaEntry SE_St "var"

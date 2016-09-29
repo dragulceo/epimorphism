@@ -9,11 +9,10 @@ import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Array (updateAt, length, head, tail)
-import Data.Complex (Cartesian(Cartesian), outCartesian)
 import Data.List (fromList)
 import Data.Maybe (Maybe(Just))
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (delete, values, empty, insert, toList)
+import Data.StrMap (values, empty, insert, toList)
 import Data.String (joinWith, split)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
@@ -77,7 +76,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
             mid  <- findModule systemST.moduleRefPool pattern addr true
             mRef <- loadLib mid systemST.moduleRefPool "find module - setP"
             mod  <- lift $ readSTRef mRef
-            let par' = insert par val' mod.par
+            let par' = insert par (show val') mod.par
             lift $ modifySTRef mRef (\m -> m {par = par'})
 
             return unit
@@ -91,34 +90,13 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
             mRef <- loadLib mid systemST.moduleRefPool "find module - setP"
             mod <- lift $ readSTRef mRef
 
-            zn' <- case (updateAt idx' val' mod.zn) of
+            zn' <- case (updateAt idx' (show val') mod.zn) of
               Just x -> return x
               _ -> throwError "zn idx out of bounds setZn"
             lift $ modifySTRef mRef (\m -> m {zn = zn'})
 
             return unit
           _ -> throwError "invalid format: setPar addr par val"
-      "setPath" -> do
-        when (length args >= 3) do -- check for errors here
-          let addr = fromJust $ head args
-          let var = fromJust $ head (fromJust $ tail args)
-
-          mid  <- findModule systemST.moduleRefPool pattern addr true
-          mRef <- loadLib mid systemST.moduleRefPool "find module - setP"
-          mod <- lift $ readSTRef mRef
-
-          let rst = fromJust $ tail (fromJust $ tail args)
-
-          paths' <- case (joinWith " " rst) of
-            "" -> do
-              return $ delete var mod.paths
-            path -> do
-              return $ insert var path mod.paths
-
-          lift $ modifySTRef mRef (\m -> m {paths = paths'})
-
-          return unit
-
       "setT" -> do
         let tExp = joinWith "" args
         mid <- findModule systemST.moduleRefPool pattern "main.application.t.t_inner" true

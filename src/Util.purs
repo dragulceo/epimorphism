@@ -7,7 +7,7 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (runExceptT)
 import DOM (DOM)
 import Data.Array (length)
-import Data.Complex (Cartesian(Cartesian), outCartesian, Complex)
+import Data.Complex (inCartesian, Cartesian(Cartesian), outCartesian, Complex)
 import Data.Either (Either(..), either)
 import Data.Foldable (foldr)
 import Data.Int (fromString) as I
@@ -122,3 +122,13 @@ inj template dt = do
   fst $ foldr handle (Tuple template ((length dt) - 1)) dt
     where
       handle elt (Tuple res idx) = (Tuple (replaceAll ("%" ++ (show idx)) elt res) (idx - 1))
+
+
+real :: Complex -> Number
+real cx = case (inCartesian cx) of
+  Cartesian x y -> x
+
+
+imag :: Complex -> Number
+imag cx = case (inCartesian cx) of
+  Cartesian x y -> y

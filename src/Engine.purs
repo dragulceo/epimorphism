@@ -276,8 +276,8 @@ renderFrame systemST engineConf engineST pattern frameNum = do
     Nothing -> throwError "RenderFrame: missing disp program"
 
   -- bind par & zn
-  bindParZn systemST.moduleRefPool ctx main pattern.main
-  bindParZn systemST.moduleRefPool ctx disp pattern.disp
+  bindParZn systemST.moduleRefPool systemST.t ctx main pattern.main
+  bindParZn systemST.moduleRefPool systemST.t ctx disp pattern.disp
 
   execGL ctx do
     liftEff $ GL.useProgram ctx main
@@ -345,11 +345,13 @@ renderFrame systemST engineConf engineST pattern frameNum = do
 
 
 -- bind parameters & zn values from pattern into program
-bindParZn :: forall h eff. StrMap (STRef h Module) -> WebGLContext -> WebGLProgram -> String -> EpiS eff h Unit
-bindParZn lib ctx prog n = do
-  {lib: _, par, zn} <- flattenParZn {lib, par: [], zn: []} n
+bindParZn :: forall h eff. StrMap (STRef h Module) -> Number -> WebGLContext -> WebGLProgram -> String -> EpiS eff h Unit
+bindParZn lib t ctx prog n = do
+  {lib: _, par, zn} <- flattenParZn t {lib, par: [], zn: []} n
   let znC = map inCartesian zn
   let znA = concatMap fn znC
+  let a = lg par
+  let b = lg znA
 
   execGL ctx do
     liftEff $ GL.useProgram ctx prog

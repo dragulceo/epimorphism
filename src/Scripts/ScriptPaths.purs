@@ -16,7 +16,7 @@ import Math (max, min, pi, round, cos, floor)
 import Pattern (purgeScript)
 import ScriptUtil (parseAndImportScript)
 import System (loadLib)
-import Util (inj, numFromStringE, intFromStringE)
+import Util (cxFromStringE, inj, numFromStringE, intFromStringE)
 
 -- fixed point
 pfix :: forall eff h. ScriptFn eff h
@@ -29,7 +29,7 @@ pfix ssRef pRef self t mid sRef = do
   mRef <- loadLib mid systemST.moduleRefPool "pfix module"
   m <- lift $ readSTRef mRef
 
-  let par' = insert par val m.par
+  let par' = insert par (show val) m.par
   lift $ modifySTRef mRef (\m' -> m' {par = par'})
 
   return false
@@ -66,7 +66,7 @@ ppath ssRef pRef self t mid sRef = do
   let val = fn (t * spd)
 
   -- modify data
-  let par' = insert par val m.par
+  let par' = insert par (show val) m.par
   lift $ modifySTRef mRef (\m' -> m' {par = par'})
 
   return false
@@ -85,7 +85,7 @@ zfix ssRef pRef self t mid sRef = do
   m <- lift $ readSTRef mRef
 
   let z = outCartesian $ Cartesian x y
-  case (A.updateAt idx z m.zn) of
+  case (A.updateAt idx (show z) m.zn) of
     (Just zn') -> lift $ modifySTRef mRef (\m' -> m' {zn = zn'})
     _ -> throwError $ "zn idx out of bound : " ++ (show idx) ++ " : in zfix"
 
@@ -140,7 +140,7 @@ zpath ssRef pRef self t mid sRef = do
     purgeScript ssRef mid self
 
   -- modify data
-  case (A.updateAt idx z' m.zn) of
+  case (A.updateAt idx (show z') m.zn) of
     (Just zn') -> lift $ modifySTRef mRef (\m' -> m' {zn = zn'})
     _ -> throwError $ "zn idx out of bound : " ++ (show idx) ++ " : in zpath"
 
@@ -163,7 +163,7 @@ incZn ssRef pRef self t mid sRef = do
   ofs <-  loadLib "ofs" dt "incZn ofs"
 
   z <- case (index mod.zn idx) of
-    Just z' -> return z'
+    Just z' -> cxFromStringE z'
     _ -> throwError "index out of bounds - incZn"
 
   (Polar fromTh fromR) <- return $ inPolar z

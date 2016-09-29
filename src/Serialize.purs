@@ -81,4 +81,4 @@ serializeCxArray ary = "[" ++ (joinWith ", " (map showCX ary)) ++ "]"
 
 showCX :: Complex -> String
 showCX z = case (inCartesian z) of
-    (Cartesian x y) -> (format (precision 2) x) ++ " + " ++ (format (precision 2) y) ++ "i"
+    (Cartesian x y) -> (format (precision 2) x) ++ "+" ++ (format (precision 2) y) ++ "i"

@@ -7,12 +7,12 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
-import Data.Array (foldM, sort, concatMap, elemIndex)
+import Data.Array (updateAt, foldM, sort, concatMap, elemIndex)
 import Data.Int (round, toNumber)
 import Data.List (fromList)
 import Data.Maybe (maybe, fromMaybe, Maybe(Nothing, Just))
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (values, keys, lookup)
+import Data.StrMap (insert, values, keys, lookup)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
 import Engine (postprocessFrame, preloadImages, initEngineST, renderFrame, setShaders)
@@ -136,14 +136,15 @@ animate state = handleError do
   systemST'' <- lift $ readSTRef ssRef
 
   -- render!
-  --t4 <- lift $ now
-  (Tuple par zn) <- flattenParZn systemST'' (Tuple [] []) pattern.main
-  tex <- renderFrame systemST'' engineConf engineST' pattern par zn systemST'.frameNum
+  t4 <- lift $ now
+  (Tuple parM znM) <- flattenParZn systemST'' (Tuple [] []) pattern.main
+  t5 <- lift $ now
+  let a = lg (t5 - t4)
+  tex <- renderFrame systemST'' engineConf engineST' pattern parM znM systemST'.frameNum
 
-  (Tuple par zn) <- flattenParZn systemST'' (Tuple [] []) pattern.disp
-  postprocessFrame systemST'' engineConf engineST' tex par zn
+  (Tuple parD znD) <- flattenParZn systemST'' (Tuple [] []) pattern.disp
+  postprocessFrame systemST'' engineConf engineST' tex parD znD
 
-  --t5 <- lift $ now
 
   -- update ui
   updateLayout uiConf uiST systemST'' pattern false
@@ -165,21 +166,36 @@ flattenParZn :: forall eff h. SystemST h -> (Tuple (Array Number) (Array Number)
 flattenParZn systemST (Tuple par zn) mid = do
   mRef <- loadLib mid systemST.moduleRefPool "mid flattenParZn"
   mod  <- lift $ readSTRef mRef
-
   let t = systemST.t
 
-  znV <- traverse (\x -> runPath false mRef t (showPos mod.zn x) x) mod.zn
+  znV <- traverse (runZnPath mRef t) mod.zn
   let znV' = concatMap (\x -> [real x, imag x]) znV
   let zn' = zn ++ znV'
 
-  parV <- traverse (get mRef mod.par) (sort $ keys mod.par)
-  let parV' = map real parV
-  let par' = par ++ parV'
+  parV <- traverse (runParPath mRef t) (sort $ keys mod.par)
+  let par' = par ++ parV
 
   foldM (flattenParZn systemST) (Tuple par' zn') (fromList $ values mod.modules)
   where
-    get mRef dt k = runPath true mRef systemST.t k (fromJust $ lookup k dt)
-    showPos dt x = show $ fromJust $ elemIndex x dt
+    runZnPath mRef t val = do
+      (Tuple res remove) <- runPath t val
+      when remove do -- replace with constant
+        m <- lift $ readSTRef mRef
+        let idx = fromJust $ elemIndex val m.zn
+        let zn' = fromJust $ updateAt idx (show val) m.zn
+        lift $ modifySTRef mRef (\m' -> m' {zn = zn'})
+        return unit
+      return res
+    runParPath mRef t key = do
+      m <- lift $ readSTRef mRef
+      let val = fromJust $ lookup key m.par
+      (Tuple res remove) <- runPath t val
+      let res' = real res
+      when remove do -- replace with constant
+        let par' = insert key (show res') m.par
+        lift $ modifySTRef mRef (\m' -> m' {par = par'})
+        return unit
+      return res'
 
 
 

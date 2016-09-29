@@ -1,47 +1,22 @@
 module Paths where
 
 import Prelude
-import Config (Module, EpiS)
-import Control.Monad (when)
+import Config (EpiS)
 import Control.Monad.Except.Trans (throwError)
-import Control.Monad.ST (modifySTRef, readSTRef, STRef)
-import Control.Monad.Trans (lift)
-import Data.Array (updateAt, uncons)
+import Data.Array (uncons)
 import Data.Complex (outCartesian, Cartesian(Cartesian), Polar(Polar), outPolar, Complex)
 import Data.Maybe (Maybe(Just))
-import Data.StrMap (insert)
 import Data.String (trim, split)
 import Data.Tuple (Tuple(Tuple))
 import Math (pi, min, cos, floor)
-import Util (cxFromString, lg, real, cxFromStringE, numFromStringE, intFromStringE)
+import Util (cxFromString, lg, cxFromStringE, numFromStringE)
 
 
-runPath :: forall eff h. Boolean -> STRef h Module -> Number -> String -> String -> EpiS eff h Complex
-runPath isPar mRef t idx pathStr = do
+runPath :: forall eff h. Number -> String -> EpiS eff h (Tuple Complex Boolean)
+runPath t pathStr = do
   Path func conf {spd, args} <- parsePath pathStr
   spd' <- numFromStringE spd
-
-  (Tuple val remove) <- func (t * spd') args
-
-  case isPar of
-    true -> do
-      when remove do
-        m <- lift $ readSTRef mRef
-        let par' = insert idx (show (real val)) m.par
-        lift $ modifySTRef mRef (\m' -> m' {par = par'})
-        return unit
-    false -> do
-      when remove do
-        m <- lift $ readSTRef mRef
-        idx' <- intFromStringE idx
-        zn' <- case updateAt idx' (show val) m.zn of
-          Just x -> return x
-          _ -> throwError "idx out of bounds runPath"
-        lift $ modifySTRef mRef (\m' -> m' {zn = zn'})
-        return unit
-
-  return val
-
+  func (t * spd') args
 
 ------------------------------ PARSING ------------------------------
 

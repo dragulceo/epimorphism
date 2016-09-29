@@ -52,12 +52,13 @@ runZnPath' mRef t (Tuple idx path) = do
 runZnPath :: forall eff h. STRef h Module -> Number -> Int -> String -> EpiS eff h Unit
 runZnPath mRef t idx pathStr = do
   Path func' conf {spd, args} <- parsePath pathStr
+  spd' <- numFromStringE spd
 
   func <- case func' of
     PF2D f -> return f
     _ -> throwError "need a 2d path for zn"
 
-  (Tuple val remove) <- func (t * spd) args
+  (Tuple val remove) <- func (t * spd') args
 
   m <- lift $ readSTRef mRef
   zn' <- case updateAt idx val m.zn of
@@ -72,12 +73,13 @@ runZnPath mRef t idx pathStr = do
 runParPath :: forall eff h. STRef h Module -> Number -> String -> String -> EpiS eff h Unit
 runParPath mRef t var pathStr = do
   Path func' conf {spd, args} <- parsePath pathStr
+  spd' <- numFromStringE spd
 
   func <- case func' of
     PF1D f -> return f
     _ -> throwError "need a 1d path for par"
 
-  (Tuple val remove) <- func (t * spd) args
+  (Tuple val remove) <- func (t * spd') args
 
   m <- lift $ readSTRef mRef
   let par' = insert var val m.par
@@ -86,21 +88,19 @@ runParPath mRef t var pathStr = do
   lift $ modifySTRef mRef (\m' -> m' {par = par', paths = paths'})
   return unit
 
-type PathFunc1D eff h = Number -> (Array Number) -> EpiS eff h (Tuple Number Boolean)
-type PathFunc2D eff h = Number -> (Array Number) -> EpiS eff h (Tuple Complex Boolean)
+type PathFunc1D eff h = Number -> (Array String) -> EpiS eff h (Tuple Number Boolean)
+type PathFunc2D eff h = Number -> (Array String) -> EpiS eff h (Tuple Complex Boolean)
 data PathFunc eff h = PF1D (PathFunc1D eff h) | PF2D (PathFunc2D eff h)
 
-type PathArgs = {spd :: Number, args :: Array Number}
+type PathArgs = {spd :: String, args :: Array String}
 data PathConfig = PathConfig String
 data Path eff h = Path (PathFunc eff h) PathConfig PathArgs
 
 parsePath :: forall eff h. String -> EpiS eff h (Path eff h)
 parsePath dta = do
   let dta' = split " " $ trim dta
-  Tuple name allargs <- case uncons dta' of
-    Just { head: n, tail: rst } -> do
-      args' <- traverse numFromStringE rst
-      return $ Tuple n args'
+  {head: name, tail: allargs} <- case uncons dta' of
+    Just x -> return x
     _ -> throwError "invalid path syntax"
 
   {head: spd, tail: args} <- case uncons allargs of
@@ -148,7 +148,10 @@ smooth1D t args = do
 wave1D :: forall eff h. PathFunc1D eff h
 wave1D t args = do
   x <- case args of
-    [a, b] -> return $ a * cos(2.0 * pi * t) + b
+    [a', b'] -> do
+      a <- numFromStringE a'
+      b <- numFromStringE b'
+      return $ a * cos(2.0 * pi * t) + b
     _ -> throwError "invalid arguments for wave1D"
   return $ Tuple x false
 
@@ -157,7 +160,11 @@ wave1D t args = do
 intrp2D :: forall eff h. PathFunc2D eff h
 intrp2D t args = do
   z <- case args of
-    [fromR, fromTh, toR, toTh] -> do
+    [fromR', fromTh', toR', toTh'] -> do
+      fromR <- numFromStringE fromR'
+      fromTh <- numFromStringE fromTh'
+      toR <- numFromStringE toR'
+      toTh <- numFromStringE toTh'
       let t' = min t 1.0
       let r = toTh * t' + fromTh * (1.0 - t')
       let th = toR * t' + fromR * (1.0 - t')
@@ -182,7 +189,8 @@ liny2D t args = do
 circle2D :: forall eff h. PathFunc2D eff h
 circle2D t args = do
   z <- case args of
-    [r] ->
+    [r'] -> do
+      r <- numFromStringE r'
       return $ outPolar $ Polar (2.0 * pi * t) r
     _ -> throwError "invalid arguments for circle2D"
 
@@ -192,7 +200,10 @@ circle2D t args = do
 rose2D :: forall eff h. PathFunc2D eff h
 rose2D t args = do
   z <- case args of
-    [a, b, c] -> do
+    [a', b', c'] -> do
+      a <- numFromStringE a'
+      b <- numFromStringE b'
+      c <- numFromStringE c'
       return $ outPolar $ Polar (2.0 * pi * t) (a * cos(b * t) + c)
     _ -> throwError "invalid arguments for rose2D"
 

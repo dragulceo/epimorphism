@@ -2,13 +2,14 @@ module Pattern where
 
 import Prelude
 import Config (EpiS, Module, Pattern, SystemST, Script)
+import Control.Monad (when)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, modifySTRef, newSTRef, readSTRef)
 import Data.Array (cons, snoc, delete, head, tail) as A
 import Data.Maybe (Maybe(..), maybe)
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (member, StrMap, foldM, fold, delete, insert, values)
+import Data.StrMap (toList, member, StrMap, foldM, fold, delete, insert, values)
 import Data.String (split)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
@@ -112,7 +113,7 @@ importModule ssRef obj = do
   lift $ modifySTRef ssRef (\s -> s {moduleRefPool = mp'})
 
   -- import children
-  foldM (importChild ssRef) id mod.modules
+  traverse (importChild ssRef id) (toList mod.modules)
 
   -- update scripts
   traverse (\x -> importScript ssRef (ImportRef x) id) mod.scripts
@@ -120,40 +121,42 @@ importModule ssRef obj = do
   return id
 
   where
-    importChild :: STRef h (SystemST h) -> String -> String -> String -> EpiS eff h String
-    importChild ssRef mid k v = do
-      systemST <- lift $ readSTRef ssRef
+    importChild :: STRef h (SystemST h) -> String -> (Tuple String String) -> EpiS eff h Unit
+    importChild ssRef mid (Tuple k v) = do
+      when (v /= "") do
+        systemST <- lift $ readSTRef ssRef
 
-      -- import child
-      child <- importModule ssRef (ImportRef v)
+        -- import child
+        child <- importModule ssRef (ImportRef v)
 
-      -- update parent
-      mRef <- loadLib mid systemST.moduleRefPool "import module - update parent"
-      m <- lift $ readSTRef mRef
-      let modules' = insert k child m.modules
-      lift $ modifySTRef mRef (\m' -> m' {modules = modules'})
+        -- update parent
+        mRef <- loadLib mid systemST.moduleRefPool "import module - update parent"
+        m <- lift $ readSTRef mRef
+        let modules' = insert k child m.modules
+        lift $ modifySTRef mRef (\m' -> m' {modules = modules'})
 
-      return mid
+        return unit
 
 
 -- remove a module from the ref pool
 purgeModule :: forall eff h. STRef h (SystemST h) -> String -> EpiS eff h Unit
 purgeModule ssRef mid = do
-  systemST <- lift $ readSTRef ssRef
-  mRef <- loadLib mid systemST.moduleRefPool "purge module"
-  mod <- lift $ readSTRef mRef
+  when (mid /= "") do
+    systemST <- lift $ readSTRef ssRef
+    mRef <- loadLib mid systemST.moduleRefPool "purge module"
+    mod <- lift $ readSTRef mRef
 
-  -- purge scripts
-  traverse (purgeScript ssRef mid) mod.scripts
+    -- purge scripts
+    traverse (purgeScript ssRef mid) mod.scripts
 
-  -- delete self
-  let mp = delete mid systemST.moduleRefPool
-  lift $ modifySTRef ssRef (\s -> s {moduleRefPool = mp})
+    -- delete self
+    let mp = delete mid systemST.moduleRefPool
+    lift $ modifySTRef ssRef (\s -> s {moduleRefPool = mp})
 
-  -- purge children
-  traverse (purgeModule ssRef) (values mod.modules)
+    -- purge children
+    traverse (purgeModule ssRef) (values mod.modules)
 
-  return unit
+    return unit
 
 
 -- replace child subN:cid(in ref pool) with child subN:obj

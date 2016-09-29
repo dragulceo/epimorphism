@@ -118,4 +118,6 @@ commonKeyHandler ucRef usRef char = do
     "|"  -> return "showFps"
     "\\" -> return "clear"
     " "  -> return "save"
+    "`"  -> return "pause"
+    "?"  -> return "halt"
     _    -> return "null"

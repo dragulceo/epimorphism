@@ -24,7 +24,7 @@ import Pattern (findModule)
 import ScriptUtil (parseAndImportScript)
 import Serialize (unsafeSerialize)
 import System (loadLib)
-import Util (Now, cxFromString, intFromStringE, numFromStringE, lg, uuid, handleError)
+import Util (halt, Now, cxFromString, intFromStringE, numFromStringE, lg, uuid, handleError)
 
 foreign import saveCanvas :: forall eff. Eff eff Unit
 
@@ -50,6 +50,9 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
       "null" -> return unit
       "pause" -> do
         lift $ modifySTRef ssRef (\s -> s {paused = not s.paused})
+        return unit
+      "halt" -> do
+        lift $ halt
         return unit
       "pauseAfterSwitch" -> do
         lift $ modifySTRef ssRef (\s -> s {pauseAfterSwitch = true})

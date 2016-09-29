@@ -5,8 +5,8 @@ import Data.TypedArray as T
 import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Graphics.WebGL.Raw.Types as GLT
-import Compiler (flattenParZn, compileShaders)
-import Config (AudioAnalyser, Epi, EpiS, Module, Pattern, EngineST, EngineConf, SystemST, SystemConf)
+import Compiler (compileShaders)
+import Config (AudioAnalyser, Epi, EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf)
 import Control.Monad (when)
 import Control.Monad.Eff (Eff, forE)
 import Control.Monad.Eff.Class (liftEff)
@@ -14,13 +14,11 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Reader.Class (ask)
 import Control.Monad.Reader.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, newSTRef, modifySTRef, readSTRef)
-import Data.Array (length, concatMap, (!!), (..), zip, foldM)
-import Data.Complex (Cartesian(..), inCartesian)
+import Data.Array (length, (!!), (..), zip, foldM)
 import Data.Either (either)
 import Data.Int (toNumber, fromNumber)
 import Data.Maybe (Maybe(Nothing, Just))
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (StrMap)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple), snd, fst)
 import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
@@ -254,8 +252,8 @@ initEngineST sysConf engineConf systemST pattern canvasId esRef' = do
 
 
 -- do the thing!
-renderFrame :: forall eff h. SystemST h -> EngineConf -> EngineST -> Pattern -> Int -> EpiS eff h Unit
-renderFrame systemST engineConf engineST pattern frameNum = do
+renderFrame :: forall eff h. SystemST h -> EngineConf -> EngineST -> Pattern -> Array Number -> Array Number -> Int -> EpiS eff h WebGLTexture
+renderFrame systemST engineConf engineST pattern par zn frameNum = do
   let ctx = engineST.ctx
 
   -- unpack
@@ -271,13 +269,9 @@ renderFrame systemST engineConf engineST pattern frameNum = do
   main <- case engineST.mainProg of
     Just x -> return x
     Nothing -> throwError "RenderFrame: missing main program"
-  disp <- case engineST.dispProg of
-    Just x -> return x
-    Nothing -> throwError "RenderFrame: missing disp program"
 
   -- bind par & zn
-  bindParZn systemST.moduleRefPool systemST.t ctx main pattern.main
-  bindParZn systemST.moduleRefPool systemST.t ctx disp pattern.disp
+  bindParZn ctx main par zn
 
   execGL ctx do
     liftEff $ GL.useProgram ctx main
@@ -329,6 +323,20 @@ renderFrame systemST engineConf engineST pattern frameNum = do
 
     debug
 
+    return td
+
+
+postprocessFrame :: forall eff h. SystemST h -> EngineConf -> EngineST -> WebGLTexture -> Array Number -> Array Number -> EpiS eff h Unit
+postprocessFrame systemST engineConf engineST tex par zn = do
+  let ctx = engineST.ctx
+
+  disp <- case engineST.dispProg of
+    Just x -> return x
+    Nothing -> throwError "RenderFrame: missing disp program"
+
+  bindParZn ctx disp par zn
+
+  execGL ctx do
     -- disp/post program
     liftEff $ GL.useProgram ctx disp
 
@@ -337,7 +345,7 @@ renderFrame systemST engineConf engineST pattern frameNum = do
     uniform1f dispUnif.kernel_dim (toNumber engineConf.kernelDim)
 
     -- draw
-    liftEff $ GL.bindTexture ctx GLE.texture2d td
+    liftEff $ GL.bindTexture ctx GLE.texture2d tex
     liftEff $ GL.bindFramebuffer ctx GLE.framebuffer unsafeNull
     drawArrays Triangles 0 6
 
@@ -345,12 +353,8 @@ renderFrame systemST engineConf engineST pattern frameNum = do
 
 
 -- bind parameters & zn values from pattern into program
-bindParZn :: forall h eff. StrMap (STRef h Module) -> Number -> WebGLContext -> WebGLProgram -> String -> EpiS eff h Unit
-bindParZn lib t ctx prog n = do
-  {lib: _, par, zn} <- flattenParZn t {lib, par: [], zn: []} n
-  let znC = map inCartesian zn
-  let znA = concatMap fn znC
-
+bindParZn :: forall h eff. WebGLContext -> WebGLProgram -> Array Number -> Array Number -> EpiS eff h Unit
+bindParZn ctx prog par zn = do
   execGL ctx do
     liftEff $ GL.useProgram ctx prog
     unif <- getUniformBindings prog
@@ -364,11 +368,8 @@ bindParZn lib t ctx prog n = do
     when (length zn > 0) do
       mZnU <- liftEff $ GL.getUniformLocation ctx prog "zn"
       case mZnU of
-        Just znU -> uniform2fv (Uniform znU) (T.asFloat32Array znA)
+        Just znU -> uniform2fv (Uniform znU) (T.asFloat32Array zn)
         Nothing  -> throwError $ ShaderError "missing zn uniform!"
-  where
-    fn (Cartesian r i) = [r, i]
-
 
 -- execute a webgl action & wrap its error
 execGL :: forall eff a. WebGLContext -> WebGL a -> Epi eff a

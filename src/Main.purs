@@ -7,17 +7,23 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
+import Data.Array (foldM, sort, concatMap, elemIndex)
 import Data.Int (round, toNumber)
+import Data.List (fromList)
 import Data.Maybe (maybe, fromMaybe, Maybe(Nothing, Just))
-import Data.StrMap (lookup)
-import Engine (preloadImages, initEngineST, renderFrame, setShaders)
+import Data.Maybe.Unsafe (fromJust)
+import Data.StrMap (values, keys, lookup)
+import Data.Traversable (traverse)
+import Data.Tuple (Tuple(Tuple))
+import Engine (postprocessFrame, preloadImages, initEngineST, renderFrame, setShaders)
 import Graphics.Canvas (Canvas)
 import Layout (updateLayout)
+import Paths (runPath)
 import Pattern (importPattern)
 import Script (runScripts)
 import System (initSystemST, loadLib)
 import UI (initUIST)
-import Util (inj, rndstr, Now, handleError, lg, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
+import Util (imag, real, inj, rndstr, Now, handleError, lg, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
 
 host :: String
 host = ""
@@ -131,7 +137,12 @@ animate state = handleError do
 
   -- render!
   --t4 <- lift $ now
-  renderFrame systemST'' engineConf engineST' pattern systemST'.frameNum
+  (Tuple par zn) <- flattenParZn systemST'' (Tuple [] []) pattern.main
+  tex <- renderFrame systemST'' engineConf engineST' pattern par zn systemST'.frameNum
+
+  (Tuple par zn) <- flattenParZn systemST'' (Tuple [] []) pattern.disp
+  postprocessFrame systemST'' engineConf engineST' tex par zn
+
   --t5 <- lift $ now
 
   -- update ui
@@ -148,6 +159,28 @@ animate state = handleError do
   --let a = lg $ inj "BREAKDOWN: init:%0ms paths:%1ms scripts:%2ms junk:%3ms render:%4ms ui:%5ms next:%6ms" [show (t1 - t0), show (t2 - t1), show (t3 - t2), show (t4 - t3), show (t5 - t4), show (t6 - t5), show (t7 - t6)]
 
   return unit
+
+-- recursively flatten par & zn lists in compilation order
+flattenParZn :: forall eff h. SystemST h -> (Tuple (Array Number) (Array Number)) -> String -> EpiS eff h (Tuple (Array Number) (Array Number))
+flattenParZn systemST (Tuple par zn) mid = do
+  mRef <- loadLib mid systemST.moduleRefPool "mid flattenParZn"
+  mod  <- lift $ readSTRef mRef
+
+  let t = systemST.t
+
+  znV <- traverse (\x -> runPath false mRef t (showPos mod.zn x) x) mod.zn
+  let znV' = concatMap (\x -> [real x, imag x]) znV
+  let zn' = zn ++ znV'
+
+  parV <- traverse (get mRef mod.par) (sort $ keys mod.par)
+  let parV' = map real parV
+  let par' = par ++ parV'
+
+  foldM (flattenParZn systemST) (Tuple par' zn') (fromList $ values mod.modules)
+  where
+    get mRef dt k = runPath true mRef systemST.t k (fromJust $ lookup k dt)
+    showPos dt x = show $ fromJust $ elemIndex x dt
+
 
 
 preloadAux :: forall h. (SystemST h) -> String ->

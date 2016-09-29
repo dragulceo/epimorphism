@@ -4,27 +4,27 @@ CURRENT PROJECTS:
 		- chopiness when at higher resolutions
 
 	- script/path cleanup
-	  - MAJOR QUESTION
-		  - do paths/scripts live as ADTs or strings?
-			- ADTs
-			  - only have to parse/serialize once
-				- cleanest way would probably be to keep ref pools around
-				- executing them & modifying their state maybe cleaner
-			- strings
-			  - maybe a performance hit?
-				- serialize/deserialize every frame(currently, could not do this for scripts always)
-				- no ref pools/importing or such business
+    - paths & scripts live as strings
+      - on each frame, decompile obj, execute, & possibly update
+
+		- default path & script objs
+
+    - new path
+		  - serialized as - var: path@phase n0 n1 n2 n3 ...
+      - returns value / whether the path should be removed
+			- internal state = phase
+			- dont ever need to update state
+		- new scripts
+			- script@phase d0:s0 d1:s1 ...,
+			- returns true(+new rootId, etc) if should recompile
+			- internal state = dt + phase
+			- sometimes we update state, need index in scripts for this(+removing self)
+
 		- combine scripts & paths again?
-		  - paths
-			  - var: path n0 n1 n2 n3 ...
-				- returns value / whether the path should be removed
-				- internal state = phase
-				- not currently imported, deserialized every frame
-			- script
-			  - script d0:s0 d1:s1 ..., phase,
-				- returns true if should recompile
-				- internal state = dt + phase,
-				- currently imported/lives in pools
+		  - unique(but related?) serializer, deserializer, to same internal format
+			- unique executors
+
+
 	  - merge paths into par/zn
       - normal variables are const path
 

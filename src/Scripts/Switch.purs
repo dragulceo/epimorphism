@@ -8,6 +8,7 @@ import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, STRef, readSTRef)
 import Data.Array (filter, index, length, null, updateAt) as A
 import Data.Maybe (Maybe(Just, Nothing))
+import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (empty, fromFoldable, insert, member, union)
 import Data.Traversable (traverse)
 import Data.Tuple (fst, snd, Tuple(..))
@@ -15,6 +16,108 @@ import Pattern (purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, 
 import ScriptUtil (createScript, parseAndImportScript)
 import System (loadLib, checkFlags, family, flagFamily)
 import Util (lg, inj, randInt, numFromStringE, intFromStringE, gmod, clickPause)
+
+
+
+
+switch :: forall eff h. ScriptFn eff h
+switch ssRef pRef scrId t modId scrRef = do
+  systemST <- lift $ readSTRef ssRef
+  scr <- lift $ readSTRef scrRef
+  let dt = scr.dt
+  spd <- (loadLib "spd" dt "switch spd") >>= numFromStringE
+
+  -- get the root, name of child & id of child to be switched
+  op  <- loadLib "op" dt "switch op" -- either load or clone
+  (Tuple rootId childN) <- case op of
+    "load" -> do
+      childN' <- loadLib "childN" dt "switch childN"
+      return $ Tuple modId childN'
+    "clone" -> findParent systemST.moduleRefPool modId
+    x -> throwError $ "invalid 'op' for switch, must be load | clone : " ++ x
+
+  by  <- loadLib "by" dt "switch by" -- either query or value
+  typ <- loadLib "typ" dt "switch typ" -- either mod or idx
+
+
+  -- get the relevant name to be used to either load or for the mutator
+  name <- case by of
+    "val" -> do
+      loadLib "val" dt "switch val"
+    "query" -> do
+      accs <- loadLib "accs" dt "switch accs"
+      query <- loadLib "query" dt "switch query"
+      lib <- case typ of
+        "mod" -> do
+          return $ family systemST.moduleLib childN [query] [] -- using childN here is wrong - seed1, etc
+        "idx" -> loadLib query systemST.indexLib "switch index" >>= \x -> return x.lib
+        x -> throwError $ "invalid 'typ' for switch, must be mod | idx : " ++ x
+
+      when (lib == []) do
+        throwError "your index is empty!"
+
+      idx <- case accs of
+        "rand" -> do
+          lift $ randInt $ A.length lib
+        iS -> do
+          i <- (return iS) >>= intFromStringE
+          return $ i `gmod` (A.length lib)
+
+      return $ fromJust (A.index lib idx)
+
+    x -> throwError $ "invalid 'by' for switch, must be query | val : " ++ x
+
+
+
+  -- remove self (do this so as not to be duplicated)
+  purgeScript ssRef modId scrId
+
+  let nxtN = if (op == "load") then name else modId
+  nxtId <- importModule ssRef (ImportRef nxtN)
+
+  switchModules ssRef rootId childN nxtId spd
+  purgeModule ssRef nxtId
+
+  return true
+
+
+  -- load module via name (from moduleLib, needs -> name)
+  -- load module via lib (from moduleLib, needs query + (rand | nxt | prev))
+  -- load module via index? (from moduleLib via index, needs index name + (rand | nxt | prev))
+
+  -- clone module + mutate needs mutator
+  -- mutate via name (needs -> name)
+  -- mutate via index (needs index name + (rand | nxt | prev)
+
+
+  -- [mod, val]
+  -- [mod, queryM, accs]
+  -- [idx, queryI, accs]
+  --
+  -- [mutatorN]
+  -- [mutatorN, val]
+  -- [mutatorN, queryI, accs]
+
+  -- so we use either val, or query + accs to get - name
+  -- for load, we load a module via that name from somewhere & switch to it
+  -- for clone, we clone the module & pass the name to the mutator we loaded
+
+
+
+  -- either
+  -- 1. get module from library
+  -- 2. clone module + mutute somehow via library
+  -- SO
+  -- need a library & a way to get something from it
+  --
+
+  -- get data
+
+  return false
+
+
+
+
 
 incData :: forall eff h. SystemST h -> Script -> String -> (String -> String -> EpiS eff h (Array String)) -> EpiS eff h {childN :: String, nxt :: String, spd :: Number}
 incData systemST scr rootId loader = do

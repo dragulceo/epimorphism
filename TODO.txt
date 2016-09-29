@@ -1,9 +1,33 @@
 CURRENT PROJECTS:
+  - general perf stuff
+	  - mathematical analysis of framerate
+		- chopiness when at higher resolutions
+
 	- script/path cleanup
-	  - inline scripts
+	  - MAJOR QUESTION
+		  - do paths/scripts live as ADTs or strings?
+			- ADTs
+			  - only have to parse/serialize once
+				- cleanest way would probably be to keep ref pools around
+				- executing them & modifying their state maybe cleaner
+			- strings
+			  - maybe a performance hit?
+				- serialize/deserialize every frame(currently, could not do this for scripts always)
+				- no ref pools/importing or such business
 		- combine scripts & paths again?
+		  - paths
+			  - var: path n0 n1 n2 n3 ...
+				- returns value / whether the path should be removed
+				- internal state = phase
+				- not currently imported, deserialized every frame
+			- script
+			  - script d0:s0 d1:s1 ..., phase,
+				- returns true if should recompile
+				- internal state = dt + phase,
+				- currently imported/lives in pools
 	  - merge paths into par/zn
-		- phases
+      - normal variables are const path
+
 
   - detect system/perf profile
     - if there are too many aux buffers (texture units), we'll have an issue?
@@ -29,20 +53,13 @@ CURRENT PROJECTS:
 
 
 NEXT PROJECTS:
-  - release?
-    - kickstarter for audio responsiveness?
-	  - make main pattern a little better
-
   - async asset loading?
 	  - what do we do when we dont have the asset yet?
 		- which images are loaded (also, clean up main)?
 
-	- importing/compiling
-		- MISC
-		  - could maybe clean up switch a bit more (remove imports/purges, combine methods)
-		  - maybe module.modules should be [SubModule = SubLib String | SubPool String] or something
-      - module/submodule cycles??
-			- only way to modify tree is via switch?
+  - release?
+    - kickstarter for audio responsiveness?
+	  - make main pattern a little better
 
 	- restructure data
 		- modules are instances of components - specific values for variables & scripts
@@ -72,6 +89,13 @@ NEXT PROJECTS:
   	  - check for duplicates when saving (id = hash of contents?)
       - namespace collisions detection
 
+	- more importing/compiling
+		- MISC
+		  - could maybe clean up switch a bit more (remove imports/purges, combine methods)
+		  - maybe module.modules should be [SubModule = SubLib String | SubPool String] or something
+      - module/submodule cycles??
+			- only way to modify tree is via switch?
+
 	- UI
 	  - basic idea is that all db & data modifications happen through UI
 		- but we need to completely rework how the ui happens.
@@ -94,9 +118,7 @@ BUGS:
 
 PERF:
   - zoom out performance problem.  unclear what the deal is.  really bad with 1/z
-	- chopiness when at higher resolutions
   - choppy in safari
-  - switch stuttering. it's compile speed + texutre upload
 
 SYSTEM:
   - scripts
@@ -146,8 +168,6 @@ NO CLUE:
   - saving images loses bit depth??
   - weird divide by zero issue - glitch in content
   - maybe pixel alignment issues with images?
-
-
 
 
 

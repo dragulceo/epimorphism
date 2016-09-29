@@ -18,7 +18,7 @@ import Pattern (importPattern)
 import Script (runScripts)
 import System (initSystemST, loadLib)
 import UI (initUIST)
-import Util (rndstr, Now, handleError, lg, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
+import Util (inj, rndstr, Now, handleError, lg, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
 
 host :: String
 host = ""
@@ -84,6 +84,7 @@ initState systemST = do
 
 animate :: forall h. (State h) -> Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
 animate state = handleError do
+  --t0 <- lift $ now
   -- unpack state
   {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef} <- return state
 
@@ -111,34 +112,42 @@ animate state = handleError do
     lift $ modifySTRef ssRef (\s -> s {lastFpsTimeMS = Just currentTimeMS, fps = Just fps})
     return unit
 
-  -- update pattern
+  --t1 <- lift $ now
   runPaths ssRef pRef
+  --t2 <- lift $ now
+  --let a = lg (t2 - t1)
+
   recompile <- runScripts ssRef pRef
+  --t3 <- lift $ now
+
   systemST' <- lift $ readSTRef ssRef
 
-  case recompile of -- when doesnt work here for some godforsaken reason
-    true -> do
-      setShaders systemConf engineConf esRef systemST' pattern
-      currentTimeMS2 <- lift $ now
-      lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS2})
-
-      return unit
-    false -> return unit
+  when recompile do
+    setShaders systemConf engineConf esRef systemST' pattern
+    currentTimeMS2 <- lift $ now
+    lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS2})
+    return unit
 
   engineST' <- lift $ readSTRef esRef
   systemST'' <- lift $ readSTRef ssRef
 
   -- render!
+  --t4 <- lift $ now
   renderFrame systemST'' engineConf engineST' pattern systemST'.frameNum
+  --t5 <- lift $ now
 
   -- update ui
   updateLayout uiConf uiST systemST'' pattern false
+  --t6 <- lift $ now
 
   -- request next frame
   halted <- lift $ isHalted
   unless halted do
     lift $ modifySTRef ssRef (\s -> s {frameNum = s.frameNum + 1})
     lift $ requestAnimationFrame animate state
+  --t7 <- lift $ now
+
+  --let a = lg $ inj "BREAKDOWN: init:%0ms paths:%1ms scripts:%2ms junk:%3ms render:%4ms ui:%5ms next:%6ms" [show (t1 - t0), show (t2 - t1), show (t3 - t2), show (t4 - t3), show (t5 - t4), show (t6 - t5), show (t7 - t6)]
 
   return unit
 

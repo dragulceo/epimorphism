@@ -9,7 +9,9 @@ exports.addEventListeners = function() {
 		var cname = this.dataset.cname;
 		var mn = this.value;
 
-		var cmd = "scr " + mid + " switchChild childN:" + cname + " to:" + mn + " spd:1.0"
+		//var cmd = "scr " + mid + " switchChild childN:" + cname + " to:" + mn + " spd:0.2"
+		var cmd = "scr " + mid + " switch childN:" + cname + " spd:0.2 op:load typ:mod by:val " + "val:" + mn;
+		console.log(cmd);
 		window.eventHandler("pauseAfterSwitch");
 		window.eventHandler(cmd);
 		$("button#pause").click();

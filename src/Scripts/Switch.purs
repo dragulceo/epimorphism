@@ -1,7 +1,7 @@
 module Switch where
 
 import Prelude
-import Config (Script, ScriptFn, EpiS, SystemST)
+import Config (Module, Script, ScriptFn, EpiS, SystemST)
 import Control.Monad (when)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
@@ -17,15 +17,14 @@ import ScriptUtil (createScript, parseAndImportScript)
 import System (loadLib, checkFlags, family, flagFamily)
 import Util (lg, inj, randInt, numFromStringE, intFromStringE, gmod, clickPause)
 
-
-
-
 switch :: forall eff h. ScriptFn eff h
 switch ssRef pRef scrId t modId scrRef = do
   systemST <- lift $ readSTRef ssRef
   scr <- lift $ readSTRef scrRef
   let dt = scr.dt
   spd <- (loadLib "spd" dt "switch spd") >>= numFromStringE
+
+  let a = lg dt
 
   -- get the root, name of child & id of child to be switched
   op  <- loadLib "op" dt "switch op" -- either load or clone
@@ -38,7 +37,6 @@ switch ssRef pRef scrId t modId scrRef = do
 
   by  <- loadLib "by" dt "switch by" -- either query or value
   typ <- loadLib "typ" dt "switch typ" -- either mod or idx
-
 
   -- get the relevant name to be used to either load or for the mutator
   name <- case by of
@@ -67,12 +65,19 @@ switch ssRef pRef scrId t modId scrRef = do
 
     x -> throwError $ "invalid 'by' for switch, must be query | val : " ++ x
 
-
   -- remove self (do this so as not to be duplicated
   purgeScript ssRef modId scrId
 
   let nxtN = if (op == "load") then name else modId
   nxtId <- importModule ssRef (ImportRef nxtN)
+  when (op == "clone") do
+    nxtRef <- loadLib nxtId systemST.moduleRefPool "switch nxtId"
+    mutatorN <- loadLib "mut" dt "switch mut"
+    mutator <- getMutator mutatorN
+    lift $ modifySTRef nxtRef mutator
+
+    return unit
+
   -- mutate module here
 
   switchModules ssRef rootId childN nxtId spd
@@ -113,9 +118,13 @@ switch ssRef pRef scrId t modId scrRef = do
 
   -- get data
 
-  return false
-
-
+getMutator :: forall eff h. String -> EpiS eff h (Module -> Module)
+getMutator name = do
+  case name of
+    "image" -> return id
+    "script" -> return id
+    "sub" -> return id
+    _ -> throwError $ "unknown mutator: " ++ name
 
 
 

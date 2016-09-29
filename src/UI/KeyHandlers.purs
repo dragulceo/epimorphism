@@ -31,9 +31,9 @@ devKeyHandler ucRef usRef char = do
 
   case char of
     "1" -> do
-      inc uiConf uiST "main.application.t" "Mod" "t_inner" "all" 1
+      inc2 uiConf uiST "main.application.t" "t_inner" "all" 1
     "q" -> do
-      inc uiConf uiST "main.application.t" "Mod" "t_inner" "all" (-1)
+      inc2 uiConf uiST "main.application.t" "t_inner" "all" (-1)
 --    "1" -> do
 --      inc uiConf uiST "main.application.t" "Script2" "t_inner" "all" 1
 --    "q" -> do
@@ -99,6 +99,14 @@ devKeyHandler ucRef usRef char = do
       modifySTRef usRef (\s -> s {incIdx = dt})
       let spd = show uiConf.keyboardSwitchSpd
       return $ inj "scr %0 inc%1 sub:%2 lib:%3 idx:%4 spd:%5" [adr, typ, sub, lib, (show idx), spd]
+    inc2 uiConf uiST adr childN lib ofs = do
+      let idn' = adr ++ childN
+      let idx = if (member idn' uiST.incIdx) then ((fromJust $ lookup idn' uiST.incIdx) + ofs) else 0
+      let dt = insert idn' idx uiST.incIdx
+      modifySTRef usRef (\s -> s {incIdx = dt})
+      let spd = show uiConf.keyboardSwitchSpd
+      return $ inj "scr %0 switch childN:%1 op:load typ:mod by:query query:%2 accs:%3 spd:%4" [adr, childN, lib, (show idx), spd]
+
 
 prodKeyHandler :: KeyHandler
 prodKeyHandler ucRef usRef char = do

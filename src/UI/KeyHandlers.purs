@@ -31,33 +31,29 @@ devKeyHandler ucRef usRef char = do
 
   case char of
     "1" -> do
-      inc2 uiConf uiST "main.application.t" "t_inner" "all" 1
+      incMod uiConf uiST "main.application.t" "t_inner" "all" 1
     "q" -> do
-      inc2 uiConf uiST "main.application.t" "t_inner" "all" (-1)
---    "1" -> do
---      inc uiConf uiST "main.application.t" "Script2" "t_inner" "all" 1
---    "q" -> do
---      inc uiConf uiST "main.application.t" "Script2" "t_inner" "all" (-1)
+      incMod uiConf uiST "main.application.t" "t_inner" "all" (-1)
     "!" -> do
-      inc uiConf uiST "main.application" "Mod" "t" "all''" 1
+      incMod uiConf uiST "main.application" "t" "all''" 1
     "Q" -> do
-      inc uiConf uiST "main.application" "Mod" "t" "all''" (-1)
+      incMod uiConf uiST "main.application" "t" "all''" (-1)
     "1" -> do
-      inc uiConf uiST "main.application.t" "Mod" "t_inner" "all" 1
+      incMod uiConf uiST "main.application.t" "t_inner" "all" 1
     "q" -> do
-      inc uiConf uiST "main.application.t" "Mod" "t_inner" "all" (-1)
+      incMod uiConf uiST "main.application.t" "t_inner" "all" (-1)
     "2" -> do
-      inc uiConf uiST "main.application" "Mod" "seed" "t_test" 1
+      incMod uiConf uiST "main.application" "seed" "t_test" 1
     "w" -> do
-      inc uiConf uiST "main.application" "Mod" "seed" "t_test" (-1)
+      incMod uiConf uiST "main.application" "seed" "t_test" (-1)
     "3" -> do
-      inc uiConf uiST "main.application" "Mod" "color" "lib" 1
+      incMod uiConf uiST "main.application" "color" "lib" 1
     "e" -> do
-      inc uiConf uiST "main.application" "Mod" "color" "lib" (-1)
+      incMod uiConf uiST "main.application" "color" "lib" (-1)
     "4" -> do
-      inc uiConf uiST "disp" "Mod" "post" "lib" 1
+      incMod uiConf uiST "disp" "post" "lib" 1
     "r" -> do
-      inc uiConf uiST "disp" "Mod" "post" "lib" (-1)
+      incMod uiConf uiST "disp" "post" "lib" (-1)
     "a" -> do
       return "scr main.application.t incZn idx:0 ofs:1"
     "z" -> do
@@ -92,14 +88,7 @@ devKeyHandler ucRef usRef char = do
       return "scr main.application.t incZn idx:3 ofs:-i"
     _   -> commonKeyHandler ucRef usRef char
   where
-    inc uiConf uiST adr typ sub lib ofs = do
-      let idn' = adr ++ sub
-      let idx = if (member idn' uiST.incIdx) then ((fromJust $ lookup idn' uiST.incIdx) + ofs) else 0
-      let dt = insert idn' idx uiST.incIdx
-      modifySTRef usRef (\s -> s {incIdx = dt})
-      let spd = show uiConf.keyboardSwitchSpd
-      return $ inj "scr %0 inc%1 sub:%2 lib:%3 idx:%4 spd:%5" [adr, typ, sub, lib, (show idx), spd]
-    inc2 uiConf uiST adr childN lib ofs = do
+    incMod uiConf uiST adr childN lib ofs = do
       let idn' = adr ++ childN
       let idx = if (member idn' uiST.incIdx) then ((fromJust $ lookup idn' uiST.incIdx) + ofs) else 0
       let dt = insert idn' idx uiST.incIdx

@@ -136,10 +136,10 @@ animate state = handleError do
   systemST'' <- lift $ readSTRef ssRef
 
   -- render!
-  t4 <- lift $ now
+  --t4 <- lift $ now
   (Tuple parM znM) <- flattenParZn systemST'' (Tuple [] []) pattern.main
-  t5 <- lift $ now
-  let a = lg (t5 - t4)
+  --t5 <- lift $ now
+
   tex <- renderFrame systemST'' engineConf engineST' pattern parM znM systemST'.frameNum
 
   (Tuple parD znD) <- flattenParZn systemST'' (Tuple [] []) pattern.disp

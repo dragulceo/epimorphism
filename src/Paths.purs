@@ -6,7 +6,7 @@ import Control.Monad.Except.Trans (throwError)
 import Data.Array (uncons)
 import Data.Complex (outCartesian, Cartesian(Cartesian), Polar(Polar), outPolar, Complex)
 import Data.Maybe (Maybe(Just))
-import Data.String (trim, split)
+import Data.String (split, trim)
 import Data.Tuple (Tuple(Tuple))
 import Math (pi, min, cos, floor)
 import Util (cxFromString, lg, cxFromStringE, numFromStringE)
@@ -14,15 +14,14 @@ import Util (cxFromString, lg, cxFromStringE, numFromStringE)
 
 runPath :: forall eff h. Number -> String -> EpiS eff h (Tuple Complex Boolean)
 runPath t pathStr = do
-  Path func conf {spd, args} <- parsePath pathStr
-  spd' <- numFromStringE spd
-  func (t * spd') args
+  Path func conf {spd, phase, args} <- parsePath pathStr
+  func ((t - phase) * spd) args
 
 ------------------------------ PARSING ------------------------------
 
 type PathFunc eff h = Number -> (Array String) -> EpiS eff h (Tuple Complex Boolean)
 
-type PathArgs = {spd :: String, args :: Array String}
+type PathArgs = {spd :: Number, phase :: Number, args :: Array String}
 data PathConfig = PathConfig String
 data Path eff h = Path (PathFunc eff h) PathConfig PathArgs
 
@@ -39,13 +38,21 @@ parsePath dta = do
         Just x -> return x
         _ -> throwError "invalid path syntax"
 
-  {head: spd, tail: args} <- case uncons allargs of
+  (Tuple name' phase) <- case (split "@" name) of
+    [x] -> return $ Tuple x 0.0
+    [x, y] -> do
+      y' <- numFromStringE y
+      return $ Tuple x y'
+    _ -> throwError "wtf are you doing?"
+
+  {head: spd', tail: args} <- case uncons allargs of
     Just x -> return x
     _ -> throwError "first arg must be spd"
 
-  Tuple func conf <- getPathObj name
+  Tuple func conf <- getPathObj name'
 
-  return $ Path func conf {spd, args}
+  spd <- numFromStringE spd'
+  return $ Path func conf {spd, phase, args}
 
 
 getPathObj :: forall eff h. String -> EpiS eff h (Tuple (PathFunc eff h) PathConfig)

@@ -9,7 +9,7 @@ import Control.Monad.ST (modifySTRef, STRef, readSTRef)
 import Data.Array (index, length, updateAt) as A
 import Data.Maybe (fromMaybe)
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (fromFoldable, insert, union)
+import Data.StrMap (insert, fromFoldable, union)
 import Data.Tuple (Tuple(..))
 import Pattern (purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule, purgeScript)
 import ScriptUtil (parseAndImportScript)
@@ -79,7 +79,7 @@ switch ssRef pRef scrId t modId scrRef = do
     return unit
 
   -- switch! (should we inline this?)
-  switchModules ssRef pRef rootId childN nxtId spd
+  switchModules ssRef pRef (t + scr.tPhase) rootId childN nxtId spd
 
   return true
 
@@ -107,8 +107,8 @@ getMutator mut idx name  = do
 
 -- should check if dim & var are the same across m0 & m1
 -- m1 is a reference id(we assume also that it was previously imported & floating)
-switchModules :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> String -> String -> String -> Number -> EpiS eff h Unit
-switchModules ssRef pRef rootId childN m1 spd = do
+switchModules :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> Number -> String -> String -> String -> Number -> EpiS eff h Unit
+switchModules ssRef pRef t rootId childN m1 spd = do
   systemST <- lift $ readSTRef ssRef
   pattern  <- lift $ readSTRef pRef
 
@@ -126,14 +126,15 @@ switchModules ssRef pRef rootId childN m1 spd = do
 
   let modules = fromFoldable [(Tuple "m0" m0), (Tuple "m1" m1)]
   let sub'    = union (fromFoldable [(Tuple "dim" m0M.dim), (Tuple "var" m0M.var)]) switchMod.sub
-  let switch' = switchMod {sub = sub', modules = modules, var = m0M.var, dim = m0M.dim}
+  let path    = inj "linear@%0 %1" [(show t), (show spd)]
+  let par     = fromFoldable [(Tuple "intrp" path)]
+  let switch' = switchMod {par=par, sub = sub', modules = modules, var = m0M.var, dim = m0M.dim}
 
   swid <- replaceModule ssRef rootId childN m0 (ImportModule switch')
   purgeModule ssRef m1 -- we assume this was imported previously, so it was imported again by replace
 
   -- create & import blending script
   parseAndImportScript ssRef pattern swid $ inj "finishSwitch delay:%0" [show spd]
-  parseAndImportScript ssRef pattern swid $ inj "ppath par:intrp path:linear spd:%0" [show spd]
 
   return unit
 
@@ -168,7 +169,7 @@ finishSwitch ssRef pRef self t rootId sRef = do
       -- this is pretty ghetto.  its for the dev ui
       when systemST.pauseAfterSwitch do
         lift $ modifySTRef ssRef (\s -> s {pauseAfterSwitch = false})
-        parseAndImportScript ssRef pattern parent "pause"
+        parseAndImportScript ssRef pattern parent "pause" -- TODO: ghetto
         return unit
 
       return true

@@ -5,8 +5,7 @@ CURRENT PROJECTS:
 
 	- script/path cleanup
 	  - STEPS
-		  - update path to new syntax
-			- give paths phases
+			- get rid of scriptPath
 			- use PathConfig objects
 
       - update scripts/remove pools, etc

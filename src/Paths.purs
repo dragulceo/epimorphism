@@ -59,16 +59,16 @@ parsePath dta = do
 getPathObj :: forall eff h. String -> EpiS eff h (Tuple (PathFunc eff h) PathConfig)
 getPathObj name = do
   case name of
-    "const" -> return $ Tuple cnst (PathConfig "")
-    "linear" -> return $ Tuple linear (PathConfig "")
-    "loop"   -> return $ Tuple loop (PathConfig "")
-    "smooth" -> return $ Tuple smooth (PathConfig "")
-    "wave"   -> return $ Tuple wave (PathConfig "")
-    "intrp"  -> return $ Tuple intrp (PathConfig "")
-    "linx"   -> return $ Tuple linx (PathConfig "")
-    "liny"   -> return $ Tuple liny (PathConfig "")
-    "circle" -> return $ Tuple circle (PathConfig "")
-    "rose"   -> return $ Tuple rose (PathConfig "")
+    "const"  -> return $ Tuple cnst (PathConfig "z")
+    "linear" -> return $ Tuple linear (PathConfig "t")
+    "loop"   -> return $ Tuple loop (PathConfig "mod t 1")
+    "smooth" -> return $ Tuple smooth (PathConfig "t * t * (3 - 2 * t)")
+    "wave"   -> return $ Tuple wave (PathConfig "a * cos(2.0 * pi * t) + b")
+    "intrp"  -> return $ Tuple intrp (PathConfig "(1-t) * z0 + t * z1")
+    "linx"   -> return $ Tuple linx (PathConfig "t + 0*i")
+    "liny"   -> return $ Tuple liny (PathConfig "t*i")
+    "circle" -> return $ Tuple circle (PathConfig "r * e^(2 * pi * i * t")
+    "rose"   -> return $ Tuple rose (PathConfig "(2.0 * pi * t) + (a * cos(b * t) + c) * i")
     -- ""   -> return $ Tuple (PFD ) (PathConfig "")
     _ -> throwError $ "unknown path: " ++ name
 
@@ -83,7 +83,6 @@ cnst t args = do
 
   z' <- cxFromStringE z
   return $ Tuple z' false
-
 
 linear :: forall eff h. PathFunc eff h
 linear t args = do
@@ -114,7 +113,7 @@ wave t args = do
   return $ Tuple z false
 
 
---  FUNCTIONS
+-- 2D FUNCTIONS
 intrp :: forall eff h. PathFunc eff h
 intrp t args = do
   z <- case args of
@@ -131,18 +130,15 @@ intrp t args = do
 
   return $ Tuple z (t >= 1.0)
 
-
 linx :: forall eff h. PathFunc eff h
 linx t args = do
   let z = outCartesian $ Cartesian t 0.0
   return $ Tuple z false
 
-
 liny :: forall eff h. PathFunc eff h
 liny t args = do
   let z = outCartesian $ Cartesian 0.0 t
   return $ Tuple z false
-
 
 circle :: forall eff h. PathFunc eff h
 circle t args = do
@@ -153,7 +149,6 @@ circle t args = do
     _ -> throwError "invalid arguments for circle"
 
   return $ Tuple z false
-
 
 rose :: forall eff h. PathFunc eff h
 rose t args = do

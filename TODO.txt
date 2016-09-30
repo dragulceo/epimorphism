@@ -5,8 +5,6 @@ CURRENT PROJECTS:
 
 	- script/path cleanup
 	  - STEPS
-			- use PathConfig objects
-
       - update scripts/remove pools, etc
 
     - paths & scripts live as strings

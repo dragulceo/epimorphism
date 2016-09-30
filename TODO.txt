@@ -5,7 +5,6 @@ CURRENT PROJECTS:
 
 	- script/path cleanup
 	  - STEPS
-			- get rid of scriptPath
 			- use PathConfig objects
 
       - update scripts/remove pools, etc
@@ -15,11 +14,6 @@ CURRENT PROJECTS:
 
 		- default path & script objs
 
-    - new path
-		  - serialized as - var: path@phase n0 n1 n2 n3 ...
-      - returns value / whether the path should be removed
-			- internal state = phase
-			- dont ever need to update state
 		- new scripts
 			- script@phase d0:s0 d1:s1 ...,
 			- returns true(+new rootId, etc) if should recompile

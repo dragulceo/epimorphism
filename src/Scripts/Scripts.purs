@@ -2,13 +2,17 @@ module Scripts where
 
 import Prelude
 import Config (ScriptFn)
-import Control.Monad.Except.Trans (lift)
+import Control.Monad.Except.Trans (throwError, lift)
 import Control.Monad.ST (modifySTRef, readSTRef)
+import Data.Array (updateAt, index)
+import Data.Complex (inPolar, Polar(Polar))
+import Data.Maybe (fromMaybe, Maybe(Just))
 import Data.StrMap (insert, member)
+import Math (max, round)
 import Pattern (purgeScript)
 import ScriptUtil (parseAndImportScript)
 import System (loadLib)
-import Util (inj, numFromStringE, clickPause)
+import Util (cxFromStringE, intFromStringE, inj, numFromStringE, clickPause)
 
 -- get rid of this abomination
 pause :: forall eff h. ScriptFn eff h
@@ -53,5 +57,56 @@ randomize ssRef pRef self t mid sRef = do
 
       return unit
     _ -> return unit
+
+  return false
+
+
+
+-- increment Zn
+incZn :: forall eff h. ScriptFn eff h
+incZn ssRef pRef self t mid sRef = do
+  systemST <- lift $ readSTRef ssRef
+  pattern  <- lift $ readSTRef pRef
+
+  scr <- lift $ readSTRef sRef
+  let dt = scr.dt
+
+  mRef <- loadLib mid systemST.moduleRefPool "incZn module"
+  mod  <- lift $ readSTRef mRef
+
+  idx <- (loadLib "idx" dt "incZn idx") >>= intFromStringE
+  ofs <-  loadLib "ofs" dt "incZn ofs"
+
+  z <- case (index mod.zn idx) of
+    Just z' -> cxFromStringE z'
+    _ -> throwError "index out of bounds - incZn"
+
+  (Polar fromTh fromR) <- return $ inPolar z
+
+  let incR = 0.1
+  let incTh = 3.1415926535 / 4.0
+
+  (Polar toTh toR) <- case ofs of
+    "1" -> do
+      let new = max ((round (fromR / incR + 1.0)) * incR) 0.0
+      return $ (Polar fromTh new)
+    "-1" -> do
+      let new = max ((round (fromR / incR - 1.0)) * incR) 0.0
+      return $ (Polar fromTh new)
+    "i" -> do
+      let new = (round (fromTh / incTh + 1.0)) * incTh
+      return $ (Polar new fromR)
+    "-i" -> do
+      let new = (round (fromTh / incTh - 1.0)) * incTh
+      return $ (Polar new fromR)
+    _ -> throwError "offset should be +-1 or +-i"
+
+  let path = inj "intrp@%0 4.0 %1 %2 %3 %4" [(show $ t + scr.tPhase), (show fromR), (show fromTh), (show toR), (show toTh)]
+
+  let zn' = fromMaybe mod.zn (updateAt idx path mod.zn)
+  lift $ modifySTRef mRef (\m -> m {zn = zn'})
+
+  -- remove self
+  purgeScript ssRef mid self
 
   return false

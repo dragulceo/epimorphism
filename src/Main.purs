@@ -182,7 +182,7 @@ flattenParZn systemST (Tuple par zn) mid = do
       when remove do -- replace with constant
         m <- lift $ readSTRef mRef
         let idx = fromJust $ elemIndex val m.zn
-        let zn' = fromJust $ updateAt idx (show val) m.zn
+        let zn' = fromJust $ updateAt idx (show res) m.zn
         lift $ modifySTRef mRef (\m' -> m' {zn = zn'})
         return unit
       return res

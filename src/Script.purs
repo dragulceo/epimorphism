@@ -7,19 +7,14 @@ import Control.Monad.ST (STRef, readSTRef)
 import Data.Foldable (or)
 import Data.StrMap (member)
 import Data.Traversable (traverse)
-import ScriptPaths (incZn, zpath, ppath, zfix, pfix)
+import Scripts (incZn, randomize, pause)
 import Switch (switch, finishSwitch)
-import Scripts (randomize, pause)
 import System (mSeq, loadLib)
 
 -- find script fuction given name
 lookupScriptFN :: forall eff h. String -> EpiS eff h (ScriptFn eff h)
 lookupScriptFN n = case n of
   "null"         -> return nullS
-  "zfix"         -> return zfix
-  "pfix"         -> return pfix
-  "ppath"        -> return ppath
-  "zpath"        -> return zpath
   "switch"       -> return switch
   "incZn"        -> return incZn
   "finishSwitch" -> return finishSwitch

@@ -1,7 +1,7 @@
 module Command where
 
 import Prelude
-import Config (scriptSchema, Schema, patternSchema, moduleSchema, EpiS, Pattern, SystemST, SystemConf, EngineST, EngineConf, UIST, UIConf)
+import Config ( Schema, patternSchema, moduleSchema, EpiS, Pattern, SystemST, SystemConf, EngineST, EngineConf, UIST, UIConf)
 import Control.Monad (when, unless)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
@@ -20,7 +20,6 @@ import Engine (setShaders, initEngineST, clearFB)
 import Graphics.Canvas (Canvas)
 import Layout (updateLayout, initLayout)
 import Pattern (findModule)
-import ScriptUtil (parseAndImportScript)
 import Serialize (unsafeSerialize)
 import System (loadLib)
 import Util (halt, Now, cxFromStringE, intFromStringE, numFromStringE, lg, uuid, handleError)
@@ -57,17 +56,17 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         lift $ modifySTRef ssRef (\s -> s {pauseAfterSwitch = true})
         return unit
       "killScripts" -> do
-        lift $ modifySTRef ssRef (\s -> s {scriptRefPool = empty})
-        let upd = (\r -> lift $ modifySTRef r (\m -> m {scripts = []}))
-        traverse upd (values systemST.moduleRefPool)
+        --lift $ modifySTRef ssRef (\s -> s {scriptRefPool = empty})
+        --let upd = (\r -> lift $ modifySTRef r (\m -> m {scripts = []}))
+        --traverse upd (values systemST.moduleRefPool)
 
         return unit
       "scr" -> do
-        when (length args >= 2) do -- check for errors here
-          let addr = fromJust $ head args
-          let rst = fromJust $ tail args
-
-          parseAndImportScript ssRef pattern addr (joinWith " " rst)
+        --when (length args >= 2) do -- check for errors here
+        --  let addr = fromJust $ head args
+        --  let rst = fromJust $ tail args
+        --
+        --  parseAndImportScript ssRef pattern addr (joinWith " " rst)
           return unit
       "setP" -> do
         case args of
@@ -178,11 +177,7 @@ save systemST pattern = do
   mods <- (traverse (serializeTup moduleSchema) $ fromList $ toList systemST.moduleRefPool) :: EpiS eff h (Array String)
   let mres = joinWith "\n\n" mods
 
-  -- scripts
-  scrs <- (traverse (serializeTup scriptSchema) $ fromList $ toList systemST.scriptRefPool) :: EpiS eff h (Array String)
-  let sres = joinWith "\n\n" scrs
-
-  let res = "#PATTERN\n" ++ ps ++ "\n\n#MODULES\n" ++ mres ++ "\n\n#SCRIPTS\n" ++ sres
+  let res = "#PATTERN\n" ++ ps ++ "\n\n#MODULES\n" ++ mres
   let a = lg res
 
   lift $ saveCanvas

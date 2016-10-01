@@ -1,7 +1,8 @@
 module System where
 
 import SLibrary
-import Config (EpiS, scriptSchema, moduleSchema, patternSchema, systemConfSchema, uiConfSchema, engineConfSchema, Schema, Epi, SystemST, defaultSystemST)
+import Prelude ((==), ($), not, (&&), (++), return, bind)
+import Config (EpiS, moduleSchema, patternSchema, systemConfSchema, uiConfSchema, engineConfSchema, Schema, Epi, SystemST, defaultSystemST)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (readSTRef, STRef)
@@ -16,7 +17,6 @@ import Data.StrMap (member, values, empty, insert, fold, lookup, StrMap)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple)
 import Library (parseLib)
-import Prelude (show, (==), ($), not, (&&), (++), return, bind)
 import Util (stick, lg, urlGet)
 
 data DataSource = LocalHTTP | LocalStorage | RemoteDB
@@ -30,7 +30,6 @@ initSystemST host = do
   engineConfLib <- buildLib engineConfSchema $ host ++ "/lib/engine_conf.lib"
   uiConfLib     <- buildLib uiConfSchema     $ host ++ "/lib/ui_conf.lib"
   moduleLib     <- buildLib moduleSchema     $ host ++ "/lib/modules.lib"
-  scriptLib     <- buildLib scriptSchema     $ host ++ "/lib/scripts.lib"
   patternLib    <- buildLib patternSchema    $ host ++ "/lib/patterns.lib"
 
   componentLib  <- buildSLib buildComponent  $ host ++ "/lib/components.slib"
@@ -41,7 +40,6 @@ initSystemST host = do
     , engineConfLib = engineConfLib
     , uiConfLib     = uiConfLib
     , moduleLib     = moduleLib
-    , scriptLib     = scriptLib
     , patternLib    = patternLib
     , componentLib  = componentLib
     , indexLib      = indexLib

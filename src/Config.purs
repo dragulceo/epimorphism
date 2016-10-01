@@ -52,11 +52,9 @@ type SystemST h = {
   , engineConfLib :: StrMap EngineConf
   , patternLib :: StrMap Pattern
   , moduleLib :: StrMap Module
-  , scriptLib :: StrMap Script
   , componentLib :: StrMap Component
   , indexLib :: StrMap Index
   , moduleRefPool :: StrMap (STRef h Module)
-  , scriptRefPool :: StrMap (STRef h Script)
 }
 
 defaultSystemST :: forall h. SystemST h
@@ -74,8 +72,6 @@ defaultSystemST = {
   , patternLib: empty
   , moduleLib: empty
   , moduleRefPool: empty
-  , scriptLib: empty
-  , scriptRefPool: empty
   , componentLib: empty
   , indexLib: empty
 }
@@ -207,24 +203,14 @@ patternSchema = [
 ]
 
 -- Script
--- sys -> self(name) -> time -> module -> self(ref) -> recompile
-type ScriptFn eff h = STRef h (SystemST h) -> STRef h Pattern -> String -> Number -> String -> STRef h Script -> EpiS eff h Boolean
-type Script = {
-    fn     :: String
-  , dt     :: StrMap String
-  , flags  :: Set String
-  , props  :: StrMap String
-  , tPhase :: Number
-}
+-- sys -> idx -> time -> module -> args -> res
+type ScriptFn eff h = STRef h (SystemST h) -> Int -> Number -> String -> StrMap String -> EpiS eff h ScriptRes
 
-scriptSchema :: Schema
-scriptSchema = [
-  SchemaEntry SE_St "fn",
-  SchemaEntry SE_M_St "dt",
-  SchemaEntry SE_S "flags",
-  SchemaEntry SE_M_St "props",
-  SchemaEntry SE_N "tPhase"
-]
+data ScriptConfig = ScriptConfig String
+data ScriptRes = ScriptRes Boolean Boolean -- compile, update obj
+data Script = Script String Number (StrMap String)
+
+
 
 --SLib
 type Component = {

@@ -1,16 +1,16 @@
 module Console where
 
 import Prelude
-import Config (Script, scriptSchema, EpiS, moduleSchema, Module, Pattern, SystemST, UIST, UIConf)
+import Config (EpiS, moduleSchema, Module, Pattern, SystemST, UIST, UIConf)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (throwError)
-import Control.Monad.ST (readSTRef, STRef)
+import Control.Monad.ST (readSTRef)
 import Control.Monad.Trans (lift)
-import Data.Array (index, (!!), length, (..), (:), filter, partition)
+import Data.Array ((!!), length, (..), (:), filter, partition)
 import Data.DOM.Simple.Element (setInnerHTML)
-import Data.Maybe (fromMaybe, Maybe(Just, Nothing))
+import Data.Maybe (Maybe(Just, Nothing))
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (foldM, StrMap)
+import Data.StrMap (StrMap)
 import Data.String (joinWith, trim, split, replace)
 import Data.String.Regex (match, noFlags, regex)
 import Data.Traversable (traverse)
@@ -31,24 +31,7 @@ renderConsole uiConf uiST systemST pattern = do
   str1 <- renderModule systemST uiConf.uiCompLib pattern.disp "DISP" Nothing
   lift $ setInnerHTML str1 dsdDiv
 
-  dssDiv <- findElt "debugScripts"
-  str2 <- serializeScripts systemST.scriptRefPool
-  lift $ setInnerHTML ("<span style='color:pink'>SCRIPTS:</span>\n" ++ str2) dssDiv
-
   lift $ addEventListeners
-
-
--- serialize scripts for debug view
-serializeScripts :: forall eff h. StrMap (STRef h Script) -> EpiS eff h String
-serializeScripts pool = do
-  foldM handle "" pool
-  where
-    handle res k sRef = do
-      scr <- lift $ readSTRef sRef
-      let title = ("<span style='color:blue;font-weight:bold;'>" ++ k ++ "</span>")
-      str <- unsafeSerialize scriptSchema (Just title) scr
-      return $ str ++ "<br/><br/>" ++ res
-
 
 -- serializes the modRefPool into an html string for debugging.  shitcode
 renderModule :: forall eff h. SystemST h -> String -> String -> String -> Maybe String -> EpiS eff h String
@@ -175,19 +158,20 @@ renderModule systemST modLib mid title pid = do
               let ui = inj "<span class='consoleUI' style='display:none;'>zn [%0]</span>" [uiCts]
               return $ "\n<span class='consoleUI'>" ++ line ++ "</span>" ++ ui
             "scripts" -> do
-              let rgx' = regex "^\\[(.*)\\]$" noFlags
-              case (match rgx' m1) of
-                (Just [(Just _), (Just cts)]) -> do
-                  let cmp = map trim $ split "," cts
-                  cmp' <- flip traverse cmp \sid -> do
-                    sRef <- loadLib sid systemST.scriptRefPool "console script"
-                    scr <- lift $ readSTRef sRef
-                    return scr.fn
-                  let res' = joinWith ", " cmp'
-                  let ui = inj "\n<span>scripts [%0]</span>" [res']
-                  return $ (inj "<span class='extraData'>\nscriptIds [%0] </span>" [cts]) ++ ui
-
-                _ -> throwError "invalid scripts ["
+              return m1
+              --let rgx' = regex "^\\[(.*)\\]$" noFlags
+              --case (match rgx' m1) of
+              --  (Just [(Just _), (Just cts)]) -> do
+              --    let cmp = map trim $ split "," cts
+              --    cmp' <- flip traverse cmp \sid -> do
+              --      sRef <- loadLib sid systemST.scriptRefPool "console script"
+              --      scr <- lift $ readSTRef sRef
+              --      return scr.fn
+              --    let res' = joinWith ", " cmp'
+              --    let ui = inj "\n<span>scripts [%0]</span>" [res']
+              --    return $ (inj "<span class='extraData'>\nscriptIds [%0] </span>" [cts]) ++ ui
+              --
+              --  _ -> throwError "invalid scripts ["
             _ -> return $ "\n" ++ line
         _ ->
           return $ "<span class='extraData'>\n" ++ line ++ "</span>"

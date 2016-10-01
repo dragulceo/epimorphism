@@ -59,6 +59,7 @@ NEXT PROJECTS:
   - async asset loading?
 	  - what do we do when we dont have the asset yet?
 		- which images are loaded (also, clean up main)?
+		- load small images to start, bigger images when needed?
 
   - release?
     - kickstarter for audio responsiveness?

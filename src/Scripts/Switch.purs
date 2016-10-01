@@ -1,7 +1,7 @@
 module Switch where
 
 import Prelude
-import Config (Pattern, Module, ScriptFn, EpiS, SystemST)
+import Config (ScriptRes(ScriptRes), Module, ScriptFn, EpiS, SystemST)
 import Control.Monad (when)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
@@ -11,17 +11,15 @@ import Data.Maybe (fromMaybe)
 import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (insert, fromFoldable, union)
 import Data.Tuple (Tuple(..))
-import Pattern (purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule, purgeScript)
-import ScriptUtil (parseAndImportScript)
+import Pattern (purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
 import System (loadLib, family)
 import Util (intFromStringE, lg, inj, randInt, numFromStringE, gmod)
 
 
 switch :: forall eff h. ScriptFn eff h
-switch ssRef pRef scrId t modId scrRef = do
+switch ssRef idx t modId dt = do
   systemST <- lift $ readSTRef ssRef
-  scr <- lift $ readSTRef scrRef
-  let dt = scr.dt
+
   spd <- (loadLib "spd" dt "switch spd") >>= numFromStringE
 
   -- get the root, name of child & id of child to be switched
@@ -63,7 +61,7 @@ switch ssRef pRef scrId t modId scrRef = do
     x -> throwError $ "invalid 'by' for switch, must be query | val : " ++ x
 
   -- import new module
-  purgeScript ssRef modId scrId
+  --purgeScript ssRef modId scrId
   let nxtN = if (op == "load") then name else modId
   nxtId <- importModule ssRef (ImportRef nxtN)
   systemST' <- lift $ readSTRef ssRef
@@ -79,9 +77,9 @@ switch ssRef pRef scrId t modId scrRef = do
     return unit
 
   -- switch! (should we inline this?)
-  switchModules ssRef pRef (t + scr.tPhase) rootId childN nxtId spd
+  --switchModules ssRef pRef (t + scr.tPhase) rootId childN nxtId spd
 
-  return true
+  return (ScriptRes true false)
 
 
 getMutator :: forall eff h. String -> String -> String -> EpiS eff h (Module -> Module)
@@ -107,10 +105,9 @@ getMutator mut idx name  = do
 
 -- should check if dim & var are the same across m0 & m1
 -- m1 is a reference id(we assume also that it was previously imported & floating)
-switchModules :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> Number -> String -> String -> String -> Number -> EpiS eff h Unit
-switchModules ssRef pRef t rootId childN m1 spd = do
+switchModules :: forall eff h. STRef h (SystemST h) -> Number -> String -> String -> String -> Number -> EpiS eff h Unit
+switchModules ssRef t rootId childN m1 spd = do
   systemST <- lift $ readSTRef ssRef
-  pattern  <- lift $ readSTRef pRef
 
   mRef  <- loadLib rootId systemST.moduleRefPool "switch module"
   m     <- lift $ readSTRef mRef
@@ -130,22 +127,18 @@ switchModules ssRef pRef t rootId childN m1 spd = do
   let par     = fromFoldable [(Tuple "intrp" path)]
   let switch' = switchMod {par=par, sub = sub', modules = modules, var = m0M.var, dim = m0M.dim}
 
-  swid <- replaceModule ssRef rootId childN m0 (ImportModule switch')
+  --swid <- replaceModule ssRef rootId childN m0 (ImportModule switch')
   purgeModule ssRef m1 -- we assume this was imported previously, so it was imported again by replace
 
   -- create & import blending script
-  parseAndImportScript ssRef pattern swid $ inj "finishSwitch delay:%0" [show spd]
+  --parseAndImportScript ssRef pattern swid $ inj "finishSwitch delay:%0" [show spd]
 
   return unit
 
 
 finishSwitch :: forall eff h. ScriptFn eff h
-finishSwitch ssRef pRef self t rootId sRef = do
+finishSwitch ssRef idx t rootId dt = do
   systemST <- lift $ readSTRef ssRef
-  pattern  <- lift $ readSTRef pRef
-
-  scr <- lift $ readSTRef sRef
-  let dt = scr.dt
 
   -- get data
   delay <- (loadLib "delay" dt "finishSwitch delay") >>= numFromStringE
@@ -169,9 +162,9 @@ finishSwitch ssRef pRef self t rootId sRef = do
       -- this is pretty ghetto.  its for the dev ui
       when systemST.pauseAfterSwitch do
         lift $ modifySTRef ssRef (\s -> s {pauseAfterSwitch = false})
-        parseAndImportScript ssRef pattern parent "pause" -- TODO: ghetto
+        --parseAndImportScript ssRef pattern parent "pause" -- TODO: ghetto
         return unit
 
-      return true
+      return (ScriptRes true false)
     _ -> do
-      return false
+      return (ScriptRes false false)

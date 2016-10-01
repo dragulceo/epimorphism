@@ -11,7 +11,7 @@ import Data.StrMap (insert, member)
 import Math (max, round)
 import ScriptUtil (addScript, purgeScript)
 import System (loadLib)
-import Util (cxFromStringE, intFromStringE, inj, numFromStringE, clickPause)
+import Util (lg, cxFromStringE, intFromStringE, inj, numFromStringE, clickPause)
 
 -- get rid of this abomination
 pause :: forall eff h. ScriptFn eff h
@@ -21,41 +21,6 @@ pause ssRef t mid idx dt = do
   lift $ clickPause
   purgeScript systemST mid idx
   return $ ScriptRes false Nothing
-
-
-randomize :: forall eff h. ScriptFn eff h
-randomize ssRef t mid idx dt = do
-  systemST <- lift $ readSTRef ssRef
-
-  dly <- (loadLib "dly" dt "randomComponent") >>= numFromStringE
-  spd <-  loadLib "spd" dt "randomComponent"
-  lib <-  loadLib "lib" dt "randomComponent"
-  sub <-  loadLib "sub" dt "randomComponent"
-  typ <-  loadLib "typ" dt "randomComponent"
-
-  nxt <- case (member "nxt" dt) of
-    false -> return t
-    true  -> (loadLib "nxt" dt "randomMain1 nxt") >>= numFromStringE
-
-  -- next iteration
-  update <- case t of
-    t | t >= nxt -> do
-      --let a = lg "ITERATE COMPONENT"
-      case typ of
-        "mod" -> do
-          let args = inj "childN:%0 op:load by:query typ:mod query:%1 accs:rand spd:%2" [sub, lib, spd]
-          addScript systemST mid "switch" args
-        _ -> do
-          let args = inj "mut:%0 idx:%1 op:clone by:query typ:idx query:%2 accs:rand spd:%3" [typ, sub, lib, spd]
-          addScript systemST mid "switch" args
-
-      let dt' = insert "nxt" (show (t + dly)) dt
-      return $ Just dt'
-    _ -> return Nothing
-
-  return $ ScriptRes false update
-
-
 
 -- increment Zn
 incZn :: forall eff h. ScriptFn eff h
@@ -102,3 +67,40 @@ incZn ssRef t mid idx dt = do
   purgeScript systemST mid idx
 
   return $ ScriptRes false Nothing
+
+
+randomize :: forall eff h. ScriptFn eff h
+randomize ssRef t mid idx dt = do
+  systemST <- lift $ readSTRef ssRef
+
+  dly <- (loadLib "dly" dt "randomComponent") >>= numFromStringE
+  spd <-  loadLib "spd" dt "randomComponent"
+  lib <-  loadLib "lib" dt "randomComponent"
+  sub <-  loadLib "sub" dt "randomComponent"
+  typ <-  loadLib "typ" dt "randomComponent"
+
+  let a = lg $ member "nxt" dt
+
+  nxt <- case (member "nxt" dt) of
+    false -> return t
+    true  -> (loadLib "nxt" dt "randomMain1 nxt") >>= numFromStringE
+
+  -- next iteration
+  update <- case t of
+    t | t >= nxt -> do
+      --let a = lg "ITERATE COMPONENT"
+      case typ of
+        "mod" -> do
+          let args = inj "childN:%0 op:load by:query typ:mod query:%1 accs:rand spd:%2" [sub, lib, spd]
+          addScript systemST mid "switch" args
+          --return unit
+        _ -> do
+          let args = inj "mut:%0 idx:%1 op:clone by:query typ:idx query:%2 accs:rand spd:%3" [typ, sub, lib, spd]
+          --addScript systemST mid "switch" args
+          return unit
+
+      let dt' = insert "nxt" (show (t + dly)) dt
+      return $ Just dt'
+    _ -> return Nothing
+
+  return $ ScriptRes false update

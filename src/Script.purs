@@ -5,10 +5,11 @@ import Config (Script(Script), ScriptRes(ScriptRes), Pattern, SystemST, ScriptFn
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (readSTRef, STRef)
 import Control.Monad.Trans (lift)
-import Data.Array (elemIndex, updateAt, length, (..), zip)
+import Data.Array (length, elemIndex, updateAt, (..), zip)
 import Data.Foldable (or)
 import Data.Maybe (Maybe(Just))
 import Data.Maybe.Unsafe (fromJust)
+import Data.StrMap (keys, member)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
 import ScriptUtil (serializeScript, parseScript)
@@ -56,16 +57,17 @@ runScript ssRef mid scr = do
   fn <- lookupScriptFN name
   let t' = systemST.t - phase
 
-  mRef <- loadLib mid systemST.moduleRefPool "mid! runScript"
-  m <- lift $ readSTRef mRef
-
-  case (mem) of
-    Just idx -> do
+  case (member mid systemST.moduleRefPool) of
+    true -> do
+      mRef <- loadLib mid systemST.moduleRefPool "mid! runScript"
+      m <- lift $ readSTRef mRef
+      let a = lg $ length m.scripts
+      idx <- return $ fromJust $ elemIndex scr m.scripts
       (ScriptRes recompile update) <- fn ssRef t' mid idx args
       case update of
         Just dt -> do
           let new = serializeScript (Script name phase dt)
-          let a = lg idx
+          let a = lg new
           mUp systemST mid \m ->
             m {scripts = fromJust $ updateAt idx new m.scripts}
           return unit

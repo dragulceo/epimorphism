@@ -4,6 +4,8 @@ flags {root}
 component disp
 modules {post: post_id}
 
+--disp_id2 < disp_id
+scripts [randomize dly:75 spd:0.4 lib:post_main dim:vec4 sub:post typ:mod]
 
 --disp_main3 < disp_id
 modules {post: post_hlim_anim2}

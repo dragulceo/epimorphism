@@ -29,7 +29,6 @@ parsePath :: forall eff h. String -> EpiS eff h (Path eff h)
 parsePath dta = do
   let dta' = split " " $ trim dta
 
-  --let a = lg dta'
   {head: name, tail: allargs} <- case (cxFromString dta) of
     Just (Tuple r i) -> do
       return {head: "const", tail: ["0.0", show $ outCartesian (Cartesian r i)]}

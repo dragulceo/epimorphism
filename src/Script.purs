@@ -33,7 +33,6 @@ lookupScriptFN n = case n of
 -- execute all scripts & script pool.  NOTE.  If a script updates the module tree, this isn't reflected until the next time all the scripts are run
 runScripts :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Boolean
 runScripts ssRef pRef = do
-  --let a = lg "RUNNING SCRIPTS:"
   pattern <- lift $ readSTRef pRef
   r0 <- mSeq ssRef (runModScripts ssRef) pattern.main
   r1 <- mSeq ssRef (runModScripts ssRef) pattern.disp
@@ -48,11 +47,6 @@ runModScripts ssRef mid = do
   mRef <- loadLib mid systemST.moduleRefPool "mid! runScripts"
   m <- lift $ readSTRef mRef
 
-  case (length m.scripts) of
-    0 -> return unit
-    _ -> do
-      --let a = lg $ "executing scripts for: " ++ mid
-      return unit
   res <- traverse (runScript ssRef mid) m.scripts
   return $ or res
 
@@ -67,22 +61,17 @@ runScript ssRef mid scr = do
   case (member mid systemST.moduleRefPool) of
     true -> do
       mRef <- loadLib mid systemST.moduleRefPool "mid! runScript"
-      m <- lift $ readSTRef mRef
-      --let a = lg $ length m.scripts
-      idx <- return $ fromJust $ elemIndex scr m.scripts
-      --let a = lg $ "idx: " ++ (show idx)
-      --let a = lg $ "name: " ++ (show name)
+      m    <- lift $ readSTRef mRef
+      idx  <- return $ fromJust $ elemIndex scr m.scripts
       (ScriptRes recompile update) <- fn ssRef t' mid idx args
+
       case update of
         Just dt -> do
           let new = serializeScript (Script name phase dt)
-          --let a = lg $ "new: " ++ new
-          --let a = lg $ "at: " ++ (show idx)
-          m' <- lift $ readSTRef mRef
-          --let a = lg $ "curlen: " ++ (show $ length m'.scripts)
-          --let b = lg m'.scripts
+          m'        <- lift $ readSTRef mRef
           systemST' <- lift $ readSTRef ssRef
-          idx' <- return $ fromJust $ elemIndex scr m'.scripts
+          idx'      <- return $ fromJust $ elemIndex scr m'.scripts
+
           mUp systemST' mid \m1 ->
             m1 {scripts = fromJust $ updateAt idx' new m1.scripts}
           return unit

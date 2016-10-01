@@ -10,6 +10,7 @@ import Data.StrMap (toList, StrMap, insert, empty)
 import Data.String (joinWith, trim, split)
 import Data.Tuple (Tuple(Tuple))
 import System (mUp)
+import Text.Format (format, precision)
 import Util (lg, inj, numFromStringE)
 
 addScript :: forall eff h. SystemST h -> String -> String -> String -> EpiS eff h Unit
@@ -51,7 +52,7 @@ parseScript dta = do
 
 serializeScript :: Script -> String
 serializeScript (Script name phase args) =
-  inj "%0@%1 %2" [name, (show phase), (serializeArgs args)]
+  inj "%0@%1 %2" [name, (format (precision 2) phase), (serializeArgs args)]
   where
     serializeArgs :: StrMap String -> String
     serializeArgs args = joinWith " " $ fromList $ map (\(Tuple k v) -> k ++ ":" ++ v) (toList args)

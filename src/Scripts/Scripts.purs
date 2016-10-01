@@ -83,14 +83,9 @@ randomize ssRef t mid idx dt = do
   sub <-  loadLib "sub" dt "randomComponent"
   typ <-  loadLib "typ" dt "randomComponent"
 
-  -- let a = lg $ member "nxt" dt
-
   nxt <- case (member "nxt" dt) of
     false -> return t
     true  -> (loadLib "nxt" dt "randomMain1 nxt") >>= numFromStringE
-
-  --let a = lg $ "t: " ++ (show t)
-  --let a = lg $ "nxt: " ++ (show nxt)
 
   -- next iteration
   update <- case t of

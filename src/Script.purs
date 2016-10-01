@@ -52,10 +52,10 @@ runScript :: forall eff h. STRef h (SystemST h) -> String -> (Tuple String Int) 
 runScript ssRef mid (Tuple scr idx) = do
   (Script name phase args) <- parseScript scr
   systemST <- lift $ readSTRef ssRef
-  fn   <- lookupScriptFN name
+  fn <- lookupScriptFN name
   let t' = systemST.t - phase
 
-  (ScriptRes recompile update) <- fn ssRef idx t' mid args
+  ScriptRes recompile <- fn ssRef idx t' mid args
   return recompile
 
 

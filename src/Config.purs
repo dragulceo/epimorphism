@@ -207,7 +207,7 @@ patternSchema = [
 type ScriptFn eff h = STRef h (SystemST h) -> Int -> Number -> String -> StrMap String -> EpiS eff h ScriptRes
 
 data ScriptConfig = ScriptConfig String
-data ScriptRes = ScriptRes Boolean Boolean -- compile, update obj
+data ScriptRes = ScriptRes Boolean -- compile
 data Script = Script String Number (StrMap String)
 
 

@@ -1,11 +1,10 @@
 module System where
 
 import SLibrary
-import Prelude ((==), ($), not, (&&), (++), return, bind)
-import Config (EpiS, moduleSchema, patternSchema, systemConfSchema, uiConfSchema, engineConfSchema, Schema, Epi, SystemST, defaultSystemST)
+import Config (Module, EpiS, moduleSchema, patternSchema, systemConfSchema, uiConfSchema, engineConfSchema, Schema, Epi, SystemST, defaultSystemST)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
-import Control.Monad.ST (readSTRef, STRef)
+import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Data.Array (concat, (:), sort, snoc)
 import Data.Either (Either(..))
 import Data.Foldable (foldl)
@@ -17,6 +16,7 @@ import Data.StrMap (member, values, empty, insert, fold, lookup, StrMap)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple)
 import Library (parseLib)
+import Prelude (unit, Unit, (==), ($), not, (&&), (++), return, bind)
 import Util (stick, lg, urlGet)
 
 data DataSource = LocalHTTP | LocalStorage | RemoteDB
@@ -108,3 +108,9 @@ mSeq ssRef f mid = do
       vC <- traverse (mSeq ssRef f) (values m.modules)
       return $ v0 : (concat $  fromList vC)
     false -> return [v0]
+
+mUp :: forall eff h. SystemST h -> String -> (Module -> Module) -> EpiS eff h Unit
+mUp systemST mid func = do
+  mRef <- loadLib mid systemST.moduleRefPool "mUp"
+  lift $ modifySTRef mRef (\m -> func m)
+  return unit

@@ -1,18 +1,18 @@
 module Command where
 
 import Prelude
-import Config ( Schema, patternSchema, moduleSchema, EpiS, Pattern, SystemST, SystemConf, EngineST, EngineConf, UIST, UIConf)
+import Config (Schema, patternSchema, moduleSchema, EpiS, Pattern, SystemST, SystemConf, EngineST, EngineConf, UIST, UIConf)
 import Control.Monad (when, unless)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
-import Data.Array (updateAt, length, head, tail)
+import Data.Array (cons, updateAt, length, head, tail)
 import Data.List (fromList)
 import Data.Maybe (Maybe(Just))
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (values, empty, insert, toList)
+import Data.StrMap (values, insert, toList)
 import Data.String (joinWith, split)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
@@ -21,7 +21,7 @@ import Graphics.Canvas (Canvas)
 import Layout (updateLayout, initLayout)
 import Pattern (findModule)
 import Serialize (unsafeSerialize)
-import System (loadLib)
+import System (mUp, loadLib)
 import Util (halt, Now, cxFromStringE, intFromStringE, numFromStringE, lg, uuid, handleError)
 
 foreign import saveCanvas :: forall eff. Eff eff Unit
@@ -56,27 +56,26 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         lift $ modifySTRef ssRef (\s -> s {pauseAfterSwitch = true})
         return unit
       "killScripts" -> do
-        --lift $ modifySTRef ssRef (\s -> s {scriptRefPool = empty})
-        --let upd = (\r -> lift $ modifySTRef r (\m -> m {scripts = []}))
-        --traverse upd (values systemST.moduleRefPool)
+        let upd = (\r -> lift $ modifySTRef r (\m -> m {scripts = []}))
+        traverse upd (values systemST.moduleRefPool)
 
         return unit
       "scr" -> do
-        --when (length args >= 2) do -- check for errors here
-        --  let addr = fromJust $ head args
-        --  let rst = fromJust $ tail args
-        --
-        --  parseAndImportScript ssRef pattern addr (joinWith " " rst)
+        when (length args >= 2) do -- check for errors here
+          let addr = fromJust $ head args
+          let rst = fromJust $ tail args
+          mid <- findModule systemST.moduleRefPool pattern addr true
+          mUp systemST mid \m ->
+            m {scripts = cons (joinWith " " rst) m.scripts}
+
           return unit
       "setP" -> do
         case args of
           [addr, par, val] -> do
             val' <- numFromStringE val
             mid  <- findModule systemST.moduleRefPool pattern addr true
-            mRef <- loadLib mid systemST.moduleRefPool "find module - setP"
-            mod  <- lift $ readSTRef mRef
-            let par' = insert par (show val') mod.par
-            lift $ modifySTRef mRef (\m -> m {par = par'})
+            mUp systemST mid \m ->
+              m {par = insert par (show val') m.par}
 
             return unit
           _ -> throwError "invalid format: setP addr par val"
@@ -99,10 +98,8 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
       "setT" -> do
         let tExp = joinWith "" args
         mid <- findModule systemST.moduleRefPool pattern "main.application.t.t_inner" true
-        mRef <- loadLib mid systemST.moduleRefPool "find module - setT"
-        mod <- lift $ readSTRef mRef
-        let sub' = insert "t_expr" tExp mod.sub
-        lift $ modifySTRef mRef (\m -> m {sub = sub'})
+        mUp systemST mid \m ->
+          m {sub = insert "t_expr" tExp m.sub}
         setShaders systemConf engineConf esRef systemST pattern
 
         return unit

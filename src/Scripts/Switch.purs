@@ -79,7 +79,7 @@ switch ssRef idx t modId dt = do
   -- switch! (should we inline this?)
   --switchModules ssRef pRef (t + scr.tPhase) rootId childN nxtId spd
 
-  return (ScriptRes true false)
+  return $ ScriptRes true
 
 
 getMutator :: forall eff h. String -> String -> String -> EpiS eff h (Module -> Module)
@@ -165,6 +165,6 @@ finishSwitch ssRef idx t rootId dt = do
         --parseAndImportScript ssRef pattern parent "pause" -- TODO: ghetto
         return unit
 
-      return (ScriptRes true false)
+      return $ ScriptRes true
     _ -> do
-      return (ScriptRes false false)
+      return $ ScriptRes false

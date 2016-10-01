@@ -17,7 +17,7 @@ pause :: forall eff h. ScriptFn eff h
 pause ssRef idx t rootId dt = do
   lift $ clickPause
   --purgeScript ssRef rootId self
-  return (ScriptRes false false)
+  return $ ScriptRes false
 
 
 randomize :: forall eff h. ScriptFn eff h
@@ -29,7 +29,6 @@ randomize ssRef idx t mid dt = do
   lib <-  loadLib "lib" dt "randomComponent"
   sub <-  loadLib "sub" dt "randomComponent"
   typ <-  loadLib "typ" dt "randomComponent"
-  adr <-  loadLib "adr" dt "randomComponent"
 
   nxt <- case (member "nxt" dt) of
     false -> return t
@@ -41,22 +40,19 @@ randomize ssRef idx t mid dt = do
       --let a = lg "ITERATE COMPONENT"
       let dt' = insert "nxt" (show (t + dly)) dt
       -- lift $ modifySTRef sRef (\s -> s {dt = dt'})
-      adr' <- case (adr == "!") of
-        true -> return mid
-        false -> return adr
 
       case typ of
         "mod" -> do
-          --parseAndImportScript ssRef pattern adr' $ inj "switch childN:%0 op:load by:query typ:mod query:%1 accs:rand spd:%2" [sub, lib, spd]
+          --parseAndImportScript ssRef pattern mid $ inj "switch childN:%0 op:load by:query typ:mod query:%1 accs:rand spd:%2" [sub, lib, spd]
           return unit
         _ -> do
-          --parseAndImportScript ssRef pattern adr' $ inj "switch mut:%0 idx:%1 op:clone by:query typ:idx query:%2 accs:rand spd:%3" [typ, sub, lib, spd]
+          --parseAndImportScript ssRef pattern mid $ inj "switch mut:%0 idx:%1 op:clone by:query typ:idx query:%2 accs:rand spd:%3" [typ, sub, lib, spd]
           return unit
 
       return unit
     _ -> return unit
 
-  return (ScriptRes false false)
+  return $ ScriptRes false
 
 
 
@@ -104,4 +100,4 @@ incZn ssRef idx t mid dt = do
   -- remove self
   --purgeScript ssRef mid self
 
-  return (ScriptRes false false)
+  return $ ScriptRes false

@@ -19,7 +19,7 @@ disp  disp_main1
 
 --main2 < dev
 main  epimorphism2_main
-disp  disp_id
+disp  disp_id2
 
 --main3 < dev
 main  epimorphism3_main

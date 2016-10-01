@@ -2,15 +2,15 @@
 modules {application: epimorphism_auto3}
 
 --epimorphism_auto3 < epimorphism
-scripts [randomizeC1]
+scripts [randomize dly:35 spd:0.3 lib:color_main dim:vec4 sub:color typ:mod]
 modules {seed: seed_multi_anim2, t:t_main2, color: rotate_hsv1, reduce: torus_reduce}
 
 --seed_wca_anim3 < seed_wca
-scripts [randomizeW3, randomizeSC2]
+scripts [randomize dly:27 spd:0.3 lib:anim dim:vec4 sub:w typ:mod, randomize dly:30 spd:0.3 lib:anim3 dim:vec4 sub:seed_color typ:mod]
 modules {t: t_seed_anim1, w:w_lines_border_anim, wt:wt_id, a:alpha_anim, seed_color:simple_color_anim1}
 
 --seed_wca_anim4 < seed_wca
-scripts [randomizeW4]
+scripts [randomize dly:40 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
 modules {t: t_seed_anim2, w:w_lines_border_anim, wt:wt_anim, a:alpha_anim, seed_color:tex_color_anim5}
 
 --seed_multi_anim2 < seed_nothing

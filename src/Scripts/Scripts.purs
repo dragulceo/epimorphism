@@ -6,7 +6,7 @@ import Control.Monad.Except.Trans (throwError, lift)
 import Control.Monad.ST (modifySTRef, readSTRef)
 import Data.Array (updateAt, index)
 import Data.Complex (inPolar, Polar(Polar))
-import Data.Maybe (fromMaybe, Maybe(Just))
+import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
 import Data.StrMap (insert, member)
 import Math (max, round)
 import System (loadLib)
@@ -14,14 +14,14 @@ import Util (cxFromStringE, intFromStringE, inj, numFromStringE, clickPause)
 
 -- get rid of this abomination
 pause :: forall eff h. ScriptFn eff h
-pause ssRef idx t rootId dt = do
+pause ssRef t rootId dt = do
   lift $ clickPause
   --purgeScript ssRef rootId self
-  return $ ScriptRes false
+  return $ ScriptRes false Nothing
 
 
 randomize :: forall eff h. ScriptFn eff h
-randomize ssRef idx t mid dt = do
+randomize ssRef t mid dt = do
   systemST <- lift $ readSTRef ssRef
 
   dly <- (loadLib "dly" dt "randomComponent") >>= numFromStringE
@@ -52,13 +52,13 @@ randomize ssRef idx t mid dt = do
       return unit
     _ -> return unit
 
-  return $ ScriptRes false
+  return $ ScriptRes false Nothing
 
 
 
 -- increment Zn
 incZn :: forall eff h. ScriptFn eff h
-incZn ssRef idx t mid dt = do
+incZn ssRef t mid dt = do
   systemST <- lift $ readSTRef ssRef
 
   mRef <- loadLib mid systemST.moduleRefPool "incZn module"
@@ -100,4 +100,4 @@ incZn ssRef idx t mid dt = do
   -- remove self
   --purgeScript ssRef mid self
 
-  return $ ScriptRes false
+  return $ ScriptRes false Nothing

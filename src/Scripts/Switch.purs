@@ -7,7 +7,7 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, STRef, readSTRef)
 import Data.Array (index, length, updateAt) as A
-import Data.Maybe (fromMaybe)
+import Data.Maybe (Maybe(Nothing), fromMaybe)
 import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (insert, fromFoldable, union)
 import Data.Tuple (Tuple(..))
@@ -17,7 +17,7 @@ import Util (intFromStringE, lg, inj, randInt, numFromStringE, gmod)
 
 
 switch :: forall eff h. ScriptFn eff h
-switch ssRef idx t modId dt = do
+switch ssRef t modId dt = do
   systemST <- lift $ readSTRef ssRef
 
   spd <- (loadLib "spd" dt "switch spd") >>= numFromStringE
@@ -79,7 +79,7 @@ switch ssRef idx t modId dt = do
   -- switch! (should we inline this?)
   --switchModules ssRef pRef (t + scr.tPhase) rootId childN nxtId spd
 
-  return $ ScriptRes true
+  return $ ScriptRes true Nothing
 
 
 getMutator :: forall eff h. String -> String -> String -> EpiS eff h (Module -> Module)
@@ -137,7 +137,7 @@ switchModules ssRef t rootId childN m1 spd = do
 
 
 finishSwitch :: forall eff h. ScriptFn eff h
-finishSwitch ssRef idx t rootId dt = do
+finishSwitch ssRef t rootId dt = do
   systemST <- lift $ readSTRef ssRef
 
   -- get data
@@ -165,6 +165,6 @@ finishSwitch ssRef idx t rootId dt = do
         --parseAndImportScript ssRef pattern parent "pause" -- TODO: ghetto
         return unit
 
-      return $ ScriptRes true
+      return $ ScriptRes true Nothing
     _ -> do
-      return $ ScriptRes false
+      return $ ScriptRes false Nothing

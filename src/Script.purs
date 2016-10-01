@@ -5,17 +5,19 @@ import Config (Script(Script), ScriptRes(ScriptRes), Pattern, SystemST, ScriptFn
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (readSTRef, STRef)
 import Control.Monad.Trans (lift)
-import Data.Array (length, (..), zip, foldM, uncons)
+import Data.Array (updateAt, length, (..), zip, foldM, uncons)
 import Data.Foldable (or)
+import Data.List (fromList)
 import Data.Maybe (Maybe(Just))
-import Data.StrMap (insert, empty)
-import Data.String (trim, split)
+import Data.Maybe.Unsafe (fromJust)
+import Data.StrMap (toList, StrMap, insert, empty)
+import Data.String (joinWith, trim, split)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
 import Scripts (randomize, pause, incZn)
 import Switch (finishSwitch, switch)
-import System (mSeq, loadLib)
-import Util (numFromStringE)
+import System (mUp, mSeq, loadLib)
+import Util (inj, numFromStringE)
 
 -- find script fuction given name
 lookupScriptFN :: forall eff h. String -> EpiS eff h (ScriptFn eff h)
@@ -55,7 +57,15 @@ runScript ssRef mid (Tuple scr idx) = do
   fn <- lookupScriptFN name
   let t' = systemST.t - phase
 
-  ScriptRes recompile <- fn ssRef idx t' mid args
+  (ScriptRes recompile update) <- fn ssRef t' mid args
+  case update of
+    Just dt -> do
+      let new = serializeScript (Script name phase dt)
+      mUp systemST mid \m ->
+        m {scripts = fromJust $ updateAt idx new m.scripts}
+    _ -> return unit
+
+
   return recompile
 
 
@@ -85,3 +95,11 @@ parseScript dta = do
       case (split ":" arg) of
         [k, v] -> return $ insert k v dt
         _ -> throwError $ "malformed arg " ++ arg
+
+
+serializeScript :: Script -> String
+serializeScript (Script name phase args) =
+  inj "%0@%1 %2" [name, (show phase), (serializeArgs args)]
+  where
+    serializeArgs :: StrMap String -> String
+    serializeArgs args = joinWith " " $ fromList $ map (\(Tuple k v) -> k ++ ":" ++ v) (toList args)

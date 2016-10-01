@@ -14,6 +14,7 @@ import Data.Tuple (Tuple(..))
 import Pattern (purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
 import ScriptUtil (addScript, purgeScript)
 import System (loadLib, family)
+import Text.Format (precision, format)
 import Util (intFromStringE, lg, inj, randInt, numFromStringE, gmod)
 
 
@@ -125,7 +126,7 @@ switchModules ssRef t rootId childN m1 spd = do
 
   let modules = fromFoldable [(Tuple "m0" m0), (Tuple "m1" m1)]
   let sub'    = union (fromFoldable [(Tuple "dim" m0M.dim), (Tuple "var" m0M.var)]) switchMod.sub
-  let path    = inj "linear@%0 %1" [(show t), (show spd)]
+  let path    = inj "linear@%0 %1" [(format (precision 2) t), (format (precision 2) spd)]
   let par     = fromFoldable [(Tuple "intrp" path)]
   let switch' = switchMod {par=par, sub = sub', modules = modules, var = m0M.var, dim = m0M.dim}
 

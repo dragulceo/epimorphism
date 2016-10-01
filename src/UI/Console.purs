@@ -14,10 +14,12 @@ import Data.StrMap (StrMap)
 import Data.String (joinWith, trim, split, replace)
 import Data.String.Regex (match, noFlags, regex)
 import Data.Traversable (traverse)
+import Data.Tuple (Tuple(Tuple))
+import Paths (runPath)
 import Serialize (unsafeSerialize)
 import System (family, loadLib)
 import UIUtil (findElt)
-import Util (inj, lg, indentLines)
+import Util (real, inj, lg, indentLines)
 
 foreign import addEventListeners :: forall eff. Eff eff Unit
 
@@ -137,7 +139,8 @@ renderModule systemST modLib mid title pid = do
                     let dt = map trim $ split ":" x
                     case dt of
                       [var, val] -> do
-                        let inp = inj "<span class='consolePar consoleVar' data-mid='%0' data-var='%1' data-val='%2' data-type='par'>%2</span>" [mid, var, val]
+                        (Tuple res _) <- runPath systemST.t val
+                        let inp = inj "<span class='consolePar consoleVar' data-mid='%0' data-var='%1' data-val='%2' data-type='par'>%2</span>" [mid, var, (show $ real res)]
                         return $ var ++ ": " ++ inp
                       _ -> throwError "invalide par fmt :"
                   return $ joinWith ", " cmp'
@@ -158,7 +161,7 @@ renderModule systemST modLib mid title pid = do
               let ui = inj "<span class='consoleUI' style='display:none;'>zn [%0]</span>" [uiCts]
               return $ "\n<span class='consoleUI'>" ++ line ++ "</span>" ++ ui
             "scripts" -> do
-              return $ "\n" ++ m1
+              return $ "\nscripts " ++ m1
               --let rgx' = regex "^\\[(.*)\\]$" noFlags
               --case (match rgx' m1) of
               --  (Just [(Just _), (Just cts)]) -> do

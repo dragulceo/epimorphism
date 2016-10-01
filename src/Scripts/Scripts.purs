@@ -11,6 +11,7 @@ import Data.StrMap (insert, member)
 import Math (max, round)
 import ScriptUtil (addScript, purgeScript)
 import System (loadLib)
+import Text.Format (format, precision)
 import Util (lg, cxFromStringE, intFromStringE, inj, numFromStringE, clickPause)
 
 null :: forall eff h. ScriptFn eff h
@@ -97,7 +98,8 @@ randomize ssRef t mid idx dt = do
 
       addScript systemST mid "switch" args
 
-      let dt' = insert "nxt" (show (t + dly)) dt
+      let nxt' = (format (precision 2) (t + dly))
+      let dt' = insert "nxt" nxt' dt
       return $ Just dt'
     _ -> return Nothing
 

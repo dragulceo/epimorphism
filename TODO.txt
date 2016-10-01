@@ -3,12 +3,6 @@ CURRENT PROJECTS:
 	  - mathematical analysis of framerate
 		- chopiness when at higher resolutions
 
-	- script/path cleanup
-    - for paths/scripts truncte numbers to 2/3 digits
-		- for paths/scripts, show current value in console
-		- stop executing scripts after one causes recompile
-
-
   - detect system/perf profile
     - if there are too many aux buffers (texture units), we'll have an issue?
 		- dynamic par/zn/aux count
@@ -29,6 +23,7 @@ CURRENT PROJECTS:
 	    - merge configs & states?
 		  - what goes in config, what goes into states?
 		  - put ref pools in pattern? why did I think of that?
+			- stop executing scripts after one causes recompile?
 
 
 NEXT PROJECTS:
@@ -82,6 +77,8 @@ NEXT PROJECTS:
 		  - dont want to have to pause to update tree, that's kind of ghetto
 			- individually pause paths/modules?
 			- reactive UI?
+		- misc
+			- for paths, show current value in console
 
 -------------------------------- BACKLOG --------------------------------
 

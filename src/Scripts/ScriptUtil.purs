@@ -10,12 +10,12 @@ import Data.StrMap (toList, StrMap, insert, empty)
 import Data.String (joinWith, trim, split)
 import Data.Tuple (Tuple(Tuple))
 import System (mUp)
-import Text.Format (format, precision)
+import Text.Format (precision, format)
 import Util (lg, inj, numFromStringE)
 
 addScript :: forall eff h. SystemST h -> String -> String -> String -> EpiS eff h Unit
 addScript systemST mid name args = do
-  let scr = inj "%0@%1 %2" [name, (show systemST.t), args]
+  let scr = inj "%0@%1 %2" [name, (format (precision 2) systemST.t), args]
   mUp systemST mid \m ->
     m {scripts = cons scr m.scripts}
 

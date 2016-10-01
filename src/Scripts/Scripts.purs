@@ -91,15 +91,11 @@ randomize ssRef t mid idx dt = do
   update <- case t of
     t | t >= nxt -> do
       --let a = lg "ITERATE COMPONENT"
-      case typ of
-        "mod" -> do
-          let args = inj "childN:%0 op:load by:query typ:mod query:%1 accs:rand spd:%2" [sub, lib, spd]
-          addScript systemST mid "switch" args
-          return unit
-        _ -> do
-          let args = inj "mut:%0 idx:%1 op:clone by:query typ:idx query:%2 accs:rand spd:%3" [typ, sub, lib, spd]
-          addScript systemST mid "switch" args
-          return unit
+      args <- return $  case typ of
+        "mod" -> inj "childN:%0 op:load by:query typ:mod query:%1 accs:rand spd:%2" [sub, lib, spd]
+        _     -> inj "mut:%0 idx:%1 op:clone by:query typ:idx query:%2 accs:rand spd:%3" [typ, sub, lib, spd]
+
+      addScript systemST mid "switch" args
 
       let dt' = insert "nxt" (show (t + dly)) dt
       return $ Just dt'

@@ -4,34 +4,10 @@ CURRENT PROJECTS:
 		- chopiness when at higher resolutions
 
 	- script/path cleanup
-	  - STEPS
-			- SCRIPTS
-			  - serializer/deserializer
-				- update modules.lib/scripts.lib
-				- update runScripts
-				- update existing scripts
-				- move refPool
-				- script config? default values?
+    - for paths/scripts truncte numbers to 2/3 digits
+		- for paths/scripts, show current value in console
+		- stop executing scripts after one causes recompile
 
-      - update scripts/remove pools, etc
-
-    - for paths truncte numbers to 2/3 digits
-		- for paths, show current value in console
-
-    - paths & scripts live as strings
-      - on each frame, decompile obj, execute, & possibly update
-
-		- default path & script objs
-
-		- new scripts
-			- script@phase d0:s0 d1:s1 ...,
-			- returns true(+new rootId, etc) if should recompile
-			- internal state = dt + phase
-			- sometimes we update state, need index in scripts for this(+removing self)
-
-		- combine scripts & paths again?
-		  - unique(but related?) serializer, deserializer, to same internal format
-			- unique executors
 
   - detect system/perf profile
     - if there are too many aux buffers (texture units), we'll have an issue?

@@ -34,7 +34,6 @@ parsePath dta = do
     Just (Tuple r i) -> do
       return {head: "const", tail: ["0.0", show $ outCartesian (Cartesian r i)]}
     _ -> do
-      let a = lg dta
       case uncons dta' of
         Just x -> return x
         _ -> throwError "invalid path syntax"

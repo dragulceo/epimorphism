@@ -8,7 +8,7 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
-import Data.Array (cons, updateAt, length, head, tail)
+import Data.Array (uncons, updateAt, length, head, tail)
 import Data.List (fromList)
 import Data.Maybe (Maybe(Just))
 import Data.Maybe.Unsafe (fromJust)
@@ -20,6 +20,7 @@ import Engine (setShaders, initEngineST, clearFB)
 import Graphics.Canvas (Canvas)
 import Layout (updateLayout, initLayout)
 import Pattern (findModule)
+import ScriptUtil (addScript)
 import Serialize (unsafeSerialize)
 import System (mUp, loadLib)
 import Util (halt, Now, cxFromStringE, intFromStringE, numFromStringE, lg, uuid, handleError)
@@ -62,11 +63,10 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         return unit
       "scr" -> do
         when (length args >= 2) do -- check for errors here
-          let addr = fromJust $ head args
-          let rst = fromJust $ tail args
+          {head: addr, tail: rst}  <- return $ fromJust $ uncons args
+          {head: name, tail: rst'} <- return $ fromJust $ uncons rst
           mid <- findModule systemST.moduleRefPool pattern addr true
-          mUp systemST mid \m ->
-            m {scripts = cons (joinWith " " rst) m.scripts}
+          addScript systemST mid name (joinWith " " rst')
 
           return unit
       "setP" -> do

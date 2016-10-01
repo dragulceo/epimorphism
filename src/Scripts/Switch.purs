@@ -12,12 +12,13 @@ import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (insert, fromFoldable, union)
 import Data.Tuple (Tuple(..))
 import Pattern (purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
+import ScriptUtil (addScript, purgeScript)
 import System (loadLib, family)
 import Util (intFromStringE, lg, inj, randInt, numFromStringE, gmod)
 
 
 switch :: forall eff h. ScriptFn eff h
-switch ssRef t modId dt = do
+switch ssRef t mid idx dt = do
   systemST <- lift $ readSTRef ssRef
 
   spd <- (loadLib "spd" dt "switch spd") >>= numFromStringE
@@ -27,8 +28,8 @@ switch ssRef t modId dt = do
   (Tuple rootId childN) <- case op of
     "load" -> do
       childN' <- loadLib "childN" dt "switch childN"
-      return $ Tuple modId childN'
-    "clone" -> findParent systemST.moduleRefPool modId
+      return $ Tuple mid childN'
+    "clone" -> findParent systemST.moduleRefPool mid
     x -> throwError $ "invalid 'op' for switch, must be load | clone : " ++ x
 
   -- get the relevant name to be used to either load or for the mutator
@@ -61,8 +62,8 @@ switch ssRef t modId dt = do
     x -> throwError $ "invalid 'by' for switch, must be query | val : " ++ x
 
   -- import new module
-  --purgeScript ssRef modId scrId
-  let nxtN = if (op == "load") then name else modId
+  purgeScript systemST mid idx
+  let nxtN = if (op == "load") then name else mid
   nxtId <- importModule ssRef (ImportRef nxtN)
   systemST' <- lift $ readSTRef ssRef
 
@@ -77,7 +78,8 @@ switch ssRef t modId dt = do
     return unit
 
   -- switch! (should we inline this?)
-  --switchModules ssRef pRef (t + scr.tPhase) rootId childN nxtId spd
+  let tPhase = systemST.t - t -- recover phase
+  switchModules ssRef (t + tPhase) rootId childN nxtId spd
 
   return $ ScriptRes true Nothing
 
@@ -127,17 +129,18 @@ switchModules ssRef t rootId childN m1 spd = do
   let par     = fromFoldable [(Tuple "intrp" path)]
   let switch' = switchMod {par=par, sub = sub', modules = modules, var = m0M.var, dim = m0M.dim}
 
-  --swid <- replaceModule ssRef rootId childN m0 (ImportModule switch')
+  swid <- replaceModule ssRef rootId childN m0 (ImportModule switch')
   purgeModule ssRef m1 -- we assume this was imported previously, so it was imported again by replace
 
   -- create & import blending script
-  --parseAndImportScript ssRef pattern swid $ inj "finishSwitch delay:%0" [show spd]
+  systemST' <- lift $ readSTRef ssRef
+  addScript systemST' swid "finishSwitch" (inj "delay:%0" [show spd])
 
   return unit
 
 
 finishSwitch :: forall eff h. ScriptFn eff h
-finishSwitch ssRef t rootId dt = do
+finishSwitch ssRef t rootId idx dt = do
   systemST <- lift $ readSTRef ssRef
 
   -- get data
@@ -146,7 +149,7 @@ finishSwitch ssRef t rootId dt = do
   case t * delay of
     -- we're done
     x | x >= 1.0 -> do
-      --let a = lg "DONE SWITCHING"
+      let a = lg "DONE SWITCHING"
 
       -- find parent & m1
       (Tuple parent subN) <- findParent systemST.moduleRefPool rootId
@@ -162,7 +165,7 @@ finishSwitch ssRef t rootId dt = do
       -- this is pretty ghetto.  its for the dev ui
       when systemST.pauseAfterSwitch do
         lift $ modifySTRef ssRef (\s -> s {pauseAfterSwitch = false})
-        --parseAndImportScript ssRef pattern parent "pause" -- TODO: ghetto
+        addScript systemST parent "pause" ""
         return unit
 
       return $ ScriptRes true Nothing

@@ -203,8 +203,8 @@ patternSchema = [
 ]
 
 -- Script
--- sys -> time -> mid -> args -> res
-type ScriptFn eff h = STRef h (SystemST h) -> Number -> String -> StrMap String -> EpiS eff h ScriptRes
+-- sys -> time -> mid -> idx -> args -> res
+type ScriptFn eff h = STRef h (SystemST h) -> Number -> String -> Int -> StrMap String -> EpiS eff h ScriptRes
 
 data ScriptConfig = ScriptConfig String
 data ScriptRes = ScriptRes Boolean (Maybe (StrMap String)) -- compile, possibly updated state

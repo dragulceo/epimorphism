@@ -9,19 +9,22 @@ import Data.Complex (inPolar, Polar(Polar))
 import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
 import Data.StrMap (insert, member)
 import Math (max, round)
+import ScriptUtil (addScript, purgeScript)
 import System (loadLib)
 import Util (cxFromStringE, intFromStringE, inj, numFromStringE, clickPause)
 
 -- get rid of this abomination
 pause :: forall eff h. ScriptFn eff h
-pause ssRef t rootId dt = do
+pause ssRef t mid idx dt = do
+  systemST <- lift $ readSTRef ssRef
+
   lift $ clickPause
-  --purgeScript ssRef rootId self
+  purgeScript systemST mid idx
   return $ ScriptRes false Nothing
 
 
 randomize :: forall eff h. ScriptFn eff h
-randomize ssRef t mid dt = do
+randomize ssRef t mid idx dt = do
   systemST <- lift $ readSTRef ssRef
 
   dly <- (loadLib "dly" dt "randomComponent") >>= numFromStringE
@@ -35,30 +38,28 @@ randomize ssRef t mid dt = do
     true  -> (loadLib "nxt" dt "randomMain1 nxt") >>= numFromStringE
 
   -- next iteration
-  case t of
+  update <- case t of
     t | t >= nxt -> do
       --let a = lg "ITERATE COMPONENT"
-      let dt' = insert "nxt" (show (t + dly)) dt
-      -- lift $ modifySTRef sRef (\s -> s {dt = dt'})
-
       case typ of
         "mod" -> do
-          --parseAndImportScript ssRef pattern mid $ inj "switch childN:%0 op:load by:query typ:mod query:%1 accs:rand spd:%2" [sub, lib, spd]
-          return unit
+          let args = inj "childN:%0 op:load by:query typ:mod query:%1 accs:rand spd:%2" [sub, lib, spd]
+          addScript systemST mid "switch" args
         _ -> do
-          --parseAndImportScript ssRef pattern mid $ inj "switch mut:%0 idx:%1 op:clone by:query typ:idx query:%2 accs:rand spd:%3" [typ, sub, lib, spd]
-          return unit
+          let args = inj "mut:%0 idx:%1 op:clone by:query typ:idx query:%2 accs:rand spd:%3" [typ, sub, lib, spd]
+          addScript systemST mid "switch" args
 
-      return unit
-    _ -> return unit
+      let dt' = insert "nxt" (show (t + dly)) dt
+      return $ Just dt'
+    _ -> return Nothing
 
-  return $ ScriptRes false Nothing
+  return $ ScriptRes false update
 
 
 
 -- increment Zn
 incZn :: forall eff h. ScriptFn eff h
-incZn ssRef t mid dt = do
+incZn ssRef t mid idx dt = do
   systemST <- lift $ readSTRef ssRef
 
   mRef <- loadLib mid systemST.moduleRefPool "incZn module"
@@ -91,13 +92,13 @@ incZn ssRef t mid dt = do
       return $ (Polar new fromR)
     _ -> throwError "offset should be +-1 or +-i"
 
-  --let path = inj "intrp@%0 4.0 %1 %2 %3 %4" [(show $ t + tPhase), (show fromR), (show fromTh), (show toR), (show toTh)]
-  let path = ""
+  let tPhase = systemST.t - t -- recover phase
+  let path = inj "intrp@%0 4.0 %1 %2 %3 %4" [(show $ t + tPhase), (show fromR), (show fromTh), (show toR), (show toTh)]
 
   let zn' = fromMaybe mod.zn (updateAt idx path mod.zn)
   lift $ modifySTRef mRef (\m -> m {zn = zn'})
 
   -- remove self
-  --purgeScript ssRef mid self
+  purgeScript systemST mid idx
 
   return $ ScriptRes false Nothing

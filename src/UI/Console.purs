@@ -158,7 +158,7 @@ renderModule systemST modLib mid title pid = do
               let ui = inj "<span class='consoleUI' style='display:none;'>zn [%0]</span>" [uiCts]
               return $ "\n<span class='consoleUI'>" ++ line ++ "</span>" ++ ui
             "scripts" -> do
-              return m1
+              return $ "\n" ++ m1
               --let rgx' = regex "^\\[(.*)\\]$" noFlags
               --case (match rgx' m1) of
               --  (Just [(Just _), (Just cts)]) -> do

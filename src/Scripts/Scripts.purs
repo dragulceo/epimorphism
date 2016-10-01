@@ -13,6 +13,10 @@ import ScriptUtil (addScript, purgeScript)
 import System (loadLib)
 import Util (lg, cxFromStringE, intFromStringE, inj, numFromStringE, clickPause)
 
+null :: forall eff h. ScriptFn eff h
+null ssRef t mid idx dt = do
+  return $ ScriptRes false Nothing
+
 -- get rid of this abomination
 pause :: forall eff h. ScriptFn eff h
 pause ssRef t mid idx dt = do
@@ -79,11 +83,14 @@ randomize ssRef t mid idx dt = do
   sub <-  loadLib "sub" dt "randomComponent"
   typ <-  loadLib "typ" dt "randomComponent"
 
-  let a = lg $ member "nxt" dt
+  -- let a = lg $ member "nxt" dt
 
   nxt <- case (member "nxt" dt) of
     false -> return t
     true  -> (loadLib "nxt" dt "randomMain1 nxt") >>= numFromStringE
+
+  --let a = lg $ "t: " ++ (show t)
+  --let a = lg $ "nxt: " ++ (show nxt)
 
   -- next iteration
   update <- case t of
@@ -93,10 +100,10 @@ randomize ssRef t mid idx dt = do
         "mod" -> do
           let args = inj "childN:%0 op:load by:query typ:mod query:%1 accs:rand spd:%2" [sub, lib, spd]
           addScript systemST mid "switch" args
-          --return unit
+          return unit
         _ -> do
           let args = inj "mut:%0 idx:%1 op:clone by:query typ:idx query:%2 accs:rand spd:%3" [typ, sub, lib, spd]
-          --addScript systemST mid "switch" args
+          addScript systemST mid "switch" args
           return unit
 
       let dt' = insert "nxt" (show (t + dly)) dt

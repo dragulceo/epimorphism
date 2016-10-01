@@ -149,7 +149,7 @@ finishSwitch ssRef t rootId idx dt = do
   case t * delay of
     -- we're done
     x | x >= 1.0 -> do
-      let a = lg "DONE SWITCHING"
+      --let a = lg "DONE SWITCHING"
 
       -- find parent & m1
       (Tuple parent subN) <- findParent systemST.moduleRefPool rootId

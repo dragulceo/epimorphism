@@ -1,8 +1,4 @@
 CURRENT PROJECTS:
-  - general perf stuff
-	  - mathematical analysis of framerate
-		- chopiness when at higher resolutions
-
   - detect system/perf profile
     - if there are too many aux buffers (texture units), we'll have an issue?
 		- dynamic par/zn/aux count
@@ -16,22 +12,22 @@ CURRENT PROJECTS:
 		- when compiling done, switch out root, unfreeze scripts
 		- also, batch compilation?  only happens once every n ms?
 
-	- cleanup
-	  - findParent is kind of ghetto
-		- scripts conflicting with each other?  who has priority?
-    - better data organization
-	    - merge configs & states?
-		  - what goes in config, what goes into states?
-		  - put ref pools in pattern? why did I think of that?
-			- stop executing scripts after one causes recompile?
-
-
-NEXT PROJECTS:
   - async asset loading?
 	  - what do we do when we dont have the asset yet?
 		- which images are loaded (also, clean up main)?
 		- load small images to start, bigger images when needed?
 
+	- cleanup
+    - make sure everything re. scripts still works
+	  - findParent is kind of ghetto
+		- scripts conflicting with each other?  who has priority?
+    - better data organization
+	    - merge configs & states?
+		  - what goes in config, what goes into states?
+			- stop executing scripts after one causes recompile?
+
+
+NEXT PROJECTS:
   - release?
     - kickstarter for audio responsiveness?
 	  - make main pattern a little better
@@ -78,6 +74,7 @@ NEXT PROJECTS:
 			- individually pause paths/modules?
 			- reactive UI?
 		- misc
+		  - https://ace.c9.io/#nav=about
 			- for paths, show current value in console
 
 -------------------------------- BACKLOG --------------------------------
@@ -116,8 +113,10 @@ SYSTEM:
   - engine stability/lost context - https://www.khronos.org/registry/webgl/extensions/WEBGL_lose_context/
   - main & disp share includes
   - preprocesser malfunctions give weird errors
-	- https://www.khronos.org/registry/webgl/extensions/WEBGL_debug_shaders/
+	- https://www.khronos.org/registry/webgl/extensions/WEBGL_debug_shaders/ - gets a host translated version of the shader (GLSL ES, HLSL)
+	- chrome/ff shader debugger/editor
   - better engine error checking/handling
+	- get rid of if statements ins seed_w & clean all of that up
 
 FEATURE IDEAS:
   - blend maps!! variable interpolation

@@ -242,3 +242,10 @@ exports.isNumber = function(s) {
 exports.clickPause = function() {
 	$("button#pause").click();
 };
+
+
+exports.elg = function elg(x) {
+	return function (){
+		console.log(x);
+	}
+}

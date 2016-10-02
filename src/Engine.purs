@@ -4,188 +4,30 @@ import Prelude
 import Data.TypedArray as T
 import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
-import Graphics.WebGL.Raw.Types as GLT
+import Audio (audioData, initAudio)
 import Compiler (compileShaders)
-import Config (AudioAnalyser, Epi, EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf)
+import Config (EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf)
 import Control.Monad (when)
-import Control.Monad.Eff (Eff, forE)
+import Control.Monad.Eff (forE)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Error.Class (throwError)
-import Control.Monad.Reader.Class (ask)
 import Control.Monad.Reader.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, newSTRef, modifySTRef, readSTRef)
-import Data.Array (length, (!!), (..), zip, foldM)
-import Data.Either (either)
+import Data.Array (length, (!!), (..))
 import Data.Int (toNumber, fromNumber)
 import Data.Maybe (Maybe(Nothing, Just))
 import Data.Maybe.Unsafe (fromJust)
-import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple), snd, fst)
+import EngineUtil (execGL)
 import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
-import Graphics.WebGL (runWebgl, debug)
 import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
-import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor, vertexAttribPointer, enableVertexAttribArray, bufferData, bindBuffer, createBuffer, createFramebuffer, createTexture)
-import Graphics.WebGL.Raw.Types (ArrayBufferView)
+import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor, vertexAttribPointer, enableVertexAttribArray, bufferData, bindBuffer, createBuffer)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram)
-import Graphics.WebGL.Types (WebGL, WebGLContext, WebGLProgram, WebGLTexture, WebGLFramebuffer, ArrayBufferType(ArrayBuffer), BufferData(DataSource), BufferUsage(StaticDraw), DataType(Float), DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
-import Util (now, Now, lg, replaceAll, unsafeNull)
-
-foreign import audioData :: forall eff. AudioAnalyser -> Eff eff (ArrayBufferView)
-foreign import initAudioAnalyzer :: forall eff. Int -> Eff eff AudioAnalyser
-foreign import preloadImages :: forall eff. Array String -> Eff eff Unit -> Eff eff Unit
+import Graphics.WebGL.Types (WebGLContext, WebGLProgram, WebGLTexture, ArrayBufferType(ArrayBuffer), BufferData(DataSource), BufferUsage(StaticDraw), DataType(Float), DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
+import Texture (uploadAux, initAux, initTexFb, emptyImage)
+import Util (dbg, now, Now, lg, replaceAll, unsafeNull)
 
 -- PUBLIC
-
--- get a webgl texture, set default properties
-getTex :: WebGL WebGLTexture
-getTex = do
-  ctx <- ask
-  tex <- createTexture
-  liftEff $ GL.bindTexture ctx GLE.texture2d tex
-  liftEff $ GL.texParameteri ctx GLE.texture2d GLE.textureWrapS GLE.clampToEdge
-  liftEff $ GL.texParameteri ctx GLE.texture2d GLE.textureWrapT GLE.clampToEdge
-  liftEff $ GL.texParameteri ctx GLE.texture2d GLE.textureMinFilter GLE.linear
-  liftEff $ GL.texParameteri ctx GLE.texture2d GLE.textureMagFilter GLE.linear
-  -- use mipmaps?
-  debug
-
-  return tex
-
-
--- initialize framebuffer/texture pair
-initTex :: Int -> WebGL (Tuple WebGLTexture WebGLFramebuffer)
-initTex dim = do
-  ctx <- ask
-  tex <- getTex
-  fb <- createFramebuffer
-  liftEff $ GL.texImage2D_ ctx GLE.texture2d 0 GLE.rgba dim dim 0 GLE.rgba GLE.unsignedByte (unsafeNull :: GLT.ArrayBufferView)
-  liftEff $ GL.bindFramebuffer ctx GLE.framebuffer fb
-  liftEff $ GL.framebufferTexture2D ctx GLE.framebuffer GLE.colorAttachment0 GLE.texture2d tex 0
-  debug
-
-  return $ Tuple tex fb
-
-
--- initialize auxiliary textures
-initAux :: EngineConf -> WebGLContext -> GLT.TexImageSource -> WebGL (Array WebGLTexture)
-initAux engineConf ctx empty = do
-  --traverse (\_ -> getTex) (0..(engineConf.numAux - 1))
-  traverse handle (0..(engineConf.numAux - 1))
-  where
-    handle i = do
-      aux <- getTex
-      liftEff $ GL.bindTexture ctx GLE.texture2d aux
-      liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte empty
-      return aux
-
-
--- initialize audio texture
-initAudio :: EngineConf -> WebGLContext -> GLT.TexImageSource -> WebGL (Maybe (Tuple WebGLTexture AudioAnalyser))
-initAudio engineConf ctx empty = do
-  case engineConf.audioAnalysisEnabled of
-    false -> return Nothing
-    true -> do
-      audioTex <- getTex
-      analyser <- lift $ lift $ initAudioAnalyzer engineConf.audioBufferSize
-      return $ Just (Tuple audioTex analyser)
-
-
-
--- upload aux textures
-uploadAux :: forall eff. EngineST -> String -> Array String -> Epi eff (Array String)
-uploadAux es host names = do
-  case es.aux of
-    Nothing -> throwError "aux textures not initialized"
-    (Just aux) -> do
-      when (length aux < length names) do
-        throwError "not enough aux textures"
-
-      foldM (createImage es.ctx es.auxImg host) 0 (zip aux names)
-      return names
-
-
--- create an image object. can throw error if images missing!  also some synchronization issues
-createImage :: forall eff. WebGLContext -> (Array String) -> String  -> Int -> (Tuple WebGLTexture String) -> Epi eff Int
-createImage ctx currentImages host c (Tuple aux name) = do
-  let currentImage = currentImages !! c
-  let doUpload = case currentImage of
-        Nothing -> true
-        Just cn -> (cn /= name)
-  when doUpload do
-    let a = if doUpload then (lg "uploading") else unit
-    lift $ createImageImpl (host ++ name) \img -> do
-      runWebgl (do
-        liftEff $ GL.bindTexture ctx GLE.texture2d aux
-        liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte img
-        return unit
-      ) ctx
-      return unit
-    return unit
-  return $ c + 1
-
-
-foreign import createImageImpl :: forall eff. String ->
-                                  (GLT.TexImageSource -> Eff eff Unit) ->
-                                  Eff eff Unit
-
-
-clearFB :: forall eff h. EngineConf -> EngineST -> EpiS eff h Unit
-clearFB engineConf engineST = do
-  let ctx = engineST.ctx
-  execGL ctx do
-    liftEff $ GL.bindTexture ctx GLE.texture2d $ fst $ fromJust engineST.tex
-    liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte engineST.empty
-    liftEff $ GL.bindTexture ctx GLE.texture2d $ snd $ fromJust engineST.tex
-    liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte engineST.empty
-  return unit
-
-foreign import emptyImage :: forall eff. Int -> Eff eff GLT.TexImageSource
-
--- compile shaders and load into systemST
-setShaders :: forall eff h. SystemConf -> EngineConf -> STRef h EngineST -> SystemST h -> Pattern -> EpiS (now :: Now | eff) h Unit
-setShaders sysConf engineConf esRef sys pattern = do
-  --a <- lift now
-  es <- lift $ readSTRef esRef
-
-  -- load & compile shaders
-  {main, disp, vert, aux} <- compileShaders pattern sys
-  let mainF = replaceAll "\\$fract\\$" (show engineConf.fract) main -- a little ghetto, we need this in a for loop
-
---  c <- lift $ now
-  auxImg <- uploadAux es sysConf.host aux
---  c' <- lift $ now
---  let x = lg $ "UPLOAD AUX: " ++ (show (c' - c))
-
-  Tuple main' disp' <- execGL es.ctx ( do
-    -- create programs
-    mainProg <- compileShadersIntoProgram vert mainF
-    dispProg <- compileShadersIntoProgram vert disp
-
-    -- vertex coords
-    pos <- createBuffer
-    bindBuffer ArrayBuffer pos
-    bufferData ArrayBuffer (DataSource (T.asFloat32Array [-1.0,-1.0,1.0,-1.0,-1.0,1.0,
-                                                          -1.0,1.0,1.0,-1.0,1.0,1.0])) StaticDraw
-
-    dispAttr <- getAttrBindings dispProg
-    mainAttr <- getAttrBindings mainProg
-
-    enableVertexAttribArray mainAttr.a_position
-    vertexAttribPointer mainAttr.a_position 2 Float false 0 0
-    enableVertexAttribArray dispAttr.a_position
-    vertexAttribPointer dispAttr.a_position 2 Float false 0 0
-
-    debug
-
-    return $ Tuple mainProg dispProg
-  )
-
-  lift $ modifySTRef esRef (\s -> s {dispProg = Just disp', mainProg = Just main', auxImg = auxImg})
-  --a' <- lift now
-
-  --let a'' = lg $ "SET SHADERS: " ++ show (a' - a)
-  return unit
-
 
 -- initialize the rendering engine & create state.  updates an existing state if passed
 -- maybe validate that kernelDim > 0?
@@ -228,8 +70,8 @@ initEngineST sysConf engineConf systemST pattern canvasId esRef' = do
 
   -- webgl initialization
   res <- execGL ctx do
-    Tuple tex0 fb0 <- initTex dim
-    Tuple tex1 fb1 <- initTex dim
+    Tuple tex0 fb0 <- initTexFb dim
+    Tuple tex1 fb1 <- initTexFb dim
     aux <- initAux engineConf es.ctx empty
     audio <- initAudio engineConf es.ctx empty
 
@@ -249,6 +91,50 @@ initEngineST sysConf engineConf systemST pattern canvasId esRef' = do
   setShaders sysConf engineConf esRef systemST pattern
 
   return esRef
+
+-- compile shaders and load into systemST
+setShaders :: forall eff h. SystemConf -> EngineConf -> STRef h EngineST -> SystemST h -> Pattern -> EpiS (now :: Now | eff) h Unit
+setShaders sysConf engineConf esRef sys pattern = do
+  dbg "set shaders"
+  --a <- lift now
+  es <- lift $ readSTRef esRef
+
+  -- load & compile shaders
+  {main, disp, vert, aux} <- compileShaders pattern sys
+  let mainF = replaceAll "\\$fract\\$" (show engineConf.fract) main -- a little ghetto, we need this in a for loop
+
+--  c <- lift $ now
+  auxImg <- uploadAux es sysConf.host aux
+--  c' <- lift $ now
+--  let x = lg $ "UPLOAD AUX: " ++ (show (c' - c))
+
+  Tuple main' disp' <- execGL es.ctx ( do
+    -- create programs
+    mainProg <- compileShadersIntoProgram vert mainF
+    dispProg <- compileShadersIntoProgram vert disp
+
+    -- vertex coords
+    pos <- createBuffer
+    bindBuffer ArrayBuffer pos
+    bufferData ArrayBuffer (DataSource (T.asFloat32Array [-1.0,-1.0,1.0,-1.0,-1.0,1.0,
+                                                          -1.0,1.0,1.0,-1.0,1.0,1.0])) StaticDraw
+
+    dispAttr <- getAttrBindings dispProg
+    mainAttr <- getAttrBindings mainProg
+
+    enableVertexAttribArray mainAttr.a_position
+    vertexAttribPointer mainAttr.a_position 2 Float false 0 0
+    enableVertexAttribArray dispAttr.a_position
+    vertexAttribPointer dispAttr.a_position 2 Float false 0 0
+
+    return $ Tuple mainProg dispProg
+  )
+
+  lift $ modifySTRef esRef (\s -> s {dispProg = Just disp', mainProg = Just main', auxImg = auxImg})
+  --a' <- lift now
+
+  --let a'' = lg $ "SET SHADERS: " ++ show (a' - a)
+  return unit
 
 
 -- do the thing!
@@ -321,8 +207,6 @@ renderFrame systemST engineConf engineST pattern par zn frameNum = do
     liftEff $ GL.bindFramebuffer ctx GLE.framebuffer fb
     drawArrays Triangles 0 6
 
-    debug
-
     return td
 
 
@@ -349,9 +233,6 @@ postprocessFrame systemST engineConf engineST tex par zn = do
     liftEff $ GL.bindFramebuffer ctx GLE.framebuffer unsafeNull
     drawArrays Triangles 0 6
 
-    debug
-
-
 -- bind parameters & zn values from pattern into program
 bindParZn :: forall h eff. WebGLContext -> WebGLProgram -> Array Number -> Array Number -> EpiS eff h Unit
 bindParZn ctx prog par zn = do
@@ -370,9 +251,3 @@ bindParZn ctx prog par zn = do
       case mZnU of
         Just znU -> uniform2fv (Uniform znU) (T.asFloat32Array zn)
         Nothing  -> throwError $ ShaderError "missing zn uniform!"
-
--- execute a webgl action & wrap its error
-execGL :: forall eff a. WebGLContext -> WebGL a -> Epi eff a
-execGL ctx webGL = do
-  res <- lift $ runWebgl webGL ctx
-  either (throwError <<< show) return res

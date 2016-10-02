@@ -1,10 +1,11 @@
 module Util where
 
 import Prelude
-import Config (Epi)
+import Config (EpiS, Epi)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (runExceptT)
+import Control.Monad.Trans (lift)
 import DOM (DOM)
 import Data.Array (length)
 import Data.Complex (inCartesian, Cartesian(Cartesian), outCartesian, Complex)
@@ -22,6 +23,7 @@ foreign import data Now :: !
 -- simple js functions
 foreign import unsafeNull :: forall a. a
 foreign import lg :: forall a b. a -> b
+foreign import elg :: forall a b eff. a -> Eff eff b
 foreign import stick :: forall a b. a -> b
 foreign import tLg :: forall a b. a -> b
 foreign import unsafeEval :: forall eff. String -> Eff eff Unit
@@ -132,3 +134,10 @@ real cx = case (inCartesian cx) of
 imag :: Complex -> Number
 imag cx = case (inCartesian cx) of
   Cartesian x y -> y
+
+
+dbg :: forall eff h. String -> EpiS eff h Unit
+dbg a = lift $ elg a
+
+dbg2 :: forall eff. String -> Epi eff Unit
+dbg2 a = lift $ elg a

@@ -15,7 +15,8 @@ import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (insert, values, keys, lookup)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
-import Engine (postprocessFrame, preloadImages, initEngineST, renderFrame, setShaders)
+import Engine (postprocessFrame, initEngineST, renderFrame, setShaders)
+import Texture (preloadImages)
 import Graphics.Canvas (Canvas)
 import Layout (updateLayout)
 import Paths (runPath)
@@ -23,7 +24,7 @@ import Pattern (importPattern)
 import Script (runScripts)
 import System (initSystemST, loadLib)
 import UI (initUIST)
-import Util (imag, real, inj, rndstr, Now, handleError, lg, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
+import Util (imag, real, rndstr, Now, handleError, lg, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
 
 host :: String
 host = ""
@@ -137,12 +138,12 @@ animate state = handleError do
 
   -- render!
   --t4 <- lift $ now
-  (Tuple parM znM) <- flattenParZn systemST'' (Tuple [] []) pattern.main
+  (Tuple parM znM) <- getParZn systemST'' (Tuple [] []) pattern.main
   --t5 <- lift $ now
 
   tex <- renderFrame systemST'' engineConf engineST' pattern parM znM systemST'.frameNum
 
-  (Tuple parD znD) <- flattenParZn systemST'' (Tuple [] []) pattern.disp
+  (Tuple parD znD) <- getParZn systemST'' (Tuple [] []) pattern.disp
   postprocessFrame systemST'' engineConf engineST' tex parD znD
 
 
@@ -162,9 +163,9 @@ animate state = handleError do
   return unit
 
 -- recursively flatten par & zn lists in compilation order
-flattenParZn :: forall eff h. SystemST h -> (Tuple (Array Number) (Array Number)) -> String -> EpiS eff h (Tuple (Array Number) (Array Number))
-flattenParZn systemST (Tuple par zn) mid = do
-  mRef <- loadLib mid systemST.moduleRefPool "mid flattenParZn"
+getParZn :: forall eff h. SystemST h -> (Tuple (Array Number) (Array Number)) -> String -> EpiS eff h (Tuple (Array Number) (Array Number))
+getParZn systemST (Tuple par zn) mid = do
+  mRef <- loadLib mid systemST.moduleRefPool "mid getParZn"
   mod  <- lift $ readSTRef mRef
   let t = systemST.t
 
@@ -175,7 +176,7 @@ flattenParZn systemST (Tuple par zn) mid = do
   parV <- traverse (runParPath mRef t) (sort $ keys mod.par)
   let par' = par ++ parV
 
-  foldM (flattenParZn systemST) (Tuple par' zn') (fromList $ values mod.modules)
+  foldM (getParZn systemST) (Tuple par' zn') (fromList $ values mod.modules)
   where
     runZnPath mRef t val = do
       (Tuple res remove) <- runPath t val

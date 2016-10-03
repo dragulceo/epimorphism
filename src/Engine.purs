@@ -20,6 +20,7 @@ import Data.Maybe.Unsafe (fromJust)
 import Data.Tuple (Tuple(Tuple), snd, fst)
 import EngineUtil (execGL)
 import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
+import Graphics.WebGL (debug)
 import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
 import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor, vertexAttribPointer, enableVertexAttribArray, bufferData, bindBuffer, createBuffer, linkProgram)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram)
@@ -120,6 +121,8 @@ setShaders sysConf engineConf esRef sys pattern = do
     bufferData ArrayBuffer (DataSource (T.asFloat32Array [-1.0,-1.0,1.0,-1.0,-1.0,1.0,
                                                           -1.0,1.0,1.0,-1.0,1.0,1.0])) StaticDraw
 
+    linkProgram dispProg
+    linkProgram mainProg
     dispAttr <- getAttrBindings dispProg
     mainAttr <- getAttrBindings mainProg
 

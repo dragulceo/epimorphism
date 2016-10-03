@@ -30,6 +30,7 @@ foreign import unsafeEval :: forall eff. String -> Eff eff Unit
 foreign import winLog :: forall a eff. a -> Eff eff Unit
 foreign import requestAnimationFrame :: forall eff a. (a -> Eff eff Unit) -> a -> Eff eff Unit
 foreign import now :: forall eff. Eff (now :: Now | eff) Number
+foreign import now2 :: forall eff. Eff eff Number
 foreign import replaceAll :: String -> String -> String -> String
 
 foreign import halt :: forall eff. Eff eff Unit
@@ -136,8 +137,8 @@ imag cx = case (inCartesian cx) of
   Cartesian x y -> y
 
 
-dbg :: forall eff h. String -> EpiS eff h Unit
+dbg :: forall eff h a b. a -> EpiS eff h b
 dbg a = lift $ elg a
 
-dbg2 :: forall eff. String -> Epi eff Unit
+dbg2 :: forall eff a b. a -> Epi eff b
 dbg2 a = lift $ elg a

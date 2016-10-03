@@ -21,11 +21,11 @@ import Data.Tuple (Tuple(Tuple), snd, fst)
 import EngineUtil (execGL)
 import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
 import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
-import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor, vertexAttribPointer, enableVertexAttribArray, bufferData, bindBuffer, createBuffer)
+import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor, vertexAttribPointer, enableVertexAttribArray, bufferData, bindBuffer, createBuffer, linkProgram)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram)
 import Graphics.WebGL.Types (WebGLContext, WebGLProgram, WebGLTexture, ArrayBufferType(ArrayBuffer), BufferData(DataSource), BufferUsage(StaticDraw), DataType(Float), DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
 import Texture (uploadAux, initAux, initTexFb, emptyImage)
-import Util (dbg, now, Now, lg, replaceAll, unsafeNull)
+import Util (now2, lg, inj, dbg, now, Now, replaceAll, unsafeNull)
 
 -- PUBLIC
 
@@ -96,23 +96,24 @@ initEngineST sysConf engineConf systemST pattern canvasId esRef' = do
 setShaders :: forall eff h. SystemConf -> EngineConf -> STRef h EngineST -> SystemST h -> Pattern -> EpiS (now :: Now | eff) h Unit
 setShaders sysConf engineConf esRef sys pattern = do
   dbg "set shaders"
-  --a <- lift now
+  t0 <- lift now
   es <- lift $ readSTRef esRef
 
   -- load & compile shaders
   {main, disp, vert, aux} <- compileShaders pattern sys
   let mainF = replaceAll "\\$fract\\$" (show engineConf.fract) main -- a little ghetto, we need this in a for loop
 
---  c <- lift $ now
+  t1 <- lift now
   auxImg <- uploadAux es sysConf.host aux
---  c' <- lift $ now
---  let x = lg $ "UPLOAD AUX: " ++ (show (c' - c))
+  t2 <- lift now
 
   Tuple main' disp' <- execGL es.ctx ( do
     -- create programs
+    a0 <- lift $ lift now2
     mainProg <- compileShadersIntoProgram vert mainF
+    a1 <- lift $ lift now2
     dispProg <- compileShadersIntoProgram vert disp
-
+    a2 <- lift $ lift now2
     -- vertex coords
     pos <- createBuffer
     bindBuffer ArrayBuffer pos
@@ -126,14 +127,15 @@ setShaders sysConf engineConf esRef sys pattern = do
     vertexAttribPointer mainAttr.a_position 2 Float false 0 0
     enableVertexAttribArray dispAttr.a_position
     vertexAttribPointer dispAttr.a_position 2 Float false 0 0
-
+    a3 <- lift $ lift now2
+    let b = lg $ inj " c0:%0ms\n c1:%1ms\n rst:%2ms" [show (a1 - a0), show (a2 - a1), show (a3 - a2)]
     return $ Tuple mainProg dispProg
   )
 
   lift $ modifySTRef esRef (\s -> s {dispProg = Just disp', mainProg = Just main', auxImg = auxImg})
-  --a' <- lift now
+  t3 <- lift now
 
-  --let a'' = lg $ "SET SHADERS: " ++ show (a' - a)
+  dbg $ inj "splice:%0ms\nimg:%1ms\ncompile:%2ms\ntotal:%3ms" [show (t1 - t0), show (t2 - t1), show (t3 - t2), show (t3 - t0)]
   return unit
 
 

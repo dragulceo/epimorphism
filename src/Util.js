@@ -63,6 +63,8 @@ exports.now = function () {
   return performance.now();
 };
 
+exports.now2 = exports.now;
+
 exports.unsafeEval = function (s) {
   return function () {eval(s);};
 }

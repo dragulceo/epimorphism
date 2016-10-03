@@ -6,30 +6,8 @@
 exports.uploadImageImpl = function(s){
 	return function(callback){
 		return function(){
-			if(window.auxImages[s]){
-				var im = window.auxImages[s];
-				if(window.auxImagesLoaded[s])
-					callback(im)();
-				else{
-					var func = im.onload;
-					im.onload = function(){
-						func();
-						callback(im)();
-					}
-				}
-				return window.auxImages[s];
-			}else{
-				console.log("COULDN'T FIND IMAGE? " + s);
-				console.log(window.auxImages);
-				console.log(window.auxImages[s]);
-				var im = new Image();
-				im.onload = function() {
-					window.auxImagesLoaded[s] = true;
-					callback(im)();
-				};
-				im.src = s;
-				window.auxImages[s] = im;
-			};
+			var im = window.auxImages[s];
+			callback(im)();
 		};
 	};
 };

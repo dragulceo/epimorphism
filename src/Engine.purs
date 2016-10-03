@@ -20,7 +20,6 @@ import Data.Maybe.Unsafe (fromJust)
 import Data.Tuple (Tuple(Tuple), snd, fst)
 import EngineUtil (execGL)
 import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
-import Graphics.WebGL (debug)
 import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
 import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor, vertexAttribPointer, enableVertexAttribArray, bufferData, bindBuffer, createBuffer, linkProgram)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram)
@@ -121,8 +120,6 @@ setShaders sysConf engineConf esRef sys pattern = do
     bufferData ArrayBuffer (DataSource (T.asFloat32Array [-1.0,-1.0,1.0,-1.0,-1.0,1.0,
                                                           -1.0,1.0,1.0,-1.0,1.0,1.0])) StaticDraw
 
-    linkProgram dispProg
-    linkProgram mainProg
     dispAttr <- getAttrBindings dispProg
     mainAttr <- getAttrBindings mainProg
 
@@ -131,14 +128,14 @@ setShaders sysConf engineConf esRef sys pattern = do
     enableVertexAttribArray dispAttr.a_position
     vertexAttribPointer dispAttr.a_position 2 Float false 0 0
     a3 <- lift $ lift now2
-    let b = lg $ inj " c0:%0ms\n c1:%1ms\n rst:%2ms" [show (a1 - a0), show (a2 - a1), show (a3 - a2)]
+    --let b = lg $ inj " c0:%0ms\n c1:%1ms\n rst:%2ms" [show (a1 - a0), show (a2 - a1), show (a3 - a2)]
     return $ Tuple mainProg dispProg
   )
 
   lift $ modifySTRef esRef (\s -> s {dispProg = Just disp', mainProg = Just main', auxImg = auxImg})
   t3 <- lift now
 
-  dbg $ inj "splice:%0ms\nimg:%1ms\ncompile:%2ms\ntotal:%3ms" [show (t1 - t0), show (t2 - t1), show (t3 - t2), show (t3 - t0)]
+  --dbg $ inj "splice:%0ms\nimg:%1ms\ncompile:%2ms\ntotal:%3ms" [show (t1 - t0), show (t2 - t1), show (t3 - t2), show (t3 - t0)]
   return unit
 
 

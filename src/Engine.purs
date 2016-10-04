@@ -6,7 +6,7 @@ import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Audio (audioData, initAudio)
 import Compiler (compileShaders)
-import Config (EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf)
+import Config (CompST(CompDone), EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf)
 import Control.Monad (when)
 import Control.Monad.Eff (forE)
 import Control.Monad.Eff.Class (liftEff)
@@ -21,11 +21,11 @@ import Data.Tuple (Tuple(Tuple), snd, fst)
 import EngineUtil (execGL)
 import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
 import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
-import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor, vertexAttribPointer, enableVertexAttribArray, bufferData, bindBuffer, createBuffer, linkProgram)
-import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram)
-import Graphics.WebGL.Types (WebGLContext, WebGLProgram, WebGLTexture, ArrayBufferType(ArrayBuffer), BufferData(DataSource), BufferUsage(StaticDraw), DataType(Float), DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
-import Texture (uploadAux, initAux, initTexFb, emptyImage)
-import Util (now2, lg, inj, dbg, now, Now, replaceAll, unsafeNull)
+import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor)
+import Graphics.WebGL.Shader (getUniformBindings)
+import Graphics.WebGL.Types (WebGLProgram, WebGLContext, WebGLTexture, DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
+import Texture (initAux, initTexFb, emptyImage)
+import Util (dbg, Now, unsafeNull)
 
 -- PUBLIC
 
@@ -58,7 +58,7 @@ initEngineST sysConf engineConf systemST pattern canvasId esRef' = do
       lift $ modifySTRef ref (\r -> r {empty = empty, auxImg = []})
       return ref
     Nothing -> do
-      let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, audio: Nothing, auxImg: [], ctx: ctx, empty}
+      let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, audio: Nothing, auxImg: [], compST: CompDone, ctx, empty}
       lift $ newSTRef tmp
 
   es <- lift $ readSTRef esRef
@@ -88,56 +88,9 @@ initEngineST sysConf engineConf systemST pattern canvasId esRef' = do
 
   -- set shaders
   lift $ writeSTRef esRef res
-  setShaders sysConf engineConf esRef systemST pattern
+  compileShaders sysConf systemST engineConf esRef pattern
 
   return esRef
-
--- compile shaders and load into systemST
-setShaders :: forall eff h. SystemConf -> EngineConf -> STRef h EngineST -> SystemST h -> Pattern -> EpiS (now :: Now | eff) h Unit
-setShaders sysConf engineConf esRef sys pattern = do
-  dbg "set shaders"
-  t0 <- lift now
-  es <- lift $ readSTRef esRef
-
-  -- load & compile shaders
-  {main, disp, vert, aux} <- compileShaders pattern sys
-  let mainF = replaceAll "\\$fract\\$" (show engineConf.fract) main -- a little ghetto, we need this in a for loop
-
-  t1 <- lift now
-  auxImg <- uploadAux es sysConf.host aux
-  t2 <- lift now
-
-  Tuple main' disp' <- execGL es.ctx ( do
-    -- create programs
-    a0 <- lift $ lift now2
-    mainProg <- compileShadersIntoProgram vert mainF
-    a1 <- lift $ lift now2
-    dispProg <- compileShadersIntoProgram vert disp
-    a2 <- lift $ lift now2
-    -- vertex coords
-    pos <- createBuffer
-    bindBuffer ArrayBuffer pos
-    bufferData ArrayBuffer (DataSource (T.asFloat32Array [-1.0,-1.0,1.0,-1.0,-1.0,1.0,
-                                                          -1.0,1.0,1.0,-1.0,1.0,1.0])) StaticDraw
-
-    dispAttr <- getAttrBindings dispProg
-    mainAttr <- getAttrBindings mainProg
-
-    enableVertexAttribArray mainAttr.a_position
-    vertexAttribPointer mainAttr.a_position 2 Float false 0 0
-    enableVertexAttribArray dispAttr.a_position
-    vertexAttribPointer dispAttr.a_position 2 Float false 0 0
-    a3 <- lift $ lift now2
-    --let b = lg $ inj " c0:%0ms\n c1:%1ms\n rst:%2ms" [show (a1 - a0), show (a2 - a1), show (a3 - a2)]
-    return $ Tuple mainProg dispProg
-  )
-
-  lift $ modifySTRef esRef (\s -> s {dispProg = Just disp', mainProg = Just main', auxImg = auxImg})
-  t3 <- lift now
-
-  --dbg $ inj "splice:%0ms\nimg:%1ms\ncompile:%2ms\ntotal:%3ms" [show (t1 - t0), show (t2 - t1), show (t3 - t2), show (t3 - t0)]
-  return unit
-
 
 -- do the thing!
 renderFrame :: forall eff h. SystemST h -> EngineConf -> EngineST -> Pattern -> Array Number -> Array Number -> Int -> EpiS eff h WebGLTexture

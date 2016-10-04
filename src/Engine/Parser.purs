@@ -1,4 +1,4 @@
-module Compiler where
+module Parser where
 
 import System
 import Config (Epi, Module, EpiS, SystemST, Pattern)
@@ -21,20 +21,20 @@ type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array
 
 foreign import parseT :: String -> String
 
--- compile vertex, disp & main shaders
-compileShaders :: forall eff h. Pattern -> (SystemST h) -> EpiS eff h Shaders
-compileShaders pattern systemST = do
-  vertRef <- loadLib pattern.vert systemST.moduleRefPool "compileShaders vert"
+-- parse vertex, disp & main shaders
+parseShaders :: forall eff h. Pattern -> (SystemST h) -> EpiS eff h Shaders
+parseShaders pattern systemST = do
+  vertRef <- loadLib pattern.vert systemST.moduleRefPool "parseShaders vert"
   vert    <- lift $ readSTRef vertRef
-  vertRes <- compile vert systemST 0 0 []
+  vertRes <- parseModule vert systemST 0 0 []
 
-  dispRef <- loadLib pattern.disp systemST.moduleRefPool "compileShaders disp"
+  dispRef <- loadLib pattern.disp systemST.moduleRefPool "parseShaders disp"
   disp    <- lift $ readSTRef dispRef
-  dispRes <- compile disp systemST 0 0 []
+  dispRes <- parseModule disp systemST 0 0 []
 
-  mainRef <- loadLib pattern.main systemST.moduleRefPool "compileShaders main"
+  mainRef <- loadLib pattern.main systemST.moduleRefPool "parseShaders main"
   main    <- lift $ readSTRef mainRef
-  mainRes <- compile main systemST 0 0 []
+  mainRes <- parseModule main systemST 0 0 []
 
   -- substitute includes
   includes <- traverse (\x -> loadLib x systemST.componentLib "includes") pattern.includes
@@ -43,11 +43,11 @@ compileShaders pattern systemST = do
   return {vert: vertRes.component, main: (allIncludes ++ mainRes.component), disp: (allIncludes ++ dispRes.component), aux: mainRes.images}
 
 
--- compile a shader.  substitutions, submodules, par & zn
-compile :: forall eff h. Module -> SystemST h -> Int -> Int -> (Array String) -> EpiS eff h CompRes
-compile mod systemST zOfs parOfs images = do
+-- parse a shader.  substitutions, submodules, par & zn
+parseModule :: forall eff h. Module -> SystemST h -> Int -> Int -> (Array String) -> EpiS eff h CompRes
+parseModule mod systemST zOfs parOfs images = do
   -- substitutions (make sure this is always first)
-  comp <- loadLib mod.component systemST.componentLib "compile component"
+  comp <- loadLib mod.component systemST.componentLib "parse component"
   sub' <- preProcessSub mod.sub
   let component' = fold handleSub comp.body sub'
 
@@ -73,7 +73,7 @@ compile mod systemST zOfs parOfs images = do
     handleZn dt v = replaceAll ("zn\\[#" ++ show v ++ "\\]") ("zn[" ++ (show $ (v + zOfs)) ++ "]") dt
     handleImg dt v = replaceAll ("aux\\[#" ++ show v ++ "\\]") ("aux[" ++ (show $ (v + (A.length images))) ++ "]") dt
     handleChild systemST {component, zOfs, parOfs, images} k v = do
-      res <- compile v systemST zOfs parOfs images
+      res <- parseModule v systemST zOfs parOfs images
       let iC = "//" ++ k ++ "\n  {\n" ++ (indentLines 2 res.component) ++ "\n  }"
       let child = replaceAll ("%" ++ k ++ "%") iC component
       return $ res { component = child }

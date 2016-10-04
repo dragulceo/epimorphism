@@ -83,7 +83,7 @@ switch ssRef pRef t mid idx dt = do
   let tPhase = systemST.t - t -- recover phase
   switchModules ssRef (t + tPhase) rootId childN nxtId spd
 
-  dbg "do switch!!!!"
+  --dbg "do switch!!!!"
   return $ ScriptRes (PMutMain "") Nothing
 
 
@@ -172,7 +172,7 @@ finishSwitch ssRef pRef t rootId idx dt = do
         addScript systemST parent "pause" ""
         return unit
 
-      dbg "finish switch!!!!"
+      --dbg "finish switch!!!!"
       return $ ScriptRes (PMutMain "") Nothing
     _ -> do
       return $ ScriptRes PMutNone Nothing

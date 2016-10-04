@@ -4,8 +4,6 @@ CURRENT PROJECTS:
 		- dynamic par/zn/aux count
 
 	- asynchronous compiling
-	  - when switching, clone root(both main & disp?), get new modId
-		- return true, new application root
 		- compile wrt new root
 		- freeze scripts
 		- when compiling done, switch out root, unfreeze scripts
@@ -20,6 +18,7 @@ CURRENT PROJECTS:
 		- load small images to start, bigger images when needed?
 
 	- cleanup
+	  - upgrade to new compiler?
 	  - double incZn is busted
     - make sure everything re. scripts still works
 		- be better about reloading objects after refs might change

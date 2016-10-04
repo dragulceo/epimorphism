@@ -1,7 +1,6 @@
 "use strict";
 
-// module Compiler
-
+// module Parser
 
 var parseN = function(node){
 	switch (node.type) {

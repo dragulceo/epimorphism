@@ -95,6 +95,7 @@ engineConfSchema = [
 ]
 
 foreign import data AudioAnalyser :: *
+data CompST = CompDone -- | compsrc | CompBuild | CompUpload | CompBind
 
 type EngineST = {
     dispProg :: Maybe WebGLProgram
@@ -106,6 +107,7 @@ type EngineST = {
   , audio :: Maybe (Tuple WebGLTexture AudioAnalyser)
   , ctx :: WebGLContext
   , empty :: GLT.TexImageSource
+  , compST :: CompST
 }
 
 -- UI
@@ -211,7 +213,6 @@ type ScriptFn eff h = STRef h (SystemST h) -> STRef h Pattern -> Number -> Strin
 data ScriptConfig = ScriptConfig String
 data ScriptRes = ScriptRes PMut (Maybe (StrMap String)) -- possible new root, possibly updated state
 data Script = Script String Number (StrMap String)
-
 
 
 --SLib

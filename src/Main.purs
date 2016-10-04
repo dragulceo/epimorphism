@@ -1,6 +1,7 @@
 module Main where
 
 import Prelude
+import Compiler (compileShaders)
 import Config (PMut(PMutNone), SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, SystemConf, UIConf)
 import Control.Monad (unless, when)
 import Control.Monad.Eff (Eff)
@@ -15,7 +16,7 @@ import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (insert, values, keys, lookup)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
-import Engine (postprocessFrame, initEngineST, renderFrame, setShaders)
+import Engine (postprocessFrame, initEngineST, renderFrame)
 import Graphics.Canvas (Canvas)
 import Layout (updateLayout)
 import Paths (runPath)
@@ -127,7 +128,7 @@ animate state = handleError do
   t2 <- lift $ now
 
   when recompile do
-    setShaders systemConf engineConf esRef systemST' pattern
+    compileShaders systemConf systemST' engineConf esRef pattern
     currentTimeMS2 <- lift $ now
     lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS2})
     return unit

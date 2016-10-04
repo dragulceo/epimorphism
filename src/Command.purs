@@ -1,6 +1,7 @@
 module Command where
 
 import Prelude
+import Compiler (compileShaders)
 import Config (Schema, patternSchema, moduleSchema, EpiS, Pattern, SystemST, SystemConf, EngineST, EngineConf, UIST, UIConf)
 import Control.Monad (when, unless)
 import Control.Monad.Eff (Eff)
@@ -16,14 +17,14 @@ import Data.StrMap (values, insert, toList)
 import Data.String (joinWith, split)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Texture (clearFB)
-import Engine (setShaders, initEngineST)
+import Engine (initEngineST)
 import Graphics.Canvas (Canvas)
 import Layout (updateLayout, initLayout)
 import Pattern (findModule)
 import ScriptUtil (addScript)
 import Serialize (unsafeSerialize)
 import System (mUp, loadLib)
+import Texture (clearFB)
 import Util (halt, Now, cxFromStringE, intFromStringE, numFromStringE, lg, uuid, handleError)
 
 foreign import saveCanvas :: forall eff. Eff eff Unit
@@ -101,7 +102,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         mid <- findModule systemST.moduleRefPool pattern "main.application.t.t_inner" true
         mUp systemST mid \m ->
           m {sub = insert "t_expr" tExp m.sub}
-        setShaders systemConf engineConf esRef systemST pattern
+        compileShaders systemConf systemST engineConf esRef pattern
 
         return unit
       "save" -> do
@@ -145,7 +146,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
             fract' <- intFromStringE fract
             lift $ modifySTRef ecRef (\ec -> ec {fract = fract'})
             engineConf' <- lift $ readSTRef ecRef
-            setShaders systemConf engineConf' esRef systemST pattern
+            compileShaders systemConf systemST engineConf' esRef pattern
 
           _ -> throwError "invalid format: setFract fract"
         return unit

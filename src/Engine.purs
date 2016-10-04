@@ -22,8 +22,7 @@ import EngineUtil (execGL)
 import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
 import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
 import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor)
-import Graphics.WebGL.Shader (getUniformBindings)
-import Graphics.WebGL.Types (WebGLProgram, WebGLContext, WebGLTexture, DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
+import Graphics.WebGL.Types (WebGLContext, WebGLTexture, DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
 import Texture (initAux, initTexFb, emptyImage)
 import Util (hasAttr, unsafeGetAttr, lg, dbg, Now, unsafeNull)
 
@@ -116,24 +115,17 @@ renderFrame systemST engineConf engineST pattern par zn frameNum = do
 
   -- bind par & zn
   execGL ctx (liftEff $ GL.useProgram ctx main)
-
-  bindParZn ctx main mainUnif par zn
+  bindParZn ctx mainUnif par zn
 
   execGL ctx do
-    --liftEff $ GL.useProgram ctx main
-
     -- bind main uniforms
     uniform1f (unsafeGetAttr mainUnif "time") (systemST.t - pattern.tPhase)
     uniform1f (unsafeGetAttr mainUnif "kernel_dim") (toNumber engineConf.kernelDim)
-
-    let a = lg "eng"
-    let a = lg (unsafeGetAttr mainUnif "kernel_dim")
 
     -- BUG!!! audio has to be before aux???
     --audio info
     case engineST.audio of
       Just (Tuple audioTex analyser) -> do
-        audioU <- liftEff $ GL.getUniformLocation ctx main "audioData"
         case (hasAttr mainUnif "audioData") of
           true -> do
             liftEff $ GL.bindTexture ctx GLE.texture2d audioTex
@@ -182,59 +174,29 @@ postprocessFrame systemST engineConf engineST tex par zn = do
     Just x -> return x
     Nothing -> throwError "RenderFrame: missing disp program"
 
-  execGL ctx do
-    --liftEff $ GL.useProgram ctx disp
-
-    --let c = lg $ (unsafeGetAttr dispUnif "kernel_dim")
-    --let a = lg dispUnif
-
-    tp <- liftEff $ GL.getUniformLocation ctx disp "kernel_dim"
-    let b = lg $ fromJust tp
-
-    unif' <- getUniformBindings disp
-    let c = lg unif'
-    return unit
-
-
-
-  bindParZn ctx disp dispUnif par zn
+  execGL ctx (liftEff $ GL.useProgram ctx disp)
+  bindParZn ctx dispUnif par zn
 
   execGL ctx do
-
     -- bind disp uniforms
     uniform1f (unsafeGetAttr dispUnif "kernel_dim") (toNumber engineConf.kernelDim)
-    --let a = lg "post"
-    --let a = lg (unsafeGetAttr dispUnif "kernel_dim")
 
     -- draw
     liftEff $ GL.bindTexture ctx GLE.texture2d tex
     liftEff $ GL.bindFramebuffer ctx GLE.framebuffer unsafeNull
     drawArrays Triangles 0 6
 
+
 -- bind parameters & zn values from pattern into program
-bindParZn :: forall h eff. WebGLContext -> WebGLProgram -> UniformBindings -> Array Number -> Array Number -> EpiS eff h Unit
-bindParZn ctx prog unif par zn = do
+bindParZn :: forall h eff. WebGLContext -> UniformBindings -> Array Number -> Array Number -> EpiS eff h Unit
+bindParZn ctx unif par zn = do
   execGL ctx do
-    liftEff $ GL.useProgram ctx prog
-
-    --let a = lg (unsafeGetAttr unif "par[0]")
-    --unif' <- getUniformBindings prog
-    --mParU <- liftEff $ GL.getUniformLocation ctx prog "par"
-    --let a = lg $ fromJust mParU
-    --let a = lg unif
-    --let a = lg unif'
-
-
     when (length par > 0) do
       when (not $ hasAttr unif "par[0]") do
         throwError $ ShaderError "missing par binding!"
-      --uniform1fv (Uniform (unsafeGetAttr unif "par[0]")) (T.asFloat32Array par)
-      tp <- liftEff $ GL.getUniformLocation ctx prog "par"
-      uniform1fv (Uniform (fromJust tp)) (T.asFloat32Array par)
+      uniform1fv (Uniform (unsafeGetAttr unif "par[0]")) (T.asFloat32Array par)
 
     when (length zn > 0) do
       when (not $ hasAttr unif "zn[0]") do
         throwError $ ShaderError "missing zn binding!"
-      --uniform1fv (Uniform (unsafeGetAttr unif "zn[0]")) (T.asFloat32Array zn)
-      tp <- liftEff $ GL.getUniformLocation ctx prog "zn"
-      uniform1fv (Uniform (fromJust tp)) (T.asFloat32Array zn)
+      uniform2fv (Uniform (unsafeGetAttr unif "zn[0]")) (T.asFloat32Array zn)

@@ -206,7 +206,7 @@ data PMut = PMutNone | PMutMain String | PMutDisp String | PMutVert String
 
 -- Script
 -- sys -> time -> mid -> idx -> args -> res
-type ScriptFn eff h = STRef h (SystemST h) -> Number -> String -> Int -> StrMap String -> EpiS eff h ScriptRes
+type ScriptFn eff h = STRef h (SystemST h) -> STRef h Pattern -> Number -> String -> Int -> StrMap String -> EpiS eff h ScriptRes
 
 data ScriptConfig = ScriptConfig String
 data ScriptRes = ScriptRes PMut (Maybe (StrMap String)) -- possible new root, possibly updated state

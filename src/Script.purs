@@ -1,7 +1,7 @@
 module Script where
 
 import Prelude
-import Config (PMut(PMutMain, PMutNone), Script(Script), ScriptRes(ScriptRes), Pattern, SystemST, ScriptFn, EpiS)
+import Config (PMut(PMutNone), Script(Script), ScriptRes(ScriptRes), Pattern, SystemST, ScriptFn, EpiS)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (readSTRef, STRef)
 import Control.Monad.Trans (lift)
@@ -34,22 +34,22 @@ lookupScriptFN n = case n of
 runScripts :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h PMut
 runScripts ssRef pRef = do
   pattern <- lift $ readSTRef pRef
-  r0 <- mFold ssRef PMutNone pattern.main (runModScripts ssRef)
-  r1 <- mFold ssRef r0 pattern.disp (runModScripts ssRef)
-  mFold ssRef r1 pattern.vert (runModScripts ssRef)
+  r0 <- mFold ssRef PMutNone pattern.main (runModScripts ssRef pRef)
+  r1 <- mFold ssRef r0 pattern.disp (runModScripts ssRef pRef)
+  mFold ssRef r1 pattern.vert (runModScripts ssRef pRef)
 
 
-runModScripts :: forall eff h. STRef h (SystemST h) -> PMut -> String -> EpiS eff h PMut
-runModScripts ssRef mut mid = do
+runModScripts :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> PMut -> String -> EpiS eff h PMut
+runModScripts ssRef pRef mut mid = do
   systemST <- lift $ readSTRef ssRef
   mRef     <- loadLib mid systemST.moduleRefPool "mid! runScripts"
   m        <- lift $ readSTRef mRef
 
-  foldM (runScript ssRef mid) mut m.scripts
+  foldM (runScript ssRef pRef mid) mut m.scripts
 
 
-runScript :: forall eff h. STRef h (SystemST h) -> String -> PMut -> String -> EpiS eff h PMut
-runScript ssRef mid PMutNone scr = do
+runScript :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> String -> PMut -> String -> EpiS eff h PMut
+runScript ssRef pRef mid PMutNone scr = do
   (Script name phase args) <- parseScript scr
   systemST <- lift $ readSTRef ssRef
   fn <- lookupScriptFN name
@@ -58,7 +58,7 @@ runScript ssRef mid PMutNone scr = do
   mRef <- loadLib mid systemST.moduleRefPool "mid! runScript"
   m    <- lift $ readSTRef mRef
   idx  <- return $ fromJust $ elemIndex scr m.scripts
-  (ScriptRes mut update) <- fn ssRef t' mid idx args
+  (ScriptRes mut update) <- fn ssRef pRef t' mid idx args
 
   case update of
     Just dt -> do
@@ -73,4 +73,4 @@ runScript ssRef mid PMutNone scr = do
     _ -> return unit
 
   return mut
-runScript ssRef mid x scr = return x
+runScript _ _ _ x _ = return x

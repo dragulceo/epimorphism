@@ -15,12 +15,12 @@ import Text.Format (format, precision)
 import Util (cxFromStringE, intFromStringE, inj, numFromStringE, clickPause)
 
 null :: forall eff h. ScriptFn eff h
-null ssRef t mid idx dt = do
+null ssRef pRef t mid idx dt = do
   return $ ScriptRes PMutNone Nothing
 
 -- get rid of this abomination
 pause :: forall eff h. ScriptFn eff h
-pause ssRef t mid idx dt = do
+pause ssRef pRef t mid idx dt = do
   systemST <- lift $ readSTRef ssRef
 
   lift $ clickPause
@@ -29,7 +29,7 @@ pause ssRef t mid idx dt = do
 
 -- increment Zn
 incZn :: forall eff h. ScriptFn eff h
-incZn ssRef t mid idx dt = do
+incZn ssRef pRef t mid idx dt = do
   systemST <- lift $ readSTRef ssRef
 
   mRef <- loadLib mid systemST.moduleRefPool "incZn module"
@@ -75,7 +75,7 @@ incZn ssRef t mid idx dt = do
 
 
 randomize :: forall eff h. ScriptFn eff h
-randomize ssRef t mid idx dt = do
+randomize ssRef pRef t mid idx dt = do
   systemST <- lift $ readSTRef ssRef
 
   dly <- (loadLib "dly" dt "randomComponent") >>= numFromStringE

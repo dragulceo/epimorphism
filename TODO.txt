@@ -22,7 +22,6 @@ CURRENT PROJECTS:
 	- cleanup
 	  - double incZn is busted
     - make sure everything re. scripts still works
-	  - findParent is kind of ghetto
 		- be better about reloading objects after refs might change
     - better data organization
 	    - merge configs & states?

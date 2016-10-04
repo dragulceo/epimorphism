@@ -11,16 +11,17 @@ import Data.Maybe (Maybe(Nothing), fromMaybe)
 import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (insert, fromFoldable, union)
 import Data.Tuple (Tuple(..))
-import Pattern (purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
+import Pattern (findAddr, purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
 import ScriptUtil (addScript, purgeScript)
 import System (loadLib, family)
 import Text.Format (precision, format)
-import Util (dbg, intFromStringE, lg, inj, randInt, numFromStringE, gmod)
+import Util (dbg, intFromStringE, inj, randInt, numFromStringE, gmod)
 
 
 switch :: forall eff h. ScriptFn eff h
-switch ssRef t mid idx dt = do
+switch ssRef pRef t mid idx dt = do
   systemST <- lift $ readSTRef ssRef
+  pattern <- lift $ readSTRef pRef
 
   spd <- (loadLib "spd" dt "switch spd") >>= numFromStringE
 
@@ -30,7 +31,7 @@ switch ssRef t mid idx dt = do
     "load" -> do
       childN' <- loadLib "childN" dt "switch childN"
       return $ Tuple mid childN'
-    "clone" -> findParent systemST.moduleRefPool mid
+    "clone" -> findParent systemST.moduleRefPool pattern mid
     x -> throwError $ "invalid 'op' for switch, must be load | clone : " ++ x
 
   -- get the relevant name to be used to either load or for the mutator
@@ -142,8 +143,9 @@ switchModules ssRef t rootId childN m1 spd = do
 
 
 finishSwitch :: forall eff h. ScriptFn eff h
-finishSwitch ssRef t rootId idx dt = do
+finishSwitch ssRef pRef t rootId idx dt = do
   systemST <- lift $ readSTRef ssRef
+  pattern <- lift $ readSTRef pRef
 
   -- get data
   delay <- (loadLib "delay" dt "finishSwitch delay") >>= numFromStringE
@@ -154,7 +156,7 @@ finishSwitch ssRef t rootId idx dt = do
       --let a = lg "DONE SWITCHING"
 
       -- find parent & m1
-      (Tuple parent subN) <- findParent systemST.moduleRefPool rootId
+      (Tuple parent subN) <- findParent systemST.moduleRefPool pattern rootId
       mRef   <- loadLib rootId systemST.moduleRefPool "finishSwitch module"
       m      <- lift $ readSTRef mRef
       m1id   <- loadLib "m1" m.modules "finishSwitch module"

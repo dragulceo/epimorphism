@@ -6,15 +6,20 @@ import Control.Monad (when)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, modifySTRef, newSTRef, readSTRef)
-import Data.Array (cons, head, tail) as A
+import Data.Array (head, init, last, length)
+import Data.Array (cons, head, tail, foldM) as A
+import Data.List (fromList)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (toList, member, StrMap, foldM, fold, delete, insert, values)
-import Data.String (split)
+import Data.StrMap (toList, member, StrMap, delete, insert, values)
+import Data.String (split, joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import System (loadLib)
-import Util (lg, uuid)
+import Util (uuid)
+
+
+------------------------ FIND ------------------------
 
 -- find a module given an address - ie main.application.t or a reference
 findModule :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> Boolean -> EpiS eff h String
@@ -48,30 +53,40 @@ findModule' mpool mid addr followSwitch = do
         false -> findModule' mpool childId addr' followSwitch
 
 
-
--- find parent module id & submodule that a module is binded to. kind of ghetto
-findParent :: forall eff h. StrMap (STRef h Module) -> String -> EpiS eff h (Tuple String String)
-findParent mpool mid = do
-  res <- foldM handle Nothing mpool
-  case res of
-    Nothing -> throwError $ "module has no parent: " ++ mid
-    Just x -> return x
+findAddr :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> EpiS eff h String
+findAddr mpool pattern mid = do
+  m0 <- find' "main" pattern.main
+  m1 <- find' "vert" pattern.disp
+  m2 <- find' "disp" pattern.vert
+  case (m0 <> m1 <> m2) of
+    Just addr -> return addr
+    Nothing -> throwError $ "orphan module? " ++ mid
   where
-    handle :: Maybe (Tuple String String) -> String -> STRef h Module -> EpiS eff h (Maybe (Tuple String String))
-    handle (Just x) _ _ = return $ Just x
-    handle _ pid ref = do
-      mod <- lift $ readSTRef ref
-      case (fold handle2 Nothing mod.modules) of
-        Nothing -> return Nothing
-        Just x -> do
-          return $ Just $ Tuple pid x
-    handle2 :: Maybe String -> String -> String -> Maybe String
-    handle2 (Just x) _ _ = Just x
-    handle2 _ k cid | cid == mid = Just k
-    handle2 _ _ _ = Nothing
+    find' :: String -> String -> EpiS eff h (Maybe String)
+    find' addr cid = case (cid == mid) of
+      true -> return (Just addr)
+      false -> do
+        cRef <- loadLib cid mpool "cid findAddr"
+        cMod <- lift $ readSTRef cRef
+        A.foldM (search addr) Nothing (fromList $ toList cMod.modules)
+    search addr val (Tuple k v) = do
+      res <- find' (addr ++ "." ++ k) v
+      return $ val <> res
 
 
--- IMPORTING ---
+findParent :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> EpiS eff h (Tuple String String)
+findParent mpool pattern mid = do
+  addr <- findAddr mpool pattern mid
+  let cmp = split "." addr
+  when (length cmp < 2) do
+    throwError $ "malformed addr: " ++ addr
+
+  let lst = fromJust $ last cmp
+  let addr' = joinWith "." $ fromJust $ init cmp
+  pId <- findModule mpool pattern addr' true
+  return $ Tuple pId lst
+
+------------------------ IMPORTING ------------------------
 
 -- import the modules of a pattern into the ref pool
 data ImportObj = ImportModule Module | ImportRef String
@@ -168,3 +183,31 @@ replaceModule ssRef mid subN cid obj = do
   lift $ modifySTRef mRef (\m' -> m' {modules = mod'})
 
   return n'
+
+
+-- slightly janky
+data CloneRes = CloneRes String String String
+cloneWith :: forall eff h. STRef h (SystemST h) -> Pattern -> String -> EpiS eff h CloneRes
+cloneWith ssRef pattern mid = do
+  systemST <- lift $ readSTRef ssRef
+
+  addr <- findAddr systemST.moduleRefPool pattern mid
+  let rootN = fromJust $ head $ split "." addr
+
+  rootId <- case rootN of
+    "main" -> return pattern.main
+    "disp" -> return pattern.disp
+    "vert" -> return pattern.vert
+    _ -> throwError "unknown root"
+
+  rootId' <- importModule ssRef (ImportRef rootId)
+
+  pattern' <- case rootN of
+    "main" -> return $ pattern {main = rootId'}
+    "disp" -> return $ pattern {disp = rootId'}
+    "vert" -> return $ pattern {vert = rootId'}
+    _ -> throwError "unknown root"
+
+  mid' <- findModule systemST.moduleRefPool pattern' addr true
+
+  return $ CloneRes rootN rootId mid'

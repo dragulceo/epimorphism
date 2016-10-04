@@ -115,14 +115,19 @@ renderFrame systemST engineConf engineST pattern par zn frameNum = do
     Nothing -> throwError "RenderFrame: missing main program"
 
   -- bind par & zn
+  execGL ctx (liftEff $ GL.useProgram ctx main)
+
   bindParZn ctx main mainUnif par zn
 
   execGL ctx do
-    liftEff $ GL.useProgram ctx main
+    --liftEff $ GL.useProgram ctx main
 
     -- bind main uniforms
     uniform1f (unsafeGetAttr mainUnif "time") (systemST.t - pattern.tPhase)
     uniform1f (unsafeGetAttr mainUnif "kernel_dim") (toNumber engineConf.kernelDim)
+
+    let a = lg "eng"
+    let a = lg (unsafeGetAttr mainUnif "kernel_dim")
 
     -- BUG!!! audio has to be before aux???
     --audio info
@@ -175,16 +180,31 @@ postprocessFrame systemST engineConf engineST tex par zn = do
     Nothing -> throwError "RenderFrame: missing disp program"
   dispUnif <- case engineST.dispUnif of
     Just x -> return x
-    Nothing -> throwError "RenderFrame: missing main program"
+    Nothing -> throwError "RenderFrame: missing disp program"
+
+  execGL ctx do
+    --liftEff $ GL.useProgram ctx disp
+
+    --let c = lg $ (unsafeGetAttr dispUnif "kernel_dim")
+    --let a = lg dispUnif
+
+    tp <- liftEff $ GL.getUniformLocation ctx disp "kernel_dim"
+    let b = lg $ fromJust tp
+
+    unif' <- getUniformBindings disp
+    let c = lg unif'
+    return unit
+
+
 
   bindParZn ctx disp dispUnif par zn
 
   execGL ctx do
-    -- disp/post program
-    liftEff $ GL.useProgram ctx disp
 
     -- bind disp uniforms
     uniform1f (unsafeGetAttr dispUnif "kernel_dim") (toNumber engineConf.kernelDim)
+    --let a = lg "post"
+    --let a = lg (unsafeGetAttr dispUnif "kernel_dim")
 
     -- draw
     liftEff $ GL.bindTexture ctx GLE.texture2d tex
@@ -197,16 +217,24 @@ bindParZn ctx prog unif par zn = do
   execGL ctx do
     liftEff $ GL.useProgram ctx prog
 
-    let x = lg unif
+    --let a = lg (unsafeGetAttr unif "par[0]")
+    --unif' <- getUniformBindings prog
+    --mParU <- liftEff $ GL.getUniformLocation ctx prog "par"
+    --let a = lg $ fromJust mParU
+    --let a = lg unif
+    --let a = lg unif'
+
 
     when (length par > 0) do
       when (not $ hasAttr unif "par[0]") do
         throwError $ ShaderError "missing par binding!"
-      let a = lg (unsafeGetAttr unif "par[0]")
-      uniform1fv (Uniform (unsafeGetAttr unif "par[0]")) (T.asFloat32Array par)
+      --uniform1fv (Uniform (unsafeGetAttr unif "par[0]")) (T.asFloat32Array par)
+      tp <- liftEff $ GL.getUniformLocation ctx prog "par"
+      uniform1fv (Uniform (fromJust tp)) (T.asFloat32Array par)
 
     when (length zn > 0) do
       when (not $ hasAttr unif "zn[0]") do
         throwError $ ShaderError "missing zn binding!"
-      let a = lg (unsafeGetAttr unif "zn[0]")
-      uniform1fv (Uniform (unsafeGetAttr unif "zn[0]")) (T.asFloat32Array zn)
+      --uniform1fv (Uniform (unsafeGetAttr unif "zn[0]")) (T.asFloat32Array zn)
+      tp <- liftEff $ GL.getUniformLocation ctx prog "zn"
+      uniform1fv (Uniform (fromJust tp)) (T.asFloat32Array zn)

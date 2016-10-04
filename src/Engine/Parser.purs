@@ -1,7 +1,7 @@
 module Parser where
 
 import System
-import Config (Epi, Module, EpiS, SystemST, Pattern)
+import Config (Epi, Module, EpiS, SystemST)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, readSTRef)
 import Data.Array (sort, length, (..)) as A
@@ -14,33 +14,23 @@ import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
 import Prelude (return, ($), bind, map, (++), (-), (+), show)
-import Util (lg, replaceAll, indentLines)
+import Util (replaceAll, indentLines)
 
 type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}
 type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array String}
 
 foreign import parseT :: String -> String
 
--- parse vertex, disp & main shaders
-parseShaders :: forall eff h. Pattern -> (SystemST h) -> EpiS eff h Shaders
-parseShaders pattern systemST = do
-  vertRef <- loadLib pattern.vert systemST.moduleRefPool "parseShaders vert"
-  vert    <- lift $ readSTRef vertRef
-  vertRes <- parseModule vert systemST 0 0 []
+parseShader :: forall eff h. SystemST h -> String -> Array String -> EpiS eff h (Tuple String (Array String))
+parseShader systemST mid includes = do
+  modRef <- loadLib mid systemST.moduleRefPool "parseShaders mid"
+  mod    <- lift $ readSTRef modRef
+  modRes <- parseModule mod systemST 0 0 []
 
-  dispRef <- loadLib pattern.disp systemST.moduleRefPool "parseShaders disp"
-  disp    <- lift $ readSTRef dispRef
-  dispRes <- parseModule disp systemST 0 0 []
+  allIncludes' <- traverse (\x -> loadLib x systemST.componentLib "includes") includes
+  let allIncludes = "//INCLUDES\n" ++ (joinWith "\n\n" (map (\x -> x.body) allIncludes')) ++ "\n//END INCLUDES\n"
 
-  mainRef <- loadLib pattern.main systemST.moduleRefPool "parseShaders main"
-  main    <- lift $ readSTRef mainRef
-  mainRes <- parseModule main systemST 0 0 []
-
-  -- substitute includes
-  includes <- traverse (\x -> loadLib x systemST.componentLib "includes") pattern.includes
-  let allIncludes = "//INCLUDES\n" ++ (joinWith "\n\n" (map (\x -> x.body) includes)) ++ "\n//END INCLUDES\n"
-
-  return {vert: vertRes.component, main: (allIncludes ++ mainRes.component), disp: (allIncludes ++ dispRes.component), aux: mainRes.images}
+  return $ Tuple (allIncludes ++ modRes.component) (modRes.images)
 
 
 -- parse a shader.  substitutions, submodules, par & zn

@@ -6,7 +6,6 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (ExceptT)
 import Control.Monad.ST (STRef, ST)
 import DOM (DOM)
-import Data.Complex (Complex)
 import Data.Maybe (Maybe(..))
 import Data.Set (Set)
 import Data.StrMap (StrMap, empty)
@@ -95,7 +94,13 @@ engineConfSchema = [
 ]
 
 foreign import data AudioAnalyser :: *
-data CompST = CompDone -- | compsrc | CompBuild | CompUpload | CompBind
+foreign import data UniformBindings :: *
+
+type CompST = {mainSrc :: Maybe String, dispSrc :: Maybe String, verSrc :: Maybe String,
+               aux :: Maybe (Array String),
+               mainProg :: Maybe WebGLProgram, dispProg :: Maybe WebGLProgram,
+               mainUnif :: Maybe UniformBindings, dispUnif :: Maybe UniformBindings}
+data CompOp = CompMainShader | CompDispShader | CompVertShader | CompUploadAux | CompMainProg | CompDispProg | CompBind | CompFinish
 
 type EngineST = {
     dispProg :: Maybe WebGLProgram
@@ -107,7 +112,10 @@ type EngineST = {
   , audio :: Maybe (Tuple WebGLTexture AudioAnalyser)
   , ctx :: WebGLContext
   , empty :: GLT.TexImageSource
-  , compST :: CompST
+  , compQueue :: Array CompOp
+  , compST :: Maybe CompST
+  , mainUnif :: Maybe UniformBindings
+  , dispUnif :: Maybe UniformBindings
 }
 
 -- UI

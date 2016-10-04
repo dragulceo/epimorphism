@@ -6,7 +6,7 @@ import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Audio (audioData, initAudio)
 import Compiler (compileShaders)
-import Config (CompST(CompDone), EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf)
+import Config (UniformBindings, EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf)
 import Control.Monad (when)
 import Control.Monad.Eff (forE)
 import Control.Monad.Eff.Class (liftEff)
@@ -25,7 +25,7 @@ import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, cl
 import Graphics.WebGL.Shader (getUniformBindings)
 import Graphics.WebGL.Types (WebGLProgram, WebGLContext, WebGLTexture, DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
 import Texture (initAux, initTexFb, emptyImage)
-import Util (dbg, Now, unsafeNull)
+import Util (hasAttr, unsafeGetAttr, lg, dbg, Now, unsafeNull)
 
 -- PUBLIC
 
@@ -58,7 +58,7 @@ initEngineST sysConf engineConf systemST pattern canvasId esRef' = do
       lift $ modifySTRef ref (\r -> r {empty = empty, auxImg = []})
       return ref
     Nothing -> do
-      let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, audio: Nothing, auxImg: [], compST: CompDone, ctx, empty}
+      let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, audio: Nothing, auxImg: [], compQueue: [], compST: Nothing, mainUnif: Nothing, dispUnif: Nothing, ctx, empty}
       lift $ newSTRef tmp
 
   es <- lift $ readSTRef esRef
@@ -110,42 +110,43 @@ renderFrame systemST engineConf engineST pattern par zn frameNum = do
   main <- case engineST.mainProg of
     Just x -> return x
     Nothing -> throwError "RenderFrame: missing main program"
+  mainUnif <- case engineST.mainUnif of
+    Just x -> return x
+    Nothing -> throwError "RenderFrame: missing main program"
 
   -- bind par & zn
-  bindParZn ctx main par zn
+  bindParZn ctx main mainUnif par zn
 
   execGL ctx do
     liftEff $ GL.useProgram ctx main
 
     -- bind main uniforms
-    mainUnif <- getUniformBindings main
-    uniform1f mainUnif.time (systemST.t - pattern.tPhase)
-    uniform1f mainUnif.kernel_dim (toNumber engineConf.kernelDim)
+    uniform1f (unsafeGetAttr mainUnif "time") (systemST.t - pattern.tPhase)
+    uniform1f (unsafeGetAttr mainUnif "kernel_dim") (toNumber engineConf.kernelDim)
 
     -- BUG!!! audio has to be before aux???
     --audio info
     case engineST.audio of
       Just (Tuple audioTex analyser) -> do
         audioU <- liftEff $ GL.getUniformLocation ctx main "audioData"
-        case audioU of
-          Just audioU' -> do
+        case (hasAttr mainUnif "audioData") of
+          true -> do
             liftEff $ GL.bindTexture ctx GLE.texture2d audioTex
             dta <- lift $ lift $ audioData analyser
             liftEff $ GL.texImage2D_ ctx GLE.texture2d 0 GLE.alpha engineConf.audioBufferSize 1 0 GLE.alpha GLE.unsignedByte dta
 
             let ofs = length engineST.auxImg + 1
-            liftEff $ GL.uniform1i ctx audioU' ofs
+            liftEff $ GL.uniform1i ctx (unsafeGetAttr mainUnif "audioData") ofs
             liftEff $ GL.activeTexture ctx (GLE.texture0 + ofs)
             liftEff $ GL.bindTexture ctx GLE.texture2d audioTex
-          Nothing -> return unit
+          false -> return unit
       Nothing -> return unit
 
     -- aux
     when (length engineST.auxImg > 0) do
-      auxU <- liftEff $ GL.getUniformLocation ctx main "aux"
-      case auxU of
-        Just auxU' -> liftEff $ GL.uniform1iv ctx auxU' (1..(length engineST.auxImg))
-        Nothing   -> throwError $ ShaderError "missing aux uniform!"
+      when (not $ hasAttr mainUnif "aux[0]") do
+        throwError $ ShaderError "missing aux uniform!"
+      liftEff $ GL.uniform1iv ctx (unsafeGetAttr mainUnif "aux[0]") (1..(length engineST.auxImg))
       liftEff $ forE 0.0 (toNumber $ length engineST.auxImg) \i -> do
         let i' = fromJust $ fromNumber i
         GL.activeTexture ctx (GLE.texture1 + i')
@@ -172,16 +173,18 @@ postprocessFrame systemST engineConf engineST tex par zn = do
   disp <- case engineST.dispProg of
     Just x -> return x
     Nothing -> throwError "RenderFrame: missing disp program"
+  dispUnif <- case engineST.dispUnif of
+    Just x -> return x
+    Nothing -> throwError "RenderFrame: missing main program"
 
-  bindParZn ctx disp par zn
+  bindParZn ctx disp dispUnif par zn
 
   execGL ctx do
     -- disp/post program
     liftEff $ GL.useProgram ctx disp
 
     -- bind disp uniforms
-    dispUnif <- getUniformBindings disp
-    uniform1f dispUnif.kernel_dim (toNumber engineConf.kernelDim)
+    uniform1f (unsafeGetAttr dispUnif "kernel_dim") (toNumber engineConf.kernelDim)
 
     -- draw
     liftEff $ GL.bindTexture ctx GLE.texture2d tex
@@ -189,20 +192,21 @@ postprocessFrame systemST engineConf engineST tex par zn = do
     drawArrays Triangles 0 6
 
 -- bind parameters & zn values from pattern into program
-bindParZn :: forall h eff. WebGLContext -> WebGLProgram -> Array Number -> Array Number -> EpiS eff h Unit
-bindParZn ctx prog par zn = do
+bindParZn :: forall h eff. WebGLContext -> WebGLProgram -> UniformBindings -> Array Number -> Array Number -> EpiS eff h Unit
+bindParZn ctx prog unif par zn = do
   execGL ctx do
     liftEff $ GL.useProgram ctx prog
-    unif <- getUniformBindings prog
+
+    let x = lg unif
 
     when (length par > 0) do
-      mParU <- liftEff $ GL.getUniformLocation ctx prog "par"
-      case mParU of
-        Just parU -> uniform1fv (Uniform parU) (T.asFloat32Array par)
-        Nothing   -> throwError $ ShaderError "missing par uniform!"
+      when (not $ hasAttr unif "par[0]") do
+        throwError $ ShaderError "missing par binding!"
+      let a = lg (unsafeGetAttr unif "par[0]")
+      uniform1fv (Uniform (unsafeGetAttr unif "par[0]")) (T.asFloat32Array par)
 
     when (length zn > 0) do
-      mZnU <- liftEff $ GL.getUniformLocation ctx prog "zn"
-      case mZnU of
-        Just znU -> uniform2fv (Uniform znU) (T.asFloat32Array zn)
-        Nothing  -> throwError $ ShaderError "missing zn uniform!"
+      when (not $ hasAttr unif "zn[0]") do
+        throwError $ ShaderError "missing zn binding!"
+      let a = lg (unsafeGetAttr unif "zn[0]")
+      uniform1fv (Uniform (unsafeGetAttr unif "zn[0]")) (T.asFloat32Array zn)

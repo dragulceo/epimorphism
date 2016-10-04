@@ -48,6 +48,7 @@ foreign import isNumber :: String -> Boolean
 
 foreign import unsafeSetAttr :: forall a b. a -> String -> b -> a
 foreign import unsafeGetAttr :: forall a b. a -> String -> b
+foreign import hasAttr :: forall a. a -> String -> Boolean
 foreign import unsafeCast :: forall a b. a -> b
 
 -- ghetto

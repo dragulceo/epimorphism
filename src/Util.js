@@ -19,6 +19,12 @@ exports.unsafeGetAttr = function(obj){
 	};
 };
 
+exports.hasAttr = function(obj){
+	return function(attrn){
+		return (obj[attrn] != undefined);
+	};
+};
+
 exports.unsafeCast = function(obj){
   return obj;
 };

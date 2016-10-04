@@ -9,11 +9,11 @@ import Data.Maybe (Maybe(Just))
 import Data.Tuple (Tuple(Tuple))
 import EngineUtil (execGL)
 import Graphics.WebGL.Methods (vertexAttribPointer, enableVertexAttribArray, bindBuffer, bufferData, createBuffer)
-import Graphics.WebGL.Shader (getAttrBindings, compileShadersIntoProgram, linkProgram)
+import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram, linkProgram)
 import Graphics.WebGL.Types (DataType(Float), BufferData(DataSource), BufferUsage(StaticDraw), ArrayBufferType(ArrayBuffer))
 import Parser (parseShader)
 import Texture (uploadAux)
-import Util (now2, now, replaceAll, dbg, Now)
+import Util (unsafeCast, lg, now2, now, replaceAll, dbg, Now)
 
 -- compile shaders and load into systemST
 compileShaders :: forall eff h. SystemConf -> SystemST h -> EngineConf -> STRef h EngineST -> Pattern -> EpiS (now :: Now | eff) h Unit
@@ -33,9 +33,10 @@ compileShaders sysConf systemST engineConf esRef pattern = do
   auxImg <- uploadAux es sysConf.host aux
 
   mainProg <- execGL es.ctx (compileShadersIntoProgram vert main)
+
   dispProg <- execGL es.ctx (compileShadersIntoProgram vert disp)
 
-  execGL es.ctx ( do
+  (Tuple mainUnif' dispUnif') <- execGL es.ctx ( do
     linkProgram mainProg
     linkProgram dispProg
     -- vertex coords
@@ -51,8 +52,14 @@ compileShaders sysConf systemST engineConf esRef pattern = do
     vertexAttribPointer mainAttr.a_position 2 Float false 0 0
     enableVertexAttribArray dispAttr.a_position
     vertexAttribPointer dispAttr.a_position 2 Float false 0 0
+
+    mainUnif <- getUniformBindings mainProg
+    dispUnif <- getUniformBindings dispProg
+    return $ Tuple mainUnif dispUnif
   )
 
-  lift $ modifySTRef esRef (\s -> s {dispProg = Just dispProg, mainProg = Just mainProg, auxImg = auxImg})
+  lift $ modifySTRef esRef (\s -> s {dispProg = Just dispProg, mainProg = Just mainProg,
+    mainUnif = Just (unsafeCast mainUnif'), dispUnif = Just (unsafeCast dispUnif'),
+    auxImg = auxImg})
 
   return unit

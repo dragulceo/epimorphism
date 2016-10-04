@@ -1,7 +1,7 @@
 module Switch where
 
 import Prelude
-import Config (ScriptRes(ScriptRes), Module, ScriptFn, EpiS, SystemST)
+import Config (PMut(PMutNone, PMutMain), ScriptRes(ScriptRes), Module, ScriptFn, EpiS, SystemST)
 import Control.Monad (when)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
@@ -15,7 +15,7 @@ import Pattern (purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, 
 import ScriptUtil (addScript, purgeScript)
 import System (loadLib, family)
 import Text.Format (precision, format)
-import Util (intFromStringE, lg, inj, randInt, numFromStringE, gmod)
+import Util (dbg, intFromStringE, lg, inj, randInt, numFromStringE, gmod)
 
 
 switch :: forall eff h. ScriptFn eff h
@@ -82,7 +82,8 @@ switch ssRef t mid idx dt = do
   let tPhase = systemST.t - t -- recover phase
   switchModules ssRef (t + tPhase) rootId childN nxtId spd
 
-  return $ ScriptRes true Nothing
+  dbg "do switch!!!!"
+  return $ ScriptRes (PMutMain "") Nothing
 
 
 getMutator :: forall eff h. String -> String -> String -> EpiS eff h (Module -> Module)
@@ -169,6 +170,7 @@ finishSwitch ssRef t rootId idx dt = do
         addScript systemST parent "pause" ""
         return unit
 
-      return $ ScriptRes true Nothing
+      dbg "finish switch!!!!"
+      return $ ScriptRes (PMutMain "") Nothing
     _ -> do
-      return $ ScriptRes false Nothing
+      return $ ScriptRes PMutNone Nothing

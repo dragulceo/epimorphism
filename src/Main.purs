@@ -1,7 +1,7 @@
 module Main where
 
 import Prelude
-import Config (SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, SystemConf, UIConf)
+import Config (PMut(PMutNone), SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, SystemConf, UIConf)
 import Control.Monad (unless, when)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
@@ -16,15 +16,15 @@ import Data.StrMap (insert, values, keys, lookup)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
 import Engine (postprocessFrame, initEngineST, renderFrame, setShaders)
-import Texture (preloadImages)
 import Graphics.Canvas (Canvas)
 import Layout (updateLayout)
 import Paths (runPath)
 import Pattern (importPattern)
 import Script (runScripts)
 import System (initSystemST, loadLib)
+import Texture (preloadImages)
 import UI (initUIST)
-import Util (imag, real, rndstr, Now, handleError, lg, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
+import Util (dbg, imag, real, rndstr, Now, handleError, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
 
 host :: String
 host = ""
@@ -58,7 +58,7 @@ initState systemST = do
   seed <- case systemConf.seed of
     "" -> do
       newSeed <- lift rndstr
-      let xxx = lg $ "GENERATING SEED: " ++ newSeed
+      dbg $ "GENERATING SEED: " ++ newSeed
       return newSeed
     _ -> return systemConf.seed
 
@@ -90,7 +90,7 @@ initState systemST = do
 
 animate :: forall h. (State h) -> Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
 animate state = handleError do
-  --t0 <- lift $ now
+  t0 <- lift $ now
   -- unpack state
   {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef} <- return state
 
@@ -106,7 +106,6 @@ animate state = handleError do
   currentTimeMS <- lift $ now
   let lastTimeMS = fromMaybe currentTimeMS systemST.lastTimeMS
   let delta = (currentTimeMS - lastTimeMS) * pattern.tSpd / 1000.0
-  --let delta' = 0.05
   let delta' = if systemST.paused then 0.0 else delta
   let t' = systemST.t + delta'
   lift $ modifySTRef ssRef (\s -> s {t = t', lastTimeMS = Just currentTimeMS})
@@ -118,14 +117,14 @@ animate state = handleError do
     lift $ modifySTRef ssRef (\s -> s {lastFpsTimeMS = Just currentTimeMS, fps = Just fps})
     return unit
 
-  --t1 <- lift $ now
-  --t2 <- lift $ now
-  --let a = lg (t2 - t1)
-
-  recompile <- runScripts ssRef pRef
-  --t3 <- lift $ now
+  t1 <- lift $ now
+  sRes <- runScripts ssRef pRef
+  recompile <- case sRes of
+    PMutNone -> return false
+    _ -> return true
 
   systemST' <- lift $ readSTRef ssRef
+  t2 <- lift $ now
 
   when recompile do
     setShaders systemConf engineConf esRef systemST' pattern
@@ -133,32 +132,30 @@ animate state = handleError do
     lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS2})
     return unit
 
-  engineST' <- lift $ readSTRef esRef
+  engineST'  <- lift $ readSTRef esRef
   systemST'' <- lift $ readSTRef ssRef
 
   -- render!
-  --t4 <- lift $ now
+  t3 <- lift $ now
   (Tuple parM znM) <- getParZn systemST'' (Tuple [] []) pattern.main
-  --t5 <- lift $ now
-
   tex <- renderFrame systemST'' engineConf engineST' pattern parM znM systemST'.frameNum
 
   (Tuple parD znD) <- getParZn systemST'' (Tuple [] []) pattern.disp
   postprocessFrame systemST'' engineConf engineST' tex parD znD
-
+  t4 <- lift $ now
 
   -- update ui
   updateLayout uiConf uiST systemST'' pattern false
-  --t6 <- lift $ now
+  t5 <- lift $ now
 
   -- request next frame
   halted <- lift $ isHalted
   unless halted do
     lift $ modifySTRef ssRef (\s -> s {frameNum = s.frameNum + 1})
     lift $ requestAnimationFrame animate state
-  --t7 <- lift $ now
+  t6 <- lift $ now
 
-  --let a = lg $ inj "BREAKDOWN: init:%0ms paths:%1ms scripts:%2ms junk:%3ms render:%4ms ui:%5ms next:%6ms" [show (t1 - t0), show (t2 - t1), show (t3 - t2), show (t4 - t3), show (t5 - t4), show (t6 - t5), show (t7 - t6)]
+  --dbg $ inj "BREAKDOWN: init:%0ms scripts:%1ms recompile:%2ms render:%3ms ui:%4ms next:%5ms" [show (t1 - t0), show (t2 - t1), show (t3 - t2), show (t4 - t3), show (t5 - t4), show (t6 - t5)]
 
   return unit
 

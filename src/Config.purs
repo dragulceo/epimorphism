@@ -202,12 +202,14 @@ patternSchema = [
   SchemaEntry SE_N "tSpd"
 ]
 
+data PMut = PMutNone | PMutMain String | PMutDisp String | PMutVert String
+
 -- Script
 -- sys -> time -> mid -> idx -> args -> res
 type ScriptFn eff h = STRef h (SystemST h) -> Number -> String -> Int -> StrMap String -> EpiS eff h ScriptRes
 
 data ScriptConfig = ScriptConfig String
-data ScriptRes = ScriptRes Boolean (Maybe (StrMap String)) -- compile, possibly updated state
+data ScriptRes = ScriptRes PMut (Maybe (StrMap String)) -- possible new root, possibly updated state
 data Script = Script String Number (StrMap String)
 
 

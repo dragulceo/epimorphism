@@ -5,7 +5,7 @@ import Config (Module, EpiS, moduleSchema, patternSchema, systemConfSchema, uiCo
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
-import Data.Array (concat, (:), sort, snoc)
+import Data.Array (concat, foldM, (:), sort, snoc)
 import Data.Either (Either(..))
 import Data.Foldable (foldl)
 import Data.List (fromList)
@@ -17,7 +17,7 @@ import Data.Traversable (traverse)
 import Data.Tuple (Tuple)
 import Library (parseLib)
 import Prelude (unit, Unit, (==), ($), not, (&&), (++), return, bind)
-import Util (stick, lg, urlGet)
+import Util (dbg, urlGet)
 
 data DataSource = LocalHTTP | LocalStorage | RemoteDB
 
@@ -93,21 +93,26 @@ family col fam inc exc = flagFamily (fold handle empty col) inc exc
       false -> res
 
 
+-- implement a breadth first fold over the modules rooted at mid
+mFold :: forall eff h a. STRef h (SystemST h) -> a -> String -> (a -> String -> EpiS eff h a) -> EpiS eff h a
+mFold ssRef val mid fn = bff val [mid]
+  where
+    bff :: a -> Array String -> EpiS eff h a
+    bff tval [] = return tval
+    bff tval xs = do
+      tval' <- (foldM fn tval xs)
+      children <- traverse childValues xs
+      bff tval' (concat children)
+    childValues :: String -> EpiS eff h (Array String)
+    childValues cid = do
+      systemST <- lift $ readSTRef ssRef
+      case (member cid systemST.moduleRefPool) of -- calling fn may have removed the module
+        true -> do
+          cRef <- loadLib cid systemST.moduleRefPool "mFold cid"
+          child <- lift $ readSTRef cRef
+          return (fromList $ values child.modules)
+        false -> return []
 
-type MFunc eff h a = String -> EpiS eff h a
-mSeq :: forall eff h a. STRef h (SystemST h) -> MFunc eff h a -> String -> EpiS eff h (Array a)
-mSeq ssRef f mid = do
-  v0 <- f mid
-
-  -- f mid mutates the module pool, so be careful
-  systemST <- lift $ readSTRef ssRef
-  case (member mid systemST.moduleRefPool) of
-    true -> do
-      mRef <- loadLib mid systemST.moduleRefPool "mid mSeq"
-      m <- lift $ readSTRef mRef
-      vC <- traverse (mSeq ssRef f) (values m.modules)
-      return $ v0 : (concat $  fromList vC)
-    false -> return [v0]
 
 mUp :: forall eff h. SystemST h -> String -> (Module -> Module) -> EpiS eff h Unit
 mUp systemST mid func = do

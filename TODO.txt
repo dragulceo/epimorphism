@@ -4,12 +4,14 @@ CURRENT PROJECTS:
 		- dynamic par/zn/aux count
 
 	- asynchronous compiling
-	  - after first script updates tree, stop executing scripts
 	  - when switching, clone root(both main & disp?), get new modId
 		- return true, new application root
 		- compile wrt new root
 		- freeze scripts
 		- when compiling done, switch out root, unfreeze scripts
+		- remove get uniforms from engine loop
+		- split compilation into stages
+
 		- also, batch compilation?  only happens once every n ms?
 
   - async asset loading?
@@ -18,13 +20,13 @@ CURRENT PROJECTS:
 		- load small images to start, bigger images when needed?
 
 	- cleanup
+	  - double incZn is busted
     - make sure everything re. scripts still works
 	  - findParent is kind of ghetto
-		- scripts conflicting with each other?  who has priority?
+		- be better about reloading objects after refs might change
     - better data organization
 	    - merge configs & states?
 		  - what goes in config, what goes into states?
-			- stop executing scripts after one causes recompile?
 
 
 NEXT PROJECTS:

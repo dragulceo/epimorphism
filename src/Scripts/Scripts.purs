@@ -1,7 +1,7 @@
 module Scripts where
 
 import Prelude
-import Config (ScriptRes(ScriptRes), ScriptFn)
+import Config (PMut(PMutNone), ScriptRes(ScriptRes), ScriptFn)
 import Control.Monad.Except.Trans (throwError, lift)
 import Control.Monad.ST (modifySTRef, readSTRef)
 import Data.Array (updateAt, index)
@@ -12,11 +12,11 @@ import Math (max, round)
 import ScriptUtil (addScript, purgeScript)
 import System (loadLib)
 import Text.Format (format, precision)
-import Util (lg, cxFromStringE, intFromStringE, inj, numFromStringE, clickPause)
+import Util (cxFromStringE, intFromStringE, inj, numFromStringE, clickPause)
 
 null :: forall eff h. ScriptFn eff h
 null ssRef t mid idx dt = do
-  return $ ScriptRes false Nothing
+  return $ ScriptRes PMutNone Nothing
 
 -- get rid of this abomination
 pause :: forall eff h. ScriptFn eff h
@@ -25,7 +25,7 @@ pause ssRef t mid idx dt = do
 
   lift $ clickPause
   purgeScript systemST mid idx
-  return $ ScriptRes false Nothing
+  return $ ScriptRes PMutNone Nothing
 
 -- increment Zn
 incZn :: forall eff h. ScriptFn eff h
@@ -71,7 +71,7 @@ incZn ssRef t mid idx dt = do
   -- remove self
   purgeScript systemST mid idx
 
-  return $ ScriptRes false Nothing
+  return $ ScriptRes PMutNone Nothing
 
 
 randomize :: forall eff h. ScriptFn eff h
@@ -103,4 +103,4 @@ randomize ssRef t mid idx dt = do
       return $ Just dt'
     _ -> return Nothing
 
-  return $ ScriptRes false update
+  return $ ScriptRes PMutNone update

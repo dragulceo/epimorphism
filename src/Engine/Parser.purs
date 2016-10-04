@@ -98,6 +98,6 @@ loadModules mr lib = do
   foldM handle empty mr
   where
     handle dt k v = do
-      mRef <- loadLib v lib "loadModules"
+      mRef <- loadLib v lib "parse loadModules"
       m    <- lift $ readSTRef mRef
       return $ insert k m dt

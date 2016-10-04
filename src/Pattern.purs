@@ -16,7 +16,7 @@ import Data.String (split, joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import System (loadLib)
-import Util (uuid)
+import Util (dbg, uuid)
 
 
 ------------------------ FIND ------------------------
@@ -77,13 +77,15 @@ findAddr mpool pattern mid = do
 findParent :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> EpiS eff h (Tuple String String)
 findParent mpool pattern mid = do
   addr <- findAddr mpool pattern mid
+
   let cmp = split "." addr
   when (length cmp < 2) do
     throwError $ "malformed addr: " ++ addr
 
   let lst = fromJust $ last cmp
   let addr' = joinWith "." $ fromJust $ init cmp
-  pId <- findModule mpool pattern addr' true
+
+  pId <- findModule mpool pattern addr' false
   return $ Tuple pId lst
 
 ------------------------ IMPORTING ------------------------

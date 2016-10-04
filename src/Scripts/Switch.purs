@@ -31,7 +31,8 @@ switch ssRef pRef t mid idx dt = do
     "load" -> do
       childN' <- loadLib "childN" dt "switch childN"
       return $ Tuple mid childN'
-    "clone" -> findParent systemST.moduleRefPool pattern mid
+    "clone" -> do
+      findParent systemST.moduleRefPool pattern mid
     x -> throwError $ "invalid 'op' for switch, must be load | clone : " ++ x
 
   -- get the relevant name to be used to either load or for the mutator

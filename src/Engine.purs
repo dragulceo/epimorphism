@@ -93,6 +93,7 @@ initEngineST sysConf engineConf systemST canvasId esRef' = do
 -- do the thing!
 renderFrame :: forall eff h. SystemST h -> EngineConf -> EngineST -> Pattern -> Array Number -> Array Number -> Int -> EpiS eff h WebGLTexture
 renderFrame systemST engineConf engineST pattern par zn frameNum = do
+  dbg "main"
   let ctx = engineST.ctx
 
   -- unpack
@@ -166,6 +167,7 @@ renderFrame systemST engineConf engineST pattern par zn frameNum = do
 
 postprocessFrame :: forall eff h. SystemST h -> EngineConf -> EngineST -> WebGLTexture -> Array Number -> Array Number -> EpiS eff h Unit
 postprocessFrame systemST engineConf engineST tex par zn = do
+  dbg "post"
   let ctx = engineST.ctx
 
   disp <- case engineST.dispProg of
@@ -191,6 +193,7 @@ postprocessFrame systemST engineConf engineST tex par zn = do
 -- bind parameters & zn values from pattern into program
 bindParZn :: forall h eff. WebGLContext -> UniformBindings -> Array Number -> Array Number -> EpiS eff h Unit
 bindParZn ctx unif par zn = do
+  dbg unif
   execGL ctx do
     when (length par > 0) do
       when (not $ hasAttr unif "par[0]") do

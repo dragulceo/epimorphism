@@ -2,17 +2,18 @@ module Main where
 
 import Prelude
 import Compiler (compileShaders)
-import Config (PMut(PMut), SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, SystemConf, UIConf, CompOp(..))
+import Config (PMut(PMutNone, PMut), SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, SystemConf, UIConf, CompOp(..))
 import Control.Monad (unless, when)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Except.Trans (throwError, lift)
+import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
-import Data.Array (head, null, updateAt, foldM, sort, concatMap, elemIndex)
+import Data.Array (null, updateAt, foldM, sort, concatMap, elemIndex)
 import Data.Int (round, toNumber)
 import Data.List (fromList)
 import Data.Maybe (maybe, fromMaybe, Maybe(Nothing, Just))
 import Data.Maybe.Unsafe (fromJust)
+import Data.Set (member)
 import Data.StrMap (insert, values, keys, lookup)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
@@ -25,7 +26,7 @@ import Script (runScripts)
 import System (initSystemST, loadLib)
 import Texture (preloadImages)
 import UI (initUIST)
-import Util (dbg, imag, real, rndstr, Now, handleError, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
+import Util (halt, dbg, imag, real, rndstr, Now, handleError, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
 
 host :: String
 host = ""
@@ -79,6 +80,9 @@ initState systemST = do
 
   -- import pattern
   importPattern ssRef pRef
+  p' <- lift $ readSTRef pRef
+  new <- lift $ newSTRef p'
+  lift $ modifySTRef ssRef (\s -> s {compPattern = Just new}) -- a bit sketchy
   systemST' <- lift $ readSTRef ssRef
 
   -- init engine & ui states
@@ -108,7 +112,7 @@ animate state = handleError do
   let lastTimeMS = fromMaybe currentTimeMS systemST.lastTimeMS
   let delta = (currentTimeMS - lastTimeMS) * pattern.tSpd / 1000.0
   let delta' = if systemST.paused then 0.0 else delta
-  let t' = systemST.t + (delta' + 0.02) / 2.5
+  let t' = systemST.t + (delta' + 20.0 / 1000.0) / 2.0 -- abstract this
   lift $ modifySTRef ssRef (\s -> s {t = t', lastTimeMS = Just currentTimeMS})
 
   -- fps
@@ -119,29 +123,27 @@ animate state = handleError do
     return unit
 
   t1 <- lift $ now
+  -- run scripts if not compiling
   when (null engineST.compQueue) do
     sRes <- runScripts ssRef pRef
     case sRes of
+      PMutNone -> return unit
       PMut pattern' new -> do
         dbg "!!!!!!!!!! BEGIN RECOMPILE !!!!!!!!!!"
-        let compST' = engineST.compST {pattern = Just pattern'}
---        let new' = fromJust $ head new
-        --queue <- case new' of
-          --"main" -> return [CompMainShader, CompMainProg, CompFinish]
-          --"disp" -> return [CompDispShader, CompDispProgb, CompFinish]
-          --_ -> throwError "invalid update"
-        let queue = [CompMainShader, CompMainProg, CompFinish]
-        lift $ modifySTRef esRef (\es -> es {compQueue = queue, compST = compST'})
+        let queue = (if (member "main" new) then [CompMainShader, CompMainProg] else []) ++
+                    (if (member "disp" new) then [CompDispShader, CompDispProg] else []) ++
+                    [CompFinish]
+
+        lift $ modifySTRef esRef (\es -> es {compQueue = queue})
         return unit
-      _ -> return unit
 
   systemST' <- lift $ readSTRef ssRef
   engineST' <- lift $ readSTRef esRef
 
   when (not $ null engineST'.compQueue) do
-    case engineST.compST.pattern of -- haven't been run before
+    case engineST.mainProg of
       Nothing -> do
-        lift $ modifySTRef esRef (\es -> es {compST = es.compST {pattern = Just pattern}})
+        dbg "FULL COMPILE"
         compileShaders systemConf ssRef engineConf esRef pRef true
       Just _ -> do
         compileShaders systemConf ssRef engineConf esRef pRef false
@@ -158,13 +160,19 @@ animate state = handleError do
 
   -- render!
   t3 <- lift $ now
+  --dbg "a"
   (Tuple parM znM) <- getParZn systemST'' (Tuple [] []) pattern'.main
   tex <- renderFrame systemST'' engineConf engineST'' pattern' parM znM systemST''.frameNum
 
+  --dbg "b"
+  dbg pattern'.disp
+  dbg systemST''.moduleRefPool
+  --dbg systemST''
   (Tuple parD znD) <- getParZn systemST'' (Tuple [] []) pattern'.disp
   postprocessFrame systemST'' engineConf engineST'' tex parD znD
   t4 <- lift $ now
 
+  --dbg "c"
   -- update ui
   updateLayout uiConf uiST systemST'' pattern' false
   t5 <- lift $ now

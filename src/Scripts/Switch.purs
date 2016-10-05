@@ -5,17 +5,15 @@ import Config (PMut(..), ScriptRes(ScriptRes), Module, ScriptFn, EpiS, SystemST)
 import Control.Monad (when)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
-import Control.Monad.ST (newSTRef, modifySTRef, STRef, readSTRef)
-import Data.Array (head)
+import Control.Monad.ST (modifySTRef, STRef, readSTRef)
 import Data.Array (index, length, updateAt) as A
-import Data.Maybe (Maybe(Just, Nothing), fromMaybe)
+import Data.Maybe (Maybe(Nothing), fromMaybe)
 import Data.Maybe.Unsafe (fromJust)
 import Data.Set (singleton)
 import Data.StrMap (insert, fromFoldable, union)
-import Data.String (split)
 import Data.Tuple (Tuple(..))
-import Pattern (findModule, cloneWith, CloneRes(CloneRes), findAddr, purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
-import ScriptUtil (addScript, purgeScript)
+import Pattern (CloneRes(CloneRes), purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
+import ScriptUtil (getClone, addScript, purgeScript)
 import System (loadLib, family)
 import Text.Format (precision, format)
 import Util (dbg, intFromStringE, inj, randInt, numFromStringE, gmod)
@@ -23,24 +21,7 @@ import Util (dbg, intFromStringE, inj, randInt, numFromStringE, gmod)
 
 switch :: forall eff h. ScriptFn eff h
 switch ssRef pRef t midPre idx dt = do
-  dbg "  CALLING SWITCH  "
-  patternPre <- lift $ readSTRef pRef
-  sys <- lift $ readSTRef ssRef
-  CloneRes newRootN pattern mid <- case sys.pCloneRef of
-    Just ref -> do
-      --dbg "found clone sw"
-      pClone <- lift $ readSTRef ref
-      addr <- findAddr sys.moduleRefPool patternPre midPre
-      mid' <- findModule sys.moduleRefPool pClone addr false
-      root <- return $ fromJust $ head $ split "." addr
-      return $ CloneRes root pClone mid'
-    Nothing -> do
-      cr@(CloneRes _ cpat _) <- cloneWith ssRef patternPre midPre
-      ref <- lift $ newSTRef cpat
-      --dbg "adding clone sw"
-      lift $ modifySTRef ssRef (\s -> s {pCloneRef = Just ref})
-      return cr
-
+  CloneRes newRootN pattern mid <- getClone ssRef pRef midPre
   systemST <- lift $ readSTRef ssRef
 
   spd <- (loadLib "spd" dt "switch spd") >>= numFromStringE
@@ -102,7 +83,6 @@ switch ssRef pRef t midPre idx dt = do
 
   -- switch! (should we inline this?)
   let tPhase = systemST'.t - t -- recover phase
-  dbg "do switch!!!!"
   switchModules ssRef (t + tPhase) rootId childN nxtId spd
 
   return $ ScriptRes (PMut pattern (singleton newRootN)) Nothing
@@ -172,24 +152,8 @@ finishSwitch ssRef pRef t rootIdPre idx dt = do
     -- we're done
     x | x >= 1.0 -> do
       --let a = lg "DONE SWITCHING"
-      patternPre <- lift $ readSTRef pRef
-      sys <- lift $ readSTRef ssRef
-      CloneRes newRootN pattern rootId <- case sys.pCloneRef of
-        Just ref -> do
-          --dbg "found clone fi"
-          pClone <- lift $ readSTRef ref
-          addr <- findAddr sys.moduleRefPool patternPre rootIdPre
-          mid' <- findModule sys.moduleRefPool pClone addr false
-          root <- return $ fromJust $ head $ split "." addr
-          return $ CloneRes root pClone mid'
-        Nothing -> do
-          cr@(CloneRes _ cpat _) <- cloneWith ssRef patternPre rootIdPre
-          ref <- lift $ newSTRef cpat
-          --dbg "adding clone fi"
-          lift $ modifySTRef ssRef (\s -> s {pCloneRef = Just ref})
-          return cr
+      CloneRes newRootN pattern rootId <- getClone ssRef pRef rootIdPre
 
-      --CloneRes newRootN pattern rootId <- cloneWith ssRef patternPre rootIdPre
       systemST <- lift $ readSTRef ssRef
 
       -- find parent & m1

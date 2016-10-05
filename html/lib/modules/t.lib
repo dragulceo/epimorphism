@@ -29,30 +29,30 @@ zn [circle 0.005 1.0, 0.0+0.0i, 0.0+1.0i, 1.0+0.0i]
 
 --t_wrap_zo'2 < t_wrap
 flags {wrap, all'}
-zn [1.1+0.0i, rose 0.006 0.8 5.0 -0.8, 0.0+1.0i, 1.0+0.0i]
+zn [1.1+0.0i, rose 0.004 0.8 5.0 -0.8, 0.0+1.0i, 1.0+0.0i]
 
 --t_wrap_zo'3 < t_wrap
 flags {wrap, all'}
-zn [1.1+0.0i, 0.0+0.0i, 0.0+1.0i, rose 0.0035 1.1 4.0 0.0]
+zn [1.1+0.0i, 0.0+0.0i, 0.0+1.0i, rose 0.002 1.1 4.0 0.0]
 
 --t_wrap_zo'4 < t_wrap
 flags {wrap, all'}
-zn [circle 0.005 1.0, 0.0+0.0i, 0.0+1.0i, rose 0.0035 1.1 4.0 0.0]
+zn [circle 0.005 1.0, 0.0+0.0i, 0.0+1.0i, rose 0.0025 1.1 4.0 0.0]
 
 --t_main1 < t_wrap
 flags {wrap, all'', lib}
 modules {t_inner: t_sinh}
-zn [circle 0.005 1.0, rose 0.006 0.8 5.0 -0.8, 0.0+1.1i, rose 0.0035 1.1 4.0 0.0]
+zn [circle 0.005 1.0, rose 0.004 0.8 5.0 -0.8, 0.0+1.1i, rose 0.0025 1.1 4.0 0.0]
 scripts [randomize dly:50 spd:0.04 lib:all dim:vec2 sub:t_inner typ:mod]
 
 --t_seed_anim1 < t_wrap
 flags {wrap}
 modules {t_inner: t_id}
-zn [rose 0.004 0.4 6.0 0.9, rose 0.0015 0.8 5.0 -0.8, rose 0.0035 0.3 7.0 0.9, rose 0.0045 1.2 4.0 0.0]
+zn [rose 0.003 0.4 6.0 0.9, rose 0.001 0.8 5.0 -0.8, rose 0.0027 0.3 7.0 0.9, rose 0.0035 1.2 4.0 0.0]
 scripts [randomize dly:35 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
 
 --t_seed_anim2 < t_seed_anim1
-zn [rose 0.025 0.4 6.0 0.9, rose 0.001 0.8 5.0 -0.8, rose 0.003 0.3 7.0 0.9, rose 0.004 1.2 4.0 0.0]
+zn [rose 0.0025 0.4 6.0 0.9, rose 0.001 0.8 5.0 -0.8, rose 0.002 0.3 7.0 0.9, rose 0.003 1.2 4.0 0.0]
 scripts [randomize dly:45 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
 
 --t_julia < t_wrap
@@ -62,6 +62,6 @@ modules {t_inner: t_p4}
 
 --t_main_test < t_wrap
 flags {wrap, lib}
-zn [rose 0.004 0.4 6.0 0.9, 0.0 + 0.0i, 0.0 + 1.1i, 1.0 + 0.0i]
+zn [rose 0.003 0.4 6.0 0.9, 0.0 + 0.0i, 0.0 + 1.1i, 1.0 + 0.0i]
 modules {t_inner: t_sinh}
 scripts [randomize dly:20 spd:0.08 lib:all dim:vec2 sub:t_inner typ:mod]

@@ -7,7 +7,7 @@ import Control.Monad.Except.Trans (ExceptT)
 import Control.Monad.ST (STRef, ST)
 import DOM (DOM)
 import Data.Maybe (Maybe(..))
-import Data.Set (Set)
+import Data.Set (union, Set)
 import Data.StrMap (StrMap, empty)
 import Data.Tuple (Tuple)
 import Graphics.Canvas (Canvas)
@@ -54,7 +54,7 @@ type SystemST h = {
   , componentLib :: StrMap Component
   , indexLib :: StrMap Index
   , moduleRefPool :: StrMap (STRef h Module)
-  , pCloneRef :: Maybe (STRef h Pattern)
+  , compPattern :: Maybe (STRef h Pattern) -- this is a bit weird
 }
 
 defaultSystemST :: forall h. SystemST h
@@ -74,7 +74,7 @@ defaultSystemST = {
   , moduleRefPool: empty
   , componentLib: empty
   , indexLib: empty
-  , pCloneRef: Nothing
+  , compPattern: Nothing
 }
 
 -- Engine
@@ -98,12 +98,12 @@ engineConfSchema = [
 foreign import data AudioAnalyser :: *
 foreign import data UniformBindings :: *
 
-type CompST = { pattern :: Maybe Pattern, aux :: Maybe (Array String),
+type CompST = { aux :: Maybe (Array String),
                 mainSrc :: Maybe String, dispSrc :: Maybe String, vertSrc :: Maybe String,
                 mainProg :: Maybe WebGLProgram, dispProg :: Maybe WebGLProgram,
                 mainUnif :: Maybe UniformBindings, dispUnif :: Maybe UniformBindings}
 newCompST :: CompST
-newCompST = {pattern: Nothing, mainSrc: Nothing, dispSrc: Nothing, vertSrc: Nothing, aux: Nothing, mainProg: Nothing, dispProg: Nothing, mainUnif: Nothing, dispUnif: Nothing}
+newCompST = {mainSrc: Nothing, dispSrc: Nothing, vertSrc: Nothing, aux: Nothing, mainProg: Nothing, dispProg: Nothing, mainUnif: Nothing, dispUnif: Nothing}
 
 data CompOp = CompMainShader | CompDispShader | CompVertShader | CompMainProg | CompDispProg | CompFinish | CompStall
 
@@ -221,6 +221,10 @@ patternSchema = [
 ]
 
 data PMut = PMutNone | PMut Pattern (Set String)
+instance mutSemi :: Semigroup PMut where
+  append (PMut p0 s0) (PMut p1 s1) = PMut p0 (union s0 s1) -- sketchy if p0 != p1
+  append PMutNone x = x
+  append x PMutNone = x
 
 -- Script
 -- sys -> time -> mid -> idx -> args -> res

@@ -10,7 +10,6 @@ import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans (lift)
 import Data.Array (length, uncons)
 import Data.Maybe (Maybe(..))
-import Data.Maybe.Unsafe (fromJust)
 import Data.Tuple (fst, Tuple(Tuple))
 import EngineUtil (execGL)
 import Graphics.WebGL.Methods (vertexAttribPointer, enableVertexAttribArray, bindBuffer, bufferData, createBuffer)
@@ -22,45 +21,45 @@ import Texture (uploadAux)
 import Util (unsafeCast, lg, now2, now, replaceAll, dbg, Now)
 
 -- compile shaders and load into systemST
-compileShaders :: forall eff h. SystemConf -> STRef h (SystemST h) -> EngineConf -> STRef h EngineST -> STRef h Pattern -> Boolean -> EpiS (now :: Now | eff) h Unit
+compileShaders :: forall eff h. SystemConf -> STRef h (SystemST h) -> EngineConf -> STRef h EngineST -> STRef h Pattern -> Boolean -> EpiS (now :: Now | eff) h Boolean
 compileShaders sysConf ssRef engineConf esRef pRef full = do
   systemST <- lift $ readSTRef ssRef
   es <- lift $ readSTRef esRef
-  pattern <- case es.compST.pattern of
+  pcompRef <- case systemST.compPattern of
     Just x -> return x
     Nothing -> throwError "need pattern to compile"
+  pattern <- lift $ readSTRef pcompRef
 
   case (uncons es.compQueue) of
     Just {head: op, tail: rst} -> do
       dbg op
-      case op of
+      done <- case op of
         CompMainShader -> do
           Tuple main aux <- parseMain systemST pattern engineConf.fract
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainSrc = Just main, aux = Just aux}})
-          return unit
+          return false
         CompDispShader -> do
           disp <- parseDisp systemST pattern
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {dispSrc = Just disp}})
-          return unit
+          return false
         CompVertShader -> do
           vert <- parseVert systemST pattern
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {vertSrc = Just vert}})
-          return unit
+          return false
         --CompUploadAux -> do
-
         CompMainProg -> do
           case (Tuple es.compST.mainSrc es.compST.vertSrc) of
             Tuple (Just mainSrc) (Just vertSrc) -> do
               mainProg <- execGL es.ctx (compileShadersIntoProgram vertSrc mainSrc)
               lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainProg = Just mainProg}})
-              return unit
+              return false
             _ -> throwError "need to compute sources first!"
         CompDispProg -> do
           case (Tuple es.compST.dispSrc es.compST.vertSrc) of
             Tuple (Just dispSrc) (Just vertSrc) -> do
               dispProg <- execGL es.ctx (compileShadersIntoProgram vertSrc dispSrc)
               lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {dispProg = Just dispProg}})
-              return unit
+              return false
             _ -> throwError "need to compute sources first!"
         CompFinish -> do
           -- aux
@@ -71,40 +70,51 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
             Nothing -> return unit -- no aux
 
           -- unif
-          Tuple mainUnif dispUnif <- linkShaders es es.compST.mainProg es.compST.dispProg
+          mainUnif <- case es.compST.mainProg of
+            Just prog -> do
+              res <- linkShader es prog
+              return (Just res)
+            Nothing -> return Nothing
 
+          dispUnif <- case es.compST.dispProg of
+            Just prog -> do
+              res <- linkShader es prog
+              return (Just res)
+            Nothing -> return Nothing
+
+          -- update engine state with new info
           lift $ modifySTRef esRef (\es' ->
                                      es' {mainProg = es'.compST.mainProg <|> es'.mainProg,
                                           dispProg = es'.compST.dispProg <|> es'.dispProg,
                                           mainUnif = mainUnif <|> es'.mainUnif,
                                           dispUnif = dispUnif <|> es'.dispUnif,
                                           currentImages = es'.compST.aux <|> es'.currentImages })
-          pold <- lift $ readSTRef pRef
 
-          -- purge
+          -- clean old pattern
+          pold <- lift $ readSTRef pRef
           when (pold.main /= pattern.main) do
             purgeModule ssRef pold.main
           when (pold.disp /= pattern.disp) do
             purgeModule ssRef pold.disp
           when (pold.vert /= pattern.vert) do
             purgeModule ssRef pold.vert
+          lift $ modifySTRef ssRef (\s -> s {compPattern = Nothing})
 
-          dbg "removing clone"
-          lift $ modifySTRef ssRef (\s -> s {pCloneRef = Nothing})
-
+          -- update pattern & reset comp info
           lift $ modifySTRef pRef (\_ -> pattern)
-          lift $ modifySTRef esRef (\es' -> es' {compST = newCompST {pattern = Just pattern, vertSrc = es.compST.vertSrc}})
-          return unit
+          lift $ modifySTRef esRef (\es' -> es' {compST = newCompST {vertSrc = es.compST.vertSrc}})
+
+          return true
         CompStall -> do
-          return unit
+          return false
 
       lift $ modifySTRef esRef (\es' -> es' {compQueue = rst})
       when (length rst /= 0 && full) do
         compileShaders sysConf ssRef engineConf esRef pRef full
+        return unit
 
-    Nothing -> return unit
-
-  --return unit
+      return $ done || full
+    Nothing -> throwError "shouldn't call compile with an empty queue chump!"
 
 
 parseMain :: forall eff h. SystemST h -> Pattern -> Int -> EpiS eff h (Tuple String (Array String))
@@ -119,31 +129,16 @@ parseDisp systemST pattern = fst <$> parseShader systemST pattern.disp pattern.i
 parseVert :: forall eff h. SystemST h -> Pattern -> EpiS eff h String
 parseVert systemST pattern = fst <$> parseShader systemST pattern.vert []
 
-linkShaders :: forall eff h. EngineST -> Maybe WebGLProgram -> Maybe WebGLProgram -> EpiS eff h (Tuple (Maybe UniformBindings) (Maybe UniformBindings))
-linkShaders es mainProg dispProg = execGL es.ctx do
+linkShader :: forall eff h. EngineST -> WebGLProgram -> EpiS eff h UniformBindings
+linkShader es prog = execGL es.ctx do
   pos <- createBuffer
   bindBuffer ArrayBuffer pos
   bufferData ArrayBuffer (DataSource (T.asFloat32Array [-1.0,-1.0,1.0,-1.0,-1.0,1.0,
                                                         -1.0,1.0,1.0,-1.0,1.0,1.0])) StaticDraw
 
-  mainUnif <- case mainProg of
-    Just mainProg' -> do
-      linkProgram mainProg'
-      mainAttr <- getAttrBindings mainProg'
-      enableVertexAttribArray mainAttr.a_position
-      vertexAttribPointer mainAttr.a_position 2 Float false 0 0
-      unif <- getUniformBindings mainProg'
-      return (Just $ unsafeCast unif)
-    Nothing -> return Nothing
-
-  dispUnif <- case dispProg of
-    Just dispProg' -> do
-      linkProgram dispProg'
-      dispAttr <- getAttrBindings dispProg'
-      enableVertexAttribArray dispAttr.a_position
-      vertexAttribPointer dispAttr.a_position 2 Float false 0 0
-      unif <- getUniformBindings dispProg'
-      return (Just $ unsafeCast unif)
-    Nothing -> return Nothing
-
-  return $ Tuple mainUnif dispUnif
+  linkProgram prog
+  attr <- getAttrBindings prog
+  enableVertexAttribArray attr.a_position
+  vertexAttribPointer attr.a_position 2 Float false 0 0
+  unif <- getUniformBindings prog
+  return (unsafeCast unif)

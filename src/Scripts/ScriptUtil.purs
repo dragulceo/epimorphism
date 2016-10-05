@@ -1,17 +1,21 @@
 module ScriptUtil where
 
 import Prelude
-import Config (Script(Script), SystemST, EpiS)
+import Config (EpiS, Pattern, SystemST, Script(Script))
 import Control.Monad.Except.Trans (throwError)
-import Data.Array (foldM, uncons, deleteAt, cons)
+import Control.Monad.ST (modifySTRef, newSTRef, readSTRef, STRef)
+import Control.Monad.Trans (lift)
+import Data.Array (head, foldM, uncons, deleteAt, cons)
 import Data.List (fromList)
-import Data.Maybe (fromMaybe, Maybe(Just))
+import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
+import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (toList, StrMap, insert, empty)
-import Data.String (joinWith, trim, split)
+import Data.String (split, joinWith, trim)
 import Data.Tuple (Tuple(Tuple))
+import Pattern (cloneWith, findModule, findAddr, CloneRes(CloneRes))
 import System (mUp)
 import Text.Format (precision, format)
-import Util (lg, inj, numFromStringE)
+import Util (dbg, inj, numFromStringE)
 
 addScript :: forall eff h. SystemST h -> String -> String -> String -> EpiS eff h Unit
 addScript systemST mid name args = do
@@ -56,3 +60,25 @@ serializeScript (Script name phase args) =
   where
     serializeArgs :: StrMap String -> String
     serializeArgs args = joinWith " " $ fromList $ map (\(Tuple k v) -> k ++ ":" ++ v) (toList args)
+
+
+-- This method is called by scripts that modify the state tree.  we perform modificatiosn in a cloned tree so we can compile asynchronously
+-- I don't like how this modifies ssRef
+getClone :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> String -> EpiS eff h CloneRes
+getClone ssRef pRef mid = do
+  systemST <- lift $ readSTRef ssRef
+  pattern  <- lift $ readSTRef pRef
+  case systemST.compPattern of
+    Just ref -> do
+      dbg "not getting clone"
+      pClone <- lift $ readSTRef ref
+      addr <- findAddr systemST.moduleRefPool pattern mid
+      mid' <- findModule systemST.moduleRefPool pClone addr false
+      root <- return $ fromJust $ head $ split "." addr
+      return $ CloneRes root pClone mid'
+    Nothing -> do
+      dbg "cloning pattern"
+      cr@(CloneRes _ cpat _) <- cloneWith ssRef pattern mid
+      ref <- lift $ newSTRef cpat
+      lift $ modifySTRef ssRef (\s -> s {compPattern = Just ref})
+      return cr

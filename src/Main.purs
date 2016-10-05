@@ -94,7 +94,6 @@ initState systemST = do
 
 animate :: forall h. (State h) -> Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
 animate state = handleError do
-  --dbg "animate"
   t0 <- lift $ now
   -- unpack state
   {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef} <- return state
@@ -160,19 +159,13 @@ animate state = handleError do
 
   -- render!
   t3 <- lift $ now
-  --dbg "a"
   (Tuple parM znM) <- getParZn systemST'' (Tuple [] []) pattern'.main
   tex <- renderFrame systemST'' engineConf engineST'' pattern' parM znM systemST''.frameNum
 
-  --dbg "b"
-  dbg pattern'.disp
-  dbg systemST''.moduleRefPool
-  --dbg systemST''
   (Tuple parD znD) <- getParZn systemST'' (Tuple [] []) pattern'.disp
   postprocessFrame systemST'' engineConf engineST'' tex parD znD
   t4 <- lift $ now
 
-  --dbg "c"
   -- update ui
   updateLayout uiConf uiST systemST'' pattern' false
   t5 <- lift $ now

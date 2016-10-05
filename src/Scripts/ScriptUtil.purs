@@ -12,7 +12,7 @@ import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (toList, StrMap, insert, empty)
 import Data.String (split, joinWith, trim)
 import Data.Tuple (Tuple(Tuple))
-import Pattern (cloneWith, findModule, findAddr, CloneRes(CloneRes))
+import Pattern (clonePattern, findModule, findAddr, CloneRes(CloneRes))
 import System (mUp)
 import Text.Format (precision, format)
 import Util (dbg, inj, numFromStringE)
@@ -68,17 +68,18 @@ getClone :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> String -> E
 getClone ssRef pRef mid = do
   systemST <- lift $ readSTRef ssRef
   pattern  <- lift $ readSTRef pRef
-  case systemST.compPattern of
-    Just ref -> do
-      dbg "not getting clone"
-      pClone <- lift $ readSTRef ref
-      addr <- findAddr systemST.moduleRefPool pattern mid
-      mid' <- findModule systemST.moduleRefPool pClone addr false
-      root <- return $ fromJust $ head $ split "." addr
-      return $ CloneRes root pClone mid'
+  pRef' <- case systemST.compPattern of
+    Just ref -> return ref
     Nothing -> do
       dbg "cloning pattern"
-      cr@(CloneRes _ cpat _) <- cloneWith ssRef pattern mid
-      ref <- lift $ newSTRef cpat
+      pattern' <- clonePattern ssRef pattern
+      ref <- lift $ newSTRef pattern'
       lift $ modifySTRef ssRef (\s -> s {compPattern = Just ref})
-      return cr
+      return ref
+
+  systemST' <- lift $ readSTRef ssRef
+  pClone <- lift $ readSTRef pRef'
+  addr <- findAddr systemST'.moduleRefPool pattern mid
+  mid' <- findModule systemST'.moduleRefPool pClone addr false
+  root <- return $ fromJust $ head $ split "." addr
+  return $ CloneRes root pClone mid'

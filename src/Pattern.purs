@@ -6,8 +6,7 @@ import Control.Monad (when)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, modifySTRef, newSTRef, readSTRef)
-import Data.Array (head, init, last, length)
-import Data.Array (cons, head, tail, foldM) as A
+import Data.Array (cons, head, tail, foldM, length, last, init)
 import Data.List (fromList)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Maybe.Unsafe (fromJust)
@@ -28,17 +27,17 @@ findModule mpool pattern dt followSwitch = do
     true -> return dt
     false -> do
       let addr = split "." dt
-      case (A.head addr) of
+      case (head addr) of
         Nothing -> throwError "we need data, chump"
-        Just "vert" -> findModule' mpool pattern.vert (fromJust $ A.tail addr) followSwitch
-        Just "disp" -> findModule' mpool pattern.disp (fromJust $ A.tail addr) followSwitch
-        Just "main" -> findModule' mpool pattern.main (fromJust $ A.tail addr) followSwitch
+        Just "vert" -> findModule' mpool pattern.vert (fromJust $ tail addr) followSwitch
+        Just "disp" -> findModule' mpool pattern.disp (fromJust $ tail addr) followSwitch
+        Just "main" -> findModule' mpool pattern.main (fromJust $ tail addr) followSwitch
         Just x      -> throwError $ "value should be main, vert, or disp : " ++ x
 
 
 findModule' :: forall eff h. StrMap (STRef h Module) -> String -> Array String -> Boolean -> EpiS eff h String
 findModule' mpool mid addr followSwitch = do
-  maybe (return $ mid) handle (A.head addr)
+  maybe (return $ mid) handle (head addr)
   where
     handle mid' = do
       mRef    <- loadLib mid mpool "findModule'"
@@ -46,10 +45,10 @@ findModule' mpool mid addr followSwitch = do
       childId <- loadLib mid' mod.modules "findModule' find child"
       cRef    <- loadLib childId mpool "findModule' child ref"
       child   <- lift $ readSTRef cRef
-      addr'   <- return $ fromJust $ A.tail addr
+      addr'   <- return $ fromJust $ tail addr
 
       case (child.family == "switch" && followSwitch) of
-        true ->  findModule' mpool childId (A.cons "m1" addr') followSwitch
+        true ->  findModule' mpool childId (cons "m1" addr') followSwitch
         false -> findModule' mpool childId addr' followSwitch
 
 
@@ -68,7 +67,7 @@ findAddr mpool pattern mid = do
       false -> do
         cRef <- loadLib cid mpool "cid findAddr"
         cMod <- lift $ readSTRef cRef
-        A.foldM (search addr) Nothing (fromList $ toList cMod.modules)
+        foldM (search addr) Nothing (fromList $ toList cMod.modules)
     search addr val (Tuple k v) = do
       res <- find' (addr ++ "." ++ k) v
       return $ val <> res
@@ -189,28 +188,12 @@ replaceModule ssRef mid subN cid obj = do
 
 -- slightly janky
 data CloneRes = CloneRes String Pattern String
-cloneWith :: forall eff h. STRef h (SystemST h) -> Pattern -> String -> EpiS eff h CloneRes
-cloneWith ssRef pattern mid = do
+clonePattern :: forall eff h. STRef h (SystemST h) -> Pattern -> EpiS eff h Pattern
+clonePattern ssRef pattern = do
   systemST <- lift $ readSTRef ssRef
 
-  addr <- findAddr systemST.moduleRefPool pattern mid
-  let rootN = fromJust $ head $ split "." addr
+  main' <- importModule ssRef (ImportRef pattern.main)
+  disp' <- importModule ssRef (ImportRef pattern.disp)
+  vert' <- importModule ssRef (ImportRef pattern.vert)
 
-  rootId <- case rootN of
-    "main" -> return pattern.main
-    "disp" -> return pattern.disp
-    "vert" -> return pattern.vert
-    _ -> throwError "unknown root"
-
-  rootId' <- importModule ssRef (ImportRef rootId)
-  systemST' <- lift $ readSTRef ssRef
-
-  pattern' <- case rootN of
-    "main" -> return $ pattern {main = rootId'}
-    "disp" -> return $ pattern {disp = rootId'}
-    "vert" -> return $ pattern {vert = rootId'}
-    _ -> throwError "unknown root"
-
-  mid' <- findModule systemST'.moduleRefPool pattern' addr false
-
-  return $ CloneRes rootN pattern' mid'
+  return $ pattern {main = main', disp = disp', vert = vert'}

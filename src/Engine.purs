@@ -6,7 +6,7 @@ import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Audio (audioData, initAudio)
 import Compiler (compileShaders)
-import Config (UniformBindings, EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf)
+import Config (fullCompile, UniformBindings, EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf)
 import Control.Monad (when)
 import Control.Monad.Eff (forE)
 import Control.Monad.Eff.Class (liftEff)
@@ -15,7 +15,7 @@ import Control.Monad.Reader.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, newSTRef, modifySTRef, readSTRef)
 import Data.Array (length, (!!), (..))
 import Data.Int (toNumber, fromNumber)
-import Data.Maybe (Maybe(Nothing, Just))
+import Data.Maybe (maybe, Maybe(Nothing, Just))
 import Data.Maybe.Unsafe (fromJust)
 import Data.Tuple (Tuple(Tuple), snd, fst)
 import EngineUtil (execGL)
@@ -54,10 +54,11 @@ initEngineST sysConf engineConf systemST pattern canvasId esRef' = do
   -- get reference
   esRef <- case esRef' of
     Just ref -> do
-      lift $ modifySTRef ref (\r -> r {empty = empty, auxImg = []})
+      lift $ modifySTRef ref (\r -> r {empty = empty, currentImages = Nothing})
       return ref
     Nothing -> do
-      let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, audio: Nothing, auxImg: [], compQueue: [], compST: Nothing, mainUnif: Nothing, dispUnif: Nothing, ctx, empty}
+      let compST = {mainSrc: Nothing, dispSrc: Nothing, vertSrc: Nothing, aux: Nothing, mainProg: Nothing, dispProg: Nothing, mainUnif: Nothing, dispUnif: Nothing}
+      let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, audio: Nothing, currentImages: Nothing, compQueue: fullCompile, mainUnif: Nothing, dispUnif: Nothing, ctx, empty, compST}
       lift $ newSTRef tmp
 
   es <- lift $ readSTRef esRef
@@ -87,7 +88,7 @@ initEngineST sysConf engineConf systemST pattern canvasId esRef' = do
 
   -- set shaders
   lift $ writeSTRef esRef res
-  compileShaders sysConf systemST engineConf esRef pattern
+  compileShaders sysConf systemST engineConf esRef pattern true
 
   return esRef
 
@@ -124,6 +125,8 @@ renderFrame systemST engineConf engineST pattern par zn frameNum = do
 
     -- BUG!!! audio has to be before aux???
     --audio info
+
+    let numAux = maybe 0 length engineST.currentImages
     case engineST.audio of
       Just (Tuple audioTex analyser) -> do
         case (hasAttr mainUnif "audioData") of
@@ -132,7 +135,7 @@ renderFrame systemST engineConf engineST pattern par zn frameNum = do
             dta <- lift $ lift $ audioData analyser
             liftEff $ GL.texImage2D_ ctx GLE.texture2d 0 GLE.alpha engineConf.audioBufferSize 1 0 GLE.alpha GLE.unsignedByte dta
 
-            let ofs = length engineST.auxImg + 1
+            let ofs = numAux + 1
             liftEff $ GL.uniform1i ctx (unsafeGetAttr mainUnif "audioData") ofs
             liftEff $ GL.activeTexture ctx (GLE.texture0 + ofs)
             liftEff $ GL.bindTexture ctx GLE.texture2d audioTex
@@ -140,11 +143,11 @@ renderFrame systemST engineConf engineST pattern par zn frameNum = do
       Nothing -> return unit
 
     -- aux
-    when (length engineST.auxImg > 0) do
+    when (numAux > 0) do
       when (not $ hasAttr mainUnif "aux[0]") do
         throwError $ ShaderError "missing aux uniform!"
-      liftEff $ GL.uniform1iv ctx (unsafeGetAttr mainUnif "aux[0]") (1..(length engineST.auxImg))
-      liftEff $ forE 0.0 (toNumber $ length engineST.auxImg) \i -> do
+      liftEff $ GL.uniform1iv ctx (unsafeGetAttr mainUnif "aux[0]") (1..numAux)
+      liftEff $ forE 0.0 (toNumber $ numAux) \i -> do
         let i' = fromJust $ fromNumber i
         GL.activeTexture ctx (GLE.texture1 + i')
         GL.bindTexture ctx GLE.texture2d $ fromJust (aux !! i')

@@ -96,11 +96,14 @@ engineConfSchema = [
 foreign import data AudioAnalyser :: *
 foreign import data UniformBindings :: *
 
-type CompST = {mainSrc :: Maybe String, dispSrc :: Maybe String, verSrc :: Maybe String,
+type CompST = {mainSrc :: Maybe String, dispSrc :: Maybe String, vertSrc :: Maybe String,
                aux :: Maybe (Array String),
                mainProg :: Maybe WebGLProgram, dispProg :: Maybe WebGLProgram,
                mainUnif :: Maybe UniformBindings, dispUnif :: Maybe UniformBindings}
 data CompOp = CompMainShader | CompDispShader | CompVertShader | CompUploadAux | CompMainProg | CompDispProg | CompBind | CompFinish
+
+fullCompile :: Array CompOp
+fullCompile = [CompMainShader, CompDispShader, CompVertShader, CompUploadAux, CompMainProg, CompDispProg, CompBind, CompFinish]
 
 type EngineST = {
     dispProg :: Maybe WebGLProgram
@@ -108,12 +111,12 @@ type EngineST = {
   , tex :: Maybe (Tuple WebGLTexture WebGLTexture)
   , fb :: Maybe (Tuple WebGLFramebuffer WebGLFramebuffer)
   , aux :: Maybe (Array WebGLTexture)
-  , auxImg :: Array String
+  , currentImages :: Maybe (Array String)
   , audio :: Maybe (Tuple WebGLTexture AudioAnalyser)
   , ctx :: WebGLContext
   , empty :: GLT.TexImageSource
   , compQueue :: Array CompOp
-  , compST :: Maybe CompST
+  , compST :: CompST
   , mainUnif :: Maybe UniformBindings
   , dispUnif :: Maybe UniformBindings
 }

@@ -12,7 +12,7 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Reader.Class (ask)
 import Control.Monad.Reader.Trans (lift)
 import Data.Array (length, (!!), (..), zip, foldM)
-import Data.Maybe (maybe, Maybe(Nothing, Just))
+import Data.Maybe (fromMaybe, maybe, Maybe(Nothing, Just))
 import Data.Maybe.Unsafe (fromJust)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple), snd, fst)
@@ -65,16 +65,17 @@ initAux engineConf ctx empty = do
       return aux
 
 -- upload aux textures
-uploadAux :: forall eff. EngineST -> String -> Array String -> Epi eff (Array String)
+uploadAux :: forall eff. EngineST -> String -> Array String -> Epi eff Unit
 uploadAux es host names = do
+  let currentImages = fromMaybe [] es.currentImages
   case es.aux of
     Nothing -> throwError "aux textures not initialized"
     (Just aux) -> do
       when (length aux < length names) do
         throwError "not enough aux textures"
 
-      foldM (uploadImage es.ctx es.auxImg host) 0 (zip aux names)
-      return names
+      foldM (uploadImage es.ctx currentImages host) 0 (zip aux names)
+      return unit
 
 
 -- create an image object. can throw error if images missing!

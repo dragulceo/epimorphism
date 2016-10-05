@@ -102,7 +102,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         mid <- findModule systemST.moduleRefPool pattern "main.application.t.t_inner" true
         mUp systemST mid \m ->
           m {sub = insert "t_expr" tExp m.sub}
-        compileShaders systemConf systemST engineConf esRef pattern
+        compileShaders systemConf systemST engineConf esRef pattern false
 
         return unit
       "save" -> do
@@ -146,7 +146,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
             fract' <- intFromStringE fract
             lift $ modifySTRef ecRef (\ec -> ec {fract = fract'})
             engineConf' <- lift $ readSTRef ecRef
-            compileShaders systemConf systemST engineConf' esRef pattern
+            compileShaders systemConf systemST engineConf' esRef pattern false
 
           _ -> throwError "invalid format: setFract fract"
         return unit

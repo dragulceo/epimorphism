@@ -2,7 +2,7 @@ module Main where
 
 import Prelude
 import Compiler (compileShaders)
-import Config (PMut(PMutNone), SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, SystemConf, UIConf)
+import Config (fullCompile, PMut(PMutNone), SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, SystemConf, UIConf)
 import Control.Monad (unless, when)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
@@ -128,7 +128,8 @@ animate state = handleError do
   t2 <- lift $ now
 
   when recompile do
-    compileShaders systemConf systemST' engineConf esRef pattern
+    lift $ modifySTRef esRef (\x -> x {compQueue = fullCompile})
+    compileShaders systemConf systemST' engineConf esRef pattern true
     currentTimeMS2 <- lift $ now
     lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS2})
     return unit

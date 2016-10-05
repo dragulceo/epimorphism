@@ -24,8 +24,6 @@ import Util (unsafeCast, lg, now2, now, replaceAll, dbg, Now)
 -- compile shaders and load into systemST
 compileShaders :: forall eff h. SystemConf -> STRef h (SystemST h) -> EngineConf -> STRef h EngineST -> STRef h Pattern -> Boolean -> EpiS (now :: Now | eff) h Unit
 compileShaders sysConf ssRef engineConf esRef pRef full = do
-  dbg "set shaders"
-
   systemST <- lift $ readSTRef ssRef
   es <- lift $ readSTRef esRef
   pattern <- case es.compST.pattern of

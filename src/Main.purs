@@ -122,13 +122,12 @@ animate state = handleError do
     sRes <- runScripts ssRef pRef
     case sRes of
       PMut pattern' new -> do
-        dbg "got a new result"
+        dbg "!!!!!!!!!! BEGIN RECOMPILE !!!!!!!!!!"
         let compST' = engineST.compST {pattern = Just pattern'}
         let new' = fromJust $ head new
-        dbg new
         queue <- case new' of
-          "main" -> return [CompMainShader, CompStall, CompStall, CompStall, CompStall, CompStall, CompMainProg, CompStall, CompStall, CompStall, CompStall, CompFinish]
-          "disp" -> return [CompDispShader, CompStall, CompStall, CompStall, CompStall, CompStall, CompDispProg, CompStall, CompStall, CompStall, CompStall, CompFinish]
+          "main" -> return [CompMainShader, CompMainProg, CompFinish]
+          "disp" -> return [CompDispShader, CompDispProg, CompFinish]
           _ -> throwError "invalid update"
         lift $ modifySTRef esRef (\es -> es {compQueue = queue, compST = compST'})
         return unit
@@ -143,7 +142,6 @@ animate state = handleError do
         lift $ modifySTRef esRef (\es -> es {compST = es.compST {pattern = Just pattern}})
         compileShaders systemConf ssRef engineConf esRef pRef true
       Just _ -> do
-        dbg "RECOMPILE!!!!!"
         compileShaders systemConf ssRef engineConf esRef pRef false
 
     currentTimeMS2 <- lift $ now

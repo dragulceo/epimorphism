@@ -48,12 +48,8 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
           vert <- parseVert systemST pattern
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {vertSrc = Just vert}})
           return unit
-        CompUploadAux -> do
-          case es.compST.aux of
-            Nothing -> throwError "need to compute aux first!"
-            Just aux -> do
-              uploadAux es sysConf.host aux
-              return unit
+        --CompUploadAux -> do
+
         CompMainProg -> do
           case (Tuple es.compST.mainSrc es.compST.vertSrc) of
             Tuple (Just mainSrc) (Just vertSrc) -> do
@@ -69,6 +65,14 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
               return unit
             _ -> throwError "need to compute sources first!"
         CompFinish -> do
+          -- aux
+          case es.compST.aux of
+            Just aux -> do
+              uploadAux es sysConf.host aux
+              return unit
+            Nothing -> return unit -- no aux
+
+          -- unif
           Tuple mainUnif dispUnif <- linkShaders es es.compST.mainProg es.compST.dispProg
 
           lift $ modifySTRef esRef (\es' ->

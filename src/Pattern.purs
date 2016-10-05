@@ -56,8 +56,8 @@ findModule' mpool mid addr followSwitch = do
 findAddr :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> EpiS eff h String
 findAddr mpool pattern mid = do
   m0 <- find' "main" pattern.main
-  m1 <- find' "vert" pattern.disp
-  m2 <- find' "disp" pattern.vert
+  m1 <- find' "disp" pattern.disp
+  m2 <- find' "vert" pattern.vert
   case (m0 <> m1 <> m2) of
     Just addr -> return addr
     Nothing -> throwError $ "orphan module? " ++ mid

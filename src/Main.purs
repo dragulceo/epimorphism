@@ -125,9 +125,10 @@ animate state = handleError do
         dbg "got a new result"
         let compST' = engineST.compST {pattern = Just pattern'}
         let new' = fromJust $ head new
+        dbg new
         queue <- case new' of
-          "main" -> return [CompMainShader, CompStall, CompStall, CompStall, CompStall, CompStall, CompUploadAux, CompMainProg, CompStall, CompStall, CompStall, CompStall, CompFinish]
-          "disp" -> return [CompDispShader, CompStall, CompStall, CompStall, CompStall, CompStall, CompUploadAux, CompDispProg, CompStall, CompStall, CompStall, CompStall, CompFinish]
+          "main" -> return [CompMainShader, CompStall, CompStall, CompStall, CompStall, CompStall, CompMainProg, CompStall, CompStall, CompStall, CompStall, CompFinish]
+          "disp" -> return [CompDispShader, CompStall, CompStall, CompStall, CompStall, CompStall, CompDispProg, CompStall, CompStall, CompStall, CompStall, CompFinish]
           _ -> throwError "invalid update"
         lift $ modifySTRef esRef (\es -> es {compQueue = queue, compST = compST'})
         return unit

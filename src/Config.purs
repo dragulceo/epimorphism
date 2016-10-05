@@ -54,6 +54,7 @@ type SystemST h = {
   , componentLib :: StrMap Component
   , indexLib :: StrMap Index
   , moduleRefPool :: StrMap (STRef h Module)
+  , pCloneRef :: Maybe (STRef h Pattern)
 }
 
 defaultSystemST :: forall h. SystemST h
@@ -73,6 +74,7 @@ defaultSystemST = {
   , moduleRefPool: empty
   , componentLib: empty
   , indexLib: empty
+  , pCloneRef: Nothing
 }
 
 -- Engine
@@ -218,7 +220,7 @@ patternSchema = [
   SchemaEntry SE_N "tSpd"
 ]
 
-data PMut = PMutNone | PMut Pattern (Array String)
+data PMut = PMutNone | PMut Pattern (Set String)
 
 -- Script
 -- sys -> time -> mid -> idx -> args -> res

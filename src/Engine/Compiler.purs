@@ -89,6 +89,9 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
           when (pold.vert /= pattern.vert) do
             purgeModule ssRef pold.vert
 
+          dbg "removing clone"
+          lift $ modifySTRef ssRef (\s -> s {pCloneRef = Nothing})
+
           lift $ modifySTRef pRef (\_ -> pattern)
           lift $ modifySTRef esRef (\es' -> es' {compST = newCompST {pattern = Just pattern, vertSrc = es.compST.vertSrc}})
           return unit

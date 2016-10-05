@@ -90,6 +90,7 @@ initState systemST = do
 
 animate :: forall h. (State h) -> Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
 animate state = handleError do
+  --dbg "animate"
   t0 <- lift $ now
   -- unpack state
   {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef} <- return state
@@ -124,11 +125,12 @@ animate state = handleError do
       PMut pattern' new -> do
         dbg "!!!!!!!!!! BEGIN RECOMPILE !!!!!!!!!!"
         let compST' = engineST.compST {pattern = Just pattern'}
-        let new' = fromJust $ head new
-        queue <- case new' of
-          "main" -> return [CompMainShader, CompMainProg, CompFinish]
-          "disp" -> return [CompDispShader, CompDispProg, CompFinish]
-          _ -> throwError "invalid update"
+--        let new' = fromJust $ head new
+        --queue <- case new' of
+          --"main" -> return [CompMainShader, CompMainProg, CompFinish]
+          --"disp" -> return [CompDispShader, CompDispProgb, CompFinish]
+          --_ -> throwError "invalid update"
+        let queue = [CompMainShader, CompMainProg, CompFinish]
         lift $ modifySTRef esRef (\es -> es {compQueue = queue, compST = compST'})
         return unit
       _ -> return unit
@@ -157,7 +159,7 @@ animate state = handleError do
   -- render!
   t3 <- lift $ now
   (Tuple parM znM) <- getParZn systemST'' (Tuple [] []) pattern'.main
-  tex <- renderFrame systemST'' engineConf engineST'' pattern' parM znM systemST'.frameNum
+  tex <- renderFrame systemST'' engineConf engineST'' pattern' parM znM systemST''.frameNum
 
   (Tuple parD znD) <- getParZn systemST'' (Tuple [] []) pattern'.disp
   postprocessFrame systemST'' engineConf engineST'' tex parD znD

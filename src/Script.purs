@@ -1,14 +1,16 @@
 module Script where
 
 import Prelude
-import Config (PMut(PMutNone), Script(Script), ScriptRes(ScriptRes), Pattern, SystemST, ScriptFn, EpiS)
+import Config (PMut(PMut, PMutNone), Script(Script), ScriptRes(ScriptRes), Pattern, SystemST, ScriptFn, EpiS)
+import Control.Monad (when)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (readSTRef, STRef)
 import Control.Monad.Trans (lift)
-import Data.Array (foldM, length, elemIndex, updateAt, (..), zip)
+import Data.Array (length, foldM, elemIndex, updateAt, (..), zip)
 import Data.Foldable (or)
 import Data.Maybe (Maybe(Just))
 import Data.Maybe.Unsafe (fromJust)
+import Data.Set (union)
 import Data.StrMap (keys, member)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
@@ -16,7 +18,7 @@ import ScriptUtil (serializeScript, parseScript)
 import Scripts (null, randomize, pause, incZn)
 import Switch (finishSwitch, switch)
 import System (mFold, mUp, loadLib)
-import Util (lg)
+import Util (dbg, lg)
 
 -- find script fuction given name
 lookupScriptFN :: forall eff h. String -> EpiS eff h (ScriptFn eff h)
@@ -49,7 +51,9 @@ runModScripts ssRef pRef mut mid = do
 
 
 runScript :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> String -> PMut -> String -> EpiS eff h PMut
-runScript ssRef pRef mid PMutNone scr = do
+runScript ssRef pRef mid x scr = do
+  --dbg $ "running script : " ++ scr ++ " : for " ++ mid
+  --dbg x
   (Script name phase args) <- parseScript scr
   systemST <- lift $ readSTRef ssRef
   fn <- lookupScriptFN name
@@ -72,5 +76,11 @@ runScript ssRef pRef mid PMutNone scr = do
       return unit
     _ -> return unit
 
-  return mut
-runScript _ _ _ x _ = return x
+  case x of
+    PMutNone -> return mut
+    PMut pat res -> do
+      case mut of
+        PMutNone -> return x
+        PMut mutP mutS -> return $ PMut pat (union res mutS)
+
+--runScript _ _ _ x _ = return x

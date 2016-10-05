@@ -102,7 +102,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         mid <- findModule systemST.moduleRefPool pattern "main.application.t.t_inner" true
         mUp systemST mid \m ->
           m {sub = insert "t_expr" tExp m.sub}
-        compileShaders systemConf systemST engineConf esRef pattern false
+        compileShaders systemConf ssRef engineConf esRef pRef false
 
         return unit
       "save" -> do
@@ -136,7 +136,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
             dim' <- intFromStringE dim
             lift $ modifySTRef ecRef (\ec -> ec {kernelDim = dim'})
             engineConf' <- lift $ readSTRef ecRef
-            initEngineST systemConf engineConf' systemST pattern uiConf.canvasId (Just esRef)
+            initEngineST systemConf engineConf' systemST uiConf.canvasId (Just esRef)
 
           _ -> throwError "invalid format: setKerneldim dim"
         return unit
@@ -146,7 +146,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
             fract' <- intFromStringE fract
             lift $ modifySTRef ecRef (\ec -> ec {fract = fract'})
             engineConf' <- lift $ readSTRef ecRef
-            compileShaders systemConf systemST engineConf' esRef pattern false
+            compileShaders systemConf ssRef engineConf' esRef pRef false
 
           _ -> throwError "invalid format: setFract fract"
         return unit
@@ -156,7 +156,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
             engineConf' <- loadLib lib systemST.engineConfLib "setEngineProfile"
             lift $ writeSTRef ecRef engineConf'
 
-            initEngineST systemConf engineConf' systemST pattern uiConf.canvasId (Just esRef)
+            initEngineST systemConf engineConf' systemST uiConf.canvasId (Just esRef)
 
           _ -> throwError "invalid format: setFract fract"
         return unit

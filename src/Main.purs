@@ -2,13 +2,13 @@ module Main where
 
 import Prelude
 import Compiler (compileShaders)
-import Config (fullCompile, PMut(PMutNone), SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, SystemConf, UIConf)
+import Config (fullCompile, PMut(PMut), SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, SystemConf, UIConf)
 import Control.Monad (unless, when)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
-import Data.Array (updateAt, foldM, sort, concatMap, elemIndex)
+import Data.Array (null, updateAt, foldM, sort, concatMap, elemIndex)
 import Data.Int (round, toNumber)
 import Data.List (fromList)
 import Data.Maybe (maybe, fromMaybe, Maybe(Nothing, Just))
@@ -79,11 +79,10 @@ initState systemST = do
 
   -- import pattern
   importPattern ssRef pRef
-  pattern'  <- lift $ readSTRef pRef
   systemST' <- lift $ readSTRef ssRef
 
   -- init engine & ui states
-  esRef <- initEngineST systemConf' engineConf systemST' pattern' uiConf.canvasId Nothing
+  esRef <- initEngineST systemConf' engineConf systemST' uiConf.canvasId Nothing
   usRef <- initUIST ucRef ecRef esRef pRef scRef ssRef
 
   return {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef}
@@ -119,35 +118,49 @@ animate state = handleError do
     return unit
 
   t1 <- lift $ now
-  sRes <- runScripts ssRef pRef
-  recompile <- case sRes of
-    PMutNone -> return false
-    _ -> return true
+  when (null engineST.compQueue) do
+    sRes <- runScripts ssRef pRef
+    case sRes of
+      PMut pattern' new -> do
+        --dbg "got a new result"
+        let compST' = engineST.compST {pattern = Just pattern'}
+        lift $ modifySTRef esRef (\es -> es {compQueue = fullCompile, compST = compST'})
+        return unit
+      _ -> return unit
 
   systemST' <- lift $ readSTRef ssRef
-  t2 <- lift $ now
+  engineST' <- lift $ readSTRef esRef
 
-  when recompile do
-    lift $ modifySTRef esRef (\x -> x {compQueue = fullCompile})
-    compileShaders systemConf systemST' engineConf esRef pattern true
+  when (not $ null engineST'.compQueue) do
+    case engineST.compST.pattern of -- haven't been run before
+      Nothing -> do
+        lift $ modifySTRef esRef (\es -> es {compST = es.compST {pattern = Just pattern}})
+        compileShaders systemConf ssRef engineConf esRef pRef true
+      Just _ -> do
+        dbg "RECOMPILE!!!!!"
+        compileShaders systemConf ssRef engineConf esRef pRef false
+
     currentTimeMS2 <- lift $ now
     lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS2})
     return unit
 
-  engineST'  <- lift $ readSTRef esRef
+  t2 <- lift $ now
+
+  engineST'' <- lift $ readSTRef esRef
   systemST'' <- lift $ readSTRef ssRef
+  pattern'   <- lift $ readSTRef pRef
 
   -- render!
   t3 <- lift $ now
-  (Tuple parM znM) <- getParZn systemST'' (Tuple [] []) pattern.main
-  tex <- renderFrame systemST'' engineConf engineST' pattern parM znM systemST'.frameNum
+  (Tuple parM znM) <- getParZn systemST'' (Tuple [] []) pattern'.main
+  tex <- renderFrame systemST'' engineConf engineST'' pattern' parM znM systemST'.frameNum
 
-  (Tuple parD znD) <- getParZn systemST'' (Tuple [] []) pattern.disp
-  postprocessFrame systemST'' engineConf engineST' tex parD znD
+  (Tuple parD znD) <- getParZn systemST'' (Tuple [] []) pattern'.disp
+  postprocessFrame systemST'' engineConf engineST'' tex parD znD
   t4 <- lift $ now
 
   -- update ui
-  updateLayout uiConf uiST systemST'' pattern false
+  updateLayout uiConf uiST systemST'' pattern' false
   t5 <- lift $ now
 
   -- request next frame

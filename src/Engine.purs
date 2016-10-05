@@ -5,7 +5,6 @@ import Data.TypedArray as T
 import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Audio (audioData, initAudio)
-import Compiler (compileShaders)
 import Config (fullCompile, UniformBindings, EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf)
 import Control.Monad (when)
 import Control.Monad.Eff (forE)
@@ -30,8 +29,8 @@ import Util (hasAttr, unsafeGetAttr, lg, dbg, Now, unsafeNull)
 
 -- initialize the rendering engine & create state.  updates an existing state if passed
 -- maybe validate that kernelDim > 0?
-initEngineST :: forall eff h. SystemConf -> EngineConf -> SystemST h -> Pattern -> String -> Maybe (STRef h EngineST) -> EpiS (now :: Now | eff) h (STRef h EngineST)
-initEngineST sysConf engineConf systemST pattern canvasId esRef' = do
+initEngineST :: forall eff h. SystemConf -> EngineConf -> SystemST h -> String -> Maybe (STRef h EngineST) -> EpiS (now :: Now | eff) h (STRef h EngineST)
+initEngineST sysConf engineConf systemST canvasId esRef' = do
   -- find canvas & create context
   canvasM <- liftEff $ getCanvasElementById canvasId
   canvas <- case canvasM of
@@ -57,7 +56,7 @@ initEngineST sysConf engineConf systemST pattern canvasId esRef' = do
       lift $ modifySTRef ref (\r -> r {empty = empty, currentImages = Nothing})
       return ref
     Nothing -> do
-      let compST = {mainSrc: Nothing, dispSrc: Nothing, vertSrc: Nothing, aux: Nothing, mainProg: Nothing, dispProg: Nothing, mainUnif: Nothing, dispUnif: Nothing}
+      let compST = {pattern: Nothing, mainSrc: Nothing, dispSrc: Nothing, vertSrc: Nothing, aux: Nothing, mainProg: Nothing, dispProg: Nothing, mainUnif: Nothing, dispUnif: Nothing}
       let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, audio: Nothing, currentImages: Nothing, compQueue: fullCompile, mainUnif: Nothing, dispUnif: Nothing, ctx, empty, compST}
       lift $ newSTRef tmp
 
@@ -88,7 +87,6 @@ initEngineST sysConf engineConf systemST pattern canvasId esRef' = do
 
   -- set shaders
   lift $ writeSTRef esRef res
-  compileShaders sysConf systemST engineConf esRef pattern true
 
   return esRef
 

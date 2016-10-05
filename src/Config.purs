@@ -96,10 +96,10 @@ engineConfSchema = [
 foreign import data AudioAnalyser :: *
 foreign import data UniformBindings :: *
 
-type CompST = {mainSrc :: Maybe String, dispSrc :: Maybe String, vertSrc :: Maybe String,
-               aux :: Maybe (Array String),
-               mainProg :: Maybe WebGLProgram, dispProg :: Maybe WebGLProgram,
-               mainUnif :: Maybe UniformBindings, dispUnif :: Maybe UniformBindings}
+type CompST = { pattern :: Maybe Pattern, aux :: Maybe (Array String),
+                mainSrc :: Maybe String, dispSrc :: Maybe String, vertSrc :: Maybe String,
+                mainProg :: Maybe WebGLProgram, dispProg :: Maybe WebGLProgram,
+                mainUnif :: Maybe UniformBindings, dispUnif :: Maybe UniformBindings}
 data CompOp = CompMainShader | CompDispShader | CompVertShader | CompUploadAux | CompMainProg | CompDispProg | CompBind | CompFinish
 
 fullCompile :: Array CompOp
@@ -215,7 +215,7 @@ patternSchema = [
   SchemaEntry SE_N "tSpd"
 ]
 
-data PMut = PMutNone | PMutMain String | PMutDisp String | PMutVert String
+data PMut = PMutNone | PMut Pattern (Array String)
 
 -- Script
 -- sys -> time -> mid -> idx -> args -> res

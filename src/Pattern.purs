@@ -188,7 +188,7 @@ replaceModule ssRef mid subN cid obj = do
 
 
 -- slightly janky
-data CloneRes = CloneRes String String String
+data CloneRes = CloneRes String Pattern String
 cloneWith :: forall eff h. STRef h (SystemST h) -> Pattern -> String -> EpiS eff h CloneRes
 cloneWith ssRef pattern mid = do
   systemST <- lift $ readSTRef ssRef
@@ -203,6 +203,7 @@ cloneWith ssRef pattern mid = do
     _ -> throwError "unknown root"
 
   rootId' <- importModule ssRef (ImportRef rootId)
+  systemST' <- lift $ readSTRef ssRef
 
   pattern' <- case rootN of
     "main" -> return $ pattern {main = rootId'}
@@ -210,6 +211,6 @@ cloneWith ssRef pattern mid = do
     "vert" -> return $ pattern {vert = rootId'}
     _ -> throwError "unknown root"
 
-  mid' <- findModule systemST.moduleRefPool pattern' addr true
+  mid' <- findModule systemST'.moduleRefPool pattern' addr false
 
-  return $ CloneRes rootN rootId mid'
+  return $ CloneRes rootN pattern' mid'

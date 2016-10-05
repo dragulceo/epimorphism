@@ -1,7 +1,7 @@
 module Switch where
 
 import Prelude
-import Config (PMut(PMutNone, PMutMain), ScriptRes(ScriptRes), Module, ScriptFn, EpiS, SystemST)
+import Config (PMut(..), ScriptRes(ScriptRes), Module, ScriptFn, EpiS, SystemST)
 import Control.Monad (when)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
@@ -11,7 +11,7 @@ import Data.Maybe (Maybe(Nothing), fromMaybe)
 import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (insert, fromFoldable, union)
 import Data.Tuple (Tuple(..))
-import Pattern (findAddr, purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
+import Pattern (cloneWith, CloneRes(CloneRes), findAddr, purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
 import ScriptUtil (addScript, purgeScript)
 import System (loadLib, family)
 import Text.Format (precision, format)
@@ -19,9 +19,11 @@ import Util (dbg, intFromStringE, inj, randInt, numFromStringE, gmod)
 
 
 switch :: forall eff h. ScriptFn eff h
-switch ssRef pRef t mid idx dt = do
+switch ssRef pRef t midPre idx dt = do
+  patternPre <- lift $ readSTRef pRef
+  CloneRes newRootN pattern mid <- cloneWith ssRef patternPre midPre
+
   systemST <- lift $ readSTRef ssRef
-  pattern <- lift $ readSTRef pRef
 
   spd <- (loadLib "spd" dt "switch spd") >>= numFromStringE
 
@@ -82,10 +84,10 @@ switch ssRef pRef t mid idx dt = do
 
   -- switch! (should we inline this?)
   let tPhase = systemST.t - t -- recover phase
+  dbg "do switch!!!!"
   switchModules ssRef (t + tPhase) rootId childN nxtId spd
 
-  --dbg "do switch!!!!"
-  return $ ScriptRes (PMutMain "") Nothing
+  return $ ScriptRes (PMut pattern [newRootN]) Nothing
 
 
 getMutator :: forall eff h. String -> String -> String -> EpiS eff h (Module -> Module)
@@ -144,10 +146,7 @@ switchModules ssRef t rootId childN m1 spd = do
 
 
 finishSwitch :: forall eff h. ScriptFn eff h
-finishSwitch ssRef pRef t rootId idx dt = do
-  systemST <- lift $ readSTRef ssRef
-  pattern <- lift $ readSTRef pRef
-
+finishSwitch ssRef pRef t rootIdPre idx dt = do
   -- get data
   delay <- (loadLib "delay" dt "finishSwitch delay") >>= numFromStringE
 
@@ -155,25 +154,29 @@ finishSwitch ssRef pRef t rootId idx dt = do
     -- we're done
     x | x >= 1.0 -> do
       --let a = lg "DONE SWITCHING"
+      patternPre <- lift $ readSTRef pRef
+      CloneRes newRootN pattern rootId <- cloneWith ssRef patternPre rootIdPre
+      systemST <- lift $ readSTRef ssRef
+      dbg rootId
 
       -- find parent & m1
       (Tuple parent subN) <- findParent systemST.moduleRefPool pattern rootId
       mRef   <- loadLib rootId systemST.moduleRefPool "finishSwitch module"
       m      <- lift $ readSTRef mRef
-      m1id   <- loadLib "m1" m.modules "finishSwitch module"
+      m1id   <- loadLib "m1" m.modules "finishSwitch module m1"
       m1Ref  <- loadLib m1id systemST.moduleRefPool "finishSwitch m1"
       m1     <- lift $ readSTRef m1Ref
-
+      dbg "a"
       -- replace.  this removes all scripts wrt this as well
       replaceModule ssRef parent subN rootId (ImportModule m1)
-
+      dbg "b"
       -- this is pretty ghetto.  its for the dev ui
       when systemST.pauseAfterSwitch do
         lift $ modifySTRef ssRef (\s -> s {pauseAfterSwitch = false})
         addScript systemST parent "pause" ""
         return unit
-
+      dbg "c"
       --dbg "finish switch!!!!"
-      return $ ScriptRes (PMutMain "") Nothing
+      return $ ScriptRes (PMut pattern [newRootN]) Nothing
     _ -> do
       return $ ScriptRes PMutNone Nothing

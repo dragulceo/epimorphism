@@ -19,11 +19,15 @@ import Texture (uploadAux)
 import Util (unsafeCast, lg, now2, now, replaceAll, dbg, Now)
 
 -- compile shaders and load into systemST
-compileShaders :: forall eff h. SystemConf -> SystemST h -> EngineConf -> STRef h EngineST -> Pattern -> Boolean -> EpiS (now :: Now | eff) h Unit
-compileShaders sysConf systemST engineConf esRef pattern full = do
+compileShaders :: forall eff h. SystemConf -> STRef h (SystemST h) -> EngineConf -> STRef h EngineST -> STRef h Pattern -> Boolean -> EpiS (now :: Now | eff) h Unit
+compileShaders sysConf ssRef engineConf esRef pRef full = do
   dbg "set shaders"
 
+  systemST <- lift $ readSTRef ssRef
   es <- lift $ readSTRef esRef
+  pattern <- case es.compST.pattern of
+    Just x -> return x
+    Nothing -> throwError "need pattern to compile"
 
   case (uncons es.compQueue) of
     Just {head: op, tail: rst} -> do
@@ -73,11 +77,14 @@ compileShaders sysConf systemST engineConf esRef pattern full = do
                         mainUnif = es.compST.mainUnif, dispUnif = es.compST.dispUnif,
                         currentImages = es.compST.aux}
           lift $ modifySTRef esRef (\_ -> es')
+          --pold <- lift $ readSTRef pRef
+
+          lift $ modifySTRef pRef (\_ -> pattern)
           return unit
 
       lift $ modifySTRef esRef (\es' -> es' {compQueue = rst})
       when (length rst /= 0 && full) do
-        compileShaders sysConf systemST engineConf esRef pattern full
+        compileShaders sysConf ssRef engineConf esRef pRef full
 
     Nothing -> return unit
 

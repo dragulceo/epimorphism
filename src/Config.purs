@@ -103,7 +103,7 @@ type CompST = { pattern :: Maybe Pattern, aux :: Maybe (Array String),
 newCompST :: CompST
 newCompST = {pattern: Nothing, mainSrc: Nothing, dispSrc: Nothing, vertSrc: Nothing, aux: Nothing, mainProg: Nothing, dispProg: Nothing, mainUnif: Nothing, dispUnif: Nothing}
 
-data CompOp = CompMainShader | CompDispShader | CompVertShader | CompUploadAux | CompMainProg | CompDispProg | CompFinish
+data CompOp = CompMainShader | CompDispShader | CompVertShader | CompUploadAux | CompMainProg | CompDispProg | CompFinish | CompStall
 
 fullCompile :: Array CompOp
 fullCompile = [CompMainShader, CompDispShader, CompVertShader, CompUploadAux, CompMainProg, CompDispProg, CompFinish]

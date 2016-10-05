@@ -90,6 +90,8 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
           lift $ modifySTRef pRef (\_ -> pattern)
           lift $ modifySTRef esRef (\es' -> es' {compST = newCompST {pattern = Just pattern, vertSrc = es.compST.vertSrc}})
           return unit
+        CompStall -> do
+          return unit
 
       lift $ modifySTRef esRef (\es' -> es' {compQueue = rst})
       when (length rst /= 0 && full) do

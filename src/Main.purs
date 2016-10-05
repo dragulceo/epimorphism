@@ -11,7 +11,7 @@ import DOM (DOM)
 import Data.Array (null, updateAt, foldM, sort, concatMap, elemIndex)
 import Data.Int (round, toNumber)
 import Data.List (fromList)
-import Data.Maybe (maybe, fromMaybe, Maybe(Nothing, Just))
+import Data.Maybe (isNothing, maybe, fromMaybe, Maybe(Nothing, Just))
 import Data.Maybe.Unsafe (fromJust)
 import Data.Set (member)
 import Data.StrMap (insert, values, keys, lookup)
@@ -26,7 +26,7 @@ import Script (runScripts)
 import System (initSystemST, loadLib)
 import Texture (preloadImages)
 import UI (initUIST)
-import Util (halt, dbg, imag, real, rndstr, Now, handleError, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
+import Util (dbg, imag, real, rndstr, Now, handleError, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
 
 host :: String
 host = ""
@@ -80,9 +80,6 @@ initState systemST = do
 
   -- import pattern
   importPattern ssRef pRef
-  p' <- lift $ readSTRef pRef
-  new <- lift $ newSTRef p'
-  lift $ modifySTRef ssRef (\s -> s {compPattern = Just new}) -- a bit sketchy
   systemST' <- lift $ readSTRef ssRef
 
   -- init engine & ui states
@@ -128,7 +125,6 @@ animate state = handleError do
     case sRes of
       PMutNone -> return unit
       PMut pattern' new -> do
-        dbg "!!!!!!!!!! BEGIN RECOMPILE !!!!!!!!!!"
         let queue = (if (member "main" new) then [CompMainShader, CompMainProg] else []) ++
                     (if (member "disp" new) then [CompDispShader, CompDispProg] else []) ++
                     [CompFinish]
@@ -140,13 +136,7 @@ animate state = handleError do
   engineST' <- lift $ readSTRef esRef
 
   when (not $ null engineST'.compQueue) do
-    case engineST.mainProg of
-      Nothing -> do
-        dbg "FULL COMPILE"
-        compileShaders systemConf ssRef engineConf esRef pRef true
-      Just _ -> do
-        compileShaders systemConf ssRef engineConf esRef pRef false
-
+    compileShaders systemConf ssRef engineConf esRef pRef (isNothing engineST.mainProg)
     currentTimeMS2 <- lift $ now
     lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS2})
     return unit

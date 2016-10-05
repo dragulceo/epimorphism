@@ -9,7 +9,7 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans (lift)
 import Data.Array (length, uncons)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (fromMaybe, Maybe(..))
 import Data.Tuple (fst, Tuple(Tuple))
 import EngineUtil (execGL)
 import Graphics.WebGL.Methods (vertexAttribPointer, enableVertexAttribArray, bindBuffer, bufferData, createBuffer)
@@ -25,10 +25,8 @@ compileShaders :: forall eff h. SystemConf -> STRef h (SystemST h) -> EngineConf
 compileShaders sysConf ssRef engineConf esRef pRef full = do
   systemST <- lift $ readSTRef ssRef
   es <- lift $ readSTRef esRef
-  pcompRef <- case systemST.compPattern of
-    Just x -> return x
-    Nothing -> throwError "need pattern to compile"
-  pattern <- lift $ readSTRef pcompRef
+  let compRef = fromMaybe pRef systemST.compPatternm
+  pattern <- lift $ readSTRef compRef
 
   case (uncons es.compQueue) of
     Just {head: op, tail: rst} -> do
@@ -98,9 +96,9 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
             purgeModule ssRef pold.disp
           when (pold.vert /= pattern.vert) do
             purgeModule ssRef pold.vert
-          lift $ modifySTRef ssRef (\s -> s {compPattern = Nothing})
 
           -- update pattern & reset comp info
+          lift $ modifySTRef ssRef (\s -> s {compPattern = Nothing})
           lift $ modifySTRef pRef (\_ -> pattern)
           lift $ modifySTRef esRef (\es' -> es' {compST = newCompST {vertSrc = es.compST.vertSrc}})
 

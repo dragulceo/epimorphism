@@ -2,13 +2,13 @@ module Main where
 
 import Prelude
 import Compiler (compileShaders)
-import Config (fullCompile, PMut(PMut), SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, SystemConf, UIConf)
+import Config (PMut(PMut), SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, SystemConf, UIConf, CompOp(..))
 import Control.Monad (unless, when)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Except.Trans (lift)
+import Control.Monad.Except.Trans (throwError, lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
-import Data.Array (null, updateAt, foldM, sort, concatMap, elemIndex)
+import Data.Array (head, null, updateAt, foldM, sort, concatMap, elemIndex)
 import Data.Int (round, toNumber)
 import Data.List (fromList)
 import Data.Maybe (maybe, fromMaybe, Maybe(Nothing, Just))
@@ -122,9 +122,14 @@ animate state = handleError do
     sRes <- runScripts ssRef pRef
     case sRes of
       PMut pattern' new -> do
-        --dbg "got a new result"
+        dbg "got a new result"
         let compST' = engineST.compST {pattern = Just pattern'}
-        lift $ modifySTRef esRef (\es -> es {compQueue = fullCompile, compST = compST'})
+        let new' = fromJust $ head new
+        queue <- case new' of
+          "main" -> return [CompMainShader, CompUploadAux, CompMainProg, CompFinish]
+          "disp" -> return [CompDispShader, CompUploadAux, CompDispProg, CompFinish]
+          _ -> throwError "invalid update"
+        lift $ modifySTRef esRef (\es -> es {compQueue = queue, compST = compST'})
         return unit
       _ -> return unit
 

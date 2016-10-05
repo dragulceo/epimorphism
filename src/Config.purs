@@ -100,10 +100,13 @@ type CompST = { pattern :: Maybe Pattern, aux :: Maybe (Array String),
                 mainSrc :: Maybe String, dispSrc :: Maybe String, vertSrc :: Maybe String,
                 mainProg :: Maybe WebGLProgram, dispProg :: Maybe WebGLProgram,
                 mainUnif :: Maybe UniformBindings, dispUnif :: Maybe UniformBindings}
-data CompOp = CompMainShader | CompDispShader | CompVertShader | CompUploadAux | CompMainProg | CompDispProg | CompBind | CompFinish
+newCompST :: CompST
+newCompST = {pattern: Nothing, mainSrc: Nothing, dispSrc: Nothing, vertSrc: Nothing, aux: Nothing, mainProg: Nothing, dispProg: Nothing, mainUnif: Nothing, dispUnif: Nothing}
+
+data CompOp = CompMainShader | CompDispShader | CompVertShader | CompUploadAux | CompMainProg | CompDispProg | CompFinish
 
 fullCompile :: Array CompOp
-fullCompile = [CompMainShader, CompDispShader, CompVertShader, CompUploadAux, CompMainProg, CompDispProg, CompBind, CompFinish]
+fullCompile = [CompMainShader, CompDispShader, CompVertShader, CompUploadAux, CompMainProg, CompDispProg, CompFinish]
 
 type EngineST = {
     dispProg :: Maybe WebGLProgram

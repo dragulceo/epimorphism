@@ -2,19 +2,22 @@ module Compiler where
 
 import Prelude
 import Data.TypedArray as T
-import Config (UniformBindings, EpiS, Pattern, SystemST, EngineST, EngineConf, SystemConf, CompOp(..))
+import Config (newCompST, UniformBindings, EpiS, Pattern, SystemST, EngineST, EngineConf, SystemConf, CompOp(..))
+import Control.Alt ((<|>))
 import Control.Monad (when)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans (lift)
 import Data.Array (length, uncons)
-import Data.Maybe (Maybe(Just, Nothing))
+import Data.Maybe (Maybe(..))
+import Data.Maybe.Unsafe (fromJust)
 import Data.Tuple (fst, Tuple(Tuple))
 import EngineUtil (execGL)
 import Graphics.WebGL.Methods (vertexAttribPointer, enableVertexAttribArray, bindBuffer, bufferData, createBuffer)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram, linkProgram)
 import Graphics.WebGL.Types (WebGLProgram, DataType(Float), BufferData(DataSource), BufferUsage(StaticDraw), ArrayBufferType(ArrayBuffer))
 import Parser (parseShader)
+import Pattern (purgeModule)
 import Texture (uploadAux)
 import Util (unsafeCast, lg, now2, now, replaceAll, dbg, Now)
 
@@ -65,21 +68,27 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
               lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {dispProg = Just dispProg}})
               return unit
             _ -> throwError "need to compute sources first!"
-        CompBind -> do
-          case (Tuple es.compST.mainProg es.compST.dispProg) of
-            Tuple (Just mainProg) (Just dispProg) -> do
-              Tuple mainUnif dispUnif <- linkShaders es mainProg dispProg
-              lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainUnif = Just mainUnif, dispUnif = Just dispUnif}})
-              return unit
-            _ -> throwError "need to compute programs first!"
         CompFinish -> do
-          let es' = es {mainProg = es.compST.mainProg, dispProg = es.compST.dispProg,
-                        mainUnif = es.compST.mainUnif, dispUnif = es.compST.dispUnif,
-                        currentImages = es.compST.aux}
-          lift $ modifySTRef esRef (\_ -> es')
-          --pold <- lift $ readSTRef pRef
+          Tuple mainUnif dispUnif <- linkShaders es es.compST.mainProg es.compST.dispProg
+
+          lift $ modifySTRef esRef (\es' ->
+                                     es' {mainProg = es'.compST.mainProg <|> es'.mainProg,
+                                          dispProg = es'.compST.dispProg <|> es'.dispProg,
+                                          mainUnif = mainUnif <|> es'.mainUnif,
+                                          dispUnif = dispUnif <|> es'.dispUnif,
+                                          currentImages = es'.compST.aux <|> es'.currentImages })
+          pold <- lift $ readSTRef pRef
+
+          -- purge
+          when (pold.main /= pattern.main) do
+            purgeModule ssRef pold.main
+          when (pold.disp /= pattern.disp) do
+            purgeModule ssRef pold.disp
+          when (pold.vert /= pattern.vert) do
+            purgeModule ssRef pold.vert
 
           lift $ modifySTRef pRef (\_ -> pattern)
+          lift $ modifySTRef esRef (\es' -> es' {compST = newCompST {pattern = Just pattern, vertSrc = es.compST.vertSrc}})
           return unit
 
       lift $ modifySTRef esRef (\es' -> es' {compQueue = rst})
@@ -103,25 +112,31 @@ parseDisp systemST pattern = fst <$> parseShader systemST pattern.disp pattern.i
 parseVert :: forall eff h. SystemST h -> Pattern -> EpiS eff h String
 parseVert systemST pattern = fst <$> parseShader systemST pattern.vert []
 
-linkShaders :: forall eff h. EngineST -> WebGLProgram -> WebGLProgram -> EpiS eff h (Tuple UniformBindings UniformBindings)
+linkShaders :: forall eff h. EngineST -> Maybe WebGLProgram -> Maybe WebGLProgram -> EpiS eff h (Tuple (Maybe UniformBindings) (Maybe UniformBindings))
 linkShaders es mainProg dispProg = execGL es.ctx do
-  linkProgram mainProg
-  linkProgram dispProg
-  -- vertex coords
   pos <- createBuffer
   bindBuffer ArrayBuffer pos
   bufferData ArrayBuffer (DataSource (T.asFloat32Array [-1.0,-1.0,1.0,-1.0,-1.0,1.0,
                                                         -1.0,1.0,1.0,-1.0,1.0,1.0])) StaticDraw
 
-  dispAttr <- getAttrBindings dispProg
-  mainAttr <- getAttrBindings mainProg
+  mainUnif <- case mainProg of
+    Just mainProg' -> do
+      linkProgram mainProg'
+      mainAttr <- getAttrBindings mainProg'
+      enableVertexAttribArray mainAttr.a_position
+      vertexAttribPointer mainAttr.a_position 2 Float false 0 0
+      unif <- getUniformBindings mainProg'
+      return (Just $ unsafeCast unif)
+    Nothing -> return Nothing
 
-  enableVertexAttribArray mainAttr.a_position
-  vertexAttribPointer mainAttr.a_position 2 Float false 0 0
-  enableVertexAttribArray dispAttr.a_position
-  vertexAttribPointer dispAttr.a_position 2 Float false 0 0
+  dispUnif <- case dispProg of
+    Just dispProg' -> do
+      linkProgram dispProg'
+      dispAttr <- getAttrBindings dispProg'
+      enableVertexAttribArray dispAttr.a_position
+      vertexAttribPointer dispAttr.a_position 2 Float false 0 0
+      unif <- getUniformBindings dispProg'
+      return (Just $ unsafeCast unif)
+    Nothing -> return Nothing
 
-  mainUnif <- getUniformBindings mainProg
-  dispUnif <- getUniformBindings dispProg
-
-  return $ Tuple (unsafeCast mainUnif) (unsafeCast dispUnif)
+  return $ Tuple mainUnif dispUnif

@@ -5,7 +5,7 @@ import Data.TypedArray as T
 import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Audio (audioData, initAudio)
-import Config (fullCompile, UniformBindings, EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf)
+import Config (newCompST, fullCompile, UniformBindings, EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf)
 import Control.Monad (when)
 import Control.Monad.Eff (forE)
 import Control.Monad.Eff.Class (liftEff)
@@ -56,7 +56,7 @@ initEngineST sysConf engineConf systemST canvasId esRef' = do
       lift $ modifySTRef ref (\r -> r {empty = empty, currentImages = Nothing})
       return ref
     Nothing -> do
-      let compST = {pattern: Nothing, mainSrc: Nothing, dispSrc: Nothing, vertSrc: Nothing, aux: Nothing, mainProg: Nothing, dispProg: Nothing, mainUnif: Nothing, dispUnif: Nothing}
+      let compST = newCompST
       let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, audio: Nothing, currentImages: Nothing, compQueue: fullCompile, mainUnif: Nothing, dispUnif: Nothing, ctx, empty, compST}
       lift $ newSTRef tmp
 

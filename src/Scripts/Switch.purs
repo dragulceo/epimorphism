@@ -157,7 +157,6 @@ finishSwitch ssRef pRef t rootIdPre idx dt = do
       patternPre <- lift $ readSTRef pRef
       CloneRes newRootN pattern rootId <- cloneWith ssRef patternPre rootIdPre
       systemST <- lift $ readSTRef ssRef
-      dbg rootId
 
       -- find parent & m1
       (Tuple parent subN) <- findParent systemST.moduleRefPool pattern rootId
@@ -166,16 +165,16 @@ finishSwitch ssRef pRef t rootIdPre idx dt = do
       m1id   <- loadLib "m1" m.modules "finishSwitch module m1"
       m1Ref  <- loadLib m1id systemST.moduleRefPool "finishSwitch m1"
       m1     <- lift $ readSTRef m1Ref
-      dbg "a"
+
       -- replace.  this removes all scripts wrt this as well
       replaceModule ssRef parent subN rootId (ImportModule m1)
-      dbg "b"
+
       -- this is pretty ghetto.  its for the dev ui
       when systemST.pauseAfterSwitch do
         lift $ modifySTRef ssRef (\s -> s {pauseAfterSwitch = false})
         addScript systemST parent "pause" ""
         return unit
-      dbg "c"
+
       --dbg "finish switch!!!!"
       return $ ScriptRes (PMut pattern [newRootN]) Nothing
     _ -> do

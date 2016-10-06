@@ -25,7 +25,7 @@ compileShaders :: forall eff h. SystemConf -> STRef h (SystemST h) -> EngineConf
 compileShaders sysConf ssRef engineConf esRef pRef full = do
   systemST <- lift $ readSTRef ssRef
   es <- lift $ readSTRef esRef
-  let compRef = fromMaybe pRef systemST.compPatternm
+  let compRef = fromMaybe pRef systemST.compPattern
   pattern <- lift $ readSTRef compRef
 
   case (uncons es.compQueue) of

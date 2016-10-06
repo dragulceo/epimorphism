@@ -53,7 +53,9 @@ exports.addGlobalEventListeners = function(handler) {
 
 		// RESIZE
 		var resizeHandler = function(){
-			handler('initLayout')();
+			if($('#glcanvas').length){
+				handler('initLayout')();
+			}
 		}
 
 		$(window).resize(resizeHandler);

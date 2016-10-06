@@ -4,12 +4,10 @@ CURRENT PROJECTS:
 		- dynamic par/zn/aux count
 
 	- asynchronous compiling
-		- compile wrt new root
-		- freeze scripts
-		- when compiling done, switch out root, unfreeze scripts
-		- remove get uniforms from engine loop
-		- split compilation into stages
-
+		- cleanup
+		- stalling? CompStall
+		- time modification on comoile
+		- fps delta'
 		- also, batch compilation?  only happens once every n ms?
 
   - async asset loading?
@@ -17,10 +15,12 @@ CURRENT PROJECTS:
 		- which images are loaded (also, clean up main)?
 		- load small images to start, bigger images when needed?
 
+  - test on more platforms
+
 	- cleanup
+	  - change resolution during switching error
 	  - upgrade to new compiler?
 	  - double incZn is busted
-    - make sure everything re. scripts still works
 		- be better about reloading objects after refs might change
     - better data organization
 	    - merge configs & states?
@@ -30,6 +30,7 @@ CURRENT PROJECTS:
 NEXT PROJECTS:
   - release?
     - kickstarter for audio responsiveness?
+		- ipad?
 	  - make main pattern a little better
 
 	- restructure data

@@ -289,11 +289,11 @@ body {
 #loading_txt {
 		text-align:center;
 		position:absolute;
-    width:150px; /*image width */
+    width:300px; /*image width */
     height:30px; /*image height */
     left:50%;
     top:50%;
-    margin-left:-75px; /*image width/2 */
+    margin-left:-150px; /*image width/2 */
     margin-top:30px; /*image height/2 */
 		color:white;
 }

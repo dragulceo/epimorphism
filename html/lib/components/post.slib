@@ -4,7 +4,7 @@ post post_id {{
 post post_hlim {{
 	// optomize me!
 	vec4 frame_i = frame;
-  frame = _gamma3(frame, @gamma@);
+  frame = _gamma3(frame, 1.2);//@gamma@);
 
   frame = rgb2hsv(frame);
 

@@ -108,7 +108,7 @@ animate state = handleError do
   let lastTimeMS = fromMaybe currentTimeMS systemST.lastTimeMS
   let delta = (currentTimeMS - lastTimeMS) * pattern.tSpd / 1000.0
   let delta' = if systemST.paused then 0.0 else delta
-  let t' = systemST.t + (delta' + 20.0 / 1000.0) / 2.0 -- abstract this
+  let t' = systemST.t + 0.02 --(delta' + 20.0 / 1000.0) / 2.0 -- abstract this
   lift $ modifySTRef ssRef (\s -> s {t = t', lastTimeMS = Just currentTimeMS})
 
   -- fps
@@ -137,8 +137,8 @@ animate state = handleError do
 
   when (not $ null engineST'.compQueue) do
     compileShaders systemConf ssRef engineConf esRef pRef (isNothing engineST.mainProg)
-    currentTimeMS2 <- lift $ now
-    lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS2})
+    --currentTimeMS2 <- lift $ now
+    --lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS2})
     return unit
 
   t2 <- lift $ now

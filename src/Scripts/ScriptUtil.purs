@@ -62,7 +62,7 @@ serializeScript (Script name phase args) =
     serializeArgs args = joinWith " " $ fromList $ map (\(Tuple k v) -> k ++ ":" ++ v) (toList args)
 
 
---  This method is called by scripts that modify the state tree.  we perform modificatiosn in a cloned tree so we can compile asynchronously
+-- This method is called by scripts that modify the state tree.  we perform modificatiosn in a cloned tree so we can compile asynchronously
 -- I don't like how this modifies ssRef
 getClone :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> String -> EpiS eff h CloneRes
 getClone ssRef pRef mid = do

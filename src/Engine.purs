@@ -25,7 +25,7 @@ import Graphics.WebGL.Types (WebGLContext, WebGLTexture, DrawMode(Triangles), Un
 import Texture (initAux, initTexFb, emptyImage)
 import Util (hasAttr, unsafeGetAttr, lg, dbg, Now, unsafeNull)
 
--- PUBLIC
+--  PUBLIC
 
 -- initialize the rendering engine & create state.  updates an existing state if passed
 -- maybe validate that kernelDim > 0?

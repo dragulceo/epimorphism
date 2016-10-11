@@ -53,7 +53,7 @@ getSysConfName = do
 
 initState :: forall eff h. SystemST h -> EpiS (now :: Now | eff) h (State h)
 initState systemST = do
-  -- init config
+  --  init config
   systemName <- lift $ getSysConfName
   systemConf <- loadLib systemName systemST.systemConfLib "init system"
 

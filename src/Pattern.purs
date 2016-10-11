@@ -186,7 +186,7 @@ replaceModule ssRef mid subN cid obj = do
   return n'
 
 
--- slightly janky
+--  slightly janky
 data CloneRes = CloneRes String Pattern String
 clonePattern :: forall eff h. STRef h (SystemST h) -> Pattern -> EpiS eff h Pattern
 clonePattern ssRef pattern = do

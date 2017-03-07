@@ -4,9 +4,7 @@ basic_images {{
   textures/simplegeom/tile_grid1.png
   textures/simplegeom/tile_grid2.png
   textures/simplegeom/tile_grid3.png
-  textures/simplegeom/tile_grid4.png
   textures/simplegeom/tile_grid6.png
-  textures/simplegeom/tile_tri1.png
   textures/simplegeom/tile_hexagons1.png
   textures/simplegeom/tile_psych1.png
   textures/simplegeom/tile_rainbow1.png
@@ -52,9 +50,7 @@ all_images {{
   textures/simplegeom/tile_grid1.png
   textures/simplegeom/tile_grid2.png
   textures/simplegeom/tile_grid3.png
-  textures/simplegeom/tile_grid4.png
   textures/simplegeom/tile_grid6.png
-  textures/simplegeom/tile_tri1.png
   textures/simplegeom/tile_hexagons1.png
   textures/simplegeom/tile_psych1.png
   textures/simplegeom/tile_rainbow1.png
@@ -106,9 +102,7 @@ images1 {{
   textures/simplegeom/tile_grid1.png
   textures/simplegeom/tile_grid2.png
   textures/simplegeom/tile_grid3.png
-  textures/simplegeom/tile_grid4.png
   textures/simplegeom/tile_grid6.png
-  textures/simplegeom/tile_tri1.png
   textures/simplegeom/tile_hexagons1.png
   textures/simplegeom/tile_psych1.png
   textures/simplegeom/tile_rainbow1.png
@@ -127,9 +121,7 @@ images2 {{
   textures/simplegeom/tile_grid1.png
   textures/simplegeom/tile_grid2.png
   textures/simplegeom/tile_grid3.png
-  textures/simplegeom/tile_grid4.png
   textures/simplegeom/tile_grid6.png
-  textures/simplegeom/tile_tri1.png
   textures/simplegeom/tile_hexagons1.png
   textures/simplegeom/tile_psych1.png
   textures/simplegeom/tile_rainbow1.png

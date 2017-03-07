@@ -17,13 +17,13 @@
   ],
   "dependencies": {
     "purescript-webgl-monad": "git@github.com:geneshuman/purescript-webgl-monad.git",
-    "purescript-extensions": "*",
-    "purescript-console": "*",
+    "purescript-extensions": "0.3.1",
+    "purescript-console": "0.1.1",
     "purescript-jquery": "~0.6.1",
     "purescript-simple-dom": "git@github.com:geneshuman/purescript-simple-dom.git#0.1.4",
-    "purescript-math": "*",
-    "purescript-complex": "*",
-    "purescript-sets": "*",
+    "purescript-math": "0.2.0",
+    "purescript-complex": "1.1.0",
+    "purescript-sets": "0.5.7",
     "purescript-format": "^0.1.1"
   },
   "resolutions": {
@@ -57,6 +57,7 @@
     "purescript-enums": "^0.7.0",
     "purescript-datetime": "~0.9.1",
     "purescript-nullable": "~0.2.1",
-    "purescript-distributive": "^0.5.0"
+    "purescript-distributive": "^0.5.0",
+		"purescript-newtype": "0.1.0"
   }
 }

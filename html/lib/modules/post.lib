@@ -25,3 +25,7 @@ par {hue:loop 0.01, spread:wave 0.011 0.35 1.5, lgv:wave 0.07 0.125 0.5, r_map:0
 --post_hlim_anim2 < post_hlim1
 flags {lib, post_main}
 par {hue:loop 0.01, spread:wave 0.011 0.35 1.5, lgv:wave 0.07 0.125 0.5, gamma:wave 0.03 0.3 1.7, r_map: wave 0.03 0.3 0.7}
+
+--post_experimental < post_id
+component post_hlim
+par {gamma:1.5, hue:0.0, spread:0.5, lgv:0.5, r_map:0.0}

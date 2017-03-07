@@ -46,7 +46,7 @@ getSysConfName :: forall eff. Eff eff String
 getSysConfName = do
   args <- urlArgs
   dev <- isDev
-  let def = if dev then "dev" else "prod"
+  let def = if dev then "experimental" else "prod"
   let conf = fromMaybe def (lookup "system" args)
   return conf
 

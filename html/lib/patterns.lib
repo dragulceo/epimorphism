@@ -28,3 +28,7 @@ disp  disp_main3
 --ponies < dev
 main  epimorphism_ponies
 disp  disp_id
+
+--experimental < dev
+main  experimental_main
+disp  disp_experimental

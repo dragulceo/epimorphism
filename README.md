@@ -16,7 +16,7 @@ The project is live on the web here http://www.epimorphism.com
 - start the build system - `scripts/watch.sh`
 - start the development server - `scripts/server.sh`
 - the project should be visible on http://localhost:8000
-
+- Use CacheKiller to disable caching on development?
 
 ## Useful Commands
  - `~` - development panel

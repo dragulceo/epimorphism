@@ -26,3 +26,8 @@ initEngineConf default
 initUIConf prod
 initPattern main3
 seed iBxKdteaFS
+
+--experimental
+initEngineConf default
+initUIConf dev
+initPattern experimental

@@ -80,9 +80,8 @@ application epimorphism_depth {{
 			//float x = (z_in.x + 1.0) / 2.0;
 			//float b = (1.0 - x) * seed.a + x * (1.0 - seed.a);
 			float a = seed.a;
-			float depth_inc = 4.0 / 255.0;
-			seed.a = depth_inc;
-			frame.a = frame.a + depth_inc;
+			seed.a = DEPTH_INC;
+			frame.a = frame.a + DEPTH_INC;
 			accum += mix(frame, seed, a);
 		}
 	}

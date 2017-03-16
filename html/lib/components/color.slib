@@ -13,11 +13,14 @@ color rotate_hsv {{
   color = rgb2hsv(color);
 
   float l = sqrt(z_in.x * z_in.x + z_in.y * z_in.y);
+	//float l = sqrt(t_z.x * t_z.x + t_z.y * t_z.y);
   l = (4.0 * @len_sc@ + 1.0) * l / (l + 4.0 * @len_sc@);
   l = @len_sc_amt@ * log(l + 1.0);
 
   float th = (@rot@ + l + time * @th_spd@);
   color.x += th;
+	color.y *= @sat_sc@;
+	//color.z /= (1.0 + 0.5 * l);
 
   color = hsv2rgb(color);
 }}

@@ -7,12 +7,14 @@ var w
 dim float
 
 --wt_inv < wt_id
+flags {}
 sub {wt_exp: 1.0 - w}
 
 --wt_circ < wt_id
 sub {wt_exp: sqrt(1.0 - (1.0 - w) * (1.0 - w))}
 
 --wt_inv_circ < wt_id
+flags {}
 sub {wt_exp: 1.0 - sqrt(1.0 - (1.0 - w) * (1.0 - w))}
 
 --wt_anim < wt_id
@@ -59,6 +61,8 @@ dim vec4
 component tex_color
 par {scale: 0.333, spd: 0.0, rot: 0.0, sat:1.0, val:1.0}
 images [textures/simplegeom/tile_grid1.png]
+
+--tex_color_sc
 
 --simple_color_anim1 < simple_color
 flags {anim1, anim3}

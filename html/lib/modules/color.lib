@@ -16,9 +16,9 @@ component color_gbr
 --rotate_hsv0 < color_id
 flags {lib, color_main, farm1}
 component rotate_hsv
-par {rot: 0.06, len_sc:0.0, len_sc_amt:0.0, th_spd: 0.0}
+par {sat_sc: 1.1, rot: 0.0, len_sc:0.0, len_sc_amt:0.0, th_spd: 0.0}
 
 --rotate_hsv1 < color_id
 flags {lib, color_main, farm1}
 component rotate_hsv
-par {rot: 0.17, len_sc:1.0, len_sc_amt:0.5, th_spd: 0.02}
+par {sat_sc: 1.05, rot: 0.01, len_sc:1.0, len_sc_amt:0.05, th_spd: 0.00}

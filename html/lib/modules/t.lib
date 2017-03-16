@@ -20,6 +20,10 @@ modules {t_inner: t_z}
 flags {wrap, all, lib}
 zn [1.1+0.0i, 0.0+0.0i, 1.0+0.0i, 0.0+0.0i]
 
+--t_wrap_z1 < t_wrap
+flags {wrap, all, lib}
+zn [4.0+0.0i, 0.0+0.0i, 1.0+0.0i, 0.0+0.0i]
+
 --t_wrap_zo' < t_wrap_zo
 zn [1.1+0.0i, 0.0+0.0i, 0.0+1.0i, 1.0+0.0i]
 

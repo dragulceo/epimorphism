@@ -1,4 +1,6 @@
 CURRENT PROJECTS:
+  - COMPILING PERFORMANCE ON WINDOWS
+
   - detect system/perf profile
     - if there are too many aux buffers (texture units), we'll have an issue?
 		- dynamic par/zn/aux count
@@ -25,6 +27,10 @@ CURRENT PROJECTS:
     - better data organization
 	    - merge configs & states?
 		  - what goes in config, what goes into states?
+
+
+UI NOTES:
+  - ability to clone module tree & quickly make changes/save/load/etc
 
 
 NEXT PROJECTS:

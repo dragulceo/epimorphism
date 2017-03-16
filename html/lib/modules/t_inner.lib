@@ -35,7 +35,7 @@ flags {lib, all, all_seed, farm1, farm2}
 sub {t_expr: exp(z)}
 
 --t_p0 < t_z
-flags {lib, all}
+flags {}
 sub {t_expr: z / (z + 1) + z / (z - 1)}
 
 --t_p1 < t_z

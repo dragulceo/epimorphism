@@ -1,8 +1,14 @@
 library colorspace {{
 #define PI 3.1415926535 // unfortunately have to do this here.  hackish
+#define DEPTH_INC (32.0 / 255.0)
 
 /* colorspace library */
 precision mediump float;
+
+vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d ){
+	return a + b * cos(2.0 * PI * (c * t + d));
+}
+
 vec4 rgb2hsv(vec4 c){
   vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
   vec4 p = c.g < c.b ? vec4(c.bg, K.wz) : vec4(c.gb, K.xy);

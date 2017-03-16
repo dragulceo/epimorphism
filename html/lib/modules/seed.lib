@@ -34,3 +34,6 @@ modules {t: t_wrap, w:w_lines_border, wt:wt_id, a:alpha_id, seed_color:tex_color
 flags {lib,multi}
 component seed_multi
 modules {t:t_wrap, seed0:seed_wca, seed1:seed_nothing, seed2:seed_nothing}
+
+--seed_wca_tex_experimental < seed_wca_tex
+modules {t: t_wrap, w:w_square_full, wt:wt_id, a:alpha_no, seed_color:simple_color}

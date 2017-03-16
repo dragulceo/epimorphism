@@ -19,7 +19,7 @@ color tex_color {{
 	// should possibly put this in a flag
 	//float hofs = 0.75 * freqData(0.1 * (z.x + wx + wy + w));
 	float hofs = 0.0;
-  seed = hsv2rgb(vec4(time * @spd@ + @rot@ + seed.x + hofs, @sat@ * seed.y, @val@ * seed.z * w, a * seed.a));
+  seed = hsv2rgb(vec4(time * @spd@ + @rot@ + seed.x + hofs, @sat@ * seed.y, @val@ * seed.z * w * w, a * seed.a));
 }}
 
 

@@ -29,6 +29,10 @@ par {w:0.2}
 component w_square
 par {w:0.3}
 
+--w_square_full < w_nul
+component w_square
+par {w:1.0}
+
 
 --w_circle_anim < w_circle
 flags {anim}

@@ -9,11 +9,11 @@ post post_hlim {{
   frame = rgb2hsv(frame);
 
 	float inc = (frame.a - DEPTH_INC) / (1.0 - DEPTH_INC);
-	inc = 0.4 * inc;
+	inc = 0.2 * inc;
 
-  vec4 c0 = hsv2rgb(vec4(0.1 * frame.x + @hue@, 1.0, 0.5, 1.0));
-  vec4 c1 = hsv2rgb(vec4(0.1 * frame.x + @hue@ + @spread@ / 2.0, 1.0, @lgv@, 1.0));
-  vec4 c2 = hsv2rgb(vec4(0.1 * frame.x + @hue@ - @spread@ / 2.0, 1.0, -1.0 * @lgv@, 1.0));
+  vec4 c0 = hsv2rgb(vec4(inc + 0.3 * frame_i.x + @hue@, 1.0, 0.5, 1.0));
+  vec4 c1 = hsv2rgb(vec4(0.9 * inc + 0.3 * frame_i.x + @hue@ + @spread@ / 2.0, 1.0, @lgv@, 1.0));
+  vec4 c2 = hsv2rgb(vec4(inc + 0.2 * frame_i.x + @hue@ - @spread@ / 2.0, 1.0, -1.0 * @lgv@, 1.0));
 
   vec4 res, r0, r1;
   float f;
@@ -36,6 +36,7 @@ post post_hlim {{
 	// modulate hue
   res = rgb2hsv(res);
   frame.x = res.x;
+	frame.y *= @sat_sc@;
   frame = hsv2rgb(frame);
 	//frame = res;
 

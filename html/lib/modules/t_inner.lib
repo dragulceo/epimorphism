@@ -40,7 +40,7 @@ sub {t_expr: z / (z + 1) + z / (z - 1)}
 
 --t_p1 < t_z
 flags {lib, all, all_seed, farm1, farm2}
-sub {t_expr: 1 - 5 * z * z * z / 3}
+sub {t_expr: 0.5 * (1 - 5 * z * z * z / 3)}
 
 --t_p2 < t_z
 flags {lib, all, all_seed, farm1, farm2}
@@ -83,7 +83,7 @@ flags {lib, all, all_seed, farm1, farm2}
 sub {t_expr: (cosh(z) + sinh(z)) / 2}
 
 --t_inv < t_z
-flags {lib, all, inv}
+flags {}
 sub {t_expr: 1.0 / z}
 
 --t_zti < t_z

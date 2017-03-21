@@ -38,69 +38,7 @@ post post_hlim {{
   frame.x = res.x;
 	frame.y *= @sat_sc@;
   frame = hsv2rgb(frame);
-	//frame = res;
-
 }}
-
-
-post post_hlim_experiment {{
-	// optimize me!
-	vec4 frame_i = frame;
-  //frame = _gamma3(frame, 1.2);//@gamma@);
-
-  frame = rgb2hsv(frame);
-	float x = @hue@;
-
-	float inc = (frame.a - DEPTH_INC) / (1.0 - DEPTH_INC);
-	inc = 0.4 * inc;
-	/*
-  vec4 c0 = hsv2rgb(vec4(inc + @hue@, 1.0, 0.5, 1.0));
-  vec4 c1 = hsv2rgb(vec4(inc + @hue@ + @spread@ / 2.0, 1.0, @lgv@, 1.0));
-  vec4 c2 = hsv2rgb(vec4(inc + @hue@ - @spread@ / 2.0, 1.0, -1.0 * @lgv@, 1.0));
-
-  vec4 res, r0, r1;
-  float f;
-
-  if(frame.x < 1.0 / 3.0){
-    f = 3.0 * frame.x;
-    r0 = c0;
-    r1 = c1;
-  }else if(frame.x < 2.0 / 3.0){
-    f = 3.0 * frame.x - 1.0;
-    r0 = c1;
-    r1 = c2;
-  }else{
-    f = 3.0 * frame.x - 2.0;
-    r0 = c2;
-    r1 = c0;
-  }
-  res = (1.0 - f) * r0 + f * r1;
-	*/
-
-	float ofs;
-	/*
-	if(frame.x < 0.5)
-		ofs = 2.0 * frame.x;
-	else
-		ofs = 2.0 - 2.0 * frame.x;
-
-	frame = vec4(ofs, 0,0,0);
-	*/
-	ofs = frame.x;//(frame.x + frame.y + frame.z) / 3.0;
-
-	vec3 th = sin(vec3(2.0 * inc, inc, 3.14 * inc));
-	vec4 res = vec4(pal(ofs, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(2.0,1.0,0.0),th), 0);//vec3(0.5,0.20,0.25)), 0);
-	//vec4 res = vec4(ofs,0,0,0);
-
-	// modulate hue
-  res = rgb2hsv(res);
-  frame.x = res.x;
-	//frame.y = frame.a - DEPTH_INC;//0.0;//res.y;
-  frame = hsv2rgb(frame);
-	//frame = res;
-
-}}
-
 
 post post_pallet1 {{
 	vec4 frame_i = frame;

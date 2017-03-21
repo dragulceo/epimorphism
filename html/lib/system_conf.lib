@@ -1,4 +1,4 @@
---prod
+--prod_old
 initEngineConf default
 initUIConf prod
 initPattern main2
@@ -18,7 +18,7 @@ initEngineConf default
 initUIConf farm1
 initPattern farm1
 
---ponies < prod
+--ponies < prod_old
 initPattern ponies
 
 --farm2
@@ -27,7 +27,7 @@ initUIConf prod
 initPattern main3
 seed iBxKdteaFS
 
---experimental
+--prod
 initEngineConf default
-initUIConf dev
-initPattern experimental
+initUIConf prod
+initPattern main4

@@ -10,5 +10,5 @@ flags {epimorphism, root}
 component main
 modules {application: farm_epimorphism}
 
---experimental_main < epimorphism_main
+--epimorphism_main4 < epimorphism_main
 modules {application: epimorphism_auto2}

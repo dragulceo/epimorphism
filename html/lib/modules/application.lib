@@ -22,7 +22,3 @@ component interference
 flags {lib, farm1}
 modules {t: t_wrap}
 par {N: 2.0, waves: 4.0, spd: 0.02}
-
---experimental < epimorphism
-component epimorphism_depth
-modules {seed: seed_wca_tex_experimental, t:t_wrap_z1, color: rotate_hsv1, reduce: torus_reduce}

@@ -92,7 +92,7 @@ randomize ssRef pRef t mid idx dt = do
   update <- case t of
     t | t >= nxt -> do
       --let a = lg "ITERATE COMPONENT"
-      args <- pure $  case typ of
+      args <- pure $ case typ of
         "mod" -> inj "childN:%0 op:load by:query typ:mod query:%1 accs:rand spd:%2" [sub, lib, spd]
         _     -> inj "mut:%0 idx:%1 op:clone by:query typ:idx query:%2 accs:rand spd:%3" [typ, sub, lib, spd]
 

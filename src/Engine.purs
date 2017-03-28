@@ -34,8 +34,8 @@ initEngineST sysConf engineConf systemST canvasId esRef' = do
   -- find canvas & create context
   canvasM <- liftEff $ getCanvasElementById canvasId
   canvas <- case canvasM of
-    Just c -> return c
-    Nothing -> throwError $ "init engine - canvas not found: " ++ canvasId
+    Just c -> pure c
+    Nothing -> throwError $ "init engine - canvas not found: " <> canvasId
 
   let attrs = defaultWebglContextAttrs {
         alpha =                 false
@@ -45,7 +45,7 @@ initEngineST sysConf engineConf systemST canvasId esRef' = do
 
   ctxM <- liftEff $ getWebglContextWithAttrs canvas attrs
   ctx <- case ctxM of
-    Just c -> return c
+    Just c -> pure c
     Nothing -> throwError "Unable to get a webgl context!!!"
 
   empty <- lift $ emptyImage engineConf.kernelDim
@@ -54,7 +54,7 @@ initEngineST sysConf engineConf systemST canvasId esRef' = do
   esRef <- case esRef' of
     Just ref -> do
       lift $ modifySTRef ref (\r -> r {empty = empty, currentImages = Nothing})
-      return ref
+      pure ref
     Nothing -> do
       let compST = newCompST
       let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, audio: Nothing, currentImages: Nothing, compQueue: fullCompile, mainUnif: Nothing, dispUnif: Nothing, ctx, empty, compST}
@@ -78,7 +78,7 @@ initEngineST sysConf engineConf systemST canvasId esRef' = do
     liftEff $ GL.clear ctx GLE.colorBufferBit
     liftEff $ GL.viewport ctx 0 0 dim dim
 
-    return $ es {
+    pure $ es {
         fb  = Just (Tuple fb0 fb1)
       , tex = Just (Tuple tex0 tex1)
       , aux = Just aux
@@ -88,28 +88,28 @@ initEngineST sysConf engineConf systemST canvasId esRef' = do
   -- set shaders
   lift $ writeSTRef esRef res
 
-  return esRef
+  pure esRef
 
 -- do the thing!
-renderFrame :: forall eff h. SystemST h -> EngineConf -> EngineST -> Pattern -> Array Number -> Array Number -> Int -> EpiS eff h WebGLTexture
+renderFrame :: forall eff h. (Partial) => SystemST h -> EngineConf -> EngineST -> Pattern -> Array Number -> Array Number -> Int -> EpiS eff h WebGLTexture
 renderFrame systemST engineConf engineST pattern par zn frameNum = do
   let ctx = engineST.ctx
 
   -- unpack
   tex <- case engineST.tex of
-    Just x -> return x
+    Just x -> pure x
     Nothing -> throwError "RenderFrame: missing textures"
   fbs <- case engineST.fb of
-    Just x -> return x
+    Just x -> pure x
     Nothing -> throwError "RenderFrame: missing framebuffers"
   aux <- case engineST.aux of
-    Just x -> return x
+    Just x -> pure x
     Nothing -> throwError "RenderFrame: missing aux"
   main <- case engineST.mainProg of
-    Just x -> return x
+    Just x -> pure x
     Nothing -> throwError "RenderFrame: missing main program"
   mainUnif <- case engineST.mainUnif of
-    Just x -> return x
+    Just x -> pure x
     Nothing -> throwError "RenderFrame: missing main program"
 
   -- bind par & zn
@@ -137,18 +137,17 @@ renderFrame systemST engineConf engineST pattern par zn frameNum = do
             liftEff $ GL.uniform1i ctx (unsafeGetAttr mainUnif "audioData") ofs
             liftEff $ GL.activeTexture ctx (GLE.texture0 + ofs)
             liftEff $ GL.bindTexture ctx GLE.texture2d audioTex
-          false -> return unit
-      Nothing -> return unit
+          false -> pure unit
+      Nothing -> pure unit
 
     -- aux
     when (numAux > 0) do
       when (not $ hasAttr mainUnif "aux[0]") do
         throwError $ ShaderError "missing aux uniform!"
       liftEff $ GL.uniform1iv ctx (unsafeGetAttr mainUnif "aux[0]") (1..numAux)
-      liftEff $ forE 0.0 (toNumber $ numAux) \i -> do
-        let i' = fromJust $ fromNumber i
-        GL.activeTexture ctx (GLE.texture1 + i')
-        GL.bindTexture ctx GLE.texture2d $ fromJust (aux !! i')
+      liftEff $ forE 0 numAux \i -> do
+        GL.activeTexture ctx (GLE.texture1 + i)
+        GL.bindTexture ctx GLE.texture2d $ fromJust (aux !! i)
 
     -- ping pong buffers
     let tm = if frameNum `mod` 2 == 0 then fst tex else snd tex
@@ -161,7 +160,7 @@ renderFrame systemST engineConf engineST pattern par zn frameNum = do
     liftEff $ GL.bindFramebuffer ctx GLE.framebuffer fb
     drawArrays Triangles 0 6
 
-    return td
+    pure td
 
 
 postprocessFrame :: forall eff h. SystemST h -> EngineConf -> EngineST -> WebGLTexture -> Array Number -> Array Number -> EpiS eff h Unit
@@ -169,10 +168,10 @@ postprocessFrame systemST engineConf engineST tex par zn = do
   let ctx = engineST.ctx
 
   disp <- case engineST.dispProg of
-    Just x -> return x
+    Just x -> pure x
     Nothing -> throwError "RenderFrame: missing disp program"
   dispUnif <- case engineST.dispUnif of
-    Just x -> return x
+    Just x -> pure x
     Nothing -> throwError "RenderFrame: missing disp program"
 
   execGL ctx (liftEff $ GL.useProgram ctx disp)

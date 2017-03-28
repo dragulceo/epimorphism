@@ -7,11 +7,11 @@ import Control.Monad.ST (ST, STRef, readSTRef, modifySTRef)
 import DOM (DOM)
 import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (insert, member, lookup)
-import Graphics.Canvas (Canvas)
+import Graphics.Canvas (CANVAS)
 import Util (inj)
 
 -- converts key codes into command sequences
-type KeyHandler = forall eff h. STRef h UIConf -> STRef h UIST -> String -> Eff (canvas :: Canvas, dom :: DOM, st :: ST h | eff) String
+type KeyHandler = forall eff h. (Partial) => STRef h UIConf -> STRef h UIST -> String -> Eff (canvas :: CANVAS, dom :: DOM, st :: ST h | eff) String
 
 keyHandler :: KeyHandler
 keyHandler ucRef usRef char = do
@@ -55,46 +55,46 @@ devKeyHandler ucRef usRef char = do
     "r" -> do
       incMod uiConf uiST "disp" "post" "lib" (-1)
     "a" -> do
-      return "scr main.application.t incZn idx:0 ofs:1"
+      pure "scr main.application.t incZn idx:0 ofs:1"
     "z" -> do
-      return "scr main.application.t incZn idx:0 ofs:-1"
+      pure "scr main.application.t incZn idx:0 ofs:-1"
     "A" -> do
-      return "scr main.application.t incZn idx:0 ofs:i"
+      pure "scr main.application.t incZn idx:0 ofs:i"
     "Z" -> do
-      return "scr main.application.t incZn idx:0 ofs:-i"
+      pure "scr main.application.t incZn idx:0 ofs:-i"
     "s" -> do
-      return "scr main.application.t incZn idx:1 ofs:1"
+      pure "scr main.application.t incZn idx:1 ofs:1"
     "x" -> do
-      return "scr main.application.t incZn idx:1 ofs:-1"
+      pure "scr main.application.t incZn idx:1 ofs:-1"
     "S" -> do
-      return "scr main.application.t incZn idx:1 ofs:i"
+      pure "scr main.application.t incZn idx:1 ofs:i"
     "X" -> do
-      return "scr main.application.t incZn idx:1 ofs:-i"
+      pure "scr main.application.t incZn idx:1 ofs:-i"
     "d" -> do
-      return "scr main.application.t incZn idx:2 ofs:1"
+      pure "scr main.application.t incZn idx:2 ofs:1"
     "c" -> do
-      return "scr main.application.t incZn idx:2 ofs:-1"
+      pure "scr main.application.t incZn idx:2 ofs:-1"
     "D" -> do
-      return "scr main.application.t incZn idx:2 ofs:i"
+      pure "scr main.application.t incZn idx:2 ofs:i"
     "C" -> do
-      return "scr main.application.t incZn idx:2 ofs:-i"
+      pure "scr main.application.t incZn idx:2 ofs:-i"
     "f" -> do
-      return "scr main.application.t incZn idx:3 ofs:1"
+      pure "scr main.application.t incZn idx:3 ofs:1"
     "v" -> do
-      return "scr main.application.t incZn idx:3 ofs:-1"
+      pure "scr main.application.t incZn idx:3 ofs:-1"
     "F" -> do
-      return "scr main.application.t incZn idx:3 ofs:i"
+      pure "scr main.application.t incZn idx:3 ofs:i"
     "V" -> do
-      return "scr main.application.t incZn idx:3 ofs:-i"
+      pure "scr main.application.t incZn idx:3 ofs:-i"
     _   -> commonKeyHandler ucRef usRef char
   where
     incMod uiConf uiST adr childN lib ofs = do
-      let idn' = adr ++ childN
+      let idn' = adr <> childN
       let idx = if (member idn' uiST.incIdx) then ((fromJust $ lookup idn' uiST.incIdx) + ofs) else 0
       let dt = insert idn' idx uiST.incIdx
       modifySTRef usRef (\s -> s {incIdx = dt})
       let spd = show uiConf.keyboardSwitchSpd
-      return $ inj "scr %0 switch childN:%1 op:load by:query typ:mod query:%2 accs:%3 spd:%4" [adr, childN, lib, (show idx), spd]
+      pure $ inj "scr %0 switch childN:%1 op:load by:query typ:mod query:%2 accs:%3 spd:%4" [adr, childN, lib, (show idx), spd]
 
 
 prodKeyHandler :: KeyHandler
@@ -111,10 +111,10 @@ commonKeyHandler ucRef usRef char = do
   uiST   <- readSTRef usRef
 
   case char of
-    "~"  -> return "dev"
-    "|"  -> return "showFps"
-    "\\" -> return "clear"
-    " "  -> return "save"
-    "`"  -> return "pause"
-    "?"  -> return "halt"
-    _    -> return "null"
+    "~"  -> pure "dev"
+    "|"  -> pure "showFps"
+    "\\" -> pure "clear"
+    " "  -> pure "save"
+    "`"  -> pure "pause"
+    "?"  -> pure "halt"
+    _    -> pure "null"

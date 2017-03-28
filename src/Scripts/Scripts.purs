@@ -16,7 +16,7 @@ import Util (cxFromStringE, intFromStringE, inj, numFromStringE, clickPause)
 
 null :: forall eff h. ScriptFn eff h
 null ssRef pRef t mid idx dt = do
-  return $ ScriptRes PMutNone Nothing
+  pure $ ScriptRes PMutNone Nothing
 
 -- get rid of this abomination
 pause :: forall eff h. ScriptFn eff h
@@ -25,7 +25,7 @@ pause ssRef pRef t mid idx dt = do
 
   lift $ clickPause
   purgeScript systemST mid idx
-  return $ ScriptRes PMutNone Nothing
+  pure $ ScriptRes PMutNone Nothing
 
 -- increment Zn
 incZn :: forall eff h. ScriptFn eff h
@@ -42,7 +42,7 @@ incZn ssRef pRef t mid idx dt = do
     Just z' -> cxFromStringE z'
     _ -> throwError "index out of bounds - incZn"
 
-  (Polar fromTh fromR) <- return $ inPolar z
+  (Polar fromTh fromR) <- pure $ inPolar z
 
   let incR = 0.1
   let incTh = 3.1415926535 / 4.0
@@ -50,16 +50,16 @@ incZn ssRef pRef t mid idx dt = do
   (Polar toTh toR) <- case ofs of
     "1" -> do
       let new = max ((round (fromR / incR + 1.0)) * incR) 0.0
-      return $ (Polar fromTh new)
+      pure $ (Polar fromTh new)
     "-1" -> do
       let new = max ((round (fromR / incR - 1.0)) * incR) 0.0
-      return $ (Polar fromTh new)
+      pure $ (Polar fromTh new)
     "i" -> do
       let new = (round (fromTh / incTh + 1.0)) * incTh
-      return $ (Polar new fromR)
+      pure $ (Polar new fromR)
     "-i" -> do
       let new = (round (fromTh / incTh - 1.0)) * incTh
-      return $ (Polar new fromR)
+      pure $ (Polar new fromR)
     _ -> throwError "offset should be +-1 or +-i"
 
   let tPhase = systemST.t - t -- recover phase
@@ -71,7 +71,7 @@ incZn ssRef pRef t mid idx dt = do
   -- remove self
   purgeScript systemST mid idx
 
-  return $ ScriptRes PMutNone Nothing
+  pure $ ScriptRes PMutNone Nothing
 
 
 randomize :: forall eff h. ScriptFn eff h
@@ -85,14 +85,14 @@ randomize ssRef pRef t mid idx dt = do
   typ <-  loadLib "typ" dt "randomComponent"
 
   nxt <- case (member "nxt" dt) of
-    false -> return t
+    false -> pure t
     true  -> (loadLib "nxt" dt "randomMain1 nxt") >>= numFromStringE
 
   -- next iteration
   update <- case t of
     t | t >= nxt -> do
       --let a = lg "ITERATE COMPONENT"
-      args <- return $  case typ of
+      args <- pure $  case typ of
         "mod" -> inj "childN:%0 op:load by:query typ:mod query:%1 accs:rand spd:%2" [sub, lib, spd]
         _     -> inj "mut:%0 idx:%1 op:clone by:query typ:idx query:%2 accs:rand spd:%3" [typ, sub, lib, spd]
 
@@ -100,7 +100,7 @@ randomize ssRef pRef t mid idx dt = do
 
       let nxt' = (format (precision 2) (t + dly))
       let dt' = insert "nxt" nxt' dt
-      return $ Just dt'
-    _ -> return Nothing
+      pure $ Just dt'
+    _ -> pure Nothing
 
-  return $ ScriptRes PMutNone update
+  pure $ ScriptRes PMutNone update

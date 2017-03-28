@@ -1,3 +1,9 @@
+Update:
+partials
+traverse -import module
+
+
+
 CURRENT PROJECTS:
   - COMPILING PERFORMANCE ON WINDOWS
 

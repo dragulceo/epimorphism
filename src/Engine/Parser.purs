@@ -13,7 +13,7 @@ import Data.StrMap (lookup, StrMap, fold, empty, keys, size, foldM, insert)
 import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
-import Prelude (return, ($), bind, map, (++), (-), (+), show)
+import Prelude (pure, ($), bind, map, (<>), (-), (+), show)
 import Util (replaceAll, indentLines)
 
 type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}
@@ -21,20 +21,20 @@ type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array
 
 foreign import parseT :: String -> String
 
-parseShader :: forall eff h. SystemST h -> String -> Array String -> EpiS eff h (Tuple String (Array String))
+parseShader :: forall eff h. (Partial) => SystemST h -> String -> Array String -> EpiS eff h (Tuple String (Array String))
 parseShader systemST mid includes = do
   modRef <- loadLib mid systemST.moduleRefPool "parseShaders mid"
   mod    <- lift $ readSTRef modRef
   modRes <- parseModule mod systemST 0 0 []
 
   allIncludes' <- traverse (\x -> loadLib x systemST.componentLib "includes") includes
-  let allIncludes = "//INCLUDES\n" ++ (joinWith "\n\n" (map (\x -> x.body) allIncludes')) ++ "\n//END INCLUDES\n"
+  let allIncludes = "//INCLUDES\n" <> (joinWith "\n\n" (map (\x -> x.body) allIncludes')) <> "\n//END INCLUDES\n"
 
-  return $ Tuple (allIncludes ++ modRes.component) (modRes.images)
+  pure $ Tuple (allIncludes <> modRes.component) (modRes.images)
 
 
 -- parse a shader.  substitutions, submodules, par & zn
-parseModule :: forall eff h. Module -> SystemST h -> Int -> Int -> (Array String) -> EpiS eff h CompRes
+parseModule :: forall eff h. (Partial) => Module -> SystemST h -> Int -> Int -> (Array String) -> EpiS eff h CompRes
 parseModule mod systemST zOfs parOfs images = do
   -- substitutions (make sure this is always first)
   comp <- loadLib mod.component systemST.componentLib "parse component"
@@ -52,21 +52,21 @@ parseModule mod systemST zOfs parOfs images = do
 
   -- images
   let component'''' = foldl handleImg component''' (A.(..) 0 ((A.length mod.images) - 1))
-  let images' = images ++ mod.images
+  let images' = images <> mod.images
 
   -- submodules
   mod <- loadModules mod.modules systemST.moduleRefPool
   foldM (handleChild systemST) { component: component'''', zOfs: zOfs', parOfs: parOfs', images: images' } mod
   where
-    handleSub dt k v = replaceAll ("\\$" ++ k ++ "\\$") v dt
-    handlePar (Tuple n dt) v = Tuple (n + 1) (replaceAll ("@" ++ v ++ "@") ("par[" ++ show n ++ "]") dt)
-    handleZn dt v = replaceAll ("zn\\[#" ++ show v ++ "\\]") ("zn[" ++ (show $ (v + zOfs)) ++ "]") dt
-    handleImg dt v = replaceAll ("aux\\[#" ++ show v ++ "\\]") ("aux[" ++ (show $ (v + (A.length images))) ++ "]") dt
+    handleSub dt k v = replaceAll ("\\$" <> k <> "\\$") v dt
+    handlePar (Tuple n dt) v = Tuple (n + 1) (replaceAll ("@" <> v <> "@") ("par[" <> show n <> "]") dt)
+    handleZn dt v = replaceAll ("zn\\[#" <> show v <> "\\]") ("zn[" <> (show $ (v + zOfs)) <> "]") dt
+    handleImg dt v = replaceAll ("aux\\[#" <> show v <> "\\]") ("aux[" <> (show $ (v + (A.length images))) <> "]") dt
     handleChild systemST {component, zOfs, parOfs, images} k v = do
       res <- parseModule v systemST zOfs parOfs images
-      let iC = "//" ++ k ++ "\n  {\n" ++ (indentLines 2 res.component) ++ "\n  }"
-      let child = replaceAll ("%" ++ k ++ "%") iC component
-      return $ res { component = child }
+      let iC = "//" <> k <> "\n  {\n" <> (indentLines 2 res.component) <> "\n  }"
+      let child = replaceAll ("%" <> k <> "%") iC component
+      pure $ res { component = child }
 
 -- preprocess substitutions.  just parses t expressions
 preProcessSub :: forall eff. StrMap String -> Epi eff (StrMap String)
@@ -75,9 +75,9 @@ preProcessSub sub = do
     (Just expr) -> do
       expr' <- parseTexp expr
       let sub' = insert "t_expr" expr' sub
-      return sub'
+      pure sub'
     Nothing -> do
-      return sub
+      pure sub
 
 parseTexp :: forall eff. String -> Epi eff String
 parseTexp expr = do
@@ -86,7 +86,7 @@ parseTexp expr = do
   let subs = [["\\+","A"],["\\-","S"],["\\~","CONJ"],["\\+","A"],["\\-","S"],["\\*","M"],["/","D"],["sinh","SINHZ"],
               ["cosh","COSHZ"],["tanh","TANHZ"],["sin","SINZ"],["cos","COSZ"],["tan","TANZ"],["exp","EXPZ"],["sq","SQZ"]]
 
-  return $ foldl f expr1 subs
+  pure $ foldl f expr1 subs
   where
     f exp [a, b] = replaceAll a b exp
     f exp _ = exp
@@ -100,4 +100,4 @@ loadModules mr lib = do
     handle dt k v = do
       mRef <- loadLib v lib "parse loadModules"
       m    <- lift $ readSTRef mRef
-      return $ insert k m dt
+      pure $ insert k m dt

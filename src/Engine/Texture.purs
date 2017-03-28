@@ -37,7 +37,7 @@ newTex = do
   liftEff $ GL.texParameteri ctx GLE.texture2d GLE.textureMagFilter GLE.linear
   -- use mipmaps?
 
-  return tex
+  pure tex
 
 
 -- initialize framebuffer/texture pair
@@ -50,7 +50,7 @@ initTexFb dim = do
   liftEff $ GL.bindFramebuffer ctx GLE.framebuffer fb
   liftEff $ GL.framebufferTexture2D ctx GLE.framebuffer GLE.colorAttachment0 GLE.texture2d tex 0
 
-  return $ Tuple tex fb
+  pure $ Tuple tex fb
 
 
 -- initialize auxiliary textures
@@ -62,7 +62,7 @@ initAux engineConf ctx empty = do
       aux <- newTex
       liftEff $ GL.bindTexture ctx GLE.texture2d aux
       liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte empty
-      return aux
+      pure aux
 
 -- upload aux textures
 uploadAux :: forall eff. EngineST -> String -> Array String -> Epi eff Unit
@@ -75,7 +75,7 @@ uploadAux es host names = do
         throwError "not enough aux textures"
 
       foldM (uploadImage es.ctx currentImages host) 0 (zip aux names)
-      return unit
+      pure unit
 
 
 -- create an image object. can throw error if images missing!
@@ -85,22 +85,22 @@ uploadImage ctx currentImages host c (Tuple aux name) = do
 
   when doUpload do
     dbg2 "uploading"
-    lift $ uploadImageImpl (host ++ name) \img -> do
+    lift $ uploadImageImpl (host <> name) \img -> do
       runWebgl (do
         liftEff $ GL.bindTexture ctx GLE.texture2d aux
         liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte img
-        return unit
+        pure unit
       ) ctx
-      return unit
-    return unit
-  return $ c + 1
+      pure unit
+    pure unit
+  pure $ c + 1
 
 foreign import uploadImageImpl :: forall eff. String ->
                                   (GLT.TexImageSource -> Eff eff Unit) ->
                                   Eff eff Unit
 
 
-clearFB :: forall eff h. EngineConf -> EngineST -> EpiS eff h Unit
+clearFB :: forall eff h. (Partial) => EngineConf -> EngineST -> EpiS eff h Unit
 clearFB engineConf engineST = do
   let ctx = engineST.ctx
   execGL ctx do
@@ -108,4 +108,4 @@ clearFB engineConf engineST = do
     liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte engineST.empty
     liftEff $ GL.bindTexture ctx GLE.texture2d $ snd $ fromJust engineST.tex
     liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte engineST.empty
-  return unit
+  pure unit

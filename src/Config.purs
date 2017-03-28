@@ -10,10 +10,10 @@ import Data.Maybe (Maybe(..))
 import Data.Set (union, Set)
 import Data.StrMap (StrMap, empty)
 import Data.Tuple (Tuple)
-import Graphics.Canvas (Canvas)
+import Graphics.Canvas (CANVAS)
 import Graphics.WebGL.Types (WebGLProgram, WebGLTexture, WebGLFramebuffer, WebGLContext)
 
-type Epi eff a = ExceptT String (Eff (canvas :: Canvas, dom :: DOM | eff)) a
+type Epi eff a = ExceptT String (Eff (canvas :: CANVAS, dom :: DOM | eff)) a
 type EpiS eff h a = Epi (st :: ST h | eff) a
 
 

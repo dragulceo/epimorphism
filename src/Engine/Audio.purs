@@ -4,7 +4,7 @@ import Prelude
 import Graphics.WebGL.Raw.Types as GLT
 import Config (AudioAnalyser, EngineConf)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Trans (lift)
+import Control.Monad.Trans.Class (lift)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Tuple (Tuple(Tuple))
 import Graphics.WebGL.Raw.Types (ArrayBufferView)
@@ -18,8 +18,8 @@ foreign import initAudioAnalyzer :: forall eff. Int -> Eff eff AudioAnalyser
 initAudio :: EngineConf -> WebGLContext -> GLT.TexImageSource -> WebGL (Maybe (Tuple WebGLTexture AudioAnalyser))
 initAudio engineConf ctx empty = do
   case engineConf.audioAnalysisEnabled of
-    false -> return Nothing
+    false -> pure Nothing
     true -> do
       audioTex <- newTex
       analyser <- lift $ lift $ initAudioAnalyzer engineConf.audioBufferSize
-      return $ Just (Tuple audioTex analyser)
+      pure $ Just (Tuple audioTex analyser)

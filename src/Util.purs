@@ -5,7 +5,7 @@ import Config (EpiS, Epi)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (runExceptT)
-import Control.Monad.Trans (lift)
+import Control.Monad.Trans.Class (lift)
 import DOM (DOM)
 import Data.Array (length)
 import Data.Complex (inCartesian, Cartesian(Cartesian), outCartesian, Complex)
@@ -14,9 +14,11 @@ import Data.Foldable (foldr)
 import Data.Int (fromString) as I
 import Data.Maybe (Maybe(..))
 import Data.StrMap (StrMap)
-import Data.String (split, joinWith)
+import Data.String (Pattern(..), split, joinWith)
+import Data.String.Regex (Regex(..), regex)
+import Data.String.Regex.Flags (noFlags)
 import Data.Tuple (fst, Tuple(..))
-import Graphics.Canvas (Canvas)
+import Graphics.Canvas (CANVAS)
 
 foreign import data Now :: !
 
@@ -83,49 +85,54 @@ foreign import cxFromStringImpl :: (Number -> Number -> (Tuple Number Number))
 foreign import boolFromString :: String -> Boolean
 
 boolFromStringE :: forall eff. String -> Epi eff Boolean
-boolFromStringE s = return $ boolFromString s
+boolFromStringE s = pure $ boolFromString s
 
 
 numFromStringE :: forall eff. String -> Epi eff Number
 numFromStringE s = case (numFromString s) of
-  (Just n) -> return n
-  _ -> throwError $ "Expected : " ++ s ++ " : to be a number"
+  (Just n) -> pure n
+  _ -> throwError $ "Expected : " <> s <> " : to be a number"
 
 
 intFromStringE :: forall eff. String -> Epi eff Int
 intFromStringE s = case (I.fromString s) of
-  (Just i) -> return i
-  _ -> throwError $ "Expected : " ++ s ++ " : to be an int"
+  (Just i) -> pure i
+  _ -> throwError $ "Expected : " <> s <> " : to be an int"
 
 
 cxFromStringE :: forall eff. String -> Epi eff Complex
 cxFromStringE s = case (cxFromString s) of
-  (Just (Tuple r i)) -> return $ outCartesian (Cartesian r i)
-  _ -> throwError $ "Expected : " ++ s ++ " : to be an cx"
+  (Just (Tuple r i)) -> pure $ outCartesian (Cartesian r i)
+  _ -> throwError $ "Expected : " <> s <> " : to be an cx"
 
 
-handleError :: forall eff. Epi eff Unit -> Eff (canvas :: Canvas, dom :: DOM | eff) Unit
+handleError :: forall eff. Epi eff Unit -> Eff (canvas :: CANVAS, dom :: DOM | eff) Unit
 handleError epi = do
   res <- runExceptT epi
-  either err return res
+  either err pure res
   where
     err msg = do
       halt
       winLog msg
 
+tryRegex :: forall eff. String -> Epi eff Regex
+tryRegex s = case regex s noFlags of
+    Right x -> pure x
+    Left _ -> throwError "Invalid Regex"
+
 spc :: Int -> String
 spc 0 = ""
-spc m = " " ++ spc (m - 1)
+spc m = " " <> spc (m - 1)
 
 indentLines :: Int -> String -> String
-indentLines n s = joinWith "\n" $ map (\x -> (spc n) ++ x) $ split "\n" s
+indentLines n s = joinWith "\n" $ map (\x -> (spc n) <> x) $ split (Pattern "\n") s
 
 
 inj :: String -> Array String -> String
 inj template dt = do
   fst $ foldr handle (Tuple template ((length dt) - 1)) dt
     where
-      handle elt (Tuple res idx) = (Tuple (replaceAll ("%" ++ (show idx)) elt res) (idx - 1))
+      handle elt (Tuple res idx) = (Tuple (replaceAll ("%" <> (show idx)) elt res) (idx - 1))
 
 
 real :: Complex -> Number

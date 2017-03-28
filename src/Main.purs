@@ -8,9 +8,8 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
-import Data.Array (null, updateAt, foldM, sort, concatMap, elemIndex)
+import Data.Array (null, updateAt, foldM, sort, concatMap, elemIndex, fromFoldable)
 import Data.Int (round, toNumber)
-import Data.List (fromList)
 import Data.Maybe (isNothing, maybe, fromMaybe, Maybe(Nothing, Just))
 import Data.Maybe.Unsafe (fromJust)
 import Data.Set (member)
@@ -18,7 +17,7 @@ import Data.StrMap (insert, values, keys, lookup)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
 import Engine (postprocessFrame, initEngineST, renderFrame)
-import Graphics.Canvas (Canvas)
+import Graphics.Canvas (CANVAS)
 import Layout (updateLayout)
 import Paths (runPath)
 import Pattern (importPattern)
@@ -48,10 +47,10 @@ getSysConfName = do
   dev <- isDev
   let def = if dev then "dev" else "prod"
   let conf = fromMaybe def (lookup "system" args)
-  return conf
+  pure conf
 
 
-initState :: forall eff h. SystemST h -> EpiS (now :: Now | eff) h (State h)
+initState :: forall eff h. (Partial) => SystemST h -> EpiS (now :: Now | eff) h (State h)
 initState systemST = do
   --  init config
   systemName <- lift $ getSysConfName
@@ -60,9 +59,9 @@ initState systemST = do
   seed <- case systemConf.seed of
     "" -> do
       newSeed <- lift rndstr
-      dbg $ "GENERATING SEED: " ++ newSeed
-      return newSeed
-    _ -> return systemConf.seed
+      dbg $ "GENERATING SEED: " <> newSeed
+      pure newSeed
+    _ -> pure systemConf.seed
 
   let systemConf' = systemConf {host = host, seed = seed}
   lift $ seedRandom systemConf'.seed
@@ -86,14 +85,14 @@ initState systemST = do
   esRef <- initEngineST systemConf' engineConf systemST' uiConf.canvasId Nothing
   usRef <- initUIST ucRef ecRef esRef pRef scRef ssRef
 
-  return {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef}
+  pure {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef}
 
 
-animate :: forall h. (State h) -> Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
+animate :: forall h. (Partial) => (State h) -> Eff (canvas :: CANVAS, dom :: DOM, now :: Now, st :: ST h) Unit
 animate state = handleError do
   t0 <- lift $ now
   -- unpack state
-  {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef} <- return state
+  {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef} <- pure state
 
   uiConf     <- lift $ readSTRef ucRef
   uiST       <- lift $ readSTRef usRef
@@ -116,21 +115,21 @@ animate state = handleError do
     let lastFpsTimeMS = fromMaybe currentTimeMS systemST.lastFpsTimeMS
     let fps = round $ (toNumber uiConf.uiUpdateFreq) * 1000.0 / (currentTimeMS - lastFpsTimeMS)
     lift $ modifySTRef ssRef (\s -> s {lastFpsTimeMS = Just currentTimeMS, fps = Just fps})
-    return unit
+    pure unit
 
   t1 <- lift $ now
   -- run scripts if not compiling
   when (null engineST.compQueue) do
     sRes <- runScripts ssRef pRef
     case sRes of
-      PMutNone -> return unit
+      PMutNone -> pure unit
       PMut pattern' new -> do
-        let queue = (if (member "main" new) then [CompMainShader, CompMainProg] else []) ++
-                    (if (member "disp" new) then [CompDispShader, CompDispProg] else []) ++
+        let queue = (if (member "main" new) then [CompMainShader, CompMainProg] else []) <>
+                    (if (member "disp" new) then [CompDispShader, CompDispProg] else []) <>
                     [CompFinish]
 
         lift $ modifySTRef esRef (\es -> es {compQueue = queue})
-        return unit
+        pure unit
 
   systemST' <- lift $ readSTRef ssRef
   engineST' <- lift $ readSTRef esRef
@@ -139,7 +138,7 @@ animate state = handleError do
     compileShaders systemConf ssRef engineConf esRef pRef (isNothing engineST.mainProg)
     --currentTimeMS2 <- lift $ now
     --lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS2})
-    return unit
+    pure unit
 
   t2 <- lift $ now
 
@@ -169,10 +168,10 @@ animate state = handleError do
 
   --dbg $ inj "BREAKDOWN: init:%0ms scripts:%1ms recompile:%2ms render:%3ms ui:%4ms next:%5ms" [show (t1 - t0), show (t2 - t1), show (t3 - t2), show (t4 - t3), show (t5 - t4), show (t6 - t5)]
 
-  return unit
+  pure unit
 
 -- recursively flatten par & zn lists in compilation order
-getParZn :: forall eff h. SystemST h -> (Tuple (Array Number) (Array Number)) -> String -> EpiS eff h (Tuple (Array Number) (Array Number))
+getParZn :: forall eff h. (Partial) => SystemST h -> (Tuple (Array Number) (Array Number)) -> String -> EpiS eff h (Tuple (Array Number) (Array Number))
 getParZn systemST (Tuple par zn) mid = do
   mRef <- loadLib mid systemST.moduleRefPool "mid getParZn"
   mod  <- lift $ readSTRef mRef
@@ -180,12 +179,12 @@ getParZn systemST (Tuple par zn) mid = do
 
   znV <- traverse (runZnPath mRef t) mod.zn
   let znV' = concatMap (\x -> [real x, imag x]) znV
-  let zn' = zn ++ znV'
+  let zn' = zn <> znV'
 
   parV <- traverse (runParPath mRef t) (sort $ keys mod.par)
-  let par' = par ++ parV
+  let par' = par <> parV
 
-  foldM (getParZn systemST) (Tuple par' zn') (fromList $ values mod.modules)
+  foldM (getParZn systemST) (Tuple par' zn') (fromFoldable $ values mod.modules)
   where
     runZnPath mRef t val = do
       (Tuple res remove) <- runPath t val
@@ -194,8 +193,8 @@ getParZn systemST (Tuple par zn) mid = do
         let idx = fromJust $ elemIndex val m.zn
         let zn' = fromJust $ updateAt idx (show res) m.zn
         lift $ modifySTRef mRef (\m' -> m' {zn = zn'})
-        return unit
-      return res
+        pure unit
+      pure res
     runParPath mRef t key = do
       m <- lift $ readSTRef mRef
       let val = fromJust $ lookup key m.par
@@ -204,22 +203,22 @@ getParZn systemST (Tuple par zn) mid = do
       when remove do -- replace with constant
         let par' = insert key (show res') m.par
         lift $ modifySTRef mRef (\m' -> m' {par = par'})
-        return unit
-      return res'
+        pure unit
+      pure res'
 
 
 
 preloadAux :: forall h. (SystemST h) -> String ->
-              Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit ->
-              Eff (canvas :: Canvas, dom :: DOM, now :: Now, st :: ST h) Unit
+              Eff (canvas :: CANVAS, dom :: DOM, now :: Now, st :: ST h) Unit ->
+              Eff (canvas :: CANVAS, dom :: DOM, now :: Now, st :: ST h) Unit
 preloadAux systemST libName callback = do
-  maybe (return unit)
+  maybe (pure unit)
     (\x -> preloadImages x.lib callback)
     (lookup libName systemST.indexLib)
 
 
 -- clean this shit up yo
-main :: Eff (canvas :: Canvas, dom :: DOM, now :: Now) Unit
+main :: (Partial) => Eff (canvas :: CANVAS, dom :: DOM, now :: Now) Unit
 main = do
   confn <- getSysConfName -- hack!!!!!
 

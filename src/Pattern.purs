@@ -7,10 +7,10 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, modifySTRef, newSTRef, readSTRef)
 import Data.Array (cons, head, tail, foldM, length, last, init)
-import Data.List (fromList)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (toList, member, StrMap, delete, insert, values)
+import Data.StrMap (member, StrMap, delete, insert, values, toUnfoldable)
+import Data.String (Pattern(..)) as S
 import Data.String (split, joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
@@ -21,23 +21,23 @@ import Util (dbg, uuid)
 ------------------------ FIND ------------------------
 
 -- find a module given an address - ie main.application.t or a reference
-findModule :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> Boolean -> EpiS eff h String
+findModule :: forall eff h. (Partial) => StrMap (STRef h Module) -> Pattern -> String -> Boolean -> EpiS eff h String
 findModule mpool pattern dt followSwitch = do
   case (member dt mpool) of
-    true -> return dt
+    true -> pure dt
     false -> do
-      let addr = split "." dt
+      let addr = split (S.Pattern ".") dt
       case (head addr) of
         Nothing -> throwError "we need data, chump"
         Just "vert" -> findModule' mpool pattern.vert (fromJust $ tail addr) followSwitch
         Just "disp" -> findModule' mpool pattern.disp (fromJust $ tail addr) followSwitch
         Just "main" -> findModule' mpool pattern.main (fromJust $ tail addr) followSwitch
-        Just x      -> throwError $ "value should be main, vert, or disp : " ++ x
+        Just x      -> throwError $ "value should be main, vert, or disp : " <> x
 
 
-findModule' :: forall eff h. StrMap (STRef h Module) -> String -> Array String -> Boolean -> EpiS eff h String
+findModule' :: forall eff h. (Partial) => StrMap (STRef h Module) -> String -> Array String -> Boolean -> EpiS eff h String
 findModule' mpool mid addr followSwitch = do
-  maybe (return $ mid) handle (head addr)
+  maybe (pure $ mid) handle (head addr)
   where
     handle mid' = do
       mRef    <- loadLib mid mpool "findModule'"
@@ -45,7 +45,7 @@ findModule' mpool mid addr followSwitch = do
       childId <- loadLib mid' mod.modules "findModule' find child"
       cRef    <- loadLib childId mpool "findModule' child ref"
       child   <- lift $ readSTRef cRef
-      addr'   <- return $ fromJust $ tail addr
+      addr'   <- pure $ fromJust $ tail addr
 
       case (child.family == "switch" && followSwitch) of
         true ->  findModule' mpool childId (cons "m1" addr') followSwitch
@@ -58,40 +58,40 @@ findAddr mpool pattern mid = do
   m1 <- find' "disp" pattern.disp
   m2 <- find' "vert" pattern.vert
   case (m0 <> m1 <> m2) of
-    Just addr -> return addr
-    Nothing -> throwError $ "orphan module? " ++ mid
+    Just addr -> pure addr
+    Nothing -> throwError $ "orphan module? " <> mid
   where
     find' :: String -> String -> EpiS eff h (Maybe String)
     find' addr cid = case (cid == mid) of
-      true -> return (Just addr)
+      true -> pure (Just addr)
       false -> do
         cRef <- loadLib cid mpool "cid findAddr"
         cMod <- lift $ readSTRef cRef
-        foldM (search addr) Nothing (fromList $ toList cMod.modules)
+        foldM (search addr) Nothing (toUnfoldable cMod.modules)
     search addr val (Tuple k v) = do
-      res <- find' (addr ++ "." ++ k) v
-      return $ val <> res
+      res <- find' (addr <> "." <> k) v
+      pure $ val <> res
 
 
-findParent :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> EpiS eff h (Tuple String String)
+findParent :: forall eff h. (Partial) => StrMap (STRef h Module) -> Pattern -> String -> EpiS eff h (Tuple String String)
 findParent mpool pattern mid = do
   addr <- findAddr mpool pattern mid
 
-  let cmp = split "." addr
+  let cmp = split (S.Pattern ".") addr
   when (length cmp < 2) do
-    throwError $ "malformed addr: " ++ addr
+    throwError $ "malformed addr: " <> addr
 
   let lst = fromJust $ last cmp
   let addr' = joinWith "." $ fromJust $ init cmp
 
   pId <- findModule mpool pattern addr' false
-  return $ Tuple pId lst
+  pure $ Tuple pId lst
 
 ------------------------ IMPORTING ------------------------
 
 -- import the modules of a pattern into the ref pool
 data ImportObj = ImportModule Module | ImportRef String
-importPattern :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Unit
+importPattern :: forall eff h. (Partial) => STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Unit
 importPattern ssRef pRef =  do
   systemST <- lift $ readSTRef ssRef
   pattern  <- lift $ readSTRef pRef
@@ -102,7 +102,7 @@ importPattern ssRef pRef =  do
   vert <- importModule ssRef (ImportRef pattern.vert)
   lift $ modifySTRef pRef (\p -> p {main = main, disp = disp, vert = vert})
 
-  return unit
+  pure unit
 
 
 -- import a module into the ref pool
@@ -112,14 +112,14 @@ importModule ssRef obj = do
   id <- lift $ uuid
   -- find module
   mod <- case obj of
-    ImportModule m -> return m
+    ImportModule m -> pure m
     ImportRef n -> case (member n systemST.moduleRefPool) of
       true -> do
         ref <- loadLib n systemST.moduleRefPool "reimport from pool"
         lift $ readSTRef ref
       false -> do
         minit <- loadLib n systemST.moduleLib "import module lib"
-        return $ minit {libName = n}
+        pure $ minit {libName = n}
 
   -- update pool
   ref <- lift $ newSTRef mod
@@ -128,9 +128,10 @@ importModule ssRef obj = do
   lift $ modifySTRef ssRef (\s -> s {moduleRefPool = mp'})
 
   -- import children
-  traverse (importChild ssRef id) (toList mod.modules)
+  let d = toUnfoldable mod.modules :: Array (Tuple String String)
+  traverse (importChild ssRef id) d
 
-  return id
+  pure id
 
   where
     importChild :: STRef h (SystemST h) -> String -> (Tuple String String) -> EpiS eff h Unit
@@ -147,7 +148,7 @@ importModule ssRef obj = do
         let modules' = insert k child m.modules
         lift $ modifySTRef mRef (\m' -> m' {modules = modules'})
 
-        return unit
+        pure unit
 
 
 -- remove a module from the ref pool
@@ -165,7 +166,7 @@ purgeModule ssRef mid = do
     -- purge children
     traverse (purgeModule ssRef) (values mod.modules)
 
-    return unit
+    pure unit
 
 
 -- replace child subN:cid(in ref pool) with child subN:obj
@@ -183,7 +184,7 @@ replaceModule ssRef mid subN cid obj = do
   let mod' = insert subN n' m.modules
   lift $ modifySTRef mRef (\m' -> m' {modules = mod'})
 
-  return n'
+  pure n'
 
 
 --  slightly janky
@@ -196,4 +197,4 @@ clonePattern ssRef pattern = do
   disp' <- importModule ssRef (ImportRef pattern.disp)
   vert' <- importModule ssRef (ImportRef pattern.vert)
 
-  return $ pattern {main = main', disp = disp', vert = vert'}
+  pure $ pattern {main = main', disp = disp', vert = vert'}

@@ -10,15 +10,15 @@ import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Array (uncons, updateAt, length, head, tail)
-import Data.List (fromList)
 import Data.Maybe (Maybe(Just))
 import Data.Maybe.Unsafe (fromJust)
-import Data.StrMap (values, insert, toList)
+import Data.StrMap (values, insert, toUnfoldable)
 import Data.String (joinWith, split)
+import Data.String (Pattern(..)) as S
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Engine (initEngineST)
-import Graphics.Canvas (Canvas)
+import Graphics.Canvas (CANVAS)
 import Layout (updateLayout, initLayout)
 import Pattern (findModule)
 import ScriptUtil (addScript)
@@ -29,7 +29,7 @@ import Util (halt, Now, cxFromStringE, intFromStringE, numFromStringE, lg, uuid,
 
 foreign import saveCanvas :: forall eff. Eff eff Unit
 
-command :: forall eff h. STRef h UIConf -> STRef h UIST -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h SystemConf -> STRef h (SystemST h) -> String -> Eff (canvas :: Canvas, dom :: DOM, st :: ST h, now :: Now | eff) Unit
+command :: forall eff h. (Partial) => STRef h UIConf -> STRef h UIST -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h SystemConf -> STRef h (SystemST h) -> String -> Eff (canvas :: CANVAS, dom :: DOM, st :: ST h, now :: Now | eff) Unit
 command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
   systemConf <- lift $ readSTRef scRef
   systemST   <- lift $ readSTRef ssRef
@@ -39,38 +39,38 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
   engineST   <- lift $ readSTRef esRef
   pattern    <- lift $ readSTRef pRef
 
-  --let x = lg $ "EXECUTE: " ++ (show msg)
+  --let x = lg $ "EXECUTE: " <> (show msg)
 
-  let dt = split " " msg
+  let dt = split (S.Pattern " ") msg
 
   unless (length dt == 0) do
     let cmd = fromJust $ head dt
     let args = fromJust $ tail dt
 
     case cmd of
-      "null" -> return unit
+      "null" -> pure unit
       "pause" -> do
         lift $ modifySTRef ssRef (\s -> s {paused = not s.paused})
-        return unit
+        pure unit
       "halt" -> do
         lift $ halt
-        return unit
+        pure unit
       "pauseAfterSwitch" -> do
         lift $ modifySTRef ssRef (\s -> s {pauseAfterSwitch = true})
-        return unit
+        pure unit
       "killScripts" -> do
         let upd = (\r -> lift $ modifySTRef r (\m -> m {scripts = []}))
         traverse upd (values systemST.moduleRefPool)
 
-        return unit
+        pure unit
       "scr" -> do
         when (length args >= 2) do -- check for errors here
-          {head: addr, tail: rst}  <- return $ fromJust $ uncons args
-          {head: name, tail: rst'} <- return $ fromJust $ uncons rst
+          {head: addr, tail: rst}  <- pure $ fromJust $ uncons args
+          {head: name, tail: rst'} <- pure $ fromJust $ uncons rst
           mid <- findModule systemST.moduleRefPool pattern addr true
           addScript systemST mid name (joinWith " " rst')
 
-          return unit
+          pure unit
       "setP" -> do
         case args of
           [addr, par, val] -> do
@@ -79,7 +79,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
             mUp systemST mid \m ->
               m {par = insert par (show val') m.par}
 
-            return unit
+            pure unit
           _ -> throwError "invalid format: setP addr par val"
       "setZn" -> do
         case args of
@@ -91,11 +91,11 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
             mod <- lift $ readSTRef mRef
 
             zn' <- case (updateAt idx' (show val') mod.zn) of
-              Just x -> return x
+              Just x -> pure x
               _ -> throwError "zn idx out of bounds setZn"
             lift $ modifySTRef mRef (\m -> m {zn = zn'})
 
-            return unit
+            pure unit
           _ -> throwError "invalid format: setPar addr par val"
       "setT" -> do
         let tExp = joinWith "" args
@@ -104,7 +104,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
           m {sub = insert "t_expr" tExp m.sub}
         compileShaders systemConf ssRef engineConf esRef pRef false
 
-        return unit
+        pure unit
       "save" -> do
         save systemST pattern
       "fullWindow" -> do
@@ -112,16 +112,16 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         uiConf' <- lift $ readSTRef ucRef
         initLayout uiConf' uiST
 
-        return unit
+        pure unit
       "dev" -> do
         lift $ modifySTRef ucRef (\ui -> ui {windowState = "dev", keySet = "dev", showFps = true})
         uiConf' <- lift $ readSTRef ucRef
         initLayout uiConf' uiST
 
-        return unit
+        pure unit
       "initLayout" -> do
         initLayout uiConf uiST
-        return unit
+        pure unit
       "updateLayout" -> do
         updateLayout uiConf uiST systemST pattern true
       "showFps" -> do
@@ -129,7 +129,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         uiConf' <- lift $ readSTRef ucRef
         initLayout uiConf' uiST
 
-        return unit
+        pure unit
       "setKernelDim" -> do
         case args of
           [dim] -> do
@@ -139,7 +139,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
             initEngineST systemConf engineConf' systemST uiConf.canvasId (Just esRef)
 
           _ -> throwError "invalid format: setKerneldim dim"
-        return unit
+        pure unit
       "setFract" -> do
         case args of
           [fract] -> do
@@ -149,7 +149,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
             compileShaders systemConf ssRef engineConf' esRef pRef false
 
           _ -> throwError "invalid format: setFract fract"
-        return unit
+        pure unit
       "setEngineProfile" -> do
         case args of
           [lib] -> do
@@ -159,10 +159,10 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
             initEngineST systemConf engineConf' systemST uiConf.canvasId (Just esRef)
 
           _ -> throwError "invalid format: setFract fract"
-        return unit
+        pure unit
       "clear" -> do
         clearFB engineConf engineST
-      _ -> throwError $ "Unknown command: " ++ msg
+      _ -> throwError $ "Unknown command: " <> msg
 
 
 -- PRIVATE
@@ -173,19 +173,19 @@ save systemST pattern = do
   ps <- unsafeSerialize patternSchema (Just id) pattern
 
   -- modules
-  mods <- (traverse (serializeTup moduleSchema) $ fromList $ toList systemST.moduleRefPool) :: EpiS eff h (Array String)
+  mods <- (traverse (serializeTup moduleSchema) $ toUnfoldable systemST.moduleRefPool) :: EpiS eff h (Array String)
   let mres = joinWith "\n\n" mods
 
-  let res = "#PATTERN\n" ++ ps ++ "\n\n#MODULES\n" ++ mres
+  let res = "#PATTERN\n" <> ps <> "\n\n#MODULES\n" <> mres
   let a = lg res
 
   lift $ saveCanvas
 
-  return unit
+  pure unit
 
   where
     serializeTup :: forall a. Schema -> (Tuple String (STRef h a)) -> EpiS eff h String
     serializeTup schema (Tuple n ref) = do
       obj <- lift $ readSTRef ref
       st <- unsafeSerialize schema (Just n) obj
-      return st
+      pure st

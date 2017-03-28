@@ -19,7 +19,7 @@ import Text.Format (precision, format)
 import Util (dbg, intFromStringE, inj, randInt, numFromStringE, gmod)
 
 
-switch :: forall eff h. ScriptFn eff h
+switch :: forall eff h. (Partial) => ScriptFn eff h
 switch ssRef pRef t midPre idx dt = do
   CloneRes newRootN pattern mid <- getClone ssRef pRef midPre
   systemST <- lift $ readSTRef ssRef
@@ -31,10 +31,10 @@ switch ssRef pRef t midPre idx dt = do
   (Tuple rootId childN) <- case op of
     "load" -> do
       childN' <- loadLib "childN" dt "switch childN"
-      return $ Tuple mid childN'
+      pure $ Tuple mid childN'
     "clone" -> do
       findParent systemST.moduleRefPool pattern mid
-    x -> throwError $ "invalid 'op' for switch, must be load | clone : " ++ x
+    x -> throwError $ "invalid 'op' for switch, must be load | clone : " <> x
 
   -- get the relevant name to be used to either load or for the mutator
   by <- loadLib "by" dt "switch by" -- either query or value
@@ -47,9 +47,9 @@ switch ssRef pRef t midPre idx dt = do
       typ <- loadLib "typ" dt "switch typ" -- either mod or idx
       lib <- case typ of
         "mod" -> do
-          return $ family systemST.moduleLib childN [query] [] -- using childN here is wrong - seed1, etc
-        "idx" -> loadLib query systemST.indexLib "switch index" >>= \x -> return x.lib
-        x -> throwError $ "invalid 'typ' for switch, must be mod | idx : " ++ x
+          pure $ family systemST.moduleLib childN [query] [] -- using childN here is wrong - seed1, etc
+        "idx" -> loadLib query systemST.indexLib "switch index" >>= \x -> pure x.lib
+        x -> throwError $ "invalid 'typ' for switch, must be mod | idx : " <> x
 
       when (lib == []) do
         throwError "your index is empty!"
@@ -58,12 +58,12 @@ switch ssRef pRef t midPre idx dt = do
         "rand" -> do
           lift $ randInt $ A.length lib
         iS -> do
-          i <- (return iS) >>= intFromStringE
-          return $ i `gmod` (A.length lib)
+          i <- (pure iS) >>= intFromStringE
+          pure $ i `gmod` (A.length lib)
 
-      return $ fromJust (A.index lib idx)
+      pure $ fromJust (A.index lib idx)
 
-    x -> throwError $ "invalid 'by' for switch, must be query | val : " ++ x
+    x -> throwError $ "invalid 'by' for switch, must be query | val : " <> x
 
   -- import new module
   purgeScript systemST mid idx
@@ -79,13 +79,13 @@ switch ssRef pRef t midPre idx dt = do
     mutator <- getMutator mutatorN idx name
     lift $ modifySTRef nxtRef mutator
 
-    return unit
+    pure unit
 
   -- switch! (should we inline this?)
   let tPhase = systemST'.t - t -- recover phase
   switchModules ssRef (t + tPhase) rootId childN nxtId spd
 
-  return $ ScriptRes (PMut pattern (singleton newRootN)) Nothing
+  pure $ ScriptRes (PMut pattern (singleton newRootN)) Nothing
 
 
 getMutator :: forall eff h. String -> String -> String -> EpiS eff h (Module -> Module)
@@ -93,19 +93,19 @@ getMutator mut idx name  = do
   case mut of
     "image" -> do
       idx' <- intFromStringE idx
-      return $ \mod ->
+      pure $ \mod ->
         let images' = fromMaybe mod.images (A.updateAt idx' name mod.images) in
         mod {images = images'}
     "script" -> do
       idx' <- intFromStringE idx
-      return $ \mod ->
+      pure $ \mod ->
         let scripts' = fromMaybe mod.scripts (A.updateAt idx' name mod.scripts) in
         mod {scripts = scripts'}
     "sub" -> do
-      return $ \mod ->
+      pure $ \mod ->
         let sub' = insert idx name mod.sub in
         mod {sub = sub'}
-    _ -> throwError $ "unknown mutator: " ++ name
+    _ -> throwError $ "unknown mutator: " <> name
 
 
 
@@ -140,10 +140,10 @@ switchModules ssRef t rootId childN m1 spd = do
   systemST' <- lift $ readSTRef ssRef
   addScript systemST' swid "finishSwitch" (inj "delay:%0" [show spd])
 
-  return unit
+  pure unit
 
 
-finishSwitch :: forall eff h. ScriptFn eff h
+finishSwitch :: forall eff h. (Partial) => ScriptFn eff h
 finishSwitch ssRef pRef t rootIdPre idx dt = do
   -- get data
   delay <- (loadLib "delay" dt "finishSwitch delay") >>= numFromStringE
@@ -171,9 +171,9 @@ finishSwitch ssRef pRef t rootIdPre idx dt = do
       when systemST.pauseAfterSwitch do
         lift $ modifySTRef ssRef (\s -> s {pauseAfterSwitch = false})
         addScript systemST parent "pause" ""
-        return unit
+        pure unit
 
       --dbg "finish switch!!!!"
-      return $ ScriptRes (PMut pattern (singleton newRootN)) Nothing
+      pure $ ScriptRes (PMut pattern (singleton newRootN)) Nothing
     _ -> do
-      return $ ScriptRes PMutNone Nothing
+      pure $ ScriptRes PMutNone Nothing

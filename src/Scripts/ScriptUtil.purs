@@ -7,7 +7,6 @@ import Control.Monad.ST (modifySTRef, newSTRef, readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (head, foldM, uncons, deleteAt, cons)
 import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
-import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (StrMap, insert, empty, toUnfoldable)
 import Data.String (split, joinWith, trim)
 import Data.String (Pattern(..)) as S
@@ -15,7 +14,7 @@ import Data.Tuple (Tuple(Tuple))
 import Pattern (clonePattern, findModule, findAddr, CloneRes(CloneRes))
 import System (mUp)
 import Text.Format (precision, format)
-import Util (dbg, inj, numFromStringE)
+import Util (dbg, inj, numFromStringE, fromJustE)
 
 addScript :: forall eff h. SystemST h -> String -> String -> String -> EpiS eff h Unit
 addScript systemST mid name args = do
@@ -81,5 +80,5 @@ getClone ssRef pRef mid = do
   pClone <- lift $ readSTRef pRef'
   addr <- findAddr systemST'.moduleRefPool pattern mid
   mid' <- findModule systemST'.moduleRefPool pClone addr false
-  root <- pure $ fromJust $ head $ split (S.Pattern ".") addr
+  root <- fromJustE (head $ split (S.Pattern ".") addr) "getClone invalid addr"
   pure $ CloneRes root pClone mid'

@@ -8,7 +8,6 @@ import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, STRef, readSTRef)
 import Data.Array (index, length, updateAt) as A
 import Data.Maybe (Maybe(Nothing), fromMaybe)
-import Data.Maybe.Unsafe (fromJust)
 import Data.Set (singleton)
 import Data.StrMap (insert, fromFoldable, union)
 import Data.Tuple (Tuple(..))
@@ -16,7 +15,7 @@ import Pattern (CloneRes(CloneRes), purgeModule, ImportObj(ImportRef, ImportModu
 import ScriptUtil (getClone, addScript, purgeScript)
 import System (loadLib, family)
 import Text.Format (precision, format)
-import Util (dbg, intFromStringE, inj, randInt, numFromStringE, gmod)
+import Util (dbg, intFromStringE, inj, randInt, numFromStringE, gmod, fromJustE)
 
 
 switch :: forall eff h. ScriptFn eff h
@@ -61,7 +60,7 @@ switch ssRef pRef t midPre idx dt = do
           i <- (pure iS) >>= intFromStringE
           pure $ i `gmod` (A.length lib)
 
-      pure $ fromJust (A.index lib idx)
+      fromJustE (A.index lib idx) "idx out of bounds in switch"
 
     x -> throwError $ "invalid 'by' for switch, must be query | val : " <> x
 

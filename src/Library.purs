@@ -6,14 +6,13 @@ import Control.Monad.Except.Trans (throwError)
 import Data.Array (tail, head, cons, foldM, reverse, filter, length, index) as A
 import Data.Complex (Complex)
 import Data.Maybe (Maybe(..))
-import Data.Maybe.Unsafe (fromJust)
 import Data.Set (Set, fromFoldable, empty) as S
 import Data.StrMap (lookup, foldM, StrMap, empty, insert, fromFoldable)
 import Data.String (Pattern(..), joinWith, null, trim, stripPrefix, split)
 import Data.String.Regex (match)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Util (cxFromStringE, numFromStringE, intFromStringE, boolFromStringE, unsafeSetAttr, tryRegex)
+import Util (cxFromStringE, numFromStringE, intFromStringE, boolFromStringE, unsafeSetAttr, tryRegex, fromJustE)
 
 foreign import unsafeGenericObjectImpl :: forall a. Schema -> S.Set String -> a
 
@@ -33,7 +32,7 @@ parseGroup schema lib group = do
 
   -- get name & parent
   {name, parent} <- parseName $ A.head lines
-  rst <- pure $ fromJust $ A.tail lines -- monadic wrapper, so fromJust is safe
+  rst <- fromJustE (A.tail lines) "not enough lines in group"
 
   -- get default obj
   obj <- if (not $ null parent) then
@@ -69,14 +68,14 @@ parseLine schema obj line = do
     0 -> throwError $ "malformed line " <> line
     1 -> pure obj
     _ -> do
-      let attrn = fromJust $ A.index tokens 0
-      let val = joinWith " " $ fromJust $ A.tail tokens
+      attrn <- fromJustE (A.index tokens 0) "< 1 tokens"
+      val <- joinWith " " <$> fromJustE (A.tail tokens) "<= 1 tokens"
 
       let ses = A.filter (schemaSel attrn) schema
       when (A.length ses /= 1) do
         throwError $ line <> " matched " <> (show $ A.length ses) <> " schema entries!!"
 
-      (SchemaEntry st _) <- pure $ fromJust $ A.head ses
+      (SchemaEntry st _) <- fromJustE (A.head ses) "not enough ses"
 
       case st of
         SE_St -> do

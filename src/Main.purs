@@ -10,7 +10,6 @@ import DOM (DOM)
 import Data.Array (null, updateAt, foldM, sort, concatMap, elemIndex, fromFoldable)
 import Data.Int (round, toNumber)
 import Data.Maybe (isNothing, maybe, fromMaybe, Maybe(Nothing, Just))
-import Data.Maybe.Unsafe (fromJust)
 import Data.Set (member)
 import Data.StrMap (insert, values, keys, lookup)
 import Data.Traversable (traverse)
@@ -24,7 +23,7 @@ import Script (runScripts)
 import System (initSystemST, loadLib)
 import Texture (preloadImages)
 import UI (initUIST)
-import Util (elg, dbg, imag, real, rndstr, Now, handleError, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
+import Util (elg, dbg, imag, real, rndstr, Now, handleError, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev, fromJustE)
 
 host :: String
 host = ""
@@ -189,14 +188,14 @@ getParZn systemST (Tuple par zn) mid = do
       (Tuple res remove) <- runPath t val
       when remove do -- replace with constant
         m <- lift $ readSTRef mRef
-        let idx = fromJust $ elemIndex val m.zn
-        let zn' = fromJust $ updateAt idx (show res) m.zn
+        idx <- fromJustE (elemIndex val m.zn) "cant find idx getParZn"
+        zn' <- fromJustE (updateAt idx (show res) m.zn) "should be safe getParZn"
         lift $ modifySTRef mRef (\m' -> m' {zn = zn'})
         pure unit
       pure res
     runParPath mRef t key = do
       m <- lift $ readSTRef mRef
-      let val = fromJust $ lookup key m.par
+      val <- fromJustE (lookup key m.par) "cant find val getParZn"
       (Tuple res remove) <- runPath t val
       let res' = real res
       when remove do -- replace with constant
@@ -222,7 +221,7 @@ main = do
   elg $ "STARTING"
   confn <- getSysConfName -- hack!!!!!
 
-  Partial.Unsafe.unsafePartial $ runST do
+  runST do
     handleError do
       sys <- initSystemST host
       lift $ preloadAux sys (if confn =="ponies" then "ponies" else "all_images") do

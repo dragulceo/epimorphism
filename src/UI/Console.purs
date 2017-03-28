@@ -13,8 +13,8 @@ import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (StrMap)
 import Data.String (Replacement(..), joinWith, trim, split, replace)
 import Data.String (Pattern(..)) as S
-import Data.String.Regex (match)
 import Data.String.Regex.Unsafe (unsafeRegex)
+import Data.String.Regex (match)
 import Data.String.Regex.Flags (noFlags)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
@@ -24,22 +24,24 @@ import System (family, loadLib)
 import UIUtil (findElt)
 import Util (real, inj, lg, indentLines, tryRegex)
 
+import Partial.Unsafe (unsafePartial)
+
 foreign import addEventListeners :: forall eff. Eff eff Unit
 
 renderConsole :: forall eff h. UIConf -> UIST -> SystemST h -> Pattern -> EpiS eff h Unit
 renderConsole uiConf uiST systemST pattern = do
   dsmDiv <- findElt "debugMain"
-  str0 <- renderModule systemST uiConf.uiCompLib pattern.main "MAIN" Nothing
+  str0 <- unsafePartial $ renderModule systemST uiConf.uiCompLib pattern.main "MAIN" Nothing
   lift $ setInnerHTML str0 dsmDiv
 
   dsdDiv <- findElt "debugDisp"
-  str1 <- renderModule systemST uiConf.uiCompLib pattern.disp "DISP" Nothing
+  str1 <- unsafePartial $ renderModule systemST uiConf.uiCompLib pattern.disp "DISP" Nothing
   lift $ setInnerHTML str1 dsdDiv
 
   lift $ addEventListeners
 
 -- serializes the modRefPool into an html string for debugging.  shitcode
-renderModule :: forall eff h. SystemST h -> String -> String -> String -> Maybe String -> EpiS eff h String
+renderModule :: forall eff h. (Partial) => SystemST h -> String -> String -> String -> Maybe String -> EpiS eff h String
 renderModule systemST modLib mid title pid = do
   let lib = systemST.moduleLib
   let pool = systemST.moduleRefPool

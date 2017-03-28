@@ -11,7 +11,7 @@ import Data.Array (length)
 import Data.Complex (inCartesian, Cartesian(Cartesian), outCartesian, Complex)
 import Data.Either (Either(..), either)
 import Data.Foldable (foldr)
-import Data.Int (fromString) as I
+import Data.Int (fromString, fromNumber) as I
 import Data.Maybe (Maybe(..))
 import Data.StrMap (StrMap)
 import Data.String (Pattern(..), split, joinWith)
@@ -105,6 +105,11 @@ cxFromStringE s = case (cxFromString s) of
   (Just (Tuple r i)) -> pure $ outCartesian (Cartesian r i)
   _ -> throwError $ "Expected : " <> s <> " : to be an cx"
 
+forceInt :: Number -> Int
+forceInt n = case (I.fromNumber n) of
+  (Just i) -> i
+  Nothing -> 0
+
 
 handleError :: forall eff. Epi eff Unit -> Eff (canvas :: CANVAS, dom :: DOM | eff) Unit
 handleError epi = do
@@ -119,6 +124,10 @@ tryRegex :: forall eff. String -> Epi eff Regex
 tryRegex s = case regex s noFlags of
     Right x -> pure x
     Left _ -> throwError "Invalid Regex"
+
+fromJustE :: forall a eff. Maybe a -> String -> Epi eff a
+fromJustE (Just x) _  = pure x
+fromJustE Nothing msg = throwError msg
 
 spc :: Int -> String
 spc 0 = ""

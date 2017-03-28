@@ -6,16 +6,15 @@ import Control.Monad (when)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, modifySTRef, newSTRef, readSTRef)
-import Data.Array (cons, head, tail, foldM, length, last, init)
+import Data.Array (cons, head, tail, foldM, length, last, init, uncons, reverse)
 import Data.Maybe (Maybe(..), maybe)
-import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (member, StrMap, delete, insert, values, toUnfoldable)
 import Data.String (Pattern(..)) as S
 import Data.String (split, joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import System (loadLib)
-import Util (dbg, uuid)
+import Util (dbg, uuid, fromJustE)
 
 
 ------------------------ FIND ------------------------
@@ -26,13 +25,14 @@ findModule mpool pattern dt followSwitch = do
   case (member dt mpool) of
     true -> pure dt
     false -> do
-      let addr = split (S.Pattern ".") dt
-      case (head addr) of
-        Nothing -> throwError "we need data, chump"
-        Just "vert" -> findModule' mpool pattern.vert (fromJust $ tail addr) followSwitch
-        Just "disp" -> findModule' mpool pattern.disp (fromJust $ tail addr) followSwitch
-        Just "main" -> findModule' mpool pattern.main (fromJust $ tail addr) followSwitch
-        Just x      -> throwError $ "value should be main, vert, or disp : " <> x
+      case (uncons $ split (S.Pattern ".") dt) of
+        Nothing -> throwError $ "invalid address: " <> dt
+        Just {head: addr, tail: rst} -> do
+          case addr of
+            "vert" -> findModule' mpool pattern.vert rst followSwitch
+            "disp" -> findModule' mpool pattern.disp rst followSwitch
+            "main" -> findModule' mpool pattern.main rst followSwitch
+            x      -> throwError $ "value should be main, vert, or disp : " <> x
 
 
 findModule' :: forall eff h. StrMap (STRef h Module) -> String -> Array String -> Boolean -> EpiS eff h String
@@ -45,10 +45,10 @@ findModule' mpool mid addr followSwitch = do
       childId <- loadLib mid' mod.modules "findModule' find child"
       cRef    <- loadLib childId mpool "findModule' child ref"
       child   <- lift $ readSTRef cRef
-      addr'   <- pure $ fromJust $ tail addr
+      addr'   <- fromJustE (tail addr) "shouldn be safe1"
 
       case (child.family == "switch" && followSwitch) of
-        true ->  findModule' mpool childId (cons "m1" addr') followSwitch
+        true  -> findModule' mpool childId (cons "m1" addr') followSwitch
         false -> findModule' mpool childId addr' followSwitch
 
 
@@ -57,9 +57,8 @@ findAddr mpool pattern mid = do
   m0 <- find' "main" pattern.main
   m1 <- find' "disp" pattern.disp
   m2 <- find' "vert" pattern.vert
-  case (m0 <> m1 <> m2) of
-    Just addr -> pure addr
-    Nothing -> throwError $ "orphan module? " <> mid
+
+  fromJustE (m0 <> m1 <> m2) ("orphan module? " <> mid)
   where
     find' :: String -> String -> EpiS eff h (Maybe String)
     find' addr cid = case (cid == mid) of
@@ -78,14 +77,12 @@ findParent mpool pattern mid = do
   addr <- findAddr mpool pattern mid
 
   let cmp = split (S.Pattern ".") addr
-  when (length cmp < 2) do
-    throwError $ "malformed addr: " <> addr
 
-  let lst = fromJust $ last cmp
-  let addr' = joinWith "." $ fromJust $ init cmp
-
-  pId <- findModule mpool pattern addr' false
-  pure $ Tuple pId lst
+  case (uncons $ reverse cmp) of
+    Nothing -> throwError $ "malformed address" <> addr
+    Just {head: lst, tail: addr'} -> do
+      pId <- findModule mpool pattern (joinWith "." $ reverse addr') false
+      pure $ Tuple pId lst
 
 ------------------------ IMPORTING ------------------------
 

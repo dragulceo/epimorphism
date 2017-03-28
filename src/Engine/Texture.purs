@@ -13,14 +13,13 @@ import Control.Monad.Reader.Class (ask)
 import Control.Monad.Reader.Trans (lift)
 import Data.Array (length, (!!), (..), zip, foldM)
 import Data.Maybe (fromMaybe, maybe, Maybe(Nothing, Just))
-import Data.Maybe.Unsafe (fromJust)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple), snd, fst)
 import EngineUtil (execGL)
 import Graphics.WebGL (runWebgl)
 import Graphics.WebGL.Methods (createFramebuffer, createTexture)
 import Graphics.WebGL.Types (WebGLTexture, WebGLContext, WebGL, WebGLFramebuffer)
-import Util (dbg2, unsafeNull)
+import Util (dbg2, unsafeNull, fromJustE)
 
 foreign import preloadImages :: forall eff. Array String -> Eff eff Unit -> Eff eff Unit
 foreign import emptyImage :: forall eff. Int -> Eff eff GLT.TexImageSource
@@ -103,9 +102,10 @@ foreign import uploadImageImpl :: forall eff. String ->
 clearFB :: forall eff h. EngineConf -> EngineST -> EpiS eff h Unit
 clearFB engineConf engineST = do
   let ctx = engineST.ctx
+  tex <- fromJustE engineST.tex "engine textures not initialized!"
   execGL ctx do
-    liftEff $ GL.bindTexture ctx GLE.texture2d $ fst $ fromJust engineST.tex
+    liftEff $ GL.bindTexture ctx GLE.texture2d $ fst $ tex
     liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte engineST.empty
-    liftEff $ GL.bindTexture ctx GLE.texture2d $ snd $ fromJust engineST.tex
+    liftEff $ GL.bindTexture ctx GLE.texture2d $ snd $ tex
     liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte engineST.empty
   pure unit

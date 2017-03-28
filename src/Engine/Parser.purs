@@ -8,13 +8,12 @@ import Data.Array (sort, length, (..)) as A
 import Data.Foldable (foldl)
 import Data.Int (fromNumber)
 import Data.Maybe (Maybe(Nothing, Just))
-import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (lookup, StrMap, fold, empty, keys, size, foldM, insert)
 import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
 import Prelude (pure, ($), bind, map, (<>), (-), (+), show)
-import Util (replaceAll, indentLines)
+import Util (replaceAll, indentLines, forceInt)
 
 type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}
 type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array String}
@@ -44,7 +43,7 @@ parseModule mod systemST zOfs parOfs images = do
   -- pars
   let k = (A.sort $ keys mod.par)
   let component'' = snd $ foldl handlePar (Tuple parOfs component') k
-  let parOfs' = parOfs + (fromJust $ fromNumber $ size mod.par)
+  let parOfs' = parOfs + (forceInt $ size mod.par)
 
   -- zn
   let component''' = foldl handleZn component'' (A.(..) 0 ((A.length mod.zn) - 1))

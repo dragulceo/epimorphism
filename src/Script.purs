@@ -9,7 +9,6 @@ import Control.Monad.Trans.Class (lift)
 import Data.Array (length, foldM, elemIndex, updateAt, (..), zip)
 import Data.Foldable (or)
 import Data.Maybe (Maybe(Just))
-import Data.Maybe.Unsafe (fromJust)
 import Data.Set (union)
 import Data.StrMap (keys, member)
 import Data.Traversable (traverse)
@@ -18,7 +17,7 @@ import ScriptUtil (serializeScript, parseScript)
 import Scripts (null, randomize, pause, incZn)
 import Switch (finishSwitch, switch)
 import System (mFold, mUp, loadLib)
-import Util (dbg, lg)
+import Util (dbg, lg, fromJustE)
 
 -- find script fuction given name
 lookupScriptFN :: forall eff h. String -> EpiS eff h (ScriptFn eff h)
@@ -61,7 +60,7 @@ runScript ssRef pRef mid x scr = do
 
   mRef <- loadLib mid systemST.moduleRefPool "mid! runScript"
   m    <- lift $ readSTRef mRef
-  idx  <- pure $ fromJust $ elemIndex scr m.scripts
+  idx  <- fromJustE (elemIndex scr m.scripts) "script not found m"
   (ScriptRes mut update) <- fn ssRef pRef t' mid idx args
 
   case update of
@@ -69,10 +68,10 @@ runScript ssRef pRef mid x scr = do
       let new = serializeScript (Script name phase dt)
       m'        <- lift $ readSTRef mRef
       systemST' <- lift $ readSTRef ssRef
-      idx'      <- pure $ fromJust $ elemIndex scr m'.scripts
+      idx'      <- fromJustE (elemIndex scr m'.scripts) "script not found m'"
+      scripts'  <- fromJustE (updateAt idx' new m'.scripts) "should be safe runScript"
 
-      mUp systemST' mid \m1 ->
-        m1 {scripts = fromJust $ updateAt idx' new m1.scripts}
+      mUp systemST' mid \m1 -> m1 {scripts = scripts'} -- not sure this was right
       pure unit
     _ -> pure unit
 

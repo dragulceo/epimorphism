@@ -15,7 +15,6 @@ import Control.Monad.ST (writeSTRef, STRef, newSTRef, modifySTRef, readSTRef)
 import Data.Array (length, (!!), (..))
 import Data.Int (toNumber, fromNumber)
 import Data.Maybe (maybe, Maybe(Nothing, Just))
-import Data.Maybe.Unsafe (fromJust)
 import Data.Tuple (Tuple(Tuple), snd, fst)
 import EngineUtil (execGL)
 import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
@@ -24,6 +23,7 @@ import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, cl
 import Graphics.WebGL.Types (WebGLContext, WebGLTexture, DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
 import Texture (initAux, initTexFb, emptyImage)
 import Util (hasAttr, unsafeGetAttr, lg, dbg, Now, unsafeNull)
+import Partial.Unsafe (unsafePartial)
 
 --  PUBLIC
 
@@ -145,9 +145,11 @@ renderFrame systemST engineConf engineST pattern par zn frameNum = do
       when (not $ hasAttr mainUnif "aux[0]") do
         throwError $ ShaderError "missing aux uniform!"
       liftEff $ GL.uniform1iv ctx (unsafeGetAttr mainUnif "aux[0]") (1..numAux)
-      liftEff $ forE 0 numAux \i -> do
+      unsafePartial $ liftEff $ forE 0 numAux \i -> do
         GL.activeTexture ctx (GLE.texture1 + i)
-        GL.bindTexture ctx GLE.texture2d $ fromJust (aux !! i)
+        case (aux !! i) of
+          Just t -> GL.bindTexture ctx GLE.texture2d t
+
 
     -- ping pong buffers
     let tm = if frameNum `mod` 2 == 0 then fst tex else snd tex

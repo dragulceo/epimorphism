@@ -5,7 +5,7 @@ import Config (UIST, UIConf)
 import Control.Monad.Eff (Eff)
 import Control.Monad.ST (ST, STRef, readSTRef, modifySTRef)
 import DOM (DOM)
-import Data.Maybe.Unsafe (fromJust)
+import Data.Maybe (Maybe(..))
 import Data.StrMap (insert, member, lookup)
 import Graphics.Canvas (CANVAS)
 import Util (inj)
@@ -90,7 +90,9 @@ devKeyHandler ucRef usRef char = do
   where
     incMod uiConf uiST adr childN lib ofs = do
       let idn' = adr <> childN
-      let idx = if (member idn' uiST.incIdx) then ((fromJust $ lookup idn' uiST.incIdx) + ofs) else 0
+      idx <- case lookup idn' uiST.incIdx of
+        Just i -> pure $ i + ofs
+        Nothing -> pure $ ofs
       let dt = insert idn' idx uiST.incIdx
       modifySTRef usRef (\s -> s {incIdx = dt})
       let spd = show uiConf.keyboardSwitchSpd

@@ -11,7 +11,7 @@ import Graphics.Canvas (CANVAS)
 import Util (inj)
 
 -- converts key codes into command sequences
-type KeyHandler = forall eff h. (Partial) => STRef h UIConf -> STRef h UIST -> String -> Eff (canvas :: CANVAS, dom :: DOM, st :: ST h | eff) String
+type KeyHandler = forall eff h. STRef h UIConf -> STRef h UIST -> String -> Eff (canvas :: CANVAS, dom :: DOM, st :: ST h | eff) String
 
 keyHandler :: KeyHandler
 keyHandler ucRef usRef char = do

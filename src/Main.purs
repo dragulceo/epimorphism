@@ -3,7 +3,6 @@ module Main where
 import Prelude
 import Compiler (compileShaders)
 import Config (PMut(PMutNone, PMut), SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, SystemConf, UIConf, CompOp(..))
-import Control.Monad (unless, when)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
@@ -25,7 +24,7 @@ import Script (runScripts)
 import System (initSystemST, loadLib)
 import Texture (preloadImages)
 import UI (initUIST)
-import Util (dbg, imag, real, rndstr, Now, handleError, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
+import Util (elg, dbg, imag, real, rndstr, Now, handleError, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev)
 
 host :: String
 host = ""
@@ -50,7 +49,7 @@ getSysConfName = do
   pure conf
 
 
-initState :: forall eff h. (Partial) => SystemST h -> EpiS (now :: Now | eff) h (State h)
+initState :: forall eff h. SystemST h -> EpiS (now :: Now | eff) h (State h)
 initState systemST = do
   --  init config
   systemName <- lift $ getSysConfName
@@ -88,7 +87,7 @@ initState systemST = do
   pure {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef}
 
 
-animate :: forall h. (Partial) => (State h) -> Eff (canvas :: CANVAS, dom :: DOM, now :: Now, st :: ST h) Unit
+animate :: forall h. (State h) -> Eff (canvas :: CANVAS, dom :: DOM, now :: Now, st :: ST h) Unit
 animate state = handleError do
   t0 <- lift $ now
   -- unpack state
@@ -171,7 +170,7 @@ animate state = handleError do
   pure unit
 
 -- recursively flatten par & zn lists in compilation order
-getParZn :: forall eff h. (Partial) => SystemST h -> (Tuple (Array Number) (Array Number)) -> String -> EpiS eff h (Tuple (Array Number) (Array Number))
+getParZn :: forall eff h. SystemST h -> (Tuple (Array Number) (Array Number)) -> String -> EpiS eff h (Tuple (Array Number) (Array Number))
 getParZn systemST (Tuple par zn) mid = do
   mRef <- loadLib mid systemST.moduleRefPool "mid getParZn"
   mod  <- lift $ readSTRef mRef
@@ -218,11 +217,12 @@ preloadAux systemST libName callback = do
 
 
 -- clean this shit up yo
-main :: (Partial) => Eff (canvas :: CANVAS, dom :: DOM, now :: Now) Unit
+main :: Eff (canvas :: CANVAS, dom :: DOM, now :: Now) Unit
 main = do
+  elg $ "STARTING"
   confn <- getSysConfName -- hack!!!!!
 
-  runST do
+  Partial.Unsafe.unsafePartial $ runST do
     handleError do
       sys <- initSystemST host
       lift $ preloadAux sys (if confn =="ponies" then "ponies" else "all_images") do

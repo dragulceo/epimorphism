@@ -1,7 +1,5 @@
 "use strict";
 
-// module Console
-
 exports.addEventListeners = function() {
 	// SWITCH CHILD
 	var switchChildHandler = function(){

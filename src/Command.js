@@ -1,7 +1,5 @@
 "use strict";
 
-// module Command
-
 exports.saveCanvas = function() {
 	var dataURL = $("#glcanvas")[0].toDataURL();
 	$.ajax({

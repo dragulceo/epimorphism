@@ -1,7 +1,5 @@
 "use strict";
 
-// module Texture
-
 // clean up
 exports.uploadImageImpl = function(s){
 	return function(callback){

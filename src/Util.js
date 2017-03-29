@@ -1,6 +1,5 @@
 "use strict";
 
-// module Util
 exports.unsafeNull = null
 
 exports.unsafeSetAttr = function(obj){

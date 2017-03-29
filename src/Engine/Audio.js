@@ -1,7 +1,5 @@
 "use strict";
 
-// module Audio
-
 // not generally supported.  works on chrome atm
 exports.initAudioAnalyzer = function(bufferSize){
 	return function(){

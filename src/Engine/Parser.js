@@ -1,7 +1,5 @@
 "use strict";
 
-// module Parser
-
 var parseN = function(node){
 	switch (node.type) {
   case 'ConstantNode':

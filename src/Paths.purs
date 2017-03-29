@@ -9,7 +9,7 @@ import Data.Maybe (Maybe(Just))
 import Data.String (Pattern(..), split, trim)
 import Data.Tuple (Tuple(Tuple))
 import Math (pi, min, cos, floor)
-import Util (cxFromString, lg, cxFromStringE, numFromStringE)
+import Util (dbg, cxFromString, lg, cxFromStringE, numFromStringE)
 
 
 runPath :: forall eff h. Number -> String -> EpiS eff h (Tuple Complex Boolean)

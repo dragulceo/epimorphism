@@ -108,6 +108,8 @@ PERF:
   - choppy in safari
 
 SYSTEM:
+	- complex number library show hack
+
   - scripts
     - way of switching modules while keeping phase/scripts.
 	  - keep scripts when switching modules?

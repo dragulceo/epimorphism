@@ -11,6 +11,7 @@ import Data.StrMap (StrMap)
 import Data.StrMap (isEmpty, toUnfoldable) as S
 import Data.String (joinWith)
 import Data.Tuple (Tuple(Tuple))
+import Math (abs)
 import Text.Format (format, precision)
 import Util (unsafeCast, unsafeGetAttr)
 
@@ -80,4 +81,6 @@ serializeCxArray ary = "[" <> (joinWith ", " (map showCX ary)) <> "]"
 
 showCX :: Complex -> String
 showCX z = case (inCartesian z) of
-    (Cartesian x y) -> (format (precision 2) x) <> " + " <> (format (precision 2) y) <> "i"
+    (Cartesian x y) -> (format (precision 2) x) <>
+                       (if y < 0.0 then " - " else " + ") <>
+                       (format (precision 2) (abs y)) <> "i"

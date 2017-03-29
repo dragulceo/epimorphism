@@ -5,14 +5,15 @@ import Config (PMut(PMutNone), ScriptRes(ScriptRes), ScriptFn)
 import Control.Monad.Except.Trans (throwError, lift)
 import Control.Monad.ST (modifySTRef, readSTRef)
 import Data.Array (updateAt, index)
-import Data.Complex (inPolar, Polar(Polar))
+import Data.Complex (Cartesian(..), outCartesian, inPolar, Polar(Polar))
+import Data.Tuple (Tuple(..))
 import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
 import Data.StrMap (insert, member)
 import Math (max, round)
 import ScriptUtil (addScript, purgeScript)
 import System (loadLib)
 import Text.Format (format, precision)
-import Util (cxFromStringE, intFromStringE, inj, numFromStringE, clickPause)
+import Util (dbg, cxFromString, intFromStringE, inj, numFromStringE, clickPause)
 
 null :: forall eff h. ScriptFn eff h
 null ssRef pRef t mid idx dt = do
@@ -29,7 +30,7 @@ pause ssRef pRef t mid idx dt = do
 
 -- increment Zn
 incZn :: forall eff h. ScriptFn eff h
-incZn ssRef pRef t mid idx dt = do
+incZn ssRef pRef t mid scrIdx dt = do
   systemST <- lift $ readSTRef ssRef
 
   mRef <- loadLib mid systemST.moduleRefPool "incZn module"
@@ -38,44 +39,46 @@ incZn ssRef pRef t mid idx dt = do
   idx <- (loadLib "idx" dt "incZn idx") >>= intFromStringE
   ofs <-  loadLib "ofs" dt "incZn ofs"
 
-  z <- case (index mod.zn idx) of
-    Just z' -> cxFromStringE z'
-    _ -> throwError "index out of bounds - incZn"
+  case (index mod.zn idx) of
+    Nothing -> throwError "index out of bounds - incZn"
+    Just z' -> case cxFromString z' of
+      Nothing -> pure unit
+      Just (Tuple r i) -> do
+        (Polar fromTh fromR) <- pure $ inPolar $ outCartesian (Cartesian r i)
 
-  (Polar fromTh fromR) <- pure $ inPolar z
+        let incR = 0.1
+        let incTh = 3.1415926535 / 4.0
 
-  let incR = 0.1
-  let incTh = 3.1415926535 / 4.0
+        (Polar toTh toR) <- case ofs of
+          "1" -> do
+            let new = max ((round (fromR / incR + 1.0)) * incR) 0.0
+            pure $ (Polar fromTh new)
+          "-1" -> do
+            let new = max ((round (fromR / incR - 1.0)) * incR) 0.0
+            pure $ (Polar fromTh new)
+          "i" -> do
+            let new = (round (fromTh / incTh + 1.0)) * incTh
+            pure $ (Polar new fromR)
+          "-i" -> do
+            let new = (round (fromTh / incTh - 1.0)) * incTh
+            pure $ (Polar new fromR)
+          _ -> throwError "offset should be +-1 or +-i"
 
-  (Polar toTh toR) <- case ofs of
-    "1" -> do
-      let new = max ((round (fromR / incR + 1.0)) * incR) 0.0
-      pure $ (Polar fromTh new)
-    "-1" -> do
-      let new = max ((round (fromR / incR - 1.0)) * incR) 0.0
-      pure $ (Polar fromTh new)
-    "i" -> do
-      let new = (round (fromTh / incTh + 1.0)) * incTh
-      pure $ (Polar new fromR)
-    "-i" -> do
-      let new = (round (fromTh / incTh - 1.0)) * incTh
-      pure $ (Polar new fromR)
-    _ -> throwError "offset should be +-1 or +-i"
+        let tPhase = systemST.t - t -- recover phase
+        let path = inj "intrp@%0 4.0 %1 %2 %3 %4" [(show $ t + tPhase), (show fromR), (show fromTh), (show toR), (show toTh)]
 
-  let tPhase = systemST.t - t -- recover phase
-  let path = inj "intrp@%0 4.0 %1 %2 %3 %4" [(show $ t + tPhase), (show fromR), (show fromTh), (show toR), (show toTh)]
-
-  let zn' = fromMaybe mod.zn (updateAt idx path mod.zn)
-  lift $ modifySTRef mRef (\m -> m {zn = zn'})
+        let zn' = fromMaybe mod.zn (updateAt idx path mod.zn)
+        lift $ modifySTRef mRef (\m -> m {zn = zn'})
+        pure unit
 
   -- remove self
-  purgeScript systemST mid idx
+  purgeScript systemST mid scrIdx
 
   pure $ ScriptRes PMutNone Nothing
 
 
 randomize :: forall eff h. ScriptFn eff h
-randomize ssRef pRef t mid idx dt = do
+randomize ssRef pRef t mid scrIdx dt = do
   systemST <- lift $ readSTRef ssRef
 
   dly <- (loadLib "dly" dt "randomComponent") >>= numFromStringE
@@ -90,7 +93,7 @@ randomize ssRef pRef t mid idx dt = do
 
   -- next iteration
   update <- case t of
-    t | t >= nxt -> do
+    t' | t' >= nxt -> do
       --let a = lg "ITERATE COMPONENT"
       args <- pure $ case typ of
         "mod" -> inj "childN:%0 op:load by:query typ:mod query:%1 accs:rand spd:%2" [sub, lib, spd]

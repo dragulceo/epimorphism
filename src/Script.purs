@@ -50,7 +50,7 @@ runModScripts ssRef pRef mut mid = do
 
 
 runScript :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> String -> PMut -> String -> EpiS eff h PMut
-runScript ssRef pRef mid x scr = do
+runScript ssRef pRef mid pmut scr = do
   --dbg $ "running script : " <> scr <> " : for " <> mid
   --dbg x
   (Script name phase args) <- parseScript scr
@@ -62,7 +62,6 @@ runScript ssRef pRef mid x scr = do
   m    <- lift $ readSTRef mRef
   idx  <- fromJustE (elemIndex scr m.scripts) "script not found m"
   (ScriptRes mut update) <- fn ssRef pRef t' mid idx args
-
   case update of
     Just dt -> do
       let new = serializeScript (Script name phase dt)
@@ -75,11 +74,11 @@ runScript ssRef pRef mid x scr = do
       pure unit
     _ -> pure unit
 
-  case x of
+  case pmut of
     PMutNone -> pure mut
     PMut pat res -> do
       case mut of
-        PMutNone -> pure x
+        PMutNone -> pure pmut
         PMut mutP mutS -> pure $ PMut pat (union res mutS)
 
 --runScript _ _ _ x _ = pure x

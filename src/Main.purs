@@ -7,7 +7,7 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
-import Data.Array (null, updateAt, foldM, sort, concatMap, elemIndex, fromFoldable)
+import Data.Array (null, updateAt, foldM, sort, concatMap, fromFoldable)
 import Data.Int (round, toNumber)
 import Data.Maybe (isNothing, maybe, fromMaybe, Maybe(Nothing, Just))
 import Data.Set (member)
@@ -217,7 +217,6 @@ preloadAux systemST libName callback = do
 -- clean this shit up yo
 main :: Eff (canvas :: CANVAS, dom :: DOM, now :: Now) Unit
 main = do
-  elg $ "STARTING 2"
   confn <- getSysConfName -- hack!!!!!
 
   runST do

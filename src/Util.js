@@ -195,9 +195,7 @@ exports.isHalted = function() {
 
 exports.uuid = function() {
 	function s4() {
-		var v = Math.floor((1 + Math.random()) * 0x10000);
-		console.log(v);
-		return v
+		return Math.floor((1 + Math.random()) * 0x10000)
 			.toString(16)
 			.substring(1);
 	}
@@ -226,7 +224,6 @@ exports.gmod = function(n) {
 
 
 exports.seedRandom = function(seed) {
-	console.log(seed);
 	return function(){
 		return Math.seedrandom(seed);
 	};
@@ -240,9 +237,7 @@ exports.random = function() {
 
 exports.randInt = function(n) {
 	return function() {
-		var v = Math.floor(n * Math.random());
-		console.log(v);
-		return v;
+		return Math.floor(n * Math.random());
 	};
 };
 

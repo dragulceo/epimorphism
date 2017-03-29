@@ -3,13 +3,12 @@ module Command where
 import Prelude
 import Compiler (compileShaders)
 import Config (Schema, patternSchema, moduleSchema, EpiS, Pattern, SystemST, SystemConf, EngineST, EngineConf, UIST, UIConf)
-import Control.Monad (when, unless)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
-import Data.Array (uncons, updateAt, length, head, tail)
+import Data.Array (uncons, updateAt, length)
 import Data.Maybe (Maybe(..))
 import Data.StrMap (values, insert, toUnfoldable)
 import Data.String (joinWith, split)
@@ -24,7 +23,7 @@ import ScriptUtil (addScript)
 import Serialize (unsafeSerialize)
 import System (mUp, loadLib)
 import Texture (clearFB)
-import Util (halt, Now, cxFromStringE, intFromStringE, numFromStringE, lg, uuid, handleError)
+import Util (dbg, halt, Now, cxFromStringE, intFromStringE, numFromStringE, lg, uuid, handleError)
 
 foreign import saveCanvas :: forall eff. Eff eff Unit
 
@@ -49,6 +48,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
         case cmd of
           "null" -> pure unit
           "pause" -> do
+            dbg "pause"
             lift $ modifySTRef ssRef (\s -> s {paused = not s.paused})
             pure unit
           "halt" -> do

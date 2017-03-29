@@ -81,7 +81,6 @@ exports.addGlobalEventListeners = function(handler) {
 		}
 
 		$("button#pause").on('click', pauseHandler);
-
   }
 };
 

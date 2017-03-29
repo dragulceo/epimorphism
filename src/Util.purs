@@ -7,7 +7,7 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (runExceptT)
 import Control.Monad.Trans.Class (lift)
 import DOM (DOM)
-import Data.Array (length)
+import Data.Array (length, zip, (..))
 import Data.Complex (inCartesian, Cartesian(Cartesian), outCartesian, Complex)
 import Data.Either (Either(..), either)
 import Data.Foldable (foldr)
@@ -128,6 +128,9 @@ tryRegex s = case regex s noFlags of
 fromJustE :: forall a eff. Maybe a -> String -> Epi eff a
 fromJustE (Just x) _  = pure x
 fromJustE Nothing msg = throwError msg
+
+zipI :: forall a. Array a -> Array (Tuple Int a)
+zipI x = zip (0..(length x - 1)) x
 
 spc :: Int -> String
 spc 0 = ""

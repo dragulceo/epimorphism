@@ -7,7 +7,7 @@ import Graphics.WebGL.Raw.Enums as GLE
 import Audio (audioData, initAudio)
 import Config (newCompST, fullCompile, UniformBindings, EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf)
 import Control.Monad (when)
-import Control.Monad.Eff (forE)
+import Control.Monad.Eff (foreachE)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Reader.Trans (lift)
@@ -22,7 +22,7 @@ import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttr
 import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor)
 import Graphics.WebGL.Types (WebGLContext, WebGLTexture, DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
 import Texture (initAux, initTexFb, emptyImage)
-import Util (hasAttr, unsafeGetAttr, lg, dbg, Now, unsafeNull)
+import Util (hasAttr, unsafeGetAttr, lg, dbg, Now, unsafeNull, zipI)
 import Partial.Unsafe (unsafePartial)
 
 --  PUBLIC
@@ -145,10 +145,9 @@ renderFrame systemST engineConf engineST pattern par zn frameNum = do
       when (not $ hasAttr mainUnif "aux[0]") do
         throwError $ ShaderError "missing aux uniform!"
       liftEff $ GL.uniform1iv ctx (unsafeGetAttr mainUnif "aux[0]") (1..numAux)
-      unsafePartial $ liftEff $ forE 0 numAux \i -> do
+      liftEff $ foreachE (zipI aux) \(Tuple i t) -> do
         GL.activeTexture ctx (GLE.texture1 + i)
-        case (aux !! i) of
-          Just t -> GL.bindTexture ctx GLE.texture2d t
+        GL.bindTexture ctx GLE.texture2d t
 
 
     -- ping pong buffers

@@ -9,7 +9,6 @@ import Control.Monad.Trans.Class (lift)
 import Data.Array ((!!), length, (..), (:), filter, partition)
 import Data.DOM.Simple.Element (setInnerHTML)
 import Data.Maybe (Maybe(Just, Nothing))
-import Data.Maybe.Unsafe (fromJust)
 import Data.StrMap (StrMap)
 import Data.String (Replacement(..), joinWith, trim, split, replace)
 import Data.String (Pattern(..)) as S
@@ -22,26 +21,24 @@ import Paths (runPath)
 import Serialize (unsafeSerialize)
 import System (family, loadLib)
 import UIUtil (findElt)
-import Util (real, inj, lg, indentLines, tryRegex)
-
-import Partial.Unsafe (unsafePartial)
+import Util (real, inj, lg, indentLines, tryRegex, zipI)
 
 foreign import addEventListeners :: forall eff. Eff eff Unit
 
 renderConsole :: forall eff h. UIConf -> UIST -> SystemST h -> Pattern -> EpiS eff h Unit
 renderConsole uiConf uiST systemST pattern = do
   dsmDiv <- findElt "debugMain"
-  str0 <- unsafePartial $ renderModule systemST uiConf.uiCompLib pattern.main "MAIN" Nothing
+  str0 <- renderModule systemST uiConf.uiCompLib pattern.main "MAIN" Nothing
   lift $ setInnerHTML str0 dsmDiv
 
   dsdDiv <- findElt "debugDisp"
-  str1 <- unsafePartial $ renderModule systemST uiConf.uiCompLib pattern.disp "DISP" Nothing
+  str1 <- renderModule systemST uiConf.uiCompLib pattern.disp "DISP" Nothing
   lift $ setInnerHTML str1 dsdDiv
 
   lift $ addEventListeners
 
 -- serializes the modRefPool into an html string for debugging.  shitcode
-renderModule :: forall eff h. (Partial) => SystemST h -> String -> String -> String -> Maybe String -> EpiS eff h String
+renderModule :: forall eff h. SystemST h -> String -> String -> String -> Maybe String -> EpiS eff h String
 renderModule systemST modLib mid title pid = do
   let lib = systemST.moduleLib
   let pool = systemST.moduleRefPool
@@ -128,9 +125,9 @@ renderModule systemST modLib mid title pid = do
               uiCts <- case (match rgx' m1) of
                 (Just [(Just _), (Just cts)]) -> do
                   let cmp = map trim $ split (S.Pattern ",") cts
-                  let idxs = (0 .. (length cmp - 1))
-                  let cmp' = flip map idxs \x ->
-                    inj "<span class='consoleImage' data-mid='%0' data-idx='%1'>%2</span>" [mid, (show x), fromJust $ cmp !! x]
+
+                  let cmp' = flip map (zipI cmp) \(Tuple i c) ->
+                    inj "<span class='consoleImage' data-mid='%0' data-idx='%1'>%2</span>" [mid, (show i), c]
                   pure $ joinWith ", " cmp'
                 _ -> throwError "invalid images fmt ["
               let ui = inj "<span class='consoleUI' style='display:none;'>images [%0]</span>" [uiCts]
@@ -157,9 +154,8 @@ renderModule systemST modLib mid title pid = do
               uiCts <- case (match rgx' m1) of
                 (Just [(Just _), (Just cts)]) -> do
                   let cmp = map trim $ split (S.Pattern ",") cts
-                  let idxs = (0 .. (length cmp - 1))
-                  let cmp' = flip map idxs \x ->
-                    inj "<span class='consoleZn consoleVar' data-mid='%0' data-var='%1'  data-val='%2' data-type='zn'>%2</span>" [mid, (show x), fromJust $ cmp !! x]
+                  let cmp' = flip map (zipI cmp) \(Tuple i c) ->
+                    inj "<span class='consoleZn consoleVar' data-mid='%0' data-var='%1'  data-val='%2' data-type='zn'>%2</span>" [mid, (show i), c]
                   pure $ joinWith ", " cmp'
                 _ -> throwError "invalid zn fmt ["
 

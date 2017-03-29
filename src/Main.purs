@@ -23,7 +23,7 @@ import Script (runScripts)
 import System (initSystemST, loadLib)
 import Texture (preloadImages)
 import UI (initUIST)
-import Util (elg, dbg, imag, real, rndstr, Now, handleError, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev, fromJustE)
+import Util (elg, dbg, imag, real, rndstr, Now, handleError, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev, fromJustE, zipI)
 
 host :: String
 host = ""
@@ -175,7 +175,7 @@ getParZn systemST (Tuple par zn) mid = do
   mod  <- lift $ readSTRef mRef
   let t = systemST.t
 
-  znV <- traverse (runZnPath mRef t) mod.zn
+  znV <- traverse (runZnPath mRef t) (zipI mod.zn)
   let znV' = concatMap (\x -> [real x, imag x]) znV
   let zn' = zn <> znV'
 
@@ -184,11 +184,10 @@ getParZn systemST (Tuple par zn) mid = do
 
   foldM (getParZn systemST) (Tuple par' zn') (fromFoldable $ values mod.modules)
   where
-    runZnPath mRef t val = do
+    runZnPath mRef t (Tuple idx val) = do
       (Tuple res remove) <- runPath t val
       when remove do -- replace with constant
         m <- lift $ readSTRef mRef
-        idx <- fromJustE (elemIndex val m.zn) "cant find idx getParZn"
         zn' <- fromJustE (updateAt idx (show res) m.zn) "should be safe getParZn"
         lift $ modifySTRef mRef (\m' -> m' {zn = zn'})
         pure unit
@@ -218,7 +217,7 @@ preloadAux systemST libName callback = do
 -- clean this shit up yo
 main :: Eff (canvas :: CANVAS, dom :: DOM, now :: Now) Unit
 main = do
-  elg $ "STARTING"
+  elg $ "STARTING 2"
   confn <- getSysConfName -- hack!!!!!
 
   runST do

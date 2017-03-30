@@ -9,48 +9,7 @@ application main_test_image {{
   color += 0.5 * texture2D(aux[#1], z);
 }}
 
-
 application epimorphism {{
-  vec4 seed, frame;
-  vec2 frame_z, t_z;
-
-	vec4 accum = vec4(0.0, 0.0, 0.0, 0.0);
-
-	float delta = 1.0 / (float($fract$) * kernel_dim);
-	float ofs = delta * (float($fract$) - 1.0);
-
- 	for(int i=0; i<$fract$; i++){
-		for(int j=0; j<$fract$; j++){
-      z = z_in;
-      z = z - vec2(ofs, ofs) + vec2(2.0 * delta * float(i), 2.0 * delta * float(j));
-
-			%t%
-
-			// get frame
-			t_z = z;
-			%reduce%
-			frame_z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
-			frame = texture2D(fb, frame_z);
-			z = t_z;
-
-			%seed%
-
-			// blend
-			//accum += vec4(seed.a * seed.rgb + (1.0 - seed.a) * frame.rgb, seed.a);
-			//float x = (z_in.x + 1.0) / 2.0;
-			//float b = (1.0 - x) * seed.a + x * (1.0 - seed.a);
-			accum += mix(frame, seed, seed.a);
-		}
-	}
-	z = z_in;
-
-	float f2 = float($fract$ * $fract$);
-	color = accum / vec4(f2, f2, f2, f2);
-
-  %color%
-}}
-
-application epimorphism_depth {{
   vec4 seed, frame;
   vec2 frame_z, t_z;
 

@@ -5,23 +5,23 @@ import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Graphics.WebGL.Raw.Types as GLT
 import Config (EpiS, EngineST, EngineConf, Epi)
-import Control.Monad (when)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Error.Class (throwError)
+import Control.Monad.Except.Trans (lift)
 import Control.Monad.Reader.Class (ask)
-import Control.Monad.Reader.Trans (lift)
-import Data.Array (length, (!!), (..), zip, foldM)
-import Data.Maybe (fromMaybe, maybe, Maybe(Nothing, Just))
+import Data.Array (filter, length, zip, (!!), (..))
+import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple), snd, fst)
 import EngineUtil (execGL)
-import Graphics.WebGL (runWebgl)
 import Graphics.WebGL.Methods (createFramebuffer, createTexture)
 import Graphics.WebGL.Types (WebGLTexture, WebGLContext, WebGL, WebGLFramebuffer)
-import Util (dbg2, unsafeNull, fromJustE)
+import Util (dbg, dbg2, fromJustE, unsafeNull)
 
-foreign import preloadImages :: forall eff. Array String -> Eff eff Unit -> Eff eff Unit
+foreign import loadImages :: forall eff. Array String -> Array String -> Eff eff Unit
+foreign import registerImages :: forall eff. Array String -> Eff eff Unit
+foreign import getImageSrc :: forall eff.String -> Eff eff GLT.TexImageSource
 foreign import emptyImage :: forall eff. Int -> Eff eff GLT.TexImageSource
 
 -- get a webgl texture, set default properties
@@ -53,9 +53,9 @@ initTexFb dim = do
 
 
 -- initialize auxiliary textures
-initAux :: EngineConf -> WebGLContext -> GLT.TexImageSource -> WebGL (Array WebGLTexture)
-initAux engineConf ctx empty = do
-  traverse doInit (0..(engineConf.numAux - 1))
+initAuxTex :: EngineConf -> WebGLContext -> GLT.TexImageSource -> WebGL (Array WebGLTexture)
+initAuxTex engineConf ctx empty = do
+  traverse doInit (0..(engineConf.numAuxBuffers - 1))
   where
     doInit i = do
       aux <- newTex
@@ -66,38 +66,30 @@ initAux engineConf ctx empty = do
 -- upload aux textures
 uploadAux :: forall eff. EngineST -> String -> Array String -> Epi eff Unit
 uploadAux es host names = do
-  let currentImages = fromMaybe [] es.currentImages
-  case es.aux of
+  case es.auxTex of
     Nothing -> throwError "aux textures not initialized"
     (Just aux) -> do
       when (length aux < length names) do
         throwError "not enough aux textures"
 
-      foldM (uploadImage es.ctx currentImages host) 0 (zip aux names)
-      pure unit
+      let currentImages' = fromMaybe [] es.currentImages
+      let currentImages = map (\i -> fromMaybe "" (currentImages' !! i)) (0..(length names - 1))
+      let zipped = map mapIt $ filter doFilter $ zip aux (zip currentImages names)
+
+      lift $ registerImages names
+      traverse (uploadImage es.ctx host) zipped
+  pure unit
+  where
+    doFilter (Tuple a (Tuple c n)) = c /= n
+    mapIt (Tuple a (Tuple c n)) = (Tuple a n)
 
 
--- create an image object. can throw error if images missing!
-uploadImage :: forall eff. WebGLContext -> (Array String) -> String  -> Int -> (Tuple WebGLTexture String) -> Epi eff Int
-uploadImage ctx currentImages host c (Tuple aux name) = do
-  let doUpload = maybe true ((/=) name) (currentImages !! c)
-
-  when doUpload do
-    dbg2 "uploading"
-    lift $ uploadImageImpl (host <> name) \img -> do
-      runWebgl (do
-        liftEff $ GL.bindTexture ctx GLE.texture2d aux
-        liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte img
-        pure unit
-      ) ctx
-      pure unit
-    pure unit
-  pure $ c + 1
-
-foreign import uploadImageImpl :: forall eff. String ->
-                                  (GLT.TexImageSource -> Eff eff Unit) ->
-                                  Eff eff Unit
-
+uploadImage :: forall eff. WebGLContext -> String -> (Tuple WebGLTexture String) -> Epi eff Unit
+uploadImage ctx host (Tuple aux name) = do
+  src <- lift $ getImageSrc (host <> name)
+  execGL ctx do
+    liftEff $ GL.bindTexture ctx GLE.texture2d aux
+    liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte src
 
 clearFB :: forall eff h. EngineConf -> EngineST -> EpiS eff h Unit
 clearFB engineConf engineST = do

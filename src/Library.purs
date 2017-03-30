@@ -73,7 +73,7 @@ parseLine schema obj line = do
 
       let ses = A.filter (schemaSel attrn) schema
       when (A.length ses /= 1) do
-        throwError $ line <> " matched " <> (show $ A.length ses) <> " schema entries!!"
+        throwError $ "field " <> line <> " matched " <> (show $ A.length ses) <> " schema entries!!"
 
       (SchemaEntry st _) <- fromJustE (A.head ses) "not enough ses"
 

@@ -81,7 +81,7 @@ defaultSystemST = {
 type EngineConf = {
     kernelDim :: Int
   , fract :: Int
-  , numAux :: Int
+  , numAuxBuffers :: Int
   , audioAnalysisEnabled :: Boolean
   , audioBufferSize :: Int
 }
@@ -90,7 +90,7 @@ engineConfSchema :: Schema
 engineConfSchema = [
     SchemaEntry SE_I "kernelDim"
   , SchemaEntry SE_I "fract"
-  , SchemaEntry SE_I "numAux"
+  , SchemaEntry SE_I "numAuxBuffers"
   , SchemaEntry SE_B "audioAnalysisEnabled"
   , SchemaEntry SE_I "audioBufferSize"
 ]
@@ -98,12 +98,12 @@ engineConfSchema = [
 foreign import data AudioAnalyser :: *
 foreign import data UniformBindings :: *
 
-type CompST = { aux :: Maybe (Array String),
+type CompST = { auxImages :: Maybe (Array String),
                 mainSrc :: Maybe String, dispSrc :: Maybe String, vertSrc :: Maybe String,
                 mainProg :: Maybe WebGLProgram, dispProg :: Maybe WebGLProgram,
                 mainUnif :: Maybe UniformBindings, dispUnif :: Maybe UniformBindings}
 newCompST :: CompST
-newCompST = {mainSrc: Nothing, dispSrc: Nothing, vertSrc: Nothing, aux: Nothing, mainProg: Nothing, dispProg: Nothing, mainUnif: Nothing, dispUnif: Nothing}
+newCompST = {mainSrc: Nothing, dispSrc: Nothing, vertSrc: Nothing, auxImages: Nothing, mainProg: Nothing, dispProg: Nothing, mainUnif: Nothing, dispUnif: Nothing}
 
 data CompOp = CompMainShader | CompDispShader | CompVertShader | CompMainProg | CompDispProg | CompFinish | CompStall
 
@@ -115,7 +115,7 @@ type EngineST = {
   , mainProg :: Maybe WebGLProgram
   , tex :: Maybe (Tuple WebGLTexture WebGLTexture)
   , fb :: Maybe (Tuple WebGLFramebuffer WebGLFramebuffer)
-  , aux :: Maybe (Array WebGLTexture)
+  , auxTex :: Maybe (Array WebGLTexture)
   , currentImages :: Maybe (Array String)
   , audio :: Maybe (Tuple WebGLTexture AudioAnalyser)
   , ctx :: WebGLContext
@@ -203,21 +203,25 @@ type Pattern = {
   , flags :: Set String
   , props :: StrMap String
   , includes :: Array String
+  , defaultImageLib :: String
+  , imageLib :: String
   , tPhase :: Number
-  , tSpd :: Number
+  , tSpd   :: Number
   -- , 3d shit
 }
 
 patternSchema :: Schema
 patternSchema = [
-  SchemaEntry SE_St "vert",
-  SchemaEntry SE_St "main",
-  SchemaEntry SE_St "disp",
-  SchemaEntry SE_S "flags",
-  SchemaEntry SE_M_St "props",
-  SchemaEntry SE_A_St "includes",
-  SchemaEntry SE_N "tPhase",
-  SchemaEntry SE_N "tSpd"
+    SchemaEntry SE_St "vert"
+  , SchemaEntry SE_St "main"
+  , SchemaEntry SE_St "disp"
+  , SchemaEntry SE_S "flags"
+  , SchemaEntry SE_M_St "props"
+  , SchemaEntry SE_A_St "includes"
+  , SchemaEntry SE_St "defaultImageLib"
+  , SchemaEntry SE_St "imageLib"
+  , SchemaEntry SE_N "tPhase"
+  , SchemaEntry SE_N "tSpd"
 ]
 
 data PMut = PMutNone | PMut Pattern (Set String)

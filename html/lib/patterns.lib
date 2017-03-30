@@ -1,10 +1,12 @@
 --dev
 vert   default_vert
-main   epimorphism_main
+main   epimorphism_dev_main
 disp   disp_id
 tPhase 0.0
 tSpd   1.0
 includes [colorspace, math]
+defaultImageLib default_images
+imageLib all_images
 
 --farm1 < dev
 main   farm_main

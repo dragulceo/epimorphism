@@ -1,4 +1,10 @@
---epimorphism_main
+--epimorphism_dev_main
+family main
+flags {epimorphism, root, dev}
+component main
+modules {application: epimorphism_dev}
+
+--epimorphism_main < epimorphism_dev_main
 family main
 flags {epimorphism, root}
 component main

@@ -35,3 +35,6 @@ showTab = function(n) {
 	$('.tab').removeClass("selected")
   $('.tab.' + n).addClass("selected")
 }
+
+
+$('document').ready(function(){$('#loading').fadeOut(1500);})

@@ -1,6 +1,9 @@
-Update:
-partials
-traverse -import module
+ASYNC assets
+  - system.imageLib
+	- system.defaultImages
+	- on system initialization, upload defaultImages, synchronously
+	- on system initialization, upload imageLib
+	  - structure to track what's uploaded
 
 
 

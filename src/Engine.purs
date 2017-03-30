@@ -6,14 +6,13 @@ import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Audio (audioData, initAudio)
 import Config (newCompST, fullCompile, UniformBindings, EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf)
-import Control.Monad (when)
 import Control.Monad.Eff (foreachE)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Reader.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, newSTRef, modifySTRef, readSTRef)
-import Data.Array (length, (!!), (..))
-import Data.Int (toNumber, fromNumber)
+import Data.Array (length, (..))
+import Data.Int (toNumber)
 import Data.Maybe (maybe, Maybe(Nothing, Just))
 import Data.Tuple (Tuple(Tuple), snd, fst)
 import EngineUtil (execGL)
@@ -21,9 +20,8 @@ import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
 import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
 import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor)
 import Graphics.WebGL.Types (WebGLContext, WebGLTexture, DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
-import Texture (initAux, initTexFb, emptyImage)
-import Util (hasAttr, unsafeGetAttr, lg, dbg, Now, unsafeNull, zipI)
-import Partial.Unsafe (unsafePartial)
+import Texture (initAuxTex, initTexFb, emptyImage)
+import Util (hasAttr, unsafeGetAttr, Now, unsafeNull, zipI)
 
 --  PUBLIC
 
@@ -57,7 +55,7 @@ initEngineST sysConf engineConf systemST canvasId esRef' = do
       pure ref
     Nothing -> do
       let compST = newCompST
-      let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, aux: Nothing, audio: Nothing, currentImages: Nothing, compQueue: fullCompile, mainUnif: Nothing, dispUnif: Nothing, ctx, empty, compST}
+      let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, auxTex: Nothing, audio: Nothing, currentImages: Nothing, compQueue: fullCompile, mainUnif: Nothing, dispUnif: Nothing, ctx, empty, compST}
       lift $ newSTRef tmp
 
   es <- lift $ readSTRef esRef
@@ -71,7 +69,7 @@ initEngineST sysConf engineConf systemST canvasId esRef' = do
   res <- execGL ctx do
     Tuple tex0 fb0 <- initTexFb dim
     Tuple tex1 fb1 <- initTexFb dim
-    aux <- initAux engineConf es.ctx empty
+    auxTex <- initAuxTex engineConf es.ctx empty
     audio <- initAudio engineConf es.ctx empty
 
     clearColor 0.0 0.0 0.0 1.0
@@ -81,7 +79,7 @@ initEngineST sysConf engineConf systemST canvasId esRef' = do
     pure $ es {
         fb  = Just (Tuple fb0 fb1)
       , tex = Just (Tuple tex0 tex1)
-      , aux = Just aux
+      , auxTex = Just auxTex
       , audio = audio
     }
 
@@ -102,9 +100,9 @@ renderFrame systemST engineConf engineST pattern par zn frameNum = do
   fbs <- case engineST.fb of
     Just x -> pure x
     Nothing -> throwError "RenderFrame: missing framebuffers"
-  aux <- case engineST.aux of
+  auxTex <- case engineST.auxTex of
     Just x -> pure x
-    Nothing -> throwError "RenderFrame: missing aux"
+    Nothing -> throwError "RenderFrame: missing auxTex"
   main <- case engineST.mainProg of
     Just x -> pure x
     Nothing -> throwError "RenderFrame: missing main program"
@@ -145,7 +143,7 @@ renderFrame systemST engineConf engineST pattern par zn frameNum = do
       when (not $ hasAttr mainUnif "aux[0]") do
         throwError $ ShaderError "missing aux uniform!"
       liftEff $ GL.uniform1iv ctx (unsafeGetAttr mainUnif "aux[0]") (1..numAux)
-      liftEff $ foreachE (zipI aux) \(Tuple i t) -> do
+      liftEff $ foreachE (zipI auxTex) \(Tuple i t) -> do
         GL.activeTexture ctx (GLE.texture1 + i)
         GL.bindTexture ctx GLE.texture2d t
 

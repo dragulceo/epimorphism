@@ -9,7 +9,7 @@ import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
 import Data.Array (null, updateAt, foldM, sort, concatMap, fromFoldable)
 import Data.Int (round, toNumber)
-import Data.Maybe (isNothing, maybe, fromMaybe, Maybe(Nothing, Just))
+import Data.Maybe (isNothing, fromMaybe, Maybe(Nothing, Just))
 import Data.Set (member)
 import Data.StrMap (insert, values, keys, lookup)
 import Data.Traversable (traverse)
@@ -21,9 +21,9 @@ import Paths (runPath)
 import Pattern (importPattern)
 import Script (runScripts)
 import System (initSystemST, loadLib)
-import Texture (preloadImages)
+import Texture (loadImages)
 import UI (initUIST)
-import Util (elg, dbg, imag, real, rndstr, Now, handleError, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev, fromJustE, zipI)
+import Util (dbg, imag, real, rndstr, Now, handleError, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev, fromJustE, zipI)
 
 host :: String
 host = ""
@@ -74,6 +74,11 @@ initState systemST = do
   ecRef <- lift $ newSTRef engineConf
   ucRef <- lift $ newSTRef uiConf
   pRef  <- lift $ newSTRef pattern
+
+  -- load image libraries
+  index' <- fromJustE (lookup pattern.defaultImageLib systemST.indexLib) "can't find default image lib!"
+  index <- fromJustE (lookup pattern.imageLib systemST.indexLib) "can't find image lib!"
+  lift $ loadImages index'.lib index.lib
 
   -- import pattern
   importPattern ssRef pRef
@@ -133,6 +138,7 @@ animate state = handleError do
   systemST' <- lift $ readSTRef ssRef
   engineST' <- lift $ readSTRef esRef
 
+  -- execute compile queue
   when (not $ null engineST'.compQueue) do
     compileShaders systemConf ssRef engineConf esRef pRef (isNothing engineST.mainProg)
     --currentTimeMS2 <- lift $ now
@@ -204,26 +210,10 @@ getParZn systemST (Tuple par zn) mid = do
         pure unit
       pure res'
 
-
-
-preloadAux :: forall h. (SystemST h) -> String ->
-              Eff (canvas :: CANVAS, dom :: DOM, now :: Now, st :: ST h) Unit ->
-              Eff (canvas :: CANVAS, dom :: DOM, now :: Now, st :: ST h) Unit
-preloadAux systemST libName callback = do
-  maybe (pure unit)
-    (\x -> preloadImages x.lib callback)
-    (lookup libName systemST.indexLib)
-
-
--- clean this shit up yo
 main :: Eff (canvas :: CANVAS, dom :: DOM, now :: Now) Unit
 main = do
-  confn <- getSysConfName -- hack!!!!!
-
   runST do
     handleError do
-      sys <- initSystemST host
-      lift $ preloadAux sys (if confn =="ponies" then "ponies" else "all_images") do
-        handleError do
-          st <- initState sys
-          lift $ animate st
+      systemST <- initSystemST host
+      state    <- initState systemST
+      lift $ animate state

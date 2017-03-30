@@ -1,7 +1,7 @@
 --default
 kernelDim 1024
 fract 3
-numAux 10
+numAuxBuffers 10
 audioAnalysisEnabled false
 audioBufferSize 128
 

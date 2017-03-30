@@ -4,12 +4,11 @@ import Prelude
 import Data.TypedArray as T
 import Config (newCompST, UniformBindings, EpiS, Pattern, SystemST, EngineST, EngineConf, SystemConf, CompOp(..))
 import Control.Alt ((<|>))
-import Control.Monad (when)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (length, uncons)
-import Data.Maybe (fromMaybe, Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (fst, Tuple(Tuple))
 import EngineUtil (execGL)
 import Graphics.WebGL.Methods (vertexAttribPointer, enableVertexAttribArray, bindBuffer, bufferData, createBuffer)
@@ -18,7 +17,7 @@ import Graphics.WebGL.Types (WebGLProgram, DataType(Float), BufferData(DataSourc
 import Parser (parseShader)
 import Pattern (purgeModule)
 import Texture (uploadAux)
-import Util (unsafeCast, lg, now2, now, replaceAll, dbg, Now)
+import Util (Now, dbg, lg, now, now2, replaceAll, unsafeCast)
 
 -- compile shaders and load into systemST
 compileShaders :: forall eff h. SystemConf -> STRef h (SystemST h) -> EngineConf -> STRef h EngineST -> STRef h Pattern -> Boolean -> EpiS (now :: Now | eff) h Boolean
@@ -34,7 +33,7 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
       done <- case op of
         CompMainShader -> do
           Tuple main aux <- parseMain systemST pattern engineConf.fract
-          lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainSrc = Just main, aux = Just aux}})
+          lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainSrc = Just main, auxImages = Just aux}})
           pure false
         CompDispShader -> do
           disp <- parseDisp systemST pattern
@@ -61,23 +60,20 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
             _ -> throwError "need to compute sources first!"
         CompFinish -> do
           -- aux
-          case es.compST.aux of
+          case es.compST.auxImages of
             Just aux -> do
               uploadAux es sysConf.host aux
-              pure unit
-            Nothing -> pure unit -- no aux
+            Nothing -> pure unit
 
           -- unif
           mainUnif <- case es.compST.mainProg of
             Just prog -> do
-              res <- linkShader es prog
-              pure (Just res)
+              Just <$> linkShader es prog
             Nothing -> pure Nothing
 
           dispUnif <- case es.compST.dispProg of
             Just prog -> do
-              res <- linkShader es prog
-              pure (Just res)
+              Just <$> linkShader es prog
             Nothing -> pure Nothing
 
           -- update engine state with new info
@@ -86,7 +82,7 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
                                           dispProg = es'.compST.dispProg <|> es'.dispProg,
                                           mainUnif = mainUnif <|> es'.mainUnif,
                                           dispUnif = dispUnif <|> es'.dispUnif,
-                                          currentImages = es'.compST.aux <|> es'.currentImages })
+                                          currentImages = es.compST.auxImages <|> es'.currentImages})
 
           -- clean old pattern
           pold <- lift $ readSTRef pRef

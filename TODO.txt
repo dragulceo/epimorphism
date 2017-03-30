@@ -1,5 +1,6 @@
 TO PROCESS:
 	starts off white on windows
+	fail gracefully if webgl not enabled
 
 
 CURRENT PROJECTS:

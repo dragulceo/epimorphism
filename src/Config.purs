@@ -110,6 +110,16 @@ data CompOp = CompMainShader | CompDispShader | CompVertShader | CompMainProg | 
 fullCompile :: Array CompOp
 fullCompile = [CompVertShader, CompMainShader, CompMainProg, CompDispShader, CompDispProg, CompFinish]
 
+type EngineProfile = {
+    os                :: String
+  , browser           :: String
+  , is_mobile         :: Boolean
+  , angle             :: Boolean
+  , max_texture_units :: Int
+  , max_frag_uniforms :: Int
+  , max_texture_size  :: Int
+}
+
 type EngineST = {
     dispProg :: Maybe WebGLProgram
   , mainProg :: Maybe WebGLProgram
@@ -124,6 +134,7 @@ type EngineST = {
   , compST :: CompST
   , mainUnif :: Maybe UniformBindings
   , dispUnif :: Maybe UniformBindings
+  , profile :: EngineProfile
 }
 
 -- UI

@@ -5,8 +5,8 @@ import Data.TypedArray as T
 import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Audio (audioData, initAudio)
-import Config (newCompST, fullCompile, UniformBindings, EpiS, Pattern, EngineST, EngineConf, SystemST, SystemConf)
-import Control.Monad.Eff (foreachE)
+import Config (EngineConf, EngineProfile, EngineST, EpiS, Pattern, SystemConf, SystemST, UniformBindings, Epi, fullCompile, newCompST)
+import Control.Monad.Eff (Eff, foreachE)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Reader.Trans (lift)
@@ -19,12 +19,34 @@ import EngineUtil (execGL)
 import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
 import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
 import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor)
-import Graphics.WebGL.Raw (getExtension)
+import Graphics.WebGL.Raw (getParameter)
 import Graphics.WebGL.Types (WebGLContext, WebGLTexture, DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
 import Texture (initAuxTex, initTexFb, emptyImage)
-import Util (Now, hasAttr, unsafeGetAttr, unsafeNull, zipI)
+import Util (Now, dbg, fromJustE, hasAttr, unsafeGetAttr, unsafeNull, zipI)
 
 --  PUBLIC
+
+foreign import getOS :: forall eff. Eff eff String
+foreign import getBrowser :: forall eff. Eff eff String
+foreign import getIsMobile :: forall eff. Eff eff Boolean
+foreign import getAngle :: forall eff. WebGLContext -> Eff eff Boolean
+
+getEngineProfile :: forall eff. WebGLContext -> Epi eff EngineProfile
+getEngineProfile ctx = do
+  os        <- lift $ getOS
+  browser   <- lift $ getBrowser
+  is_mobile <- lift $ getIsMobile
+  angle     <- lift $ getAngle ctx
+
+  max_texture_units' <- liftEff $ getParameter ctx GLE.maxTextureImageUnits
+  max_texture_size'  <- liftEff $ getParameter ctx GLE.maxTextureSize
+  max_frag_uniforms' <- liftEff $ getParameter ctx GLE.maxFragmentUniformVectors
+  max_texture_units  <- fromJustE max_texture_units' "invalid param"
+  max_texture_size   <- fromJustE max_texture_size'  "invalid param"
+  max_frag_uniforms  <- fromJustE max_frag_uniforms' "invalid param"
+
+  pure $ { os, browser, is_mobile, angle, max_texture_units, max_texture_size, max_frag_uniforms }
+
 
 -- initialize the rendering engine & create state.  updates an existing state if passed
 -- maybe validate that kernelDim > 0?
@@ -48,6 +70,8 @@ initEngineST sysConf engineConf systemST canvasId esRef' = do
     Just c -> pure c
     Nothing -> throwError "Unable to get a webgl context!!!"
 
+  profile <- getEngineProfile ctx
+  dbg profile
   --liftEff $ getExtension ctx "OES_texture_float"
   --liftEff $ getExtension ctx "OES_texture_float_linear"
 
@@ -60,7 +84,7 @@ initEngineST sysConf engineConf systemST canvasId esRef' = do
       pure ref
     Nothing -> do
       let compST = newCompST
-      let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, auxTex: Nothing, audio: Nothing, currentImages: Nothing, compQueue: fullCompile, mainUnif: Nothing, dispUnif: Nothing, ctx, empty, compST}
+      let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, auxTex: Nothing, audio: Nothing, currentImages: Nothing, compQueue: fullCompile, mainUnif: Nothing, dispUnif: Nothing, ctx, empty, compST, profile}
       lift $ newSTRef tmp
 
   es <- lift $ readSTRef esRef

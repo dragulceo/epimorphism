@@ -27,15 +27,6 @@ basic_images {{
   textures/psych/psych_7.png
 }}
 
-init_images {{
-  textures/simplegeom/grid_1.png
-  textures/simplegeom/grid_2.png
-  textures/simplegeom/tile_grid1.png
-  textures/simplegeom/tile_grid2.png
-  textures/simplegeom/tile_grid3.png
-  textures/simplegeom/tile_grid6.png
-}}
-
 all_images {{
   textures/Alexgrey/grey1.png
   textures/Vasarely/tile_vasarely2.png

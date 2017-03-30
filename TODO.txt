@@ -1,5 +1,4 @@
 TO PROCESS:
-	optional increase of bit depth - half float, etc
 	starts off white on windows
 
 
@@ -20,15 +19,12 @@ CURRENT PROJECTS:
 		- also, batch compilation?  only happens once every n ms?
 
 	- cleanup
-	  - change resolution during switching error
-		- be better about reloading objects after refs might change
-    - better data organization
-	    - merge configs & states?
-		  - what goes in config, what goes into states?
+	  - change resolution during switching error?
 
-  - T
-	- SEED
-	- COLOR still needs work some times
+  - main pattern
+    - T
+	  - SEED
+	  - COLOR still needs work some times
 
 
 UI NOTES:
@@ -39,7 +35,6 @@ NEXT PROJECTS:
   - release?
     - kickstarter for audio responsiveness?
 		- ipad?
-	  - make main pattern a little better
 
 	- restructure data
 		- modules are instances of components - with specific values for variables & scripts
@@ -50,6 +45,10 @@ NEXT PROJECTS:
 		- scripts could use some more thought.
 		  - which module do they belong to?
 			- how to syncronize multiple scripts? i.e, color & disp?
+    - better data organization
+	    - merge configs & states?
+		  - what goes in config, what goes into states?
+		- be better about reloading objects after refs might change
 
 	- pattern:
 		- patternRefPool?
@@ -90,6 +89,7 @@ NEXT PROJECTS:
 
 BUGS:
 	- flakey menu
+	- black blobs in ios
   - firefox WebGL: texImage2D: conversion requires pixel reformatting (maybe non-issue)
   - catch errors when parsing t_exp
   - no error message when image texture doesnt exist
@@ -135,6 +135,8 @@ SYSTEM:
 	- get rid of if statements ins seed_w & clean all of that up
 
 FEATURE IDEAS:
+	- optional increase of bit depth - half float, etc (works?  not obvious is better; half_float = 36193)
+	- shader precision optimization?
   - blend maps!! variable interpolation
 	- catagorize transformations:
   	- symmetries, is_inversion, scale, periodic?, rational?, accumulation points, empty regions?, elementary, custom?

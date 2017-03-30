@@ -1,10 +1,9 @@
 library colorspace {{
+precision mediump float;
 #define PI 3.1415926535 // unfortunately have to do this here.  hackish
 #define DEPTH_INC (32.0 / 255.0)
 
 /* colorspace library */
-precision mediump float;
-
 vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d ){
 	return a + b * cos(2.0 * PI * (c * t + d));
 }
@@ -114,9 +113,6 @@ vec4 rgb2hsls(vec4 c){
 
 library math {{
 /* math utility library */
-
-
-precision mediump float;
 
 float sinh(float x){
   return (exp(x) - exp(-1.0 * x)) / 2.0;

@@ -1,6 +1,5 @@
 main_frag main {{
 
-precision mediump float;
 uniform sampler2D fb;
 uniform float time;
 uniform float kernel_dim;
@@ -31,7 +30,6 @@ void main() {
 
 main_frag main_func {{
 
-precision mediump float;
 uniform sampler2D fb;
 uniform float time;
 uniform float kernel_dim;

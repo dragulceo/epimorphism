@@ -4,7 +4,7 @@ uniform sampler2D fb;
 uniform float kernel_dim;
 
 uniform float par[#par#];
-//uniform vec2 zn[#zn#];
+uniform vec2 zn[#zn#];
 
 void main() {
   vec4 frame;

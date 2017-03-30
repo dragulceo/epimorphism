@@ -36,9 +36,9 @@ spliceUniformSizes :: CompRes -> CompRes
 spliceUniformSizes cmp@{ component, zOfs, parOfs, images } =
   cmp{component = component'''}
   where
-    component'   = replaceAll "#par#" (show parOfs) component
-    component''  = replaceAll "#zn#" (show zOfs) component'
-    component''' = replaceAll "#aux#" (show $ length images) component''
+    component'   = replaceAll "#par#" (show $ parOfs + 1) component
+    component''  = replaceAll "#zn#" (show $ zOfs + 1) component'
+    component''' = replaceAll "#aux#" (show $ length images + 1) component''
 
 -- parse a shader.  substitutions, submodules, par & zn
 parseModule :: forall eff h. Module -> SystemST h -> Int -> Int -> (Array String) -> EpiS eff h CompRes

@@ -19,9 +19,10 @@ import EngineUtil (execGL)
 import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
 import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
 import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor)
+import Graphics.WebGL.Raw (getExtension)
 import Graphics.WebGL.Types (WebGLContext, WebGLTexture, DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
 import Texture (initAuxTex, initTexFb, emptyImage)
-import Util (hasAttr, unsafeGetAttr, Now, unsafeNull, zipI)
+import Util (Now, hasAttr, unsafeGetAttr, unsafeNull, zipI)
 
 --  PUBLIC
 
@@ -31,20 +32,24 @@ initEngineST :: forall eff h. SystemConf -> EngineConf -> SystemST h -> String -
 initEngineST sysConf engineConf systemST canvasId esRef' = do
   -- find canvas & create context
   canvasM <- liftEff $ getCanvasElementById canvasId
-  canvas <- case canvasM of
-    Just c -> pure c
-    Nothing -> throwError $ "init engine - canvas not found: " <> canvasId
+  canvas <-
+    case canvasM of
+      Just c -> pure c
+      Nothing -> throwError $ "init engine - canvas not found: " <> canvasId
 
   let attrs = defaultWebglContextAttrs {
         alpha =                 false
-      , depth =                 false
-      , antialias =             false
-      , preserveDrawingBuffer = true}
+        , depth =                 false
+        , antialias =             false
+        , preserveDrawingBuffer = true}
 
   ctxM <- liftEff $ getWebglContextWithAttrs canvas attrs
   ctx <- case ctxM of
     Just c -> pure c
     Nothing -> throwError "Unable to get a webgl context!!!"
+
+  --liftEff $ getExtension ctx "OES_texture_float"
+  --liftEff $ getExtension ctx "OES_texture_float_linear"
 
   empty <- lift $ emptyImage engineConf.kernelDim
 

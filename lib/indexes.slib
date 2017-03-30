@@ -1,0 +1,205 @@
+default_images {{
+  textures/default/64-1.png
+  textures/default/64-2.png
+  textures/default/128-1.png
+  textures/default/128-2.png
+}}
+
+basic_images {{
+  textures/simplegeom/grid_1.png
+  textures/simplegeom/grid_2.png
+  textures/simplegeom/tile_grid1.png
+  textures/simplegeom/tile_grid2.png
+  textures/simplegeom/tile_grid3.png
+  textures/simplegeom/tile_grid6.png
+  textures/simplegeom/tile_hexagons1.png
+  textures/simplegeom/tile_psych1.png
+  textures/simplegeom/tile_rainbow1.png
+  textures/simplegeom/tile_rainbow2.png
+  textures/Vasarely/tile_vasarely2.png
+  textures/Vasarely/tile_vasarely4.png
+  textures/Vasarely/tile_vasarely7.png
+  textures/Vasarely/tile_vasarely8.png
+  textures/psych/psych_12.png
+  textures/psych/psych_13.png
+  textures/psych/psych_5.png
+  textures/psych/psych_6.png
+  textures/psych/psych_7.png
+}}
+
+all_images {{
+  textures/Alexgrey/grey1.png
+  textures/Vasarely/tile_vasarely2.png
+  textures/Vasarely/tile_vasarely4.png
+  textures/Vasarely/tile_vasarely7.png
+  textures/Vasarely/tile_vasarely8.png
+  textures/cats/cats1.png
+  textures/cats/cats2.png
+  textures/cats/cats3.png
+  textures/cats/cats4.png
+  textures/flowers/flowers3.png
+  textures/flowers/flowers5.png
+  textures/flowers/flowers6.png
+  textures/flowers/flowers7.png
+  textures/flowers/lines1.png
+  textures/misc/tile_floral1.png
+  textures/misc/tile_islamic1.png
+  textures/misc/tile_oct1.png
+  textures/misc/tile_vector1.png
+  textures/misc/tile_vector2.png
+  textures/misc/tile_vector3.png
+  textures/misc/tile_vector4.png
+  textures/nontile/flowers3.png
+  textures/nontile/tile_dodec.png
+  textures/nontile/tile_spidro.png
+  textures/simplegeom/grid_1.png
+  textures/simplegeom/grid_2.png
+  textures/simplegeom/tile_grid1.png
+  textures/simplegeom/tile_grid2.png
+  textures/simplegeom/tile_grid3.png
+  textures/simplegeom/tile_grid6.png
+  textures/simplegeom/tile_hexagons1.png
+  textures/simplegeom/tile_psych1.png
+  textures/simplegeom/tile_rainbow1.png
+  textures/simplegeom/tile_rainbow2.png
+  textures/psych/psych_12.png
+  textures/psych/psych_13.png
+  textures/psych/psych_5.png
+  textures/psych/psych_6.png
+  textures/psych/psych_7.png
+}}
+
+stoopid {{
+  textures/stoopid/hamster.png
+  textures/stoopid/mouse.png
+  textures/stoopid/puppy.png
+  textures/stoopid/stoopid_1.png
+  textures/stoopid/stoopid_4.png
+  textures/stoopid/stoopid_6.png
+  textures/stoopid/suckit.png
+  textures/stoopid/tree.png
+}}
+
+ponies {{
+	textures/ponies/ponies_1.png
+  textures/ponies/ponies_10.png
+  textures/ponies/ponies_11.png
+  textures/ponies/ponies_2.png
+  textures/ponies/ponies_3.png
+  textures/ponies/ponies_4.png
+  textures/ponies/ponies_5.png
+  textures/ponies/ponies_6.png
+  textures/ponies/ponies_7.png
+  textures/ponies/ponies_8.png
+  textures/ponies/ponies_9.png
+  textures/ponies/pony31.png
+  textures/ponies/pony32.png
+  textures/ponies/pony33.png
+  textures/ponies/pony34.png
+  textures/ponies/pony35.png
+  textures/ponies/pony36.png
+  textures/ponies/pony37.png
+  textures/ponies/pony38.png
+  textures/ponies/pony39.png
+}}
+
+images1 {{
+  textures/simplegeom/grid_1.png
+  textures/simplegeom/grid_2.png
+  textures/simplegeom/tile_grid1.png
+  textures/simplegeom/tile_grid2.png
+  textures/simplegeom/tile_grid3.png
+  textures/simplegeom/tile_grid6.png
+  textures/simplegeom/tile_hexagons1.png
+  textures/simplegeom/tile_psych1.png
+  textures/simplegeom/tile_rainbow1.png
+  textures/simplegeom/tile_rainbow2.png
+  textures/psych/psych_12.png
+  textures/psych/psych_13.png
+  textures/psych/psych_5.png
+  textures/psych/psych_6.png
+  textures/psych/psych_7.png
+}}
+
+
+images2 {{
+  textures/simplegeom/grid_1.png
+  textures/simplegeom/grid_2.png
+  textures/simplegeom/tile_grid1.png
+  textures/simplegeom/tile_grid2.png
+  textures/simplegeom/tile_grid3.png
+  textures/simplegeom/tile_grid6.png
+  textures/simplegeom/tile_hexagons1.png
+  textures/simplegeom/tile_psych1.png
+  textures/simplegeom/tile_rainbow1.png
+  textures/simplegeom/tile_rainbow2.png
+  textures/psych/psych_12.png
+  textures/psych/psych_13.png
+  textures/psych/psych_5.png
+  textures/psych/psych_6.png
+  textures/psych/psych_7.png
+  textures/Vasarely/tile_vasarely2.png
+  textures/Vasarely/tile_vasarely4.png
+  textures/Vasarely/tile_vasarely7.png
+  textures/Vasarely/tile_vasarely8.png
+  textures/misc/tile_floral1.png
+  textures/misc/tile_islamic1.png
+  textures/misc/tile_oct1.png
+}}
+
+
+
+t_1 {{
+	zpath main.application.t idx:1 path:linx spd:0.0
+	zpath main.application.t idx:1 path:linx spd:0.1
+	zpath main.application.t idx:1 path:circle r:1.0 spd:0.01
+}}
+
+
+
+seed_a_main {{
+	a * @alpha@
+	sqrt(1.0 - (1.0 - w) * (1.0 - w)) * a * @alpha@
+}}
+
+seed_wt_main_old {{
+	w
+	1.0 - w
+	sqrt(1.0 - (1.0 - w) * (1.0 - w))
+	1.0 - sqrt(1.0 - (1.0 - w) * (1.0 - w))
+}}
+
+
+seed_wt_main {{
+	w
+	w * w
+	w * w * w
+	sqrt(w)
+	sqrt(1.0 - (1.0 - w) * (1.0 - w))
+}}
+
+
+
+t_inner {{
+  z
+  tanh(z)
+  exp(z)
+  cos(z)
+  sinh(z)
+  cosh(z)
+	z / (z + 1) + z / (z - 1)
+	1 - 5 * z * z * z / 3
+	1 - z * z
+	z * (1 + z) / 2
+  z * z
+  1 - (z * z + tanh(z)) / 2
+  cos(z) - tanh(z)
+  (z + exp(z)) / 2
+  (sin(z) + tan(z)) / 2
+  cosh(z) + exp(z)
+  z * cos(z)
+  (cosh(z) + sinh(z)) / 2
+}}
+
+
+

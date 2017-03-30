@@ -1,5 +1,14 @@
+TO PROCESS:
+  move lib/
+	cant scroll for some shader errors
+	optional increase of bit depth
+	starts off white on windows
+
+
+
 CURRENT PROJECTS:
   - COMPILING PERFORMANCE ON WINDOWS
+	  - no fract 2-3x improvement!
 
   - detect system/perf profile
     - if there are too many aux buffers (texture units), we'll have an issue?
@@ -21,6 +30,10 @@ CURRENT PROJECTS:
 	    - merge configs & states?
 		  - what goes in config, what goes into states?
 
+  - T
+	- SEED
+	- COLOR still needs work some times
+
 
 UI NOTES:
   - ability to clone module tree & quickly make changes/save/load/etc
@@ -33,7 +46,7 @@ NEXT PROJECTS:
 	  - make main pattern a little better
 
 	- restructure data
-		- modules are instances of components - specific values for variables & scripts
+		- modules are instances of components - with specific values for variables & scripts
 		- components are instances of families.
 		  - contain code
 			- variable specifications ie how many par, how many images, & default values
@@ -80,6 +93,7 @@ NEXT PROJECTS:
 -------------------------------- BACKLOG --------------------------------
 
 BUGS:
+  - firefox WebGL: texImage2D: conversion requires pixel reformatting
   - catch errors when parsing t_exp
   - no error message when image texture doesnt exist
   - reduce is a substition in seeds, but comes from appliction.  the order of "modules {x: .., y: ..}" matters :/
@@ -91,11 +105,13 @@ BUGS:
   - number parsing flakey? how so?
 
 PERF:
-  - zoom out performance problem.  unclear what the deal is.  really bad with 1/z
+  - zoom out performance problem.  unclear what the deal is.  really bad with 1/z(cache something or other?)
   - choppy in safari
 
 SYSTEM:
+  - better deploy scripts
 	- complex number library show hack
+	- consolidate remote lib requests
 
   - scripts
     - way of switching modules while keeping phase/scripts.
@@ -105,7 +121,7 @@ SYSTEM:
   - use git for deploy
   - addGlobalEventListeners is a bit ghetto
   - more work on fract.  more specific fracts.  like for seed vs T.  can possibly also increase quality
-	- too many debug statements going on (in engine?)
+	- too many debug statements going on (in engine?)  Better logging
   - prevent default in ui.js
   - make serializable a class
   - remote control (webui, websockets, etc)

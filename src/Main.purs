@@ -23,7 +23,7 @@ import Script (runScripts)
 import System (initSystemST, loadLib)
 import Texture (loadImages)
 import UI (initUIST)
-import Util (dbg, imag, real, rndstr, Now, handleError, isHalted, requestAnimationFrame, now, seedRandom, urlArgs, isDev, fromJustE, zipI)
+import Util (Now, dbg, fromJustE, handleError, imag, inj, isDev, isHalted, now, real, requestAnimationFrame, rndstr, seedRandom, urlArgs, zipI)
 
 host :: String
 host = ""
@@ -140,7 +140,10 @@ animate state = handleError do
 
   -- execute compile queue
   when (not $ null engineST'.compQueue) do
+    t' <- lift $ now
     compileShaders systemConf ssRef engineConf esRef pRef (isNothing engineST.mainProg)
+    t'' <- lift $ now
+    dbg $ inj "COMPILE :%0ms" [show (t'' - t')]
     --currentTimeMS2 <- lift $ now
     --lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS2})
     pure unit

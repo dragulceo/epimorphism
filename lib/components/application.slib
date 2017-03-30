@@ -53,6 +53,39 @@ application epimorphism {{
 }}
 
 
+application epimorphism_nofract {{
+  vec4 seed, frame;
+  vec2 frame_z, t_z;
+
+	vec4 accum = vec4(0.0, 0.0, 0.0, 0.0);
+
+	float delta = 1.0 / (float($fract$) * kernel_dim);
+	float ofs = delta * (float($fract$) - 1.0);
+
+  z = z_in;
+  %t%
+
+  // get frame
+  t_z = z;
+  %reduce%
+  frame_z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+  frame = texture2D(fb, frame_z);
+  z = t_z;
+
+  %seed%
+
+
+  float a = seed.a;
+  seed.a = DEPTH_INC;
+  frame.a = frame.a + DEPTH_INC;
+	color = mix(frame, seed, a);
+
+	z = z_in;
+
+
+  %color%
+}}
+
 application julia {{
   int j = 0;
   const int max_iter = 700;

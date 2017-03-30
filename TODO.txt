@@ -4,20 +4,18 @@ CURRENT PROJECTS:
   - detect system/perf profile
     - if there are too many aux buffers (texture units), we'll have an issue?
 		- dynamic par/zn/aux count
+		- # of uniforms?
+		- ios shader error
 
 	- asynchronous compiling
 		- cleanup
 		- stalling? CompStall
-		- time modification on comoile
+		- time modification on compile?
 		- fps delta'
 		- also, batch compilation?  only happens once every n ms?
 
-  - test on more platforms
-
 	- cleanup
 	  - change resolution during switching error
-	  - upgrade to new compiler?
-	  - double incZn is busted
 		- be better about reloading objects after refs might change
     - better data organization
 	    - merge configs & states?

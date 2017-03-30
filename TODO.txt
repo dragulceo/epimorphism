@@ -1,8 +1,6 @@
 TO PROCESS:
-	cant scroll for some shader errors
 	optional increase of bit depth - half float, etc
 	starts off white on windows
-	need to define funcs in main - planewave, etc
 
 
 CURRENT PROJECTS:
@@ -11,9 +9,8 @@ CURRENT PROJECTS:
 
   - detect system/perf profile
     - if there are too many aux buffers (texture units), we'll have an issue?
-		- dynamic par/zn/aux count
-		- # of uniforms?
-		- ios shader error
+		- max number of uniforms available
+		- auto scale performance for framerate
 
 	- asynchronous compiling
 		- cleanup
@@ -92,7 +89,8 @@ NEXT PROJECTS:
 -------------------------------- BACKLOG --------------------------------
 
 BUGS:
-  - firefox WebGL: texImage2D: conversion requires pixel reformatting
+	- flakey menu
+  - firefox WebGL: texImage2D: conversion requires pixel reformatting (maybe non-issue)
   - catch errors when parsing t_exp
   - no error message when image texture doesnt exist
   - reduce is a substition in seeds, but comes from appliction.  the order of "modules {x: .., y: ..}" matters :/
@@ -108,6 +106,7 @@ PERF:
   - choppy in safari
 
 SYSTEM:
+  - need to define funcs in main - planewave, etc
   - better deploy scripts
 	- complex number library show hack
 	- consolidate remote lib requests

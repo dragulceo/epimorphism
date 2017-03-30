@@ -4,16 +4,16 @@ import System
 import Config (Epi, Module, EpiS, SystemST)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, readSTRef)
+import Data.Array (length)
 import Data.Array (sort, length, (..)) as A
 import Data.Foldable (foldl)
-import Data.Int (fromNumber)
 import Data.Maybe (Maybe(Nothing, Just))
 import Data.StrMap (lookup, StrMap, fold, empty, keys, size, foldM, insert)
 import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
 import Prelude (pure, ($), bind, map, (<>), (-), (+), show)
-import Util (replaceAll, indentLines, forceInt)
+import Util (dbg, forceInt, indentLines, replaceAll)
 
 type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}
 type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array String}
@@ -26,11 +26,19 @@ parseShader systemST mid includes = do
   mod    <- lift $ readSTRef modRef
   modRes <- parseModule mod systemST 0 0 []
 
+  let modRes' = spliceUniformSizes modRes
   allIncludes' <- traverse (\x -> loadLib x systemST.componentLib "includes") includes
   let allIncludes = "//INCLUDES\n" <> (joinWith "\n\n" (map (\x -> x.body) allIncludes')) <> "\n//END INCLUDES\n"
 
-  pure $ Tuple (allIncludes <> modRes.component) (modRes.images)
+  pure $ Tuple (allIncludes <> modRes'.component) (modRes'.images)
 
+spliceUniformSizes :: CompRes -> CompRes
+spliceUniformSizes cmp@{ component, zOfs, parOfs, images } =
+  cmp{component = component'''}
+  where
+    component'   = replaceAll "#par#" (show parOfs) component
+    component''  = replaceAll "#zn#" (show zOfs) component'
+    component''' = replaceAll "#aux#" (show $ length images) component''
 
 -- parse a shader.  substitutions, submodules, par & zn
 parseModule :: forall eff h. Module -> SystemST h -> Int -> Int -> (Array String) -> EpiS eff h CompRes

@@ -94,3 +94,7 @@ exports.registerAuxImages = function(imgs) {
 		};
 	}
 };
+
+exports.doneLoading = function() {
+	$('#loading').fadeOut(1500);
+}

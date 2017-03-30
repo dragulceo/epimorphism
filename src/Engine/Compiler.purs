@@ -32,7 +32,7 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
       dbg op
       done <- case op of
         CompMainShader -> do
-          Tuple main aux <- parseMain systemST pattern engineConf.fract
+          Tuple main aux <- parseMain systemST pattern engineConf.fract es.profile.angle
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainSrc = Just main, auxImages = Just aux}})
           pure false
         CompDispShader -> do
@@ -111,10 +111,12 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
     Nothing -> throwError "shouldn't call compile with an empty queue chump!"
 
 
-parseMain :: forall eff h. SystemST h -> Pattern -> Int -> EpiS eff h (Tuple String (Array String))
-parseMain systemST pattern fract = do
-  Tuple main' aux <- parseShader systemST pattern.main pattern.includes
-  let main = replaceAll "\\$fract\\$" (show fract) main'
+parseMain :: forall eff h. SystemST h -> Pattern -> Int -> Boolean -> EpiS eff h (Tuple String (Array String))
+parseMain systemST pattern fract angle = do
+  Tuple main'' aux <- parseShader systemST pattern.main pattern.includes
+  let main' = replaceAll "\\$fract\\$" (show fract) main'' -- both of these are kind of ghetto
+  let main = replaceAll "\\$angle\\$" (if angle then "#define __ANGLE" else "") main'
+
   pure $ Tuple main aux
 
 parseDisp :: forall eff h. SystemST h -> Pattern -> EpiS eff h String

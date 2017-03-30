@@ -22,7 +22,7 @@ import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, cl
 import Graphics.WebGL.Raw (getParameter)
 import Graphics.WebGL.Types (WebGLContext, WebGLTexture, DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
 import Texture (initAuxTex, initTexFb, emptyImage)
-import Util (Now, dbg, fromJustE, hasAttr, unsafeGetAttr, unsafeNull, zipI)
+import Util (Now, dbg, dbg2, fromJustE, hasAttr, unsafeGetAttr, unsafeNull, zipI)
 
 --  PUBLIC
 
@@ -37,6 +37,9 @@ getEngineProfile ctx = do
   browser   <- lift $ getBrowser
   is_mobile <- lift $ getIsMobile
   angle     <- lift $ getAngle ctx
+  case angle of
+    true -> dbg2 "ANGLE Detected"
+    false -> pure unit
 
   max_texture_units' <- liftEff $ getParameter ctx GLE.maxTextureImageUnits
   max_texture_size'  <- liftEff $ getParameter ctx GLE.maxTextureSize

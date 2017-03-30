@@ -8,6 +8,8 @@ uniform vec2 zn[#zn#];
 uniform sampler2D aux[#aux#];
 uniform sampler2D audioData;
 
+$angle$
+
 void main() {
   vec4 color;
   vec2 z, z_in;

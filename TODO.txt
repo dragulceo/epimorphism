@@ -1,6 +1,10 @@
 TO PROCESS:
-	starts off white on windows
+  better spinner
+	also, spinner freezes
 	fail gracefully if webgl not enabled
+	black blobs in ios (precision?)
+	display complete shader source in ui
+	cache performance preferences in cookies
 
 
 CURRENT PROJECTS:
@@ -90,7 +94,6 @@ NEXT PROJECTS:
 
 BUGS:
 	- flakey menu
-	- black blobs in ios
   - firefox WebGL: texImage2D: conversion requires pixel reformatting (maybe non-issue)
   - catch errors when parsing t_exp
   - no error message when image texture doesnt exist

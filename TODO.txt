@@ -1,9 +1,8 @@
 TO PROCESS:
-  move lib/
 	cant scroll for some shader errors
-	optional increase of bit depth
+	optional increase of bit depth - half float, etc
 	starts off white on windows
-
+	need to define funcs in main - planewave, etc
 
 
 CURRENT PROJECTS:
@@ -144,6 +143,7 @@ FEATURE IDEAS:
 	- vector fields
   - seed impulses
 	- graphically outline seeds?
+	- animate seed textures somehow
 	- superformula - https://en.wikipedia.org/wiki/Superformula
   - for each pixel, define a normal vector, so we can do lighting & material effects
   - investigate dsl for scripts
@@ -162,9 +162,6 @@ NO CLUE:
   - saving images loses bit depth??
   - weird divide by zero issue - glitch in content
   - maybe pixel alignment issues with images?
-
-
-
 
 
 MATH:

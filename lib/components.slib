@@ -277,7 +277,9 @@ vec4 hsv2rgb(vec4 c){
   vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
   return vec4(c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y), c.w);
 }
+}}
 
+library colorspace_extra {{
 // can probably optimize all hsl functions
 vec4 hsl2rgb(vec4 c){
   float h = c.x;
@@ -452,32 +454,8 @@ vec2 TANHZ(vec2 z0){
   return vec2(sinh(2.0 * z0.x), s) / r;
 }
 
-
-
 vec4 _gamma3(vec4 v, float gamma){
   return vec4(pow(v.xyz, vec3(gamma, gamma, gamma)), v.w);
-}
-
-vec3 rotate3D(vec3 v, vec3 axis, float th){
-  // compute constants
-  float c = cos(th);
-  float s = sin(th);
-
-  // compute rotation
-  vec3 res;
-  res.x = (1.0 + (1.0 - c) * (axis.x * axis.x - 1.0)) * v.x +
-          (axis.z * s + (1.0 - c) * axis.x * axis.y) * v.y +
-          (-1.0 * axis.y * s + (1.0 - c) * axis.x * axis.z) * v.z;
-
-  res.y = (-1.0 * axis.z * s + (1.0 - c) * axis.x * axis.y) * v.x +
-          (1.0 + (1.0 - c) * (axis.y * axis.y - 1.0)) * v.y +
-          (axis.x * s + (1.0 - c) * axis.y * axis.z) * v.z;
-
-  res.z = (axis.y * s + (1.0 - c) * axis.x * axis.z) * v.x +
-          (-1.0 * axis.x * s + (1.0 - c) * axis.y * axis.z) * v.y +
-          (1.0 + (1.0 - c) * (axis.z * axis.z - 1.0)) * v.z;
-
-  return res;
 }
 
 bool isNan(float val)
@@ -505,6 +483,31 @@ vec2 grid_reduce(vec2 z){
 
 }}
 
+library math_extra {{
+
+vec3 rotate3D(vec3 v, vec3 axis, float th){
+  // compute constants
+  float c = cos(th);
+  float s = sin(th);
+
+  // compute rotation
+  vec3 res;
+  res.x = (1.0 + (1.0 - c) * (axis.x * axis.x - 1.0)) * v.x +
+          (axis.z * s + (1.0 - c) * axis.x * axis.y) * v.y +
+          (-1.0 * axis.y * s + (1.0 - c) * axis.x * axis.z) * v.z;
+
+  res.y = (-1.0 * axis.z * s + (1.0 - c) * axis.x * axis.y) * v.x +
+          (1.0 + (1.0 - c) * (axis.y * axis.y - 1.0)) * v.y +
+          (axis.x * s + (1.0 - c) * axis.y * axis.z) * v.z;
+
+  res.z = (axis.y * s + (1.0 - c) * axis.x * axis.z) * v.x +
+          (-1.0 * axis.x * s + (1.0 - c) * axis.y * axis.z) * v.y +
+          (1.0 + (1.0 - c) * (axis.z * axis.z - 1.0)) * v.z;
+
+  return res;
+}
+}}
+
 
 
 main_frag main {{
@@ -518,22 +521,36 @@ uniform vec2 zn[50];
 uniform sampler2D aux[10];
 uniform sampler2D audioData;
 
-float freqData(float x){
-	return texture2D(audioData, vec2(mod(x, 1.0), 0.0)).a;
+void main() {
+  vec4 color;
+  vec2 z, z_in;
+
+	// a bit hackish, we do this to make sure the uniforms aren't optimized out
+	float nul0 = zn[0].x;
+	float nul1 = par[0];
+
+  // into z coordinates
+  z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(kernel_dim, kernel_dim) - vec2(1.0, 1.0);
+  z_in = z;
+
+  %application%
+
+  gl_FragColor = color;
 }
 
-float timeData(float x){
-	return texture2D(audioData, vec2(mod(x, 1.0), 2.0)).a;
-}
+}}
 
-float plane_wave(vec2 k, vec2 z, float w, float time){
 
-  float th = (k.x * z.x + k.y * z.y) - w * time;
-	th = mod(th, 1.0);
-  float v = sin(2.0 * PI * th);
+main_frag main_func {{
 
-  return v;
-}
+precision mediump float;
+uniform sampler2D fb;
+uniform float time;
+uniform float kernel_dim;
+uniform float par[100];
+uniform vec2 zn[50];
+uniform sampler2D aux[10];
+uniform sampler2D audioData;
 
 void main() {
   vec4 color;
@@ -751,6 +768,7 @@ alpha alpha {{
 }}
 
 color simple_color {{
+		asdfasdf
 	// palletize as function of z
 	float l = 0.08 * sqrt(t_z.x * t_z.x + t_z.y * t_z.y);
 	float l2 = 0.08 * sqrt(z_in.x * z_in.x + z_in.y * z_in.y);

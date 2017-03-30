@@ -9,22 +9,36 @@ uniform vec2 zn[50];
 uniform sampler2D aux[10];
 uniform sampler2D audioData;
 
-float freqData(float x){
-	return texture2D(audioData, vec2(mod(x, 1.0), 0.0)).a;
+void main() {
+  vec4 color;
+  vec2 z, z_in;
+
+	// a bit hackish, we do this to make sure the uniforms aren't optimized out
+	float nul0 = zn[0].x;
+	float nul1 = par[0];
+
+  // into z coordinates
+  z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(kernel_dim, kernel_dim) - vec2(1.0, 1.0);
+  z_in = z;
+
+  %application%
+
+  gl_FragColor = color;
 }
 
-float timeData(float x){
-	return texture2D(audioData, vec2(mod(x, 1.0), 2.0)).a;
-}
+}}
 
-float plane_wave(vec2 k, vec2 z, float w, float time){
 
-  float th = (k.x * z.x + k.y * z.y) - w * time;
-	th = mod(th, 1.0);
-  float v = sin(2.0 * PI * th);
+main_frag main_func {{
 
-  return v;
-}
+precision mediump float;
+uniform sampler2D fb;
+uniform float time;
+uniform float kernel_dim;
+uniform float par[100];
+uniform vec2 zn[50];
+uniform sampler2D aux[10];
+uniform sampler2D audioData;
 
 void main() {
   vec4 color;

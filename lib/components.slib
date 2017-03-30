@@ -768,7 +768,6 @@ alpha alpha {{
 }}
 
 color simple_color {{
-		asdfasdf
 	// palletize as function of z
 	float l = 0.08 * sqrt(t_z.x * t_z.x + t_z.y * t_z.y);
 	float l2 = 0.08 * sqrt(z_in.x * z_in.x + z_in.y * z_in.y);

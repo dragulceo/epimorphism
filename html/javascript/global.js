@@ -40,8 +40,14 @@ function webGLEnabled() {
 	var canvas = document.createElement("canvas");
   var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
 	canvas = undefined;
-  return false;//(gl && gl instanceof WebGLRenderingContext);
+  return (gl && gl instanceof WebGLRenderingContext);
 }
+
+$(document).ready( function() {
+	var c = getCookie("epimorphism_profile");
+	if(c)
+		$("#resolutionSel").val(c);
+})
 
 // start main application
 $(document).ready( function() {

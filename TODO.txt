@@ -1,7 +1,6 @@
 CURRENT PROJECTS:
   - release:
 	  - for paths, show current value in console
-		- cache engine preferences in cookies
 	  - flakey menu
 		- auto scale performance for framerate or something
 
@@ -74,7 +73,7 @@ NEXT PROJECTS:
 BUGS:
 	- change resolution during switching error?
   - black blobs in ios
-  - freezing spinner
+  - freezing spinner (i think its the synchronous get requests for lib)
   - firefox WebGL: texImage2D: conversion requires pixel reformatting (maybe non-issue)
   - catch errors when parsing t_exp
   - no error message when image texture doesnt exist

@@ -63,6 +63,7 @@ exports.addGlobalEventListeners = function(handler) {
 
 		var resChangeHandler =
 				function (){
+					setCookie("epimorphism_profile", this.value)
 					handler("setEngineProfile " + this.value)();
 				};
 

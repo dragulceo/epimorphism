@@ -53,6 +53,8 @@ foreign import unsafeGetAttr :: forall a b. a -> String -> b
 foreign import hasAttr :: forall a. a -> String -> Boolean
 foreign import unsafeCast :: forall a b. a -> b
 
+foreign import getProfileCookie :: forall eff. Eff eff String
+
 -- ghetto
 foreign import clickPause :: forall eff. Eff eff Unit
 

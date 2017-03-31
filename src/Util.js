@@ -28,6 +28,11 @@ exports.unsafeCast = function(obj){
   return obj;
 };
 
+exports.getProfileCookie = function(){
+	var c = getCookie("epimorphism_profile")
+	return c;
+}
+
 
 exports.requestAnimationFrame = function(func){
 	return function(args){

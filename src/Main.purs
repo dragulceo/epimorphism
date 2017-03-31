@@ -23,7 +23,7 @@ import Script (runScripts)
 import System (initSystemST, loadLib)
 import Texture (loadImages)
 import UI (initUIST)
-import Util (Now, dbg, fromJustE, handleError, imag, inj, isDev, isHalted, now, real, requestAnimationFrame, rndstr, seedRandom, urlArgs, zipI)
+import Util (Now, dbg, fromJustE, getProfileCookie, handleError, imag, inj, isDev, isHalted, now, real, requestAnimationFrame, rndstr, seedRandom, urlArgs, zipI)
 
 host :: String
 host = ""
@@ -64,7 +64,12 @@ initState systemST = do
   let systemConf' = systemConf {host = host, seed = seed}
   lift $ seedRandom systemConf'.seed
 
-  engineConf <- loadLib systemConf'.initEngineConf systemST.engineConfLib "init engine"
+  cookie_profile <- lift $ getProfileCookie
+
+  engineConf <- case (lookup cookie_profile systemST.engineConfLib) of
+    Nothing -> loadLib systemConf'.initEngineConf systemST.engineConfLib "init engine"
+    (Just d) -> pure d
+
   uiConf     <- loadLib systemConf'.initUIConf systemST.uiConfLib "init ui"
   pattern    <- loadLib systemConf'.initPattern systemST.patternLib "init pattern"
 

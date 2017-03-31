@@ -1,30 +1,14 @@
-TO PROCESS:
-  better spinner
-	also, spinner freezes
-	fail gracefully if webgl not enabled
-	black blobs in ios (precision?)
-	display complete shader source in ui
-	cache performance preferences in cookies
-
-
 CURRENT PROJECTS:
-
-  - detect system/perf profile
-    - if there are too many aux buffers (texture units), we'll have an issue?
-		- max number of uniforms available
-		- auto scale performance for framerate
-
-	- cleanup
-	  - change resolution during switching error?
+  - release:
+	  - for paths, show current value in console
+		- cache engine preferences in cookies
+	  - flakey menu
+		- auto scale performance for framerate or something
 
   - main pattern
     - T
 	  - SEED
 	  - COLOR still needs work some times
-
-
-UI NOTES:
-  - ability to clone module tree & quickly make changes/save/load/etc
 
 
 NEXT PROJECTS:
@@ -80,14 +64,17 @@ NEXT PROJECTS:
 		  - dont want to have to pause to update tree, that's kind of ghetto
 			- individually pause paths/modules?
 			- reactive UI?
+		- ability to clone module tree & quickly make changes/save/load/etc
 		- misc
 		  - https://ace.c9.io/#nav=about
-			- for paths, show current value in console
+			- show shader source in tab
 
 -------------------------------- BACKLOG --------------------------------
 
 BUGS:
-	- flakey menu
+	- change resolution during switching error?
+  - black blobs in ios
+  - freezing spinner
   - firefox WebGL: texImage2D: conversion requires pixel reformatting (maybe non-issue)
   - catch errors when parsing t_exp
   - no error message when image texture doesnt exist
@@ -104,6 +91,7 @@ PERF:
   - choppy in safari
 
 SYSTEM:
+  - do something smart if not enough resources (uniforms, tex, etc)
   - need to define funcs in main - planewave, etc
   - better deploy scripts
 	- complex number library show hack

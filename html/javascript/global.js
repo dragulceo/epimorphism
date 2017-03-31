@@ -35,3 +35,19 @@ showTab = function(n) {
 	$('.tab').removeClass("selected")
   $('.tab.' + n).addClass("selected")
 }
+
+function webGLEnabled() {
+	var canvas = document.createElement("canvas");
+  var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+	canvas = undefined;
+  return false;//(gl && gl instanceof WebGLRenderingContext);
+}
+
+// start main application
+$(document).ready( function() {
+	if(webGLEnabled()){
+		Main.main();
+	}else{
+		$('#loading').html("<center style='margin-top:50px;color:white;'>WebGL not available</center>")
+	}
+})

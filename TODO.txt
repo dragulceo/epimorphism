@@ -1,7 +1,7 @@
 CURRENT PROJECTS:
   - release:
 	  - for paths, show current value in console
-	  - flakey menu
+
 		- auto scale performance for framerate or something
 
   - main pattern
@@ -79,7 +79,6 @@ BUGS:
   - no error message when image texture doesnt exist
   - reduce is a substition in seeds, but comes from appliction.  the order of "modules {x: .., y: ..}" matters :/
 
-  - on windows menu disappears hovering over res selector
   - weird when opening console in fullscreen
   - shader indentation issues with switching & in general
   - error handling for failing to enter fullscreen mode

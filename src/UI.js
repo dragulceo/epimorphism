@@ -29,6 +29,9 @@ exports.registerKeyHandler = function(handler) {
 	};
 };
 
+function closeMenu(){
+	$("#menuContainer").fadeOut("slow");$("#menu-icon").fadeIn("slow");
+}
 
 exports.addGlobalEventListeners = function(handler) {
   return function() {
@@ -45,6 +48,8 @@ exports.addGlobalEventListeners = function(handler) {
 				$('#enterFullScreen').removeClass('hide');
 			}
 			handler('fullWindow')();
+
+			closeMenu();
 		};
 
 		$(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', fsHandler);
@@ -58,12 +63,13 @@ exports.addGlobalEventListeners = function(handler) {
 
 		$(window).resize(resizeHandler);
 
-		$("#menu-icon").hover(function(){$("#menuContainer").fadeIn("slow");$("#menu-icon").fadeOut("slow");},function(){});
-		$("#menuContainer").hover(function(){},function(){$("#menuContainer").fadeOut("slow");$("#menu-icon").fadeIn("slow");});
+		$("#menu-icon").click(function(){$("#menuContainer").fadeIn("slow");$("#menu-icon").fadeOut("slow");});
+		$("#menu-close").click(closeMenu);
 
 		var resChangeHandler =
 				function (){
-					setCookie("epimorphism_profile", this.value)
+					setCookie("epimorphism_profile", this.value);
+					closeMenu();
 					handler("setEngineProfile " + this.value)();
 				};
 

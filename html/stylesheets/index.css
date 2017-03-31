@@ -125,6 +125,17 @@ body {
 #buttons {
 }
 
+#menu-icon:hover{
+  cursor: pointer;
+}
+
+#menu-close{
+  position:absolute;
+  top:0px;
+  right:0px;
+  font-size:11px;
+}
+
 #menu {
 		position:absolute;
 		bottom:20px;

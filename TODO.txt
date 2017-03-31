@@ -8,20 +8,11 @@ TO PROCESS:
 
 
 CURRENT PROJECTS:
-  - COMPILING PERFORMANCE ON WINDOWS
-	  - no fract 2-3x improvement!
 
   - detect system/perf profile
     - if there are too many aux buffers (texture units), we'll have an issue?
 		- max number of uniforms available
 		- auto scale performance for framerate
-
-	- asynchronous compiling
-		- cleanup
-		- stalling? CompStall
-		- time modification on compile?
-		- fps delta'
-		- also, batch compilation?  only happens once every n ms?
 
 	- cleanup
 	  - change resolution during switching error?
@@ -74,6 +65,9 @@ NEXT PROJECTS:
       - namespace collisions detection
 
 	- more importing/compiling
+		- WINDOWS SUCKS
+		- batch compilation?
+		- cleanup
 		- MISC
 		  - could maybe clean up switch a bit more (remove imports/purges, combine methods)
 		  - maybe module.modules should be [SubModule = SubLib String | SubPool String] or something

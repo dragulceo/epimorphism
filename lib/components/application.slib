@@ -18,7 +18,7 @@ application epimorphism {{
 	float delta = 1.0 / (float($fract$) * kernel_dim);
 	float ofs = delta * (float($fract$) - 1.0);
 
-#ifndef __ANGLE
+#ifndef _NO_FRACT_
  	for(int i=0; i<$fract$; i++){
 		for(int j=0; j<$fract$; j++){
       z = z_in;
@@ -46,13 +46,13 @@ application epimorphism {{
 			seed.a = DEPTH_INC;
 			frame.a = frame.a + DEPTH_INC;
 			accum += mix(frame, seed, a);
-#ifndef __ANGLE
+#ifndef _NO_FRACT_
 		}
 	}
 #endif
 	z = z_in;
 
-#ifndef __ANGLE
+#ifndef _NO_FRACT_
 	float f2 = float($fract$ * $fract$);
 	color = accum / vec4(f2, f2, f2, f2);
 #else

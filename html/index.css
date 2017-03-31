@@ -278,12 +278,12 @@ body {
 
 #loading_spinner {
 		position:absolute;
-    width:30px; /*image width */
-    height:30px; /*image height */
+    width:180px; /*image width */
+    height:180px; /*image height */
     left:50%;
     top:50%;
-    margin-left:-15px; /*image width/2 */
-    margin-top:-15px; /*image height/2 */
+    margin-left:-90px; /*image width/2 */
+    margin-top:-90px; /*image height/2 */
 }
 
 #loading_txt {
@@ -294,6 +294,6 @@ body {
     left:50%;
     top:50%;
     margin-left:-150px; /*image width/2 */
-    margin-top:30px; /*image height/2 */
+    margin-top:-8px; /*image height/2 */
 		color:white;
 }

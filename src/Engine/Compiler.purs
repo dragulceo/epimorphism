@@ -9,6 +9,8 @@ import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (length, uncons)
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.String (stripPrefix)
+import Data.String (Pattern(..)) as S
 import Data.Tuple (fst, Tuple(Tuple))
 import EngineUtil (execGL)
 import Graphics.WebGL.Methods (vertexAttribPointer, enableVertexAttribArray, bindBuffer, bufferData, createBuffer)
@@ -32,7 +34,10 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
       dbg op
       done <- case op of
         CompMainShader -> do
-          Tuple main aux <- parseMain systemST pattern engineConf.fract es.profile.angle
+          fract <- case stripPrefix (S.Pattern "Windows") es.profile.os of
+            Just _ -> pure Nothing
+            Nothing -> pure $ Just engineConf.fract
+          Tuple main aux <- parseMain systemST pattern fract
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainSrc = Just main, auxImages = Just aux}})
           pure false
         CompDispShader -> do
@@ -111,11 +116,19 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
     Nothing -> throwError "shouldn't call compile with an empty queue chump!"
 
 
-parseMain :: forall eff h. SystemST h -> Pattern -> Int -> Boolean -> EpiS eff h (Tuple String (Array String))
-parseMain systemST pattern fract angle = do
+parseMain :: forall eff h. SystemST h -> Pattern -> Maybe Int -> EpiS eff h (Tuple String (Array String))
+parseMain systemST pattern fract = do
   Tuple main'' aux <- parseShader systemST pattern.main pattern.includes
-  let main' = replaceAll "\\$fract\\$" (show fract) main'' -- both of these are kind of ghetto
-  let main = replaceAll "\\$angle\\$" (if angle then "#define __ANGLE" else "") main'
+
+  -- kind of ghetto
+  main <- case fract of
+    Just i -> do
+      let main' = replaceAll "\\$fract\\$" (show i) main''
+      pure $ replaceAll "\\$NO_FRACT\\$" "" main'
+    Nothing -> do
+      dbg "NO FRACT"
+      let main' = replaceAll "\\$fract\\$" "1" main''
+      pure $ replaceAll "\\$NO_FRACT\\$" "#define _NO_FRACT_" main'
 
   pure $ Tuple main aux
 

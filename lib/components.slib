@@ -18,7 +18,7 @@ application epimorphism {{
 	float delta = 1.0 / (float($fract$) * kernel_dim);
 	float ofs = delta * (float($fract$) - 1.0);
 
-#ifndef __ANGLE
+#ifndef _NO_FRACT_
  	for(int i=0; i<$fract$; i++){
 		for(int j=0; j<$fract$; j++){
       z = z_in;
@@ -46,13 +46,13 @@ application epimorphism {{
 			seed.a = DEPTH_INC;
 			frame.a = frame.a + DEPTH_INC;
 			accum += mix(frame, seed, a);
-#ifndef __ANGLE
+#ifndef _NO_FRACT_
 		}
 	}
 #endif
 	z = z_in;
 
-#ifndef __ANGLE
+#ifndef _NO_FRACT_
 	float f2 = float($fract$ * $fract$);
 	color = accum / vec4(f2, f2, f2, f2);
 #else
@@ -228,11 +228,13 @@ application interference {{
 
 
 
-library colorspace {{
+library header {{
 precision mediump float;
-#define PI 3.1415926535 // unfortunately have to do this here.  hackish
+#define PI 3.1415926535
 #define DEPTH_INC (32.0 / 255.0)
+}}
 
+library colorspace {{
 /* colorspace library */
 vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d ){
 	return a + b * cos(2.0 * PI * (c * t + d));
@@ -493,7 +495,7 @@ uniform vec2 zn[#zn#];
 uniform sampler2D aux[#aux#];
 uniform sampler2D audioData;
 
-$angle$
+$NO_FRACT$
 
 void main() {
   vec4 color;

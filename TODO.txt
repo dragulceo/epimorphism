@@ -1,8 +1,7 @@
 CURRENT PROJECTS:
   - release:
-		- fix up about page
 		- auto scale performance for framerate or something
-		- spinner could still use some work
+		- could start whole application in global image loading callbacks
 
   - main pattern
     - T

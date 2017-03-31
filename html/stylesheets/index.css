@@ -285,7 +285,7 @@ body {
 
 #loading {
 		position: fixed;
-		background-color:#000;
+		background-color:#111;
 		width:100%;
 		height:100%;
 		z-index:1000;
@@ -293,11 +293,11 @@ body {
 
 #loading_spinner {
 		position:absolute;
-    width:180px; /*image width */
-    height:180px; /*image height */
+    width:100px; /*image width */
+    height:100px; /*image height */
     left:50%;
     top:50%;
-    margin-left:-90px; /*image width/2 */
+    margin-left:-50px; /*image width/2 */
     margin-top:-90px; /*image height/2 */
 }
 
@@ -309,6 +309,6 @@ body {
     left:50%;
     top:50%;
     margin-left:-150px; /*image width/2 */
-    margin-top:-8px; /*image height/2 */
+    margin-top:10px; /*image height/2 */
 		color:white;
 }

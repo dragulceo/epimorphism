@@ -103,5 +103,5 @@ exports.registerAuxImages = function(imgs) {
 };
 
 exports.doneLoading = function() {
-	$('#loading').fadeOut(1500);
+	$('#loading').fadeOut(2500);
 }

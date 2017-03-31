@@ -142,8 +142,9 @@ renderModule systemST modLib mid title pid = do
                     let dt = map trim $ split (S.Pattern ":") x
                     case dt of
                       [var, val] -> do
+                        (Tuple res _) <- runPath systemST.t val
                         let inp = inj "<span class='consolePar consoleVar' data-mid='%0' data-var='%1' data-val='%2' data-type='par'>%2</span>" [mid, var, val]
-                        pure $ var <> ": " <> inp
+                        pure $ inj "%0: (%1)%2" [var, (format (precision 2) $ real res), inp]
                       _ -> throwError "invalide par fmt :"
                   pure $ joinWith ", " cmp'
                 _ -> throwError "invalid par fmt {"
@@ -171,8 +172,9 @@ renderModule systemST modLib mid title pid = do
               uiCts <- case (match rgx' m1) of
                 (Just [(Just _), (Just cts)]) -> do
                   let cmp = map trim $ split (S.Pattern ",") cts
-                  let cmp' = flip map (zipI cmp) \(Tuple i c) ->
-                    inj "<span class='consoleZn consoleVar' data-mid='%0' data-var='%1' data-val='%2' data-type='zn'>%2</span>" [mid, (show i), c]
+                  cmp' <- flip traverse (zipI cmp) \(Tuple i c) -> do
+                    (Tuple res _) <- runPath systemST.t c
+                    pure $ inj "<span class='consoleZn consoleVar' data-mid='%0' data-var='%1' data-val='%2' data-type='zn'>(%2)%3</span>" [mid, (show i), (showCX res), c]
                   pure $ joinWith ", " cmp'
                 _ -> throwError "invalid zn fmt ["
               let ui = inj "<span class='consoleUI' style='display:none;'>zn [%0]</span>" [uiCts]

@@ -1,7 +1,8 @@
 CURRENT PROJECTS:
   - release:
 		- auto scale performance for framerate or something
-		- could start whole application in global image loading callbacks
+		- fb color
+		- animate colors a bit
 
   - main pattern
     - T
@@ -10,6 +11,8 @@ CURRENT PROJECTS:
 
 
 NEXT PROJECTS:
+		- could start whole application in global image loading callbacks
+
   - release?
     - kickstarter for audio responsiveness?
 		- ipad?

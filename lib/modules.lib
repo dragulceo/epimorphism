@@ -125,7 +125,7 @@ par {hue:loop 0.01, spread:wave 0.011 0.35 1.5, lgv:wave 0.07 0.125 0.5, gamma:w
 
 --post_main4 < post_hlim_anim
 component post_hlim
-par {hue:loop 0.01, spread:wave 0.011 0.37 1.5, lgv:wave 0.07 0.225 0.5, sat_sc: wave 0.006 0.3 1.4}
+par {hue:loop 0.01, spread:wave 0.011 0.37 1.5, lgv:wave 0.07 0.225 0.5, inc_sc: 0.1, sat_sc: wave 0.006 0.3 1.4}
 
 
 --grid_reduce
@@ -199,9 +199,14 @@ sub {wt_exp: sqrt(1.0 - (1.0 - w) * (1.0 - w))}
 flags {}
 sub {wt_exp: 1.0 - sqrt(1.0 - (1.0 - w) * (1.0 - w))}
 
---wt_anim < wt_id
+--wt_anim1 < wt_id
 flags {lib}
 scripts [randomize dly:45 spd:0.1 lib:seed_wt_main dim:float sub:wt_exp typ:sub]
+
+--wt_anim2 < wt_id
+flags {lib}
+scripts [randomize dly:40 spd:0.1 lib:seed_wt_main dim:float sub:wt_exp typ:sub]
+
 
 --alpha_id
 family a
@@ -224,10 +229,16 @@ sub {a_exp: w * a * @alpha@}
 --alpha_circ < alpha_id
 sub {a_exp: sqrt(1.0 - (1.0 - w) * (1.0 - w)) * a * @alpha@}
 
---alpha_anim < alpha_solid
+--alpha_anim1 < alpha_solid
 flags {lib, farm1}
-par {alpha:wave 0.048 0.25 0.7}
+par {alpha:wave 0.048 0.2 0.8}
 scripts [randomize dly:40 spd:0.5 lib:seed_a_main dim:float sub:a_exp typ:sub]
+
+
+--alpha_anim2 < alpha_solid
+flags {lib, farm1}
+par {alpha:wave 0.038 0.2 0.77}
+scripts [randomize dly:55 spd:0.5 lib:seed_a_main dim:float sub:a_exp typ:sub]
 
 
 
@@ -269,7 +280,6 @@ flags {anim3}
 --tex_color_anim5 < tex_color
 scripts [randomize dly:40 spd:0.05 lib:images2 dim:vec4 sub:0 typ:image]
 flags {}
-
 
 
 --fb_color < simple_color
@@ -628,11 +638,11 @@ modules {t: t_wrap, w:w_lines_border, wt:wt_anim, a:alpha_id, seed_color:simple_
 
 --seed_wca_anim1 < seed_wca
 scripts [randomize dly:55 spd:0.3 lib:anim dim:vec4 sub:w typ:mod, randomize dly:65 spd:0.3 lib:anim1 dim:vec4 sub:seed_color typ:mod]
-modules {t: t_seed_anim1, w:w_lines_border_anim, wt:wt_anim, a:alpha_anim, seed_color:simple_color_anim1}
+modules {t: t_seed_anim1, w:w_lines_border_anim, wt:wt_anim1, a:alpha_anim1, seed_color:simple_color_anim1}
 
 --seed_wca_anim2 < seed_wca
-scripts [randomize dly:65 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
-modules {t: t_seed_anim2, w:w_lines_border_anim, wt:wt_anim, a:alpha_anim, seed_color:tex_color_anim2}
+scripts [randomize dly:63 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
+modules {t: t_seed_anim2, w:w_lines_border_anim, wt:wt_anim2, a:alpha_anim2, seed_color:tex_color_anim2}
 
 --seed_multi_anim < seed_nothing
 flags {multi}

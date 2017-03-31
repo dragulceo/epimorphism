@@ -1373,8 +1373,8 @@ var renderModule = function (systemST) {
                 return function (pid) {
                     var isModules = function (line) {
                         var rgx = Data_String_Regex_Unsafe.unsafeRegex("^modules")(Data_String_Regex_Flags.noFlags);
-                        var $31 = Data_String_Regex.match(rgx)(line);
-                        if ($31 instanceof Data_Maybe.Just) {
+                        var $34 = Data_String_Regex.match(rgx)(line);
+                        if ($34 instanceof Data_Maybe.Just) {
                             return true;
                         };
                         return false;
@@ -1383,20 +1383,20 @@ var renderModule = function (systemST) {
                         return function (line) {
                             var rgx = Data_String_Regex_Unsafe.unsafeRegex("^(component|par|zn|images|sub|scripts|--)\\s?(.*)$")(Data_String_Regex_Flags.noFlags);
                             return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))((function () {
-                                var $33 = Data_String_Regex.match(rgx)(line);
-                                if ($33 instanceof Data_Maybe.Just && ($33.value0.length === 3 && ($33["value0"][0] instanceof Data_Maybe.Just && ($33["value0"][1] instanceof Data_Maybe.Just && $33["value0"][2] instanceof Data_Maybe.Just)))) {
-                                    if ($33["value0"][1].value0 === "component") {
-                                        return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadLib($33["value0"][2].value0)(systemST.componentLib)("load component console"))(function (v) {
-                                            var ui = Util.inj("<span class='consoleUI' style='display:none'>component </span><span class='componentUI consoleUI' style='display:none;' data-mid='%1'>%0</span><div id='%1' class='hidden' style='display:none'><div>%2</div></div>")([ $33["value0"][2].value0, $33["value0"][2].value0, v.body ]);
+                                var $36 = Data_String_Regex.match(rgx)(line);
+                                if ($36 instanceof Data_Maybe.Just && ($36.value0.length === 3 && ($36["value0"][0] instanceof Data_Maybe.Just && ($36["value0"][1] instanceof Data_Maybe.Just && $36["value0"][2] instanceof Data_Maybe.Just)))) {
+                                    if ($36["value0"][1].value0 === "component") {
+                                        return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(System.loadLib($36["value0"][2].value0)(systemST.componentLib)("load component console"))(function (v) {
+                                            var ui = Util.inj("<span class='consoleUI' style='display:none'>component </span><span class='componentUI consoleUI' style='display:none;' data-mid='%1'>%0</span><div id='%1' class='hidden' style='display:none'><div>%2</div></div>")([ $36["value0"][2].value0, $36["value0"][2].value0, v.body ]);
                                             return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))("\x0a<span class='consoleUI'>" + (line + ("</span>" + ui)));
                                         });
                                     };
-                                    if ($33["value0"][1].value0 === "sub") {
+                                    if ($36["value0"][1].value0 === "sub") {
                                         var rgx$prime = Data_String_Regex_Unsafe.unsafeRegex("^\\{(.*)\\}$")(Data_String_Regex_Flags.noFlags);
                                         return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))((function () {
-                                            var $36 = Data_String_Regex.match(rgx$prime)($33["value0"][2].value0);
-                                            if ($36 instanceof Data_Maybe.Just && ($36.value0.length === 2 && ($36["value0"][0] instanceof Data_Maybe.Just && $36["value0"][1] instanceof Data_Maybe.Just))) {
-                                                var cmp = Data_Functor.map(Data_Functor.functorArray)(Data_String.trim)(Data_String.split(",")($36["value0"][1].value0));
+                                            var $39 = Data_String_Regex.match(rgx$prime)($36["value0"][2].value0);
+                                            if ($39 instanceof Data_Maybe.Just && ($39.value0.length === 2 && ($39["value0"][0] instanceof Data_Maybe.Just && $39["value0"][1] instanceof Data_Maybe.Just))) {
+                                                var cmp = Data_Functor.map(Data_Functor.functorArray)(Data_String.trim)(Data_String.split(",")($39["value0"][1].value0));
                                                 return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Data_Function.flip(Data_Traversable.traverse(Data_Traversable.traversableArray)(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff)))(cmp)(function (x) {
                                                     var dt = Data_Functor.map(Data_Functor.functorArray)(Data_String.trim)(Data_String.split(":")(x));
                                                     if (dt.length === 2) {
@@ -1414,12 +1414,12 @@ var renderModule = function (systemST) {
                                             return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))("\x0a<span class='consoleUI'>" + (line + ("</span>" + ui)));
                                         });
                                     };
-                                    if ($33["value0"][1].value0 === "images") {
+                                    if ($36["value0"][1].value0 === "images") {
                                         var rgx$prime = Data_String_Regex_Unsafe.unsafeRegex("^\\[(.*)\\]$")(Data_String_Regex_Flags.noFlags);
                                         return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))((function () {
-                                            var $47 = Data_String_Regex.match(rgx$prime)($33["value0"][2].value0);
-                                            if ($47 instanceof Data_Maybe.Just && ($47.value0.length === 2 && ($47["value0"][0] instanceof Data_Maybe.Just && $47["value0"][1] instanceof Data_Maybe.Just))) {
-                                                var cmp = Data_Functor.map(Data_Functor.functorArray)(Data_String.trim)(Data_String.split(",")($47["value0"][1].value0));
+                                            var $50 = Data_String_Regex.match(rgx$prime)($36["value0"][2].value0);
+                                            if ($50 instanceof Data_Maybe.Just && ($50.value0.length === 2 && ($50["value0"][0] instanceof Data_Maybe.Just && $50["value0"][1] instanceof Data_Maybe.Just))) {
+                                                var cmp = Data_Functor.map(Data_Functor.functorArray)(Data_String.trim)(Data_String.split(",")($50["value0"][1].value0));
                                                 var cmp$prime = Data_Function.flip(Data_Functor.map(Data_Functor.functorArray))(Util.zipI(cmp))(function (v) {
                                                     return Util.inj("<span class='consoleImage' data-mid='%0' data-idx='%1'>%2</span>")([ mid, Data_Show.show(Data_Show.showInt)(v.value0), v.value1 ]);
                                                 });
@@ -1431,17 +1431,19 @@ var renderModule = function (systemST) {
                                             return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))("\x0a<span class='consoleUI'>" + (line + ("</span>" + ui)));
                                         });
                                     };
-                                    if ($33["value0"][1].value0 === "par") {
+                                    if ($36["value0"][1].value0 === "par") {
                                         var rgx$prime = Data_String_Regex_Unsafe.unsafeRegex("^\\{(.*)\\}$")(Data_String_Regex_Flags.noFlags);
                                         return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))((function () {
-                                            var $57 = Data_String_Regex.match(rgx$prime)($33["value0"][2].value0);
-                                            if ($57 instanceof Data_Maybe.Just && ($57.value0.length === 2 && ($57["value0"][0] instanceof Data_Maybe.Just && $57["value0"][1] instanceof Data_Maybe.Just))) {
-                                                var cmp = Data_Functor.map(Data_Functor.functorArray)(Data_String.trim)(Data_String.split(",")($57["value0"][1].value0));
+                                            var $60 = Data_String_Regex.match(rgx$prime)($36["value0"][2].value0);
+                                            if ($60 instanceof Data_Maybe.Just && ($60.value0.length === 2 && ($60["value0"][0] instanceof Data_Maybe.Just && $60["value0"][1] instanceof Data_Maybe.Just))) {
+                                                var cmp = Data_Functor.map(Data_Functor.functorArray)(Data_String.trim)(Data_String.split(",")($60["value0"][1].value0));
                                                 return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Data_Function.flip(Data_Traversable.traverse(Data_Traversable.traversableArray)(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff)))(cmp)(function (x) {
                                                     var dt = Data_Functor.map(Data_Functor.functorArray)(Data_String.trim)(Data_String.split(":")(x));
                                                     if (dt.length === 2) {
-                                                        var inp = Util.inj("<span class='consolePar consoleVar' data-mid='%0' data-var='%1' data-val='%2' data-type='par'>%2</span>")([ mid, dt[0], dt[1] ]);
-                                                        return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))(dt[0] + (": " + inp));
+                                                        return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Paths.runPath(systemST.t)(dt[1]))(function (v) {
+                                                            var inp = Util.inj("<span class='consolePar consoleVar' data-mid='%0' data-var='%1' data-val='%2' data-type='par'>%2</span>")([ mid, dt[0], dt[1] ]);
+                                                            return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))(Util.inj("%0: (%1)%2")([ dt[0], Text_Format.format(Text_Format.formatNumber)(Text_Format.precision(2))(Util.real(v.value0)), inp ]));
+                                                        });
                                                     };
                                                     return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))("invalide par fmt :");
                                                 }))(function (v) {
@@ -1452,23 +1454,23 @@ var renderModule = function (systemST) {
                                         })())(function (v) {
                                             var ui = Util.inj("<span class='consoleUI' style='display:none;'>par {%0}</span>")([ v ]);
                                             return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))((function () {
-                                                var $68 = Data_String_Regex.match(rgx$prime)($33["value0"][2].value0);
-                                                if ($68 instanceof Data_Maybe.Just && ($68.value0.length === 2 && ($68["value0"][0] instanceof Data_Maybe.Just && $68["value0"][1] instanceof Data_Maybe.Just))) {
-                                                    var cmp = Data_Functor.map(Data_Functor.functorArray)(Data_String.trim)(Data_String.split(",")($68["value0"][1].value0));
+                                                var $74 = Data_String_Regex.match(rgx$prime)($36["value0"][2].value0);
+                                                if ($74 instanceof Data_Maybe.Just && ($74.value0.length === 2 && ($74["value0"][0] instanceof Data_Maybe.Just && $74["value0"][1] instanceof Data_Maybe.Just))) {
+                                                    var cmp = Data_Functor.map(Data_Functor.functorArray)(Data_String.trim)(Data_String.split(",")($74["value0"][1].value0));
                                                     return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Data_Function.flip(Data_Traversable.traverse(Data_Traversable.traversableArray)(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff)))(cmp)(function (x) {
                                                         var dt = Data_Functor.map(Data_Functor.functorArray)(Data_String.trim)(Data_String.split(":")(x));
                                                         if (dt.length === 2) {
-                                                            var $70 = Paths.isConstantPath(dt[1]);
-                                                            if ($70) {
+                                                            var $76 = Paths.isConstantPath(dt[1]);
+                                                            if ($76) {
                                                                 return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))(dt[0] + (": " + dt[1]));
                                                             };
-                                                            if (!$70) {
+                                                            if (!$76) {
                                                                 return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Paths.runPath(systemST.t)(dt[1]))(function (v1) {
                                                                     var val$prime = Util.inj("<span class='consoleVal'>%0</span>")([ Text_Format.format(Text_Format.formatNumber)(Text_Format.precision(2))(Util.real(v1.value0)) ]);
                                                                     return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))(Util.inj("%0: (%1)%2")([ dt[0], val$prime, dt[1] ]));
                                                                 });
                                                             };
-                                                            throw new Error("Failed pattern match at Console line 158, column 25 - line 163, column 69: " + [ $70.constructor.name ]);
+                                                            throw new Error("Failed pattern match at Console line 159, column 25 - line 164, column 69: " + [ $76.constructor.name ]);
                                                         };
                                                         return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))("invalide par fmt :");
                                                     }))(function (v1) {
@@ -1482,36 +1484,39 @@ var renderModule = function (systemST) {
                                             });
                                         });
                                     };
-                                    if ($33["value0"][1].value0 === "zn") {
+                                    if ($36["value0"][1].value0 === "zn") {
                                         var rgx$prime = Data_String_Regex_Unsafe.unsafeRegex("^\\[(.*)\\]$")(Data_String_Regex_Flags.noFlags);
                                         return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))((function () {
-                                            var $83 = Data_String_Regex.match(rgx$prime)($33["value0"][2].value0);
-                                            if ($83 instanceof Data_Maybe.Just && ($83.value0.length === 2 && ($83["value0"][0] instanceof Data_Maybe.Just && $83["value0"][1] instanceof Data_Maybe.Just))) {
-                                                var cmp = Data_Functor.map(Data_Functor.functorArray)(Data_String.trim)(Data_String.split(",")($83["value0"][1].value0));
-                                                var cmp$prime = Data_Function.flip(Data_Functor.map(Data_Functor.functorArray))(Util.zipI(cmp))(function (v) {
-                                                    return Util.inj("<span class='consoleZn consoleVar' data-mid='%0' data-var='%1' data-val='%2' data-type='zn'>%2</span>")([ mid, Data_Show.show(Data_Show.showInt)(v.value0), v.value1 ]);
+                                            var $89 = Data_String_Regex.match(rgx$prime)($36["value0"][2].value0);
+                                            if ($89 instanceof Data_Maybe.Just && ($89.value0.length === 2 && ($89["value0"][0] instanceof Data_Maybe.Just && $89["value0"][1] instanceof Data_Maybe.Just))) {
+                                                var cmp = Data_Functor.map(Data_Functor.functorArray)(Data_String.trim)(Data_String.split(",")($89["value0"][1].value0));
+                                                return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Data_Function.flip(Data_Traversable.traverse(Data_Traversable.traversableArray)(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff)))(Util.zipI(cmp))(function (v) {
+                                                    return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Paths.runPath(systemST.t)(v.value1))(function (v1) {
+                                                        return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))(Util.inj("<span class='consoleZn consoleVar' data-mid='%0' data-var='%1' data-val='%2' data-type='zn'>(%2)%3</span>")([ mid, Data_Show.show(Data_Show.showInt)(v.value0), Serialize.showCX(v1.value0), v.value1 ]));
+                                                    });
+                                                }))(function (v) {
+                                                    return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))(Data_String.joinWith(", ")(v));
                                                 });
-                                                return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))(Data_String.joinWith(", ")(cmp$prime));
                                             };
                                             return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))("invalid zn fmt [");
                                         })())(function (v) {
                                             var ui = Util.inj("<span class='consoleUI' style='display:none;'>zn [%0]</span>")([ v ]);
                                             return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))((function () {
-                                                var $93 = Data_String_Regex.match(rgx$prime)($33["value0"][2].value0);
-                                                if ($93 instanceof Data_Maybe.Just && ($93.value0.length === 2 && ($93["value0"][0] instanceof Data_Maybe.Just && $93["value0"][1] instanceof Data_Maybe.Just))) {
-                                                    var cmp = Data_Functor.map(Data_Functor.functorArray)(Data_String.trim)(Data_String.split(",")($93["value0"][1].value0));
+                                                var $103 = Data_String_Regex.match(rgx$prime)($36["value0"][2].value0);
+                                                if ($103 instanceof Data_Maybe.Just && ($103.value0.length === 2 && ($103["value0"][0] instanceof Data_Maybe.Just && $103["value0"][1] instanceof Data_Maybe.Just))) {
+                                                    var cmp = Data_Functor.map(Data_Functor.functorArray)(Data_String.trim)(Data_String.split(",")($103["value0"][1].value0));
                                                     return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Data_Function.flip(Data_Traversable.traverse(Data_Traversable.traversableArray)(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff)))(Util.zipI(cmp))(function (v1) {
-                                                        var $95 = Paths.isConstantPath(v1.value1);
-                                                        if ($95) {
+                                                        var $105 = Paths.isConstantPath(v1.value1);
+                                                        if ($105) {
                                                             return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))(v1.value1);
                                                         };
-                                                        if (!$95) {
+                                                        if (!$105) {
                                                             return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Paths.runPath(systemST.t)(v1.value1))(function (v2) {
                                                                 var val$prime = Util.inj("<span class='consoleVal'>%0</span>")([ Serialize.showCX(v2.value0) ]);
                                                                 return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))(Util.inj("(%0)%1")([ val$prime, v1.value1 ]));
                                                             });
                                                         };
-                                                        throw new Error("Failed pattern match at Console line 183, column 21 - line 188, column 54: " + [ $95.constructor.name ]);
+                                                        throw new Error("Failed pattern match at Console line 185, column 21 - line 190, column 54: " + [ $105.constructor.name ]);
                                                     }))(function (v1) {
                                                         return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))(Data_String.joinWith(", ")(v1));
                                                     });
@@ -1523,8 +1528,8 @@ var renderModule = function (systemST) {
                                             });
                                         });
                                     };
-                                    if ($33["value0"][1].value0 === "scripts") {
-                                        return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))("\x0ascripts " + $33["value0"][2].value0);
+                                    if ($36["value0"][1].value0 === "scripts") {
+                                        return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))("\x0ascripts " + $36["value0"][2].value0);
                                     };
                                     return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))("\x0a" + line);
                                 };
@@ -1544,16 +1549,16 @@ var renderModule = function (systemST) {
                         return function (mod) {
                             return function (line) {
                                 var rgx = Data_String_Regex_Unsafe.unsafeRegex("modules \\{([^\\{\\}]*)\\}")(Data_String_Regex_Flags.noFlags);
-                                var $119 = Data_String_Regex.match(rgx)(line);
-                                if ($119 instanceof Data_Maybe.Just && ($119.value0.length === 2 && ($119["value0"][0] instanceof Data_Maybe.Just && ($119["value0"][1] instanceof Data_Maybe.Just && $119["value0"][1].value0 === "")))) {
+                                var $129 = Data_String_Regex.match(rgx)(line);
+                                if ($129 instanceof Data_Maybe.Just && ($129.value0.length === 2 && ($129["value0"][0] instanceof Data_Maybe.Just && ($129["value0"][1] instanceof Data_Maybe.Just && $129["value0"][1].value0 === "")))) {
                                     return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))(line);
                                 };
-                                if ($119 instanceof Data_Maybe.Just && ($119.value0.length === 2 && ($119["value0"][0] instanceof Data_Maybe.Just && $119["value0"][1] instanceof Data_Maybe.Just))) {
-                                    return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Data_Traversable.traverse(Data_Traversable.traversableArray)(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))(function ($149) {
-                                        return exp(Data_String.split(":")($149));
-                                    })(Data_String.split(",")($119["value0"][1].value0)))(function (v) {
+                                if ($129 instanceof Data_Maybe.Just && ($129.value0.length === 2 && ($129["value0"][0] instanceof Data_Maybe.Just && $129["value0"][1] instanceof Data_Maybe.Just))) {
+                                    return Control_Bind.bind(Control_Monad_Except_Trans.bindExceptT(Control_Monad_Eff.monadEff))(Data_Traversable.traverse(Data_Traversable.traversableArray)(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))(function ($159) {
+                                        return exp(Data_String.split(":")($159));
+                                    })(Data_String.split(",")($129["value0"][1].value0)))(function (v) {
                                         var modS = Data_String.joinWith("\x0a")(v);
-                                        return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))(Data_String.trim(Data_String.replace($119["value0"][0].value0)("")(Data_String.replace($119["value0"][0].value0 + "\x0a")("")(line))) + ("\x0a" + modS));
+                                        return Control_Applicative.pure(Control_Monad_Except_Trans.applicativeExceptT(Control_Monad_Eff.monadEff))(Data_String.trim(Data_String.replace($129["value0"][0].value0)("")(Data_String.replace($129["value0"][0].value0 + "\x0a")("")(line))) + ("\x0a" + modS));
                                     });
                                 };
                                 return Control_Monad_Error_Class.throwError(Control_Monad_Except_Trans.monadErrorExceptT(Control_Monad_Eff.monadEff))("not a module line, dingus");

@@ -559,7 +559,7 @@ post post_hlim {{
   frame = rgb2hsv(frame);
 
 	float inc = (frame.a - DEPTH_INC) / (1.0 - DEPTH_INC);
-	inc = 0.2 * inc;
+	inc = @inc_sc@ * inc;
 
   vec4 c0 = hsv2rgb(vec4(inc + 0.3 * frame_i.x + @hue@, 1.0, 0.5, 1.0));
   vec4 c1 = hsv2rgb(vec4(0.3 * frame_i.x + @hue@ + @spread@ / 2.0, 1.0, @lgv@, 1.0));
@@ -752,7 +752,9 @@ color simple_color {{
 
 color tex_color {{
 	vec2 ofs = mod(@scale@ * wdt.zw, 1.0);
-  seed = texture2D(aux[#0], ofs);
+	float ti = 0.03 * time;
+	vec2 rot = mod(vec2(cos(ti) * ofs.x - sin(ti) * ofs.y, sin(ti) * ofs.x + cos(ti) * ofs.y), 1.0);
+  seed = texture2D(aux[#0], rot);
   seed = rgb2hsv(seed);
 
 	// multiplying the value by w makes things look nice
@@ -761,7 +763,7 @@ color tex_color {{
 	float hofs = 0.0;
 	float l = 0.08 * sqrt(t_z.x * t_z.x + t_z.y * t_z.y);
 	vec4 del = vec4(pal(l, vec3(0.5,0.5,0.5), vec3(0.5,0.5,0.5), vec3(2.0,1.0,0.0), vec3(0.5,0.20,0.25)), 0);
-  seed = hsv2rgb(vec4(time * @spd@ + @rot@ + seed.x + hofs + del.x, @sat@ * seed.y, @val@ * seed.z * w * w, a * seed.a));
+  seed = hsv2rgb(vec4(time * @spd@ + @rot@ + seed.x + hofs + del.x, @sat@ * seed.y, @val@ * seed.z * w, a * seed.a));
 }}
 
 

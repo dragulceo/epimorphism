@@ -1,8 +1,8 @@
 CURRENT PROJECTS:
   - release:
-	  - for paths, show current value in console
-
+		- fix up about page
 		- auto scale performance for framerate or something
+		- spinner could still use some work
 
   - main pattern
     - T

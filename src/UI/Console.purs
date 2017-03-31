@@ -12,16 +12,17 @@ import Data.Maybe (Maybe(Just, Nothing))
 import Data.StrMap (StrMap)
 import Data.String (Replacement(..), joinWith, trim, split, replace)
 import Data.String (Pattern(..)) as S
-import Data.String.Regex.Unsafe (unsafeRegex)
 import Data.String.Regex (match)
 import Data.String.Regex.Flags (noFlags)
+import Data.String.Regex.Unsafe (unsafeRegex)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
-import Paths (runPath)
-import Serialize (unsafeSerialize)
+import Paths (isConstantPath, runPath)
+import Serialize (showCX, unsafeSerialize)
 import System (family, loadLib)
+import Text.Format (format, precision)
 import UIUtil (findElt)
-import Util (real, inj, lg, indentLines, tryRegex, zipI)
+import Util (dbg, indentLines, inj, lg, real, tryRegex, zipI)
 
 foreign import addEventListeners :: forall eff. Eff eff Unit
 
@@ -141,26 +142,54 @@ renderModule systemST modLib mid title pid = do
                     let dt = map trim $ split (S.Pattern ":") x
                     case dt of
                       [var, val] -> do
-                        (Tuple res _) <- runPath systemST.t val
-                        let inp = inj "<span class='consolePar consoleVar' data-mid='%0' data-var='%1' data-val='%2' data-type='par'>%2</span>" [mid, var, (show $ real res)]
+                        let inp = inj "<span class='consolePar consoleVar' data-mid='%0' data-var='%1' data-val='%2' data-type='par'>%2</span>" [mid, var, val]
                         pure $ var <> ": " <> inp
                       _ -> throwError "invalide par fmt :"
                   pure $ joinWith ", " cmp'
                 _ -> throwError "invalid par fmt {"
               let ui = inj "<span class='consoleUI' style='display:none;'>par {%0}</span>" [uiCts]
-              pure $ "\n<span class='consoleUI'>" <> line <> "</span>" <> ui
+              lineCts <- case (match rgx' m1) of
+                (Just [(Just _), (Just cts)]) -> do
+                  let cmp = map trim $ split (S.Pattern ",") cts
+                  cmp' <- flip traverse cmp \x -> do
+                    let dt = map trim $ split (S.Pattern ":") x
+                    case dt of
+                      [var, val] -> do
+                        case isConstantPath val of
+                          true -> pure $ var <> ": " <> val
+                          false -> do
+                            (Tuple res _) <- runPath systemST.t val
+                            let val' = (inj "<span class='consoleVal'>%0</span>" [(format (precision 2) $ real res)])
+                            pure $ inj "%0: (%1)%2" [var, val', val]
+                      _ -> throwError "invalide par fmt :"
+                  pure $ joinWith ", " cmp'
+                _ -> throwError "invalid par fmt {"
+              let line' = inj "par {%0}" [lineCts]
+              pure $ "\n<span class='consoleUI'>" <> line' <> "</span>" <> ui
             "zn" -> do
               let rgx' = unsafeRegex "^\\[(.*)\\]$" noFlags
               uiCts <- case (match rgx' m1) of
                 (Just [(Just _), (Just cts)]) -> do
                   let cmp = map trim $ split (S.Pattern ",") cts
                   let cmp' = flip map (zipI cmp) \(Tuple i c) ->
-                    inj "<span class='consoleZn consoleVar' data-mid='%0' data-var='%1'  data-val='%2' data-type='zn'>%2</span>" [mid, (show i), c]
+                    inj "<span class='consoleZn consoleVar' data-mid='%0' data-var='%1' data-val='%2' data-type='zn'>%2</span>" [mid, (show i), c]
                   pure $ joinWith ", " cmp'
                 _ -> throwError "invalid zn fmt ["
-
               let ui = inj "<span class='consoleUI' style='display:none;'>zn [%0]</span>" [uiCts]
-              pure $ "\n<span class='consoleUI'>" <> line <> "</span>" <> ui
+              lineCts <- case (match rgx' m1) of
+                (Just [(Just _), (Just cts)]) -> do
+                  let cmp = map trim $ split (S.Pattern ",") cts
+                  cmp' <- flip traverse (zipI cmp) \(Tuple i c) -> do
+                    case isConstantPath c of
+                      true -> pure c
+                      false -> do
+                        (Tuple res _) <- runPath systemST.t c
+                        let val' = inj "<span class='consoleVal'>%0</span>" [showCX res]
+                        pure $ inj "(%0)%1" [val', c]
+                  pure $ joinWith ", " cmp'
+                _ -> throwError "invalid zn fmt ["
+              let line' = inj "zn [%0]" [lineCts]
+              pure $ "\n<span class='consoleUI'>" <> line' <> "</span>" <> ui
             "scripts" -> do
               pure $ "\nscripts " <> m1
               --let rgx' = unsafeRegex "^\\[(.*)\\]$" noFlags

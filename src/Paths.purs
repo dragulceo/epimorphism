@@ -5,7 +5,7 @@ import Config (EpiS)
 import Control.Monad.Except.Trans (throwError)
 import Data.Array (uncons)
 import Data.Complex (outCartesian, Cartesian(Cartesian), Polar(Polar), outPolar, Complex)
-import Data.Maybe (Maybe(Just))
+import Data.Maybe (Maybe(..))
 import Data.String (Pattern(..), split, trim)
 import Data.Tuple (Tuple(Tuple))
 import Math (pi, min, cos, floor)
@@ -24,6 +24,11 @@ type PathFunc eff h = Number -> (Array String) -> EpiS eff h (Tuple Complex Bool
 type PathArgs = {spd :: Number, phase :: Number, args :: Array String}
 data PathConfig = PathConfig String
 data Path eff h = Path (PathFunc eff h) PathConfig PathArgs
+
+isConstantPath :: String -> Boolean
+isConstantPath path = case (cxFromString path) of
+  Just _ -> true
+  Nothing -> false
 
 parsePath :: forall eff h. String -> EpiS eff h (Path eff h)
 parsePath dta = do

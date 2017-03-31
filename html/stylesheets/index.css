@@ -69,7 +69,11 @@ body {
 }
 
 .consoleImage, .consoleVar {
-	  color:#2da;
+	  color:#b39;
+}
+
+.consoleVal {
+  color: #906;
 }
 
 .consoleImage:hover, .consoleVar:hover {

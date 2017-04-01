@@ -285,7 +285,7 @@ body {
 
 #loading {
 		position: fixed;
-		background-color:#111;
+		background-color:#000;
 		width:100%;
 		height:100%;
 		z-index:1000;
@@ -293,22 +293,23 @@ body {
 
 #loading_spinner {
 		position:absolute;
-    width:100px; /*image width */
-    height:100px; /*image height */
+    width:350px; /*image width */
+    height:350px; /*image height */
     left:50%;
     top:50%;
-    margin-left:-50px; /*image width/2 */
-    margin-top:-90px; /*image height/2 */
+    margin-left:-175px; /*image width/2 */
+    margin-top:-175px; /*image height/2 */
 }
 
 #loading_txt {
-		text-align:center;
+	text-align:center;
+  font-size:30px;
 		position:absolute;
     width:300px; /*image width */
     height:30px; /*image height */
     left:50%;
     top:50%;
     margin-left:-150px; /*image width/2 */
-    margin-top:10px; /*image height/2 */
+    margin-top:-19px; /*image height/2 */
 		color:white;
 }

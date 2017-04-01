@@ -3,15 +3,15 @@
   <head>
     <title>Epimorphism</title>
 		<style>
-			body {background-color:#555; font-family: helvetica, Geneva, sans-serif;}
+			body {font-size:21px; background-color:#555; font-family: "Open Sans", Helvetica, Arial, sans-serif;line-height: 1.618;}
 			img {width:260px; height:260px;padding:5px 9px;}
 			#center {margin: 0 auto;width: 750px;box-shadow: 10px 10px 5px #333;background-color:#fff;padding:10px 25px 25px 25px;text-align:justify;text-justify: inter-word;}
-			h1, h2, h3 {color: #216; text-decoration:underline}
+			h1, h2, h3 {color: #213; font-family:medium-content-sans-serif-font,"Lucida Grande","Lucida Sans Unicode","Lucida Sans",Geneva,Arial,sans-serif;}
 		</style>
   </head>
   <body>
 		<div id="center">
-			<h2 style="padding:5px;padding-left:0px;"> What is this thing? </h2>
+			<h1 style="padding:0px;padding-left:0px;text-decoration:underline;"> What is this thing? </h1>
 			<img style="width:280px;height:280px;float:right;padding-left:15px;" src="http://i.imgur.com/URvrHuW.jpg"/>
 			<p>
 				Epimorphism is a digital simulation of video feeback, a recursive process wherin a video animation is fed back into itself.  Video feedback is a pretty straightforward concept.  If you take a webcam and hook it up to your computer and then point the webcam at your screen, you see an infinite recursive loop.  In the display, you see a picture of the display.  In that display, you see another picture of the display...
@@ -24,21 +24,22 @@
 			<p>
 				Epimorphism is a steadily evolving stream of video feedback system.  The various ways in which we can bend and twist and process the image and the various images we draw into the system are constantly morphing into each other.  There are so many possible variations of how this happens that its practically impossible for the system to ever repeat - Epimorphism exists in a state of perpetual & endless variation.
 			</p>
-
+			<!--
 			<a href="https://groups.google.com/forum/#!forum/epimorphism/join"> Join the epimorphism mailing list</a>
+!-->
 
-			<h3> Technical details </h3>
+			<h2> Technical details </h2>
 			<img style="float:left;padding-right:15px;"src="http://i.imgur.com/1urWDRi.jpg"/>
 			<p>
-				The current iteration of the project is written largely in PureScript, a dialect of Haskell which transpiles to javascript  The project is open source and can be found <a href="https://github.com/geneshuman/pure_morph"> here</a>.  The PureScript component of Epimorphism acts as the front end for a parallel/high performance computing application which runs directly on the clients graphics hardware via pixel shaders & WebGL.  The frontend of the application is responsible for the WebGL interface, application UI, pixel shader compilation, state evolution, and maintaining and modulating the pattern library.  The backend of the application is responsible for implementing the feedback transfer function.  It is a highly parallel application, wherein the color value of each pixel is computed in its own thread directly on the graphics hardware.  The backend of the application is a highly parameterized system, and the default mode of operation of the system is a random walk through the parameter space; numerical parameters, as well as transfer functions themselves are animated and interpolated by the front end of the software.  Interactive modes of the software are also available, exposing the parameter space to the user (push ~ while the application is running if you're curious :)
+				The current iteration of the project is written largely in <a href="http://www.purescript.org/"> PureScript </a>, a dialect of Haskell which transpiles to javascript  The project is open source and can be found <a href="https://github.com/geneshuman/pure_morph"> here</a>.  The PureScript component of Epimorphism acts as the front end for a parallel/high performance computing application which runs directly on the clients graphics hardware via pixel shaders & WebGL.  It is a highly parallel application, wherein the color value of each pixel is computed in its own thread directly on the graphics hardware.  The backend of the application is a parameterized system,and the default mode of operation of the system is a random walk through the parameter space; numerical parameters, as well as transfer functions themselves are animated and interpolated by the front end of the software.  (push ~ while the application is running if you're curious :)
 			</p>
 			<p>
 				<a href="http://functional-art.org/2016/epimorphism.html"> More technical details </a>
 			</p>
 
-			<h3> History/Future </h3>
+			<h2> History/Future </h2>
 			<p>
-				The software has been in development in some form for ~15 years.  It originally started off as a geodesic dome covered in leds at burning man(in 2001!) and some how organically morphed into this. Significant near term plans for the software include audio responsiveness, a more detailed & user accessible creation UI, and implementing machine learning algorithms to more adeptly navigate the phase space of the software, possibly even tailoring the results to users individual tastes.  An algorithm to ray trace a generalized version of the software in 3 dimensions using distance fields has also been developed but technology is currently lacking.  However back of the envelope calculations suggest that consumer hardware is only about 2 generations away from being able to support this idea :)
+				The software has been in development in some form for ~15 years.  It originally started off as a geodesic dome covered in leds at Burning Man(in 2001!) and some how organically morphed into this. Significant near term plans for the software include audio responsiveness, a more detailed & user accessible creation UI, and implementing machine learning algorithms to more adeptly navigate the phase space of the software, possibly even tailoring the results to users individual tastes.  Generalization of the system to 3 dimensions is also currently conceptually in development.
 			</p>
 			<h2> Gallery </h2>
 			<img style="width:345px;height:345px;" src="http://i.imgur.com/BHS1Zy9.jpg"/>
@@ -46,7 +47,6 @@
 			<img style="width:345px;height:345px;" src="http://i.imgur.com/cMA7yJm.jpg"/>
 			<img style="width:345px;height:345px;" src="http://i.imgur.com/uSfHr6k.jpg"/>
 			<img style="width:345px;height:345px;" src="http://i.imgur.com/LwTzRFz.jpg"/>
-			<img style="width:345px;height:345px;" src="http://i.imgur.com/FemRReH.jpg"/>
 			<img style="width:345px;height:345px;" src="http://i.imgur.com/jIZeQ2h.jpg"/>
 			<br style="clear:both;" />
 

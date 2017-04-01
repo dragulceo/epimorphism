@@ -752,9 +752,9 @@ color simple_color {{
 
 color tex_color {{
 	vec2 ofs = mod(@scale@ * wdt.zw, 1.0);
-	float ti = 0.03 * time;
-	vec2 rot = mod(vec2(cos(ti) * ofs.x - sin(ti) * ofs.y, sin(ti) * ofs.x + cos(ti) * ofs.y), 1.0);
-  seed = texture2D(aux[#0], rot);
+	//float ti = 0.03 * time;
+	//vec2 rot = mod(vec2(cos(ti) * ofs.x - sin(ti) * ofs.y, sin(ti) * ofs.x + cos(ti) * ofs.y), 1.0);
+  seed = texture2D(aux[#0], ofs);
   seed = rgb2hsv(seed);
 
 	// multiplying the value by w makes things look nice

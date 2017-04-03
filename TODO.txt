@@ -14,11 +14,11 @@ CURRENT PROJECTS:
 		/r/generative
 		/r/woahdude
 		/r/trees
+		/r/fractals
 		/r/drugs?
-		/r/electricsheel
+		/r/electricsheep
 		/r/art?
-		/r/abstract art
-		/r/contemporaryart
+		/r/abstract art?
 		facebook
 		websites?
 

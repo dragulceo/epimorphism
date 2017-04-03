@@ -44,7 +44,7 @@ sub {t_expr: 0.5 * (1 - 5 * z * z * z / 3)}
 
 --t_p2 < t_z
 flags {lib, all, all_seed, farm1, farm2}
-sub {t_expr: 1 - z * z}
+sub {t_expr: 0.9*(1 - z * z)}
 
 --t_p3 < t_z
 flags {lib, all, all_seed, farm1, farm2}
@@ -56,7 +56,7 @@ sub {t_expr: z * z}
 
 --t_tp0 < t_z
 flags {lib, all}
-sub {t_expr: 1 - (z * z + tanh(z)) / 2}
+sub {t_expr: 1.2 * (1 - (z * z + tanh(z)) / 2)}
 
 --t_tp1 < t_z
 flags {lib, all}
@@ -95,7 +95,7 @@ flags {lib, all, new}
 sub {t_expr: z * cosh(z)}
 
 --t_f1 < t_z
-flags {lib, all, new}
+flags {lib}
 sub {t_expr: 0.8 * (cosh(z) + z * z + i)}
 
 --t_f2 < t_z
@@ -103,12 +103,12 @@ flags {lib, all, new}
 sub {t_expr: sin(z) * cosh(z)}
 
 --t_f3 < t_z
-flags {lib, all, new}
+flags {lib}
 sub {t_expr: sin(z*z) * sin(z * i)}
 
 --t_f4 < t_z
 flags {lib, all, new}
-sub {t_expr: cos(z) + exp(i * z)}
+sub {t_expr: 0.8 * (cos(z) + exp(i * z))}
 
 --t_f5 < t_z
 flags {lib, all, new}
@@ -124,28 +124,28 @@ sub {t_expr: sin(i * z)}
 
 --t_f8 < t_z
 flags {lib, all, new}
-sub {t_expr: cos(i * z) + z * z}
+sub {t_expr: 0.5 * (cos(i * z) + z * z)}
 
 --t_f9 < t_z
 flags {lib, all, new}
-sub {t_expr: z * tanh(z)}
+sub {t_expr: 0.8 * z * tanh(z)}
 
 --t_f10 < t_z
 flags {lib, all, new}
-sub {t_expr: z*tanh(z)+cos(exp(z))}
+sub {t_expr: 0.9*(z*tanh(z)+cos(exp(z)))}
 
 --t_f11 < t_z
 flags {lib, all, new}
 sub {t_expr: 0.7*(cos(z)+tan(z))*z}
 
 --t_f12 < t_z
-flags {lib, all, new}
+flags {lib}
 sub {t_expr: 0.7 * (z-1)*(z+1)*(z-i)*(z+i)}
 
 --t_f13 < t_z
 flags {lib, all, new}
-sub {t_expr: (cos(z)-1)*(sin(z)+1)}
+sub {t_expr: (0.8 * (cos(z)-1)*(sin(z)+1))}
 
 --t_f14 < t_z
-flags {lib, all, new}
-sub {t_expr: z+i*cos(i*sin(i*z)}
+flags {lib}
+sub {t_expr: z+i*cos(i*sin(i*z))}

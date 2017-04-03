@@ -561,9 +561,9 @@ post post_hlim {{
 	float inc = (frame.a - DEPTH_INC) / (1.0 - DEPTH_INC);
 	inc = @inc_sc@ * inc;
 
-  vec4 c0 = hsv2rgb(vec4(inc + 0.3 * frame_i.x + @hue@, 1.0, 0.5, 1.0));
-  vec4 c1 = hsv2rgb(vec4(0.3 * frame_i.x + @hue@ + @spread@ / 2.0, 1.0, @lgv@, 1.0));
-  vec4 c2 = hsv2rgb(vec4(inc + 0.2 * frame_i.x + @hue@ - @spread@ / 2.0, 1.0, -1.0 * @lgv@, 1.0));
+  vec4 c0 = hsv2rgb(vec4(0.9 + inc + 0.3 * frame_i.x + @hue@, 1.0, 0.5, 1.0));
+  vec4 c1 = hsv2rgb(vec4(0.9 + 0.3 * frame_i.x + @hue@ + @spread@ / 2.0, 1.0, @lgv@, 1.0));
+  vec4 c2 = hsv2rgb(vec4(0.9 + inc + 0.2 * frame_i.x + @hue@ - @spread@ / 2.0, 1.0, -1.0 * @lgv@, 1.0));
 
   vec4 res, r0, r1;
   float f;

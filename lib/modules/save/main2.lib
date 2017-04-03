@@ -23,9 +23,9 @@ modules {t:t_wrap, seed0:seed_wca_anim1, seed1:seed_wca_anim2, seed2:seed_nothin
 
 --t_main2 < t_wrap
 flags {wrap, lib}
-zn [1.0 + 0.0i, 0.0 + 0.0i, 0.0 + 1.1i, 1.0 + 0.0i]
+zn [0.95 + 0.0i, 0.0 + 0.0i, 0.0 + 1.1i, 1.0 + 0.0i]
 modules {t_inner: t_sinh}
-scripts [randomize dly:50 spd:0.04 lib:all dim:vec2 sub:t_inner typ:mod]
+scripts [randomize dly:50 spd:0.04 lib:new dim:vec2 sub:t_inner typ:mod]
 
 --disp_main2 < disp_id
 flags {}

@@ -89,3 +89,63 @@ sub {t_expr: 1.0 / z}
 --t_zti < t_z
 flags {lib, all}
 sub {t_expr: 2.0 * z / tan (z * i)}
+
+--t_f0 < t_z
+flags {lib, all, new}
+sub {t_expr: z * cosh(z)}
+
+--t_f1 < t_z
+flags {lib, all, new}
+sub {t_expr: 0.8 * (cosh(z) + z * z + i)}
+
+--t_f2 < t_z
+flags {lib, all, new}
+sub {t_expr: sin(z) * cosh(z)}
+
+--t_f3 < t_z
+flags {lib, all, new}
+sub {t_expr: sin(z*z) * sin(z * i)}
+
+--t_f4 < t_z
+flags {lib, all, new}
+sub {t_expr: cos(z) + exp(i * z)}
+
+--t_f5 < t_z
+flags {lib, all, new}
+sub {t_expr: 1.3 * cos(sin(z))}
+
+--t_f6 < t_z
+flags {lib, all, new}
+sub {t_expr: 1.3 * cos(i * sin(z))}
+
+--t_f7 < t_z
+flags {lib, all, new}
+sub {t_expr: sin(i * z)}
+
+--t_f8 < t_z
+flags {lib, all, new}
+sub {t_expr: cos(i * z) + z * z}
+
+--t_f9 < t_z
+flags {lib, all, new}
+sub {t_expr: z * tanh(z)}
+
+--t_f10 < t_z
+flags {lib, all, new}
+sub {t_expr: z*tanh(z)+cos(exp(z))}
+
+--t_f11 < t_z
+flags {lib, all, new}
+sub {t_expr: 0.7*(cos(z)+tan(z))*z}
+
+--t_f12 < t_z
+flags {lib, all, new}
+sub {t_expr: (z-1)*(z+1)*(z-i)*(z+i)}
+
+--t_f13 < t_z
+flags {lib, all, new}
+sub {t_expr: (cos(z)-1)*(sin(z)+1)}
+
+--t_f14 < t_z
+flags {lib, all, new}
+sub {t_expr: z+i*cos(i*sin(i*z)}

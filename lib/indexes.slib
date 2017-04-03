@@ -295,5 +295,23 @@ t_inner {{
   (cosh(z) + sinh(z)) / 2
 }}
 
+t_new {{
+	z * cosh(z)
+	0.8 * (cosh(z) + z * z + i)
+	sin(z) * cosh(z)
+	sin(z*z) * sin(z * i)
+	cos(z) + exp(i * z)
+	1.3 * cos(sin(z))
+	1.3 * cos(i * sin(z))
+	sin(i * z)
+	cos(i * z) + z * z
+	z * tanh(z)
+	z*tanh(z)+cos(exp(z))
+	0.7* (cos(z)+tan(z))*z
+	(z-1)*(z+1)*(z-i)*(z+i)
+	(cos(z)-1)*(sin(z)+1)
+  z+i*cos(i*sin(i*z)
+}}
+
 
 

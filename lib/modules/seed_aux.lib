@@ -69,8 +69,8 @@ var seed
 dim vec4
 
 --tex_color < simple_color
-component tex_color
-par {scale: 0.333, spd: 0.0, rot: 0.0, sat:1.0, val:1.0}
+component tex_color_scroll
+par {scale: wave 0.02 0.1 0.33, spd: 0.0, rot: 0.0, sat:1.0, val:1.0, tex_spd: 1.0}
 images [textures/simplegeom/tile_grid1.png]
 
 --tex_color_sc

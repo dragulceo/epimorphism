@@ -16,6 +16,6 @@
 *log.txt*
 *.log
 
-*.png
+/save_server/images/*
 
 *.DS_Store

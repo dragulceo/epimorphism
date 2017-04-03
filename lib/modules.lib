@@ -578,7 +578,7 @@ sub {t_expr: 0.7*(cos(z)+tan(z))*z}
 
 --t_f12 < t_z
 flags {lib, all, new}
-sub {t_expr: (z-1)*(z+1)*(z-i)*(z+i)}
+sub {t_expr: 0.7 * (z-1)*(z+1)*(z-i)*(z+i)}
 
 --t_f13 < t_z
 flags {lib, all, new}

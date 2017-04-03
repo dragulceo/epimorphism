@@ -308,7 +308,7 @@ t_new {{
 	z * tanh(z)
 	z*tanh(z)+cos(exp(z))
 	0.7* (cos(z)+tan(z))*z
-	(z-1)*(z+1)*(z-i)*(z+i)
+	0.7 * (z-1)*(z+1)*(z-i)*(z+i)
 	(cos(z)-1)*(sin(z)+1)
   z+i*cos(i*sin(i*z)
 }}

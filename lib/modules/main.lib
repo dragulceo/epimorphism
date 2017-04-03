@@ -4,6 +4,10 @@ flags {epimorphism, root, dev}
 component main
 modules {application: epimorphism_dev}
 
+--epimorphism_dev_ponies_main < epimorphism_dev_main
+modules {application: epimorphism_dev_ponies}
+
+
 --epimorphism_main < epimorphism_dev_main
 family main
 flags {epimorphism, root}

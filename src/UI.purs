@@ -21,8 +21,9 @@ foreign import doneLoading :: forall eff. Eff eff Unit
 initUIST :: forall eff h. STRef h UIConf -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h SystemConf -> STRef h (SystemST h) -> EpiS (now :: Now | eff) h (STRef h UIST)
 initUIST ucRef ecRef esRef pRef scRef ssRef = do
   let uiST = defaultUIST
-  usRef  <- lift $ newSTRef uiST
-  uiConf <- lift $ readSTRef ucRef
+  usRef   <- lift $ newSTRef uiST
+  uiConf  <- lift $ readSTRef ucRef
+  pattern <- lift $ readSTRef pRef
 
   initLayout uiConf uiST
 
@@ -32,7 +33,8 @@ initUIST ucRef ecRef esRef pRef scRef ssRef = do
   lift $ registerKeyHandler (keyHandler ucRef usRef)
 
   systemST <- lift $ readSTRef ssRef
-  imgLib <- loadLib "all_images" systemST.indexLib "all_images registerAux"
+
+  imgLib <- loadLib pattern.imageLib systemST.indexLib "all_images registerAux"
 
   lift $ registerAuxImages imgLib.lib
 

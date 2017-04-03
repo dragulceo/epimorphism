@@ -8,6 +8,11 @@ includes [header, colorspace, math]
 defaultImageLib default_images
 imageLib all_images
 
+--dev_ponies < dev
+main   epimorphism_dev_ponies_main
+defaultImageLib default_ponies
+imageLib ponies
+
 --farm1 < dev
 main   farm_main
 
@@ -30,6 +35,9 @@ disp  disp_main3
 --ponies < dev
 main  epimorphism_ponies
 disp  disp_id
+defaultImageLib default_ponies
+imageLib ponies
+
 
 --main4 < dev
 main  epimorphism_main4

@@ -73,8 +73,6 @@ component tex_color_scroll
 par {scale: wave 0.02 0.1 0.33, spd: 0.0, rot: 0.0, sat:1.0, val:1.0, tex_spd: 1.0}
 images [textures/simplegeom/tile_grid1.png]
 
---tex_color_sc
-
 --simple_color_anim1 < simple_color
 flags {anim1, anim3}
 par {spd: 0.05, rot: 0.15, sat:1.0, val:1.0}
@@ -104,3 +102,9 @@ flags {}
 flags {lib}
 component fb_color
 par {scale: 1.0, spd: 0.0, rot: 0.0, sat:1.0, val:1.0}
+
+
+--tex_color_ponies < simple_color
+component tex_color
+par {scale: 0.33, spd: 0.0, rot: 0.0, sat:1.0, val:1.0}
+images [textures/ponies_1.png]

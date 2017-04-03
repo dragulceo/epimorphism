@@ -3,6 +3,11 @@ initEngineConf default
 initUIConf dev
 initPattern dev
 
+--dev_ponies
+initEngineConf default
+initUIConf dev
+initPattern dev_ponies
+
 --prod < dev
 initUIConf prod
 initPattern main4

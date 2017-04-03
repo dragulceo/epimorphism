@@ -5,6 +5,13 @@ default_images {{
   textures/default/128-2.png
 }}
 
+default_ponies {{
+  textures/default_ponies/64-1.png
+  textures/default_ponies/64-2.png
+  textures/default_ponies/128-1.png
+  textures/default_ponies/128-2.png
+}}
+
 basic_images {{
   textures/simplegeom/grid_1.png
   textures/simplegeom/grid_2.png
@@ -151,7 +158,6 @@ ponies {{
   textures/ponies/pony36.png
   textures/ponies/pony37.png
   textures/ponies/pony38.png
-  textures/ponies/pony39.png
 }}
 
 images1 {{

@@ -293,12 +293,12 @@ body {
 
 #loading_spinner {
 		position:absolute;
-    width:350px; /*image width */
-    height:350px; /*image height */
+    width:267px; /*image width */
+    height:200px; /*image height */
     left:50%;
     top:50%;
-    margin-left:-175px; /*image width/2 */
-    margin-top:-175px; /*image height/2 */
+    margin-left:-134px; /*image width/2 */
+    margin-top:-135px; /*image height/2 */
 }
 
 #loading_txt {
@@ -310,6 +310,6 @@ body {
     left:50%;
     top:50%;
     margin-left:-150px; /*image width/2 */
-    margin-top:-19px; /*image height/2 */
+    margin-top:65px; /*image height/2 */
 		color:white;
 }

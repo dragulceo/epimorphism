@@ -70,7 +70,7 @@ getClone ssRef pRef mid = do
   pRef' <- case systemST.compPattern of
     Just ref -> pure ref
     Nothing -> do
-      dbg "cloning pattern"
+      -- dbg "cloning pattern"
       pattern' <- clonePattern ssRef pattern
       ref <- lift $ newSTRef pattern'
       lift $ modifySTRef ssRef (\s -> s {compPattern = Just ref})

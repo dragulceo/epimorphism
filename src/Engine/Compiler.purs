@@ -31,7 +31,7 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
 
   case (uncons es.compQueue) of
     Just {head: op, tail: rst} -> do
-      dbg op
+      --dbg op
       done <- case op of
         CompMainShader -> do
           fract <- case stripPrefix (S.Pattern "Windows") es.profile.os of

@@ -4,7 +4,7 @@
 /output/
 /.psci*
 
-/html/index.js
+/html/javascript/index.js
 /html/lib/modules.lib
 /html/lib/components.slib
 /html/lib/indexes.slib

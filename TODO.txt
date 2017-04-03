@@ -2,12 +2,31 @@ CURRENT PROJECTS:
   - release:
 		- auto scale performance for framerate or something
 		- fb color
-		- animate colors a bit
 
   - main pattern
     - T
 	  - SEED
 	  - COLOR still needs work some times
+
+  - to spam
+	  /r/gonwild
+		/r/programmerart
+		/r/generative
+		/r/woahdude
+		/r/trees
+		/r/drugs?
+		/r/electricsheel
+		/r/art?
+		/r/abstract art
+		/r/contemporaryart
+		facebook
+		websites?
+
+		wtil
+		yacht club
+		ooshiney
+		phage?
+
 
 
 NEXT PROJECTS:

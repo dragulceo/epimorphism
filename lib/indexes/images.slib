@@ -69,6 +69,31 @@ all_images {{
   textures/psych/psych_7.png
 }}
 
+geometry {{
+  textures/geometry/geom_1.png
+  textures/geometry/geom_2.png
+  textures/geometry/geom_3.png
+  textures/geometry/geom_4.png
+  textures/geometry/geom_5.png
+  textures/geometry/geom_6.png
+  textures/geometry/geom_7.png
+  textures/geometry/geom_8.png
+  textures/geometry/geom_9.png
+  textures/geometry/geom_10.png
+  textures/geometry/geom_11.png
+  textures/geometry/geom_12.png
+  textures/geometry/geom_13.png
+  textures/geometry/geom_14.png
+  textures/geometry/geom_15.png
+  textures/geometry/geom_16.png
+  textures/geometry/geom_17.png
+  textures/geometry/geom_18.png
+  textures/geometry/geom_19.png
+  textures/geometry/geom_20.png
+  textures/geometry/geom_21.png
+  textures/geometry/geom_22.png
+}}
+
 stoopid {{
   textures/stoopid/hamster.png
   textures/stoopid/mouse.png

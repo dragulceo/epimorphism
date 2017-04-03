@@ -4,7 +4,7 @@ Epimorphism is a psychedelic virtualization of video feedback.  It is written in
 
 The project is live on the web here http://www.epimorphism.com
 
-## Setup
+## Setup - OSX(& Linux, mostly)
 
 - get setup with purescript http://www.purescript.org/learn/getting-started/
 -  Tested & stable with purescript 0.10.7
@@ -19,3 +19,4 @@ The project is live on the web here http://www.epimorphism.com
 ## Useful Commands
  - `~` - development panel
  - `|` - show fps
+ - `\` - clear the framebuffer(if things start spazzing out)

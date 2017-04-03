@@ -7,22 +7,23 @@
 			img {width:260px; height:260px;padding:5px 9px;}
 			#center {margin: 0 auto;width: 750px;box-shadow: 10px 10px 5px #333;background-color:#fff;padding:10px 25px 25px 25px;text-align:justify;text-justify: inter-word;}
 			h1, h2, h3 {color: #213; font-family:medium-content-sans-serif-font,"Lucida Grande","Lucida Sans Unicode","Lucida Sans",Geneva,Arial,sans-serif;}
+			code {font-size:14px; font-weight:bold; border: solid 1px black;  padding:5px; background-color:#ddd}
 		</style>
   </head>
   <body>
 		<div id="center">
-			<h1 style="padding:0px;padding-left:0px;text-decoration:underline;"> What is this thing? </h1>
+			<h1 style="padding:0px;padding-left:0px;text-decoration:underline;"> What Is This Thing? </h1>
 			<img style="width:280px;height:280px;float:right;padding-left:15px;" src="http://i.imgur.com/URvrHuW.jpg"/>
 			<p>
-				Epimorphism is a digital simulation of video feeback, a recursive process wherin a video animation is fed back into itself.  Video feedback is a pretty straightforward concept.  If you take a webcam and hook it up to your computer and then point the webcam at your screen, you see an infinite recursive loop.  In the display, you see a picture of the display.  In that display, you see another picture of the display...
+				Epimorphism is a digital simulation of video feeback, a recursive process wherin a video animation is fed back into itself.  Video feedback is a pretty straightforward concept.  If you take a webcam and hook it up to your computer and then point the webcam at your screen, you get an infinite recursive loop.  In the display, you see a picture of the display.  In that display, you see another picture of the display...
 			</p>
 
 			<p>
-				This project is based on a similar principle, but takes things a few steps further.  Normal video feedback is interesting enough but it lacks in precision, and is fairly limited in what you can do with it.  Epimorphism generalizes the whole process by simulating it; a virtual camera which is pointed at a virtual screen.  We draw something on the screen, and then capture the result.  We bend and twist the picture in a bunch of mathematically interesting ways, and then draw this picture back on the screen.  We then take a picture of that, bend and twist it again, draw that back on the screen, repeating ad infinitum..
+				This project is based on a similar principle, but takes things a few steps further.  Normal video feedback is interesting enough but it lacks in precision, and is fairly limited in what you can do with it.  Epimorphism generalizes the whole process by simulating it; a virtual camera which is pointed at a virtual screen.  We draw something on the screen, and then capture the result.  We bend and twist the picture in a bunch of mathematically interesting ways, and then draw this picture back on the screen, blending it with the previous result.  We then take a picture of that, bend and twist it again, draw and blend that result, repeating ad infinitum..
 			</p>
 
 			<p>
-				Epimorphism is a steadily evolving stream of video feedback system.  The various ways in which we can bend and twist and process the image and the various images we draw into the system are constantly morphing into each other.  There are so many possible variations of how this happens that its practically impossible for the system to ever repeat - Epimorphism exists in a state of perpetual & endless variation.
+				Epimorphism is a steadily evolving stream of video feedback system.  The various ways in which we can bend and twist and process the image and the various images we seed into the system are constantly morphing into each other.  There are so many possible variations of how this happens that its practically impossible for the system to ever repeat - Epimorphism exists in a state of perpetual, endless variation.
 			</p>
 			<!--
 			<a href="https://groups.google.com/forum/#!forum/epimorphism/join"> Join the epimorphism mailing list</a>
@@ -31,7 +32,8 @@
 			<h2> Technical details </h2>
 			<img style="float:left;padding-right:15px;"src="http://i.imgur.com/1urWDRi.jpg"/>
 			<p>
-				The current iteration of the project is written largely in <a href="http://www.purescript.org/"> PureScript </a>, a dialect of Haskell which transpiles to javascript  The project is open source and can be found <a href="https://github.com/geneshuman/pure_morph"> here</a>.  The PureScript component of Epimorphism acts as the front end for a parallel/high performance computing application which runs directly on the clients graphics hardware via pixel shaders & WebGL.  It is a highly parallel application, wherein the color value of each pixel is computed in its own thread directly on the graphics hardware.  The backend of the application is a parameterized system,and the default mode of operation of the system is a random walk through the parameter space; numerical parameters, as well as transfer functions themselves are animated and interpolated by the front end of the software.  (push ~ while the application is running if you're curious :)
+				The current iteration of the project is written largely in <a href="http://www.purescript.org
+/"> PureScript </a>, a dialect of Haskell which transpiles to javascript.  It is an HTML5 application which runs on virtually all platforms, including tablets, and many cell phones.  The project is open source and can be found <a href="https://github.com/geneshuman/pure_morph"> here</a>.  The PureScript component of Epimorphism acts as the front end for a parallel / high performance computing application which runs directly on the clients graphics hardware via pixel shaders & WebGL.  It is a highly parallel application, wherein the color value of each pixel is computed in its own thread directly on the graphics hardware, not on the cpu.  The application is a parameterized system, and the default mode of operation is a random walk through the parameter space; numerical parameters, as well as component functions themselves are animated and interpolated by the front end of the software.  (push ~ while the application is running if you're curious :)
 			</p>
 			<p>
 				<a href="http://functional-art.org/2016/epimorphism.html"> More technical details </a>
@@ -39,7 +41,34 @@
 
 			<h2> History/Future </h2>
 			<p>
-				The software has been in development in some form for ~15 years.  It originally started off as a geodesic dome covered in leds at Burning Man(in 2001!) and some how organically morphed into this. Significant near term plans for the software include audio responsiveness, a more detailed & user accessible creation UI, and implementing machine learning algorithms to more adeptly navigate the phase space of the software, possibly even tailoring the results to users individual tastes.  Generalization of the system to 3 dimensions is also currently conceptually in development.
+				The software has been in development in some form for ~16 years.  It originally started off as a geodesic dome covered in leds at Burning Man(in 2001!) and some how organically morphed into this.  Its been in a somewhat recognizable state for about <a href="http://dbqpdb.deviantart.com/gallery/"> 11 years.</a> Significant near term plans for the software include audio responsiveness, a more detailed & user accessible creation UI, and implementing machine learning algorithms to more adeptly navigate the phase space of the software, possibly even tailoring the results to users individual tastes.  Generalization of the system to 3 dimensions, using VR,  is also currently conceptually in development.
+			</p>
+			<h2> Windows Performance </h2>
+			<p style="font-size:20px;">
+				Unfortunately, the program is slightly choppy on windows, and ther'es really not all that much I can do about it, despite my best efforts.  If you care enough though, there are solutions for both Chrome & Firefox(don't use Edge/IE), but they take a bit of fiddling.  In both, you have to disable angle, an OpenGL -> DirectX conversion library.  You probably shouldn't leave either of these modifications in place. The following instructions are taken from <a href="https://github.com/mrdoob/three.js/wiki/How-to-use-OpenGL-or-ANGLE-rendering-on-Windows"> here. </a>
+			</p>
+			<h4> Chrome </h4>
+			<p style="font-size:18px;">
+				For using OpenGL in Chrome, you need to start it with a command line option:
+				<br/>
+				<code>
+					chrome.exe --use-gl=desktop
+				</code>
+				<br/>
+				You can create a shortcut to chrome with this enabled, so you don't have to enable it globally.  In Windows 10, right click on a new Chrome shortcut, and add the --use-gl=desktop flag to the Target field.  It should look something like this:<br/>
+				<code style="font-size:14px;font-weight:bold">
+					"C:\Program Files(x86)\Google\Chrome\Application\chrome.exe" --use-gl=desktop
+				</code>
+			</p>
+			<h4> Firefox </h4>
+			<p style="font-size:18px;">
+				For using OpenGL in Firefox you need to change the runtime option. Type into address bar:
+				<br/>
+				<code>
+					about:config
+				</code>
+				<br/>
+				Find webgl.disable-angle option and set its value to true. The effect is immediate, Firefox doesn't need to be restarted.  This is global change and you should think about changing it back when you're done, although if epimorphism runs fine, you might not have any problems(and may have some imrpovement) with other graphical HTML5 applications.
 			</p>
 			<h2> Gallery </h2>
 			<img style="width:345px;height:345px;" src="http://i.imgur.com/BHS1Zy9.jpg"/>
@@ -52,11 +81,17 @@
 
 			<br/> <br/>
 			<a href="/me">About Me</a>
-			<br/><br/><br/><br/><br/><br/>
 			<!--
 			<p style='font-size:10px;'> Congratulations, you've found <a href="/ponies"> this </a></p>
 			-->
-
+			<br/><br/><br/>
+			<div>
+				<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+					<input type="hidden" name="cmd" value="_s-xclick">
+					<input type="hidden" name="hosted_button_id" value="HL8HP9U73Q8C6">
+					<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+				</form>
+			</div>
 		</div>
 	</body>
 </html>

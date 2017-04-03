@@ -6,7 +6,7 @@ tPhase 0.0
 tSpd   1.0
 includes [header, colorspace, math]
 defaultImageLib default_images
-imageLib all_images
+imageLib geometry
 
 --farm1 < dev
 main   farm_main

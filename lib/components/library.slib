@@ -4,6 +4,27 @@ precision mediump float;
 #define DEPTH_INC (32.0 / 255.0)
 }}
 
+library additional_funcs {{
+		/*
+float freqData(float x){
+	return texture2D(audioData, vec2(mod(x, 1.0), 0.0)).a;
+}
+
+float timeData(float x){
+	return texture2D(audioData, vec2(mod(x, 1.0), 2.0)).a;
+}
+		*/
+
+float plane_wave(vec2 k, vec2 z, float w, float time){
+
+  float th = (k.x * z.x + k.y * z.y) - w * time;
+	th = mod(th, 1.0);
+  float v = sin(2.0 * PI * th);
+
+  return v;
+}
+}}
+
 library colorspace {{
 /* colorspace library */
 vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d ){

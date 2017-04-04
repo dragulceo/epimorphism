@@ -8,27 +8,6 @@ CURRENT PROJECTS:
 	  - SEED
 	  - COLOR still needs work some times
 
-  - to spam
-	  /r/gonwild
-		/r/programmerart
-		/r/generative
-		/r/woahdude
-		/r/trees
-		/r/fractals
-		/r/drugs?
-		/r/electricsheep
-		/r/art?
-		/r/abstract art?
-		facebook
-		websites?
-
-		wtil
-		yacht club
-		ooshiney
-		phage?
-
-
-
 NEXT PROJECTS:
 		- could start whole application in global image loading callbacks
 

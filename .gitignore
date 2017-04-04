@@ -5,9 +5,9 @@
 /.psci*
 
 /html/javascript/index.js
-/html/lib/modules.lib
-/html/lib/components.slib
-/html/lib/indexes.slib
+lib/modules.lib
+lib/components.slib
+lib/indexes.slib
 
 *~
 *.cache

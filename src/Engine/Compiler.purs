@@ -8,7 +8,7 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (length, uncons)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.String (stripPrefix)
 import Data.String (Pattern(..)) as S
 import Data.Tuple (fst, Tuple(Tuple))
@@ -34,9 +34,9 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
       dbg op
       done <- case op of
         CompMainShader -> do
-          fract <- case stripPrefix (S.Pattern "Windows") es.profile.os of
-            Just _ -> pure Nothing
-            Nothing -> pure $ Just engineConf.fract
+          let no_fract = es.profile.angle ||
+                         (isJust $ stripPrefix (S.Pattern "Windows") es.profile.os)
+          let fract = if no_fract then Nothing else Just engineConf.fract
           Tuple main aux <- parseMain systemST pattern fract
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainSrc = Just main, auxImages = Just aux}})
           pure false

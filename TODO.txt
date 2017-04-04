@@ -1,19 +1,8 @@
-CURRENT PROJECTS:
-  - release:
-		- auto scale performance for framerate or something
-		- fb color
-
-  - main pattern
-    - T
-	  - SEED
-	  - COLOR still needs work some times
-
-NEXT PROJECTS:
-		- could start whole application in global image loading callbacks
-
-  - release?
-    - kickstarter for audio responsiveness?
-		- ipad?
+PROJECTS:
+	- async
+	  - lib requests
+		- image requests
+		- db requests
 
 	- restructure data
 		- modules are instances of components - with specific values for variables & scripts
@@ -28,12 +17,11 @@ NEXT PROJECTS:
 	    - merge configs & states?
 		  - what goes in config, what goes into states?
 		- be better about reloading objects after refs might change
-
-	- pattern:
-		- patternRefPool?
-    - make patterns modules/pattern level scripts?
-	  - put pattern into systemST, patternRefPool.  stop passing pattern around
-	  - interpolating between patterns?
+	  - pattern:
+		  - patternRefPool?
+      - make patterns modules/pattern level scripts?
+	    - put pattern into systemST, patternRefPool.  stop passing pattern around
+	    - interpolating between patterns?
 
 	- database support
 	  - which database?
@@ -47,16 +35,6 @@ NEXT PROJECTS:
   	  - check for duplicates when saving (id = hash of contents?)
       - namespace collisions detection
 
-	- more importing/compiling
-		- WINDOWS SUCKS
-		- batch compilation?
-		- cleanup
-		- MISC
-		  - could maybe clean up switch a bit more (remove imports/purges, combine methods)
-		  - maybe module.modules should be [SubModule = SubLib String | SubPool String] or something
-      - module/submodule cycles??
-			- only way to modify tree is via switch?
-
 	- UI
 	  - basic idea is that all db & data modifications happen through UI
 		- but we need to completely rework how the ui happens.
@@ -68,10 +46,40 @@ NEXT PROJECTS:
 		  - https://ace.c9.io/#nav=about
 			- show shader source in tab
 
+	- more importing/compiling
+		- WINDOWS SUCKS - OSX Nvidia 640M?
+		- batch compilation?
+		- cleanup
+		- MISC
+		  - could maybe clean up switch a bit more (remove imports/purges, combine methods)
+		  - maybe module.modules should be [SubModule = SubLib String | SubPool String] or something
+      - module/submodule cycles??
+			- only way to modify tree is via switch?
+
+  - main pattern
+    - T
+	  - SEED
+	  - COLOR still needs work some times
+		- integrate fb color into main
+		- framed images
+		- different w's
+
+  - misc
+	  - auto scale performance for framerate or something
+	  - could start whole application in global image loading callbacks
+
+  - exposure
+	  - codame
+		- priceless
+		- burningman?
+		- museums?
+		- twitter
+		- dore
+
 -------------------------------- BACKLOG --------------------------------
 
 BUGS:
-	- change resolution during switching error?
+  - value should be main, vert, or disp when changing vals sometimes
   - black blobs in ios
   - freezing spinner (i think its the synchronous get requests for lib)
   - firefox WebGL: texImage2D: conversion requires pixel reformatting (maybe non-issue)
@@ -82,7 +90,7 @@ BUGS:
   - weird when opening console in fullscreen
   - shader indentation issues with switching & in general
   - error handling for failing to enter fullscreen mode
-  - number parsing flakey? how so?
+  - number parsing flakey? how so? floating point?
 
 PERF:
   - zoom out performance problem.  unclear what the deal is.  really bad with 1/z(cache something or other?)
@@ -107,20 +115,18 @@ SYSTEM:
   - prevent default in ui.js
   - make serializable a class
   - remote control (webui, websockets, etc)
-  - currently manually implementing GL.repeat for aux
   - compiler substitutions %XXXX%, etc can still cause errors?  dont remember what kind
   - investigate dsl for scripts
   - engine stability/lost context - https://www.khronos.org/registry/webgl/extensions/WEBGL_lose_context/
   - main & disp share includes
   - preprocesser malfunctions give weird errors
-	- https://www.khronos.org/registry/webgl/extensions/WEBGL_debug_shaders/ - gets a host translated version of the shader (GLSL ES, HLSL)
 	- chrome/ff shader debugger/editor
   - better engine error checking/handling
 	- get rid of if statements ins seed_w & clean all of that up
 
 FEATURE IDEAS:
 	- optional increase of bit depth - half float, etc (works?  not obvious is better; half_float = 36193)
-	- shader precision optimization?
+	- shader precision optimization? mediump, highp, etc
   - blend maps!! variable interpolation
 	- catagorize transformations:
   	- symmetries, is_inversion, scale, periodic?, rational?, accumulation points, empty regions?, elementary, custom?
@@ -147,6 +153,7 @@ NO CLUE:
   - saving images loses bit depth??
   - weird divide by zero issue - glitch in content
   - maybe pixel alignment issues with images?
+	- change resolution during switching error?
 
 
 MATH:

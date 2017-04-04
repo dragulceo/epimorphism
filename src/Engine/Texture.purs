@@ -30,8 +30,8 @@ newTex = do
   ctx <- ask
   tex <- createTexture
   liftEff $ GL.bindTexture ctx GLE.texture2d tex
-  liftEff $ GL.texParameteri ctx GLE.texture2d GLE.textureWrapS GLE.clampToEdge
-  liftEff $ GL.texParameteri ctx GLE.texture2d GLE.textureWrapT GLE.clampToEdge
+  liftEff $ GL.texParameteri ctx GLE.texture2d GLE.textureWrapS GLE.repeat
+  liftEff $ GL.texParameteri ctx GLE.texture2d GLE.textureWrapT GLE.repeat
   liftEff $ GL.texParameteri ctx GLE.texture2d GLE.textureMinFilter GLE.linear
   liftEff $ GL.texParameteri ctx GLE.texture2d GLE.textureMagFilter GLE.linear
   -- use mipmaps?

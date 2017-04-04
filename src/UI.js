@@ -46,10 +46,10 @@ exports.addGlobalEventListeners = function(handler) {
 			} else {
 				$('#exitFullScreen').addClass('hide');
 				$('#enterFullScreen').removeClass('hide');
+				$("#menu-icon").fadeIn("slow");
 			}
+			$("#menuContainer").fadeOut("slow");
 			handler('fullWindow')();
-
-			closeMenu();
 		};
 
 		$(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', fsHandler);

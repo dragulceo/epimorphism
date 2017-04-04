@@ -1,0 +1,26 @@
+### SystemConf
+id dev
+parent
+flags []
+props {}
+initEngineConf default
+initUIConf dev
+initPattern dev
+
+### SystemConf
+id prod
+parent
+flags []
+props {}
+initEngineConf default
+initUIConf prod
+initPattern main4
+
+### SystemConf
+id analysis
+parent
+flags []
+props {}
+initEngineConf default
+initUIConf dev
+initPattern analysis

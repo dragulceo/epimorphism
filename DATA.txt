@@ -1,0 +1,186 @@
+DATA - SECTION:
+  - engine_conf
+	  - id
+		- flags/props
+		- org
+	  - *
+
+	- ui_conf
+	  - id
+		- flags/props
+		- org
+	  - *
+
+	- system_conf
+	  - id
+		- flags/props
+		- org
+	  - engine_conf
+		- ui_conf
+		- pattern?
+		- *
+
+  - pattern
+	  - id
+		- flags/props
+		- org
+		- vert/main/disp?
+		- vertC/mainC/dispC
+		- scripts
+		- image libraries
+		- tSpd
+		- *
+
+  - module
+	  - id
+		- flags/props
+		- org
+		- ref_name (id changes on import, so keep the name in the object?)
+		- component_id
+		- imageLib
+		- scripts
+		- modules
+		- par/zn
+		- images
+		- sub
+
+  - component
+	  - id
+		- flags/props
+		- org
+		- family_id
+		- {module:family, ..}
+		- default_module
+		- code
+		- includes
+		- args? [name:dim?]
+
+  - family
+    - id
+		- flags/props
+		- org
+		- dim
+		- default_component
+
+  - includes (individual function, or groups?)
+	  - id
+		- org
+		- flags/props
+		- code
+
+  - index
+	  - id
+		- org
+		- flags/props
+		- [val(flags/props?), ..]
+
+DATA - NON SECTION
+  - corpus
+	  - id/date
+		- flags/props
+
+  - textures
+	  - id
+		- flags/props
+		- image itself
+
+  - screenshot?
+
+
+  - components should be pure?
+		- TEST - components as (dynamic)functions as opposed to inlined
+
+  - REF POOL
+	  - everything is a reference now, no separate libraries for live/imported code
+
+  - basically, going to build a library/database
+		- mutation happens via the ui & via scripts.  scripts only change modules
+		- so we don't quite import, we just copy.
+			- when copying we generate new ids
+		  - modules are also a tree, so we have to copy the whole tree
+		  - keep reference to original module?  dont have any better idea
+			- also mark the module as live
+		- there are special modules in the library that are 'live'
+
+    - do we actually get objects, or just properties?
+		- need to be able to write
+		- then serialize/deserialize to disk
+
+
+	- patterns?
+	  - no switching between patterns.
+		- get rid of main modules, just app.  patterns are main(no vars, just children)
+		- how to sync scripts across main & disp
+		  - pattern scripts?  this is a general problem though, dont need to solve it here
+		- generalize pipeline? - later
+		- image libraries?
+			- should we be able to change image libraries? yes, but not now
+			  - yes, but how?
+
+
+- how do phases work again?  do we need module level phases
+
+
+
+
+DATA STRUCTURE:
+  - need to return typed data
+	- reads by id/data type/flags/props
+	- is org a prop?
+	  - org is basically just the folder it lives in, maybe part of the name
+	- needs to either return a raw value(int string, etc), or a section
+	- needs to support copying of everything (deep vs shallow?)
+	- needs to support updates by id (deep vs shallow?)
+	- need to delete by id (deep vs shallow?)
+	- all writes happen via either the UI or a script
+
+  - modules are special, cloning, etc can be separate
+	  - needs to support deep copying of modules
+
+  - use a db, or create my own?
+	  - at the very least, I'll need a typed wrapper
+
+  - readers:
+	  - findType(id)
+		  - is (find(id) :: Type) a possibility?
+		- searchType({id, flags, props})
+		- follow chains?  meh
+		  - findType(id).pattern.disp?
+
+	- writers:
+		- saveType(obj)
+		- deleteType(id)
+
+  - serializers:
+	  - importAll
+		- serializeAll
+
+ - BUILD MY OWN VS DB
+   - USE DB
+	   - how to handle typing?
+		 - slightly more general
+		 - auto remote sync?
+		 - direct modification might be complex
+		 - does it matter, as long as the interface stays the same?
+
+
+
+
+
+
+
+
+DATABASE THOUGHTS:
+  - Total synchronization of local & remote dbs.  Writes manually pushed.
+
+VARIOUS CLASSES OF DATA:
+  - core epimorphism library
+	- user generated.
+	- orgs -> orginization
+
+NO DATABASE!
+  - still need a server
+	  - get all data
+	  - backup & replace data
+
+  - need some kind of server.  will make writes/updates/deletes manageable

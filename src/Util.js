@@ -52,8 +52,9 @@ exports.requestAnimationFrame = function(func){
 	};
 };
 
-window.lgCnt = 0;
 exports.tLg = function tLg(x) {
+	if(typeof window.lgCnt == 'undefined')
+		window.lgCnt = 0;
 	if(window.lgCnt < 10)
 		console.log(x);
 	window.lgCnt = window.lgCnt + 1;

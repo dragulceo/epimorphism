@@ -16,7 +16,7 @@ import Data.Maybe (Maybe(..))
 import Data.StrMap (StrMap)
 import Data.String (Pattern(..), split, joinWith)
 import Data.String.Regex (Regex, regex)
-import Data.String.Regex.Flags (noFlags)
+import Data.String.Regex.Flags (RegexFlags(..), noFlags)
 import Data.Tuple (fst, Tuple(..))
 import Graphics.Canvas (CANVAS)
 
@@ -126,6 +126,12 @@ tryRegex :: forall eff. String -> Epi eff Regex
 tryRegex s = case regex s noFlags of
     Right x -> pure x
     Left _ -> throwError "Invalid Regex"
+
+tryRegex' :: forall eff. String -> RegexFlags -> Epi eff Regex
+tryRegex' s flags = case regex s flags of
+    Right x -> pure x
+    Left _ -> throwError "Invalid Regex"
+
 
 fromJustE :: forall a eff. Maybe a -> String -> Epi eff a
 fromJustE (Just x) _  = pure x

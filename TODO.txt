@@ -1,5 +1,7 @@
 PROJECTS:
-	- async
+	- complex number library show hack
+
+	- async (AFF?)
 	  - lib requests
 		- image requests
 		- db requests
@@ -67,6 +69,8 @@ PROJECTS:
   - misc
 	  - auto scale performance for framerate or something
 	  - could start whole application in global image loading callbacks
+		- some kind of error reporting
+		- menu available in dev
 
   - exposure
 	  - codame
@@ -75,6 +79,9 @@ PROJECTS:
 		- museums?
 		- twitter
 		- dore
+		- Scenario? (https://itunes.apple.com/us/app/scenario/id423444193?mt=12)
+		- Chrome Experiments
+		- Chrome Web store (https://developer.chrome.com/webstore/get_started_simple)
 
 -------------------------------- BACKLOG --------------------------------
 
@@ -100,7 +107,6 @@ SYSTEM:
   - do something smart if not enough resources (uniforms, tex, etc)
   - need to define funcs in main - planewave, etc
   - better deploy scripts
-	- complex number library show hack
 	- consolidate remote lib requests
 
   - scripts
@@ -152,7 +158,7 @@ FUTURE:
 NO CLUE:
   - saving images loses bit depth??
   - weird divide by zero issue - glitch in content
-  - maybe pixel alignment issues with images?
+p  - maybe pixel alignment issues with images?
 	- change resolution during switching error?
 
 

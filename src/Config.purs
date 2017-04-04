@@ -6,6 +6,7 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (ExceptT)
 import Control.Monad.ST (STRef, ST)
 import DOM (DOM)
+import Data.Library (Library)
 import Data.Maybe (Maybe(..))
 import Data.Set (union, Set)
 import Data.StrMap (StrMap, empty)
@@ -15,7 +16,6 @@ import Graphics.WebGL.Types (WebGLProgram, WebGLTexture, WebGLFramebuffer, WebGL
 
 type Epi eff a = ExceptT String (Eff (canvas :: CANVAS, dom :: DOM | eff)) a
 type EpiS eff h a = Epi (st :: ST h | eff) a
-
 
 data SchemaEntryType = SE_St | SE_N | SE_I | SE_B | SE_S | SE_A_St | SE_A_Cx | SE_M_N | SE_M_St
 data SchemaEntry = SchemaEntry SchemaEntryType String
@@ -32,7 +32,11 @@ type SystemConf = {
 
 systemConfSchema :: Schema
 systemConfSchema = [
-    SchemaEntry SE_St "initEngineConf"
+    SchemaEntry SE_St "id"
+  , SchemaEntry SE_St "flags"
+  , SchemaEntry SE_St "props"
+  , SchemaEntry SE_St "parent"
+  , SchemaEntry SE_St "initEngineConf"
   , SchemaEntry SE_St "initUIConf"
   , SchemaEntry SE_St "initPattern"
   , SchemaEntry SE_St "seed"
@@ -55,6 +59,7 @@ type SystemST h = {
   , indexLib :: StrMap Index
   , moduleRefPool :: StrMap (STRef h Module)
   , compPattern :: Maybe (STRef h Pattern) -- this is a bit weird
+  , library :: Maybe (Library h)
 }
 
 defaultSystemST :: forall h. SystemST h
@@ -75,6 +80,7 @@ defaultSystemST = {
   , componentLib: empty
   , indexLib: empty
   , compPattern: Nothing
+  , library: Nothing
 }
 
 -- Engine
@@ -88,7 +94,11 @@ type EngineConf = {
 
 engineConfSchema :: Schema
 engineConfSchema = [
-    SchemaEntry SE_I "kernelDim"
+    SchemaEntry SE_St "id"
+  , SchemaEntry SE_St "flags"
+  , SchemaEntry SE_St "props"
+  , SchemaEntry SE_St "parent"
+  , SchemaEntry SE_I "kernelDim"
   , SchemaEntry SE_I "fract"
   , SchemaEntry SE_I "numAuxBuffers"
   , SchemaEntry SE_B "audioAnalysisEnabled"
@@ -152,7 +162,11 @@ type UIConf = {
 
 uiConfSchema :: Schema
 uiConfSchema = [
-    SchemaEntry SE_St "canvasId"
+    SchemaEntry SE_St "id"
+  , SchemaEntry SE_St "flags"
+  , SchemaEntry SE_St "props"
+  , SchemaEntry SE_St "parent"
+  , SchemaEntry SE_St "canvasId"
   , SchemaEntry SE_St "consoleId"
   , SchemaEntry SE_St "fpsId"
   , SchemaEntry SE_B  "showFps"
@@ -190,6 +204,19 @@ type Module = {
   , libName   :: String
 }
 
+componentSchema :: Schema
+componentSchema = [
+    SchemaEntry SE_St "id"
+  , SchemaEntry SE_St "flags"
+  , SchemaEntry SE_St "props"
+  , SchemaEntry SE_St "parent"
+  , SchemaEntry SE_St "family_ref"
+  , SchemaEntry SE_St "def_mod_ref"
+  , SchemaEntry SE_M_St "children"
+  , SchemaEntry SE_St "code"
+  , SchemaEntry SE_A_St "includes"
+]
+
 moduleSchema :: Schema
 moduleSchema = [
     SchemaEntry SE_St "component"
@@ -206,6 +233,7 @@ moduleSchema = [
   , SchemaEntry SE_St "dim"
   , SchemaEntry SE_St "libName"
 ]
+
 
 type Pattern = {
     vert :: String

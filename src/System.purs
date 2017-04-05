@@ -1,15 +1,14 @@
 module System where
 
 import SLibrary
-import Config (Module, EpiS, moduleSchema, patternSchema, uiConfSchema, engineConfSchema, Epi, SystemST, defaultSystemST)
-import Data.Library (Schema)
+import Config (Module, EpiS, moduleSchema, patternSchema, engineConfSchema, Epi, SystemST, defaultSystemST)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Data.Array (concat, foldM, sort, snoc)
 import Data.Either (Either(..))
 import Data.Foldable (foldl)
-import Data.Library (Library)
+import Data.Library (Library, Schema)
 import Data.List (toUnfoldable)
 import Data.Maybe (Maybe(..))
 import Data.Serialize (parseLibData)
@@ -30,7 +29,6 @@ initSystemST host = do
 
   -- initialize libraries
   engineConfLib <- buildLib engineConfSchema $ host <> "/lib/engine_conf.lib"
-  uiConfLib     <- buildLib uiConfSchema     $ host <> "/lib/ui_conf.lib"
   moduleLib     <- buildLib moduleSchema     $ host <> "/lib/modules.lib"
   patternLib    <- buildLib patternSchema    $ host <> "/lib/patterns.lib"
 
@@ -39,7 +37,6 @@ initSystemST host = do
 
   pure $ defaultSystemST {
       engineConfLib = engineConfLib
-    , uiConfLib     = uiConfLib
     , moduleLib     = moduleLib
     , patternLib    = patternLib
     , componentLib  = componentLib

@@ -1,13 +1,14 @@
 module Console where
 
 import Prelude
-import Config (EpiS, moduleSchema, Module, Pattern, SystemST, UIST, UIConf)
+import Config (EpiS, moduleSchema, Module, Pattern, SystemST, UIST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (readSTRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array ((!!), length, (..), (:), filter, partition)
 import Data.DOM.Simple.Element (setInnerHTML)
+import Data.Library (Library(..), getUIConfD)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.StrMap (StrMap)
 import Data.String (Replacement(..), joinWith, trim, split, replace)
@@ -26,14 +27,15 @@ import Util (dbg, indentLines, inj, lg, real, tryRegex, zipI)
 
 foreign import addEventListeners :: forall eff. Eff eff Unit
 
-renderConsole :: forall eff h. UIConf -> UIST -> SystemST h -> Pattern -> EpiS eff h Unit
-renderConsole uiConf uiST systemST pattern = do
+renderConsole :: forall eff h. UIST -> SystemST h -> Pattern -> Library h -> EpiS eff h Unit
+renderConsole uiST systemST pattern lib = do
+  uiConfD  <- getUIConfD lib "renderConsole"
   dsmDiv <- findElt "debugMain"
-  str0 <- renderModule systemST uiConf.uiCompLib pattern.main "MAIN" Nothing
+  str0 <- renderModule systemST uiConfD.uiCompLib pattern.main "MAIN" Nothing
   lift $ setInnerHTML str0 dsmDiv
 
   dsdDiv <- findElt "debugDisp"
-  str1 <- renderModule systemST uiConf.uiCompLib pattern.disp "DISP" Nothing
+  str1 <- renderModule systemST uiConfD.uiCompLib pattern.disp "DISP" Nothing
   lift $ setInnerHTML str1 dsdDiv
 
   lift $ addEventListeners

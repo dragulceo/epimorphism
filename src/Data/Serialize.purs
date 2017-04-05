@@ -1,14 +1,14 @@
 module Data.Serialize where
 
 import Prelude
-import Config (engineConfSchema, uiConfSchema)
+import Config (engineConfSchema)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (cons, filter, length, replicate, uncons, zip)
 import Data.Array (foldM) as A
-import Data.Library (Epi, EpiS, Component(..), EngineConf(..), SystemConf(..), UIConf(..), Index, Library(..), Schema, SchemaEntry(..), SchemaEntryType(..), indexSchema, systemConfSchema, componentSchema)
+import Data.Library (Epi, EpiS, Component(..), EngineConf(..), SystemConf(..), UIConf(..), Index, Library(..), Schema, SchemaEntry(..), SchemaEntryType(..), indexSchema, systemConfSchema, uiConfSchema, componentSchema)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Set (Set, empty) as Set
 import Data.StrMap (StrMap, empty, insert, lookup, thawST)
@@ -139,7 +139,8 @@ parseLibData libData = do
     , moduleLib:     ml
     , imageLib:      il
     , sectionLib:    sl
-    }
+    , system:        Nothing
+  }
 
   objs <- S.foldM mapRefById empty strobjs
   S.foldM instantiateChunk lib objs

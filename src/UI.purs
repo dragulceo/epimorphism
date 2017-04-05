@@ -2,7 +2,7 @@ module UI where
 
 import Prelude
 import Command (command)
-import Config (UIST, UIConf, EpiS, SystemST, Pattern, EngineST, EngineConf, defaultUIST)
+import Config (UIST, EpiS, SystemST, Pattern, EngineST, EngineConf, defaultUIST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, readSTRef, newSTRef)
@@ -22,11 +22,12 @@ foreign import doneLoading :: forall eff. Eff eff Unit
 initUIST :: forall eff h. STRef h UIConf -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h (SystemST h) -> Library h -> EpiS (now :: Now | eff) h (STRef h UIST)
 initUIST ucRef ecRef esRef pRef ssRef lib = do
   let uiST = defaultUIST
+  uiConfD  <- getUIConfD lib "initUIST"
+
   usRef   <- lift $ newSTRef uiST
-  uiConf  <- lift $ readSTRef ucRef
   pattern <- lift $ readSTRef pRef
 
-  initLayout uiConf uiST
+  initLayout uiST lib
 
   let handler = command ucRef usRef ecRef esRef pRef ssRef lib
   lift $ addGlobalEventListeners handler

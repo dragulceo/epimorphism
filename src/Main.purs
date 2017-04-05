@@ -2,15 +2,14 @@ module Main where
 
 import Prelude
 import Compiler (compileShaders)
-import Config (PMut(PMutNone, PMut), SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, UIConf, CompOp(..))
+import Config (PMut(PMutNone, PMut), SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, CompOp(..))
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
 import Data.Array (null, updateAt, foldM, sort, concatMap, fromFoldable)
 import Data.Int (round, toNumber)
-import Data.Library (SystemConf(..))
-import Data.Library (Library, findLib)
+import Data.Library (SystemConf(..), UIConf(..), Library, getUIConfD, getSystemConfD)
 import Data.Maybe (isNothing, fromMaybe, Maybe(Nothing, Just))
 import Data.Set (member)
 import Data.StrMap (insert, values, keys, lookup)
@@ -31,8 +30,7 @@ host :: String
 host = ""
 
 type State h = {
-    ucRef :: STRef h UIConf
-  , usRef :: STRef h UIST
+    usRef :: STRef h UIST
   , ssRef :: STRef h (SystemST h)
   , ecRef :: STRef h EngineConf
   , esRef :: STRef h EngineST
@@ -51,13 +49,13 @@ getSysConfName = do
 
 
 initState :: forall eff h. SystemST h -> Library h -> EpiS (now :: Now | eff) h (State h)
-initState systemST lib = do
+initState systemST lib'@(Library libVar@{}) = do
   --  init config
   systemName <- lift $ getSysConfName
-
+  let lib = Library libVar{system = Just systemName}
   --dbg lib
 
-  (SystemConf _ systemConfD) <- findLib lib systemName "init system"
+  systemConfD <- getSystemD lib "init system"
 
   seed <- case systemConfD.seed of
     "" -> do
@@ -74,16 +72,16 @@ initState systemST lib = do
   cookie_profile <- lift $ getProfileCookie
 
   engineConf <- case (lookup cookie_profile systemST.engineConfLib) of
-    Nothing -> loadLib systemConfD.initEngineConf systemST.engineConfLib "init engine"
+    Nothing -> loadLib systemConfD.engineConf systemST.engineConfLib "init engine"
     (Just d) -> pure d
 
-  uiConf     <- loadLib systemConfD.initUIConf systemST.uiConfLib "init ui"
-  pattern    <- loadLib systemConfD.initPattern systemST.patternLib "init pattern"
+  uiConfD <- getUIConfD lib
+
+  pattern <- loadLib systemConfD.pattern systemST.patternLib "init pattern"
 
   -- build strefs
   ssRef <- lift $ newSTRef systemST
   ecRef <- lift $ newSTRef engineConf
-  ucRef <- lift $ newSTRef uiConf
   pRef  <- lift $ newSTRef pattern
 
   -- load image libraries
@@ -96,19 +94,21 @@ initState systemST lib = do
   systemST' <- lift $ readSTRef ssRef
 
   -- init engine & ui states
-  esRef <- initEngineST engineConf systemST' lib uiConf.canvasId Nothing
-  usRef <- initUIST ucRef ecRef esRef pRef ssRef lib
+  esRef <- initEngineST engineConf systemST' lib uiConfD.canvasId Nothing
+  usRef <- initUIST ecRef esRef pRef ssRef lib
 
-  pure {ucRef, usRef, ssRef, ecRef, esRef, pRef, lib}
+  pure {usRef, ssRef, ecRef, esRef, pRef, lib}
 
 
 animate :: forall h. (State h) -> Eff (canvas :: CANVAS, dom :: DOM, now :: Now, st :: ST h) Unit
 animate state = handleError do
   t0 <- lift $ now
   -- unpack state
-  {ucRef, usRef, ssRef, ecRef, esRef, pRef, lib} <- pure state
+  {usRef, ssRef, ecRef, esRef, pRef, lib} <- pure state
 
-  uiConf     <- lift $ readSTRef ucRef
+  (SystemConf _ systemConfD) <- findLib lib systemName "animate system"
+  (UIConf _ uiConfD) <- findLib lib systemName "animate uiConf"
+
   uiST       <- lift $ readSTRef usRef
   systemST   <- lift $ readSTRef ssRef
   engineConf <- lift $ readSTRef ecRef
@@ -126,9 +126,9 @@ animate state = handleError do
   lift $ modifySTRef ssRef (\s -> s {t = t', lastTimeMS = Just currentTimeMS})
 
   -- fps
-  when (systemST.frameNum `mod` uiConf.uiUpdateFreq == 0) do
+  when (systemST.frameNum `mod` uiConfD.uiUpdateFreq == 0) do
     let lastFpsTimeMS = fromMaybe currentTimeMS systemST.lastFpsTimeMS
-    let fps = round $ (toNumber uiConf.uiUpdateFreq) * 1000.0 / (currentTimeMS - lastFpsTimeMS)
+    let fps = round $ (toNumber uiConfD.uiUpdateFreq) * 1000.0 / (currentTimeMS - lastFpsTimeMS)
     lift $ modifySTRef ssRef (\s -> s {lastFpsTimeMS = Just currentTimeMS, fps = Just fps})
     pure unit
 
@@ -175,7 +175,7 @@ animate state = handleError do
   t4 <- lift $ now
 
   -- update ui
-  updateLayout uiConf uiST systemST'' pattern' false
+  updateLayout uiST systemST'' pattern' lib false
   t5 <- lift $ now
 
   -- request next frame

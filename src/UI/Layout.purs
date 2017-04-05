@@ -1,38 +1,40 @@
 module Layout where
 
 import Prelude
-import Config (EpiS, Pattern, SystemST, UIST, UIConf, Epi)
+import Config (Pattern, SystemST, UIST)
 import Console (renderConsole)
-import Control.Monad (when)
 import Control.Monad.Trans.Class (lift)
 import Data.DOM.Simple.Element (classRemove, classAdd, setInnerHTML, setStyleAttr)
 import Data.DOM.Simple.Window (innerHeight, innerWidth, document, globalWindow)
+import Data.Library (EpiS, Library, getUIConfD)
 import Data.Maybe (Maybe(Just, Nothing))
 import UIUtil (findElt)
 import Util (lg)
 
-initLayout :: forall eff. UIConf -> UIST -> Epi eff Unit
-initLayout uiConf uiST = do
+initLayout :: forall eff h. UIST -> Library h -> EpiS eff h Unit
+initLayout uiST lib = do
+  uiConfD  <- getUIConfD lib "initUIST"
+
   let window = globalWindow
   doc <- lift $ document window
   width  <- lift $ innerWidth window
   height <- lift $ innerHeight window
 
-  canvas <- findElt uiConf.canvasId
+  canvas <- findElt uiConfD.canvasId
   cont <- findElt "container"
   menu <- findElt "menu"
-  console <- findElt uiConf.consoleId
-  fps <- findElt uiConf.fpsId
+  console <- findElt uiConfD.consoleId
+  fps <- findElt uiConfD.fpsId
 
   lift $ classAdd "hide" console
   lift $ classAdd "hide" menu
   lift $ classAdd "hide" fps
   lift $ classRemove "fullWindow" cont
 
-  when uiConf.showFps do
+  when uiConfD.showFps do
     lift $ classRemove "hide" fps
 
-  case uiConf.windowState of
+  case uiConfD.windowState of
     "dev" -> do
       lift $ setStyleAttr "width" (show (height - 10.0) <> "px") canvas
       lift $ setStyleAttr "height" (show (height - 11.0) <> "px") canvas
@@ -53,19 +55,20 @@ initLayout uiConf uiST = do
 
 
 -- hides malformed html issues
-updateLayout :: forall eff h. UIConf -> UIST -> SystemST h -> Pattern -> Boolean -> EpiS eff h Unit
-updateLayout uiConf uiST systemST pattern force = do
+updateLayout :: forall eff h. UIST -> SystemST h -> Pattern -> Library h -> Boolean -> EpiS eff h Unit
+updateLayout uiST systemST pattern lib force = do
+  uiConfD <- getUIConfD lib "updateLayout"
   when (force ||
-        (systemST.frameNum `mod` uiConf.uiUpdateFreq == 0 && not systemST.paused)) do
+        (systemST.frameNum `mod` uiConfD.uiUpdateFreq == 0 && not systemST.paused)) do
 
-    when uiConf.showFps do
+    when uiConfD.showFps do
       case systemST.fps of
         (Just fps) -> do
-          fpsDiv <- findElt uiConf.fpsId
+          fpsDiv <- findElt uiConfD.fpsId
           lift $ setInnerHTML (show fps) fpsDiv
         Nothing -> pure unit
 
-    when (uiConf.windowState == "dev") do
-      renderConsole uiConf uiST systemST pattern
+    when (uiConfD.windowState == "dev") do
+      renderConsole uiST systemST pattern lib
 
     pure unit

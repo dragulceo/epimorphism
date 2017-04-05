@@ -18,14 +18,6 @@ type Epi eff a = ExceptT String (Eff (canvas :: CANVAS, dom :: DOM | eff)) a
 type EpiS eff h a = Epi (st :: ST h | eff) a
 
 -- System
---type SystemConf = {
---    initEngineConf :: String
---  , initUIConf     :: String
---  , initPattern    :: String
---  , host           :: String
---  , seed           :: String
---}
-
 type SystemST h = {
     lastTimeMS :: Maybe Number
   , frameNum :: Int
@@ -34,7 +26,6 @@ type SystemST h = {
   , t :: Number
   , paused :: Boolean
   , pauseAfterSwitch :: Boolean
-  , uiConfLib :: StrMap UIConf
   , engineConfLib :: StrMap EngineConf
   , patternLib :: StrMap Pattern
   , moduleLib :: StrMap Module
@@ -53,7 +44,6 @@ defaultSystemST = {
   , t: 0.0
   , paused: false
   , pauseAfterSwitch: false
-  , uiConfLib: empty
   , engineConfLib: empty
   , patternLib: empty
   , moduleLib: empty
@@ -126,36 +116,6 @@ type EngineST = {
   , dispUnif :: Maybe UniformBindings
   , profile :: EngineProfile
 }
-
--- UI
-type UIConf = {
-    canvasId          :: String
-  , consoleId         :: String
-  , fpsId             :: String
-  , showFps           :: Boolean
-  , windowState       :: String
-  , uiUpdateFreq      :: Int
-  , keyboardSwitchSpd :: Number
-  , keySet            :: String
-  , uiCompLib         :: String
-}
-
-uiConfSchema :: Schema
-uiConfSchema = [
-    SchemaEntry SE_St "id"
-  , SchemaEntry SE_St "flags"
-  , SchemaEntry SE_M_St "props"
-  , SchemaEntry SE_St "parent"
-  , SchemaEntry SE_St "canvasId"
-  , SchemaEntry SE_St "consoleId"
-  , SchemaEntry SE_St "fpsId"
-  , SchemaEntry SE_B  "showFps"
-  , SchemaEntry SE_St "windowState"
-  , SchemaEntry SE_I  "uiUpdateFreq"
-  , SchemaEntry SE_N  "keyboardSwitchSpd"
-  , SchemaEntry SE_St "keySet"
-  , SchemaEntry SE_St "uiCompLib"
-]
 
 type UIST = {
     incIdx :: StrMap Int

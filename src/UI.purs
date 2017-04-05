@@ -13,7 +13,7 @@ import System (loadLib)
 import Util (Now)
 
 foreign import registerEventHandler :: forall eff. (String -> Eff eff Unit) -> Eff eff Unit
-foreign import registerKeyHandler :: forall eff. (String -> Epi eff String) -> Eff eff Unit
+foreign import registerKeyHandler :: forall eff. (String -> Eff eff String) -> Eff eff Unit
 foreign import addGlobalEventListeners :: forall eff. (String -> Eff eff Unit) -> Eff eff Unit
 foreign import registerAuxImages :: forall eff. Array String -> Eff eff Unit
 foreign import doneLoading :: forall eff. Eff eff Unit

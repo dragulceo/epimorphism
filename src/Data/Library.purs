@@ -210,10 +210,10 @@ delLib lib name = do
 
 -- specific finders
 
-getSystemD :: forall eff h.  Library h -> String -> EpiS eff h SystemConfD
-getSystemD (Library {system: Nothing}) msg = do
+getSystemConfD :: forall eff h.  Library h -> String -> EpiS eff h SystemConfD
+getSystemConfD (Library {system: Nothing}) msg = do
   throwError $ msg <> ": System not initialized"
-getSystemD lib@(Library {system: (Just system)}) msg = do
+getSystemConfD lib@(Library {system: (Just system)}) msg = do
   (SystemConf _ systemConfD) <- getLib lib system (msg <> ": Can't find system" <> system)
   pure systemConfD
 
@@ -221,7 +221,7 @@ getUIConfD :: forall eff h.  Library h -> String -> EpiS eff h UIConfD
 getUIConfD (Library {system: Nothing}) msg = do
   throwError $ msg <> ": System not initialized"
 getUIConfD lib@(Library {system: (Just system)}) msg = do
-  (SystemConf _ systemConfD) <- getLib lib system (msg <> ": Can't find system " <> system)
+  systemConfD <- getSystemConfD lib "getUIConfD"
   let name = systemConfD.uiConf
   (UIConf _ uiConfD) <- getLib lib name (msg <> ": Can't find uiConf " <> name)
   pure uiConfD
@@ -230,7 +230,7 @@ getEngineConfD :: forall eff h.  Library h -> String -> EpiS eff h EngineConfD
 getEngineConfD (Library {system: Nothing}) msg = do
   throwError $ msg <> ": System not initialized"
 getEngineConfD lib@(Library {system: (Just system)}) msg = do
-  (SystemConf _ systemConfD) <- getLib lib system (msg <> ": Can't find system " <> system)
+  systemConfD <- getSystemConfD lib "getEngineConfD"
   let name = systemConfD.engineConf
   (EngineConf _ engineConfD) <- getLib lib name (msg <> ": Can't find engineConf " <> name)
   pure engineConfD

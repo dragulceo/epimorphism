@@ -9,7 +9,7 @@ import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
 import Data.Array (null, updateAt, foldM, sort, concatMap, fromFoldable)
 import Data.Int (round, toNumber)
-import Data.Library (SystemConf(..), UIConf(..), Library, getUIConfD, getSystemConfD)
+import Data.Library (Library(..), getSystemConfD, getUIConfD)
 import Data.Maybe (isNothing, fromMaybe, Maybe(Nothing, Just))
 import Data.Set (member)
 import Data.StrMap (insert, values, keys, lookup)
@@ -55,7 +55,7 @@ initState systemST lib'@(Library libVar@{}) = do
   let lib = Library libVar{system = Just systemName}
   --dbg lib
 
-  systemConfD <- getSystemD lib "init system"
+  systemConfD <- getSystemConfD lib "init system"
 
   seed <- case systemConfD.seed of
     "" -> do
@@ -75,7 +75,7 @@ initState systemST lib'@(Library libVar@{}) = do
     Nothing -> loadLib systemConfD.engineConf systemST.engineConfLib "init engine"
     (Just d) -> pure d
 
-  uiConfD <- getUIConfD lib
+  uiConfD <- getUIConfD lib "init system"
 
   pattern <- loadLib systemConfD.pattern systemST.patternLib "init pattern"
 
@@ -106,8 +106,8 @@ animate state = handleError do
   -- unpack state
   {usRef, ssRef, ecRef, esRef, pRef, lib} <- pure state
 
-  (SystemConf _ systemConfD) <- findLib lib systemName "animate system"
-  (UIConf _ uiConfD) <- findLib lib systemName "animate uiConf"
+  systemConfD <- getSystemConfD lib "animate"
+  uiConfD     <- getUIConfD lib "animate"
 
   uiST       <- lift $ readSTRef usRef
   systemST   <- lift $ readSTRef ssRef

@@ -2,29 +2,37 @@ module KeyHandlers where
 
 import Prelude
 import Config (UIST)
+import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.ST (STRef, readSTRef, modifySTRef)
+import Control.Monad.Except.Trans (runExceptT)
+import Control.Monad.ST (ST, STRef, modifySTRef, readSTRef)
+import DOM (DOM)
+import Data.Either (either)
 import Data.Library (EpiS, Library, getUIConfD)
 import Data.Maybe (Maybe(..))
 import Data.StrMap (insert, lookup)
+import Graphics.Canvas (CANVAS)
 import Util (inj)
 
 -- converts key codes into command sequences
-type KeyHandler = forall eff h. STRef h UIST -> Library h -> String -> EpiS eff h String
+type KeyHandler = forall eff h. STRef h UIST -> Library h -> String -> Eff (canvas :: CANVAS, dom :: DOM, st :: ST h | eff) String
+
+type EpiSKeyHandler = forall eff h. STRef h UIST -> Library h -> String -> EpiS eff h String
 
 keyHandler :: KeyHandler
 keyHandler usRef lib char = do
-  uiConfD <- getUIConfD lib "keyHandler"
-
   --let x = lg char
-  case uiConfD.keySet of
-  --  "dev"  -> devKeyHandler usRef lib char
-    "prod" -> prodKeyHandler usRef lib char
-    _      -> commonKeyHandler usRef lib char
+  res <- runExceptT do
+    uiConfD <- getUIConfD lib "keyHandler"
+    case uiConfD.keySet of
+      "dev"  -> devKeyHandler usRef lib char
+      "prod" -> prodKeyHandler usRef lib char
+      _      -> commonKeyHandler usRef lib char
+
+  pure $ either (\_ -> "") id res
 
 
-
-devKeyHandler :: KeyHandler
+devKeyHandler :: EpiSKeyHandler
 devKeyHandler usRef lib char = do
   uiConfD <- getUIConfD lib "devKeyHandler"
   uiST    <- liftEff $ readSTRef usRef
@@ -100,12 +108,12 @@ devKeyHandler usRef lib char = do
 
 
 
-prodKeyHandler :: KeyHandler
+prodKeyHandler :: EpiSKeyHandler
 prodKeyHandler usRef lib char = do
   case char of
     _ -> commonKeyHandler usRef lib char
 
-commonKeyHandler :: KeyHandler
+commonKeyHandler :: EpiSKeyHandler
 commonKeyHandler usRef lib char = do
   case char of
     "~"  -> pure "dev"

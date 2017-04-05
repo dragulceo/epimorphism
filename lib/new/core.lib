@@ -1,20 +1,20 @@
 ### SystemConf
 id dev
-initEngineConf default
-initUIConf dev
-initPattern dev
+engineConf default
+uiConf dev
+pattern dev
 
 ### SystemConf
 id prod
-initEngineConf default
-initUIConf prod
-initPattern main4
+engineConf default
+uiConf prod
+pattern main4
 
 ### SystemConf
 id analysis
-initEngineConf default
-initUIConf dev
-initPattern analysis
+engineConf default
+uiConf dev
+pattern analysis
 
 
 ### UIConf

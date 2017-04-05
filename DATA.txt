@@ -87,6 +87,11 @@ DATA - NON SECTION
   - screenshot?
 
 
+  - any need to persist parent?
+
+  - also, lets think about props/org, etc
+	  - mostly for saving?
+
   - components should be pure?
 		- TEST - components as (dynamic)functions as opposed to inlined
 

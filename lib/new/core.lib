@@ -1,35 +1,62 @@
 ### SystemConf
 id dev
-parent
-flags []
-props {}
 initEngineConf default
 initUIConf dev
 initPattern dev
 
 ### SystemConf
 id prod
-parent
-flags []
-props {}
 initEngineConf default
 initUIConf prod
 initPattern main4
 
 ### SystemConf
 id analysis
-parent
-flags []
-props {}
 initEngineConf default
 initUIConf dev
 initPattern analysis
 
+
+### UIConf
+id dev
+canvasId glcanvas
+consoleId console
+fpsId showFps
+showFps true
+windowState dev
+uiUpdateFreq 20
+keyboardSwitchSpd 1.0
+keySet dev
+uiCompLib lib
+
+### UIConf
+id debug
+canvasId glcanvas
+consoleId console
+fpsId showFps
+showFps true
+windowState dev
+uiUpdateFreq 1
+keyboardSwitchSpd 1.0
+keySet dev
+uiCompLib lib
+
+
+### UIConf
+id prod
+canvasId glcanvas
+consoleId console
+fpsId showFps
+showFps false
+windowState fullWindow
+uiUpdateFreq 20
+keyboardSwitchSpd 1.0
+keySet prod
+uiCompLib lib
+
+
 ### Component
 id seed_simple
-parent
-flags []
-props {}
 family_ref seed
 def_mod_ref seed_simple
 children {color:color}

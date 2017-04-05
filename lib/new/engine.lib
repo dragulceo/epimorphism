@@ -1,0 +1,40 @@
+
+### EngineConf
+id default
+kernelDim 1024
+fract 3
+numAuxBuffers 10
+audioAnalysisEnabled false
+audioBufferSize 128
+
+### EngineConf
+id low
+kernelDim 512
+fract 4
+numAuxBuffers 10
+audioAnalysisEnabled false
+audioBufferSize 128
+
+### EngineConf
+id high
+kernelDim 2048
+fract 2
+numAuxBuffers 10
+audioAnalysisEnabled false
+audioBufferSize 128
+
+### EngineConf
+id ultra
+kernelDim 3072
+fract 2
+numAuxBuffers 10
+audioAnalysisEnabled false
+audioBufferSize 128
+
+### EngineConf
+id insane
+kernelDim 4096
+fract 2
+numAuxBuffers 10
+audioAnalysisEnabled false
+audioBufferSize 128

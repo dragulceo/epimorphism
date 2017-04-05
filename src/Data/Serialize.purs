@@ -1,21 +1,30 @@
 module Data.Serialize where
 
 import Prelude
-import Config (Epi, EpiS, Schema, SchemaEntry(..), SchemaEntryType(..), componentSchema, engineConfSchema, systemConfSchema, uiConfSchema)
+import Config (componentSchema, engineConfSchema, uiConfSchema)
+import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
-import Data.Array (cons, filter, length, uncons)
+import Data.Array (cons, filter, length, replicate, uncons, zip)
 import Data.Array (foldM) as A
-import Data.Library (Library(..), SystemConf, EngineConf, UIConf, Component)
+import Data.Library (Epi, EpiS, Index, Schema, SchemaEntry(..), SchemaEntryType(..), indexSchema, systemConfSchema)
+import Data.Library (Library(..), SystemConf(..), EngineConf, UIConf, Component)
 import Data.Maybe (Maybe(..), maybe)
+import Data.Set (Set, empty) as Set
 import Data.StrMap (StrMap, empty, insert, lookup, thawST)
 import Data.StrMap (foldM) as S
 import Data.StrMap.ST (new)
 import Data.String (Pattern(..), Replacement(..), joinWith, replace, split, trim)
 import Data.Tuple (Tuple(..))
 import Library (parseCLst, parseLst, parseMp, parseNMp, parseSet, unsafeGenericObject)
-import Util (boolFromStringE, dbg, dbg2, fromJustE, inj, intFromStringE, numFromStringE, unsafeSetAttr, zipI)
+import Util (boolFromStringE, dbg, dbg2, fromJustE, inj, intFromStringE, numFromStringE, stick, unsafeSetAttr, zipI)
+
+foreign import unsafeSetIndexableAttr :: forall a b eff. a -> String -> String -> b -> Eff eff a
+foreign import unsafeGenericIndexableImpl :: forall a r. Schema -> Schema -> (Index -> (Record r) -> a) -> (Set.Set String) -> a
+
+unsafeGenericIndexable :: forall a r. Schema -> Schema -> (Index -> (Record r) -> a) -> a
+unsafeGenericIndexable idxSchema schema const = unsafeGenericIndexableImpl idxSchema schema const Set.empty
 
 class Serializable a where
   schema :: a -> Schema
@@ -23,19 +32,19 @@ class Serializable a where
 
 instance scSerializable :: Serializable SystemConf where
   schema a = systemConfSchema
-  generic = unsafeGenericObject systemConfSchema
+  generic = unsafeGenericIndexable indexSchema systemConfSchema SystemConf
 
-instance ecSerializable :: Serializable EngineConf where
-  schema a = engineConfSchema
-  generic = unsafeGenericObject engineConfSchema
-
-instance ucSerializable :: Serializable UIConf where
-  schema a = uiConfSchema
-  generic = unsafeGenericObject uiConfSchema
-
-instance cSerializable :: Serializable Component where
-  schema a = componentSchema
-  generic = unsafeGenericObject componentSchema
+--instance ecSerializable :: Serializable EngineConf where
+--  schema a = engineConfSchema
+--  generic = unsafeGenericObject engineConfSchema
+--
+--instance ucSerializable :: Serializable UIConf where
+--  schema a = uiConfSchema
+--  generic = unsafeGenericObject uiConfSchema
+--
+--instance cSerializable :: Serializable Component where
+--  schema a = componentSchema
+--  generic = unsafeGenericObject componentSchema
 
 
 type StrObj = StrMap String
@@ -144,50 +153,54 @@ parseLibData libData = do
     instantiateChunk lib@(Library val@{}) dataType objs = case dataType of
       "SystemConf" -> do
         obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+        dbg obj
         pure $ Library val {systemConfLib = obj}
-      "EngineConf" -> do
-        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
-        pure $ Library val {engineConfLib = obj}
-      "UIConf" -> do
-        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
-        pure $ Library val {uiConfLib = obj}
-      "Component" -> do
-        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
-        pure $ Library val {componentLib = obj}
+--      "EngineConf" -> do
+--        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+--        pure $ Library val {engineConfLib = obj}
+--      "UIConf" -> do
+--        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+--        pure $ Library val {uiConfLib = obj}
+--      "Component" -> do
+--        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+--        pure $ Library val {componentLib = obj}
       _ -> pure lib
     fields :: forall a. (Serializable a) => a -> String -> String -> EpiS eff h a
     fields obj fieldName fieldVal = do
-      let ses = filter (schemaSel fieldName) (schema obj)
-      case ses of
-        [(SchemaEntry entryType _)] -> do
+      let idx_entries  = filter (schemaSel fieldName) indexSchema
+      let idx_entries' = zip idx_entries (replicate (length idx_entries) "value0")
+      let entries      = filter (schemaSel fieldName) (schema obj)
+      let entries'     = zip entries (replicate (length entries) "value1")
+      case (idx_entries' <> entries') of
+        [Tuple (SchemaEntry entryType _) accs] -> do
           case entryType of
             SE_St -> do
-              pure $ unsafeSetAttr obj fieldName fieldVal
+              liftEff $ unsafeSetIndexableAttr obj accs fieldName fieldVal
             SE_N -> do
               n <- numFromStringE fieldVal
-              pure $ unsafeSetAttr obj fieldName n
+              liftEff $ unsafeSetIndexableAttr obj accs fieldName n
             SE_I -> do
               i <- intFromStringE fieldVal
-              pure $ unsafeSetAttr obj fieldName i
+              liftEff $ unsafeSetIndexableAttr obj accs fieldName i
             SE_B -> do
               b <- boolFromStringE fieldVal
-              pure $ unsafeSetAttr obj fieldName b
+              liftEff $ unsafeSetIndexableAttr obj accs fieldName b
             SE_S -> do
               s <- parseSet fieldVal
-              pure $ unsafeSetAttr obj fieldName s
+              liftEff $ unsafeSetIndexableAttr obj accs fieldName s
             SE_M_St -> do
               m <- parseMp fieldVal
-              pure $ unsafeSetAttr obj fieldName m
+              liftEff $ unsafeSetIndexableAttr obj accs fieldName m
             SE_M_N -> do
               mn <- parseMp fieldVal >>= parseNMp
-              pure $ unsafeSetAttr obj fieldName mn
+              liftEff $ unsafeSetIndexableAttr obj accs fieldName mn
             SE_A_St -> do
               l <- parseLst fieldVal
-              pure $ unsafeSetAttr obj fieldName l
+              liftEff $ unsafeSetIndexableAttr obj accs fieldName l
             SE_A_Cx -> do
               cx <- parseLst fieldVal >>= parseCLst
-              pure $ unsafeSetAttr obj fieldName cx
-        _ -> throwError $ inj "Found %0 SchemaEntries for %1" [show $ length ses, fieldName]
+              liftEff $ unsafeSetIndexableAttr obj accs fieldName cx
+        _ -> throwError $ inj "Found %0 SchemaEntries for %1" [show $ length entries, fieldName]
     schemaSel n (SchemaEntry _ sen) = (n == sen)
 
 

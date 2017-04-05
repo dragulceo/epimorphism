@@ -1,7 +1,7 @@
 module Util where
 
 import Prelude
-import Config (EpiS, Epi)
+import Data.Library (EpiS, Epi)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (runExceptT)

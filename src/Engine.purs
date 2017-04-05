@@ -5,7 +5,7 @@ import Data.TypedArray as T
 import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Audio (audioData, initAudio)
-import Config (EngineConf, EngineProfile, EngineST, EpiS, Pattern, SystemConf, SystemST, UniformBindings, Epi, fullCompile, newCompST)
+import Config (EngineConf, EngineProfile, EngineST, EpiS, Pattern, SystemST, UniformBindings, Epi, fullCompile, newCompST)
 import Control.Monad.Eff (Eff, foreachE)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Error.Class (throwError)
@@ -13,6 +13,7 @@ import Control.Monad.Reader.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, newSTRef, modifySTRef, readSTRef)
 import Data.Array (length, (..))
 import Data.Int (toNumber)
+import Data.Library (Library)
 import Data.Maybe (maybe, Maybe(Nothing, Just))
 import Data.Tuple (Tuple(Tuple), snd, fst)
 import EngineUtil (execGL)
@@ -53,8 +54,8 @@ getEngineProfile ctx = do
 
 -- initialize the rendering engine & create state.  updates an existing state if passed
 -- maybe validate that kernelDim > 0?
-initEngineST :: forall eff h. SystemConf -> EngineConf -> SystemST h -> String -> Maybe (STRef h EngineST) -> EpiS (now :: Now | eff) h (STRef h EngineST)
-initEngineST sysConf engineConf systemST canvasId esRef' = do
+initEngineST :: forall eff h. EngineConf -> SystemST h -> Library h -> String -> Maybe (STRef h EngineST) -> EpiS (now :: Now | eff) h (STRef h EngineST)
+initEngineST engineConf systemST lib canvasId esRef' = do
   -- find canvas & create context
   canvasM <- liftEff $ getCanvasElementById canvasId
   canvas <-

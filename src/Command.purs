@@ -2,13 +2,14 @@ module Command where
 
 import Prelude
 import Compiler (compileShaders)
-import Config (Schema, patternSchema, moduleSchema, EpiS, Pattern, SystemST, SystemConf, EngineST, EngineConf, UIST, UIConf)
+import Config (patternSchema, moduleSchema, Pattern, SystemST, EngineST, EngineConf, UIST, UIConf)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Array (uncons, updateAt, length)
+import Data.Library (EpiS, Library, Schema)
 import Data.Maybe (Maybe(..))
 import Data.StrMap (values, insert, toUnfoldable)
 import Data.String (joinWith, split)
@@ -27,9 +28,8 @@ import Util (dbg, halt, Now, cxFromStringE, intFromStringE, numFromStringE, lg, 
 
 foreign import saveCanvas :: forall eff. Eff eff Unit
 
-command :: forall eff h. STRef h UIConf -> STRef h UIST -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h SystemConf -> STRef h (SystemST h) -> String -> Eff (canvas :: CANVAS, dom :: DOM, st :: ST h, now :: Now | eff) Unit
-command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
-  systemConf <- lift $ readSTRef scRef
+command :: forall eff h. STRef h UIConf -> STRef h UIST -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h (SystemST h) -> Library h -> String -> Eff (canvas :: CANVAS, dom :: DOM, st :: ST h, now :: Now | eff) Unit
+command ucRef usRef ecRef esRef pRef ssRef lib msg = handleError do
   systemST   <- lift $ readSTRef ssRef
   uiConf     <- lift $ readSTRef ucRef
   uiST       <- lift $ readSTRef usRef
@@ -103,7 +103,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
             mid <- findModule systemST.moduleRefPool pattern "main.application.t.t_inner" true
             mUp systemST mid \m ->
               m {sub = insert "t_expr" tExp m.sub}
-            compileShaders systemConf ssRef engineConf esRef pRef false
+            compileShaders ssRef engineConf esRef pRef lib false
 
             pure unit
           "save" -> do
@@ -137,7 +137,7 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
                 dim' <- intFromStringE dim
                 lift $ modifySTRef ecRef (\ec -> ec {kernelDim = dim'})
                 engineConf' <- lift $ readSTRef ecRef
-                initEngineST systemConf engineConf' systemST uiConf.canvasId (Just esRef)
+                initEngineST engineConf' systemST lib uiConf.canvasId (Just esRef)
 
               _ -> throwError "invalid format: setKerneldim dim"
             pure unit
@@ -147,17 +147,17 @@ command ucRef usRef ecRef esRef pRef scRef ssRef msg = handleError do
                 fract' <- intFromStringE fract
                 lift $ modifySTRef ecRef (\ec -> ec {fract = fract'})
                 engineConf' <- lift $ readSTRef ecRef
-                compileShaders systemConf ssRef engineConf' esRef pRef false
+                compileShaders ssRef engineConf' esRef pRef lib false
 
               _ -> throwError "invalid format: setFract fract"
             pure unit
           "setEngineProfile" -> do
             case args of
-              [lib] -> do
-                engineConf' <- loadLib lib systemST.engineConfLib "setEngineProfile"
+              [prof] -> do
+                engineConf' <- loadLib prof systemST.engineConfLib "setEngineProfile"
                 lift $ writeSTRef ecRef engineConf'
 
-                initEngineST systemConf engineConf' systemST uiConf.canvasId (Just esRef)
+                initEngineST engineConf' systemST lib uiConf.canvasId (Just esRef)
 
               _ -> throwError "invalid format: setFract fract"
             pure unit

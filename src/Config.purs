@@ -6,7 +6,7 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (ExceptT)
 import Control.Monad.ST (STRef, ST)
 import DOM (DOM)
-import Data.Library (Library)
+import Data.Library (Schema, SchemaEntry(..), SchemaEntryType(..), SystemConf)
 import Data.Maybe (Maybe(..))
 import Data.Set (union, Set)
 import Data.StrMap (StrMap, empty)
@@ -17,30 +17,14 @@ import Graphics.WebGL.Types (WebGLProgram, WebGLTexture, WebGLFramebuffer, WebGL
 type Epi eff a = ExceptT String (Eff (canvas :: CANVAS, dom :: DOM | eff)) a
 type EpiS eff h a = Epi (st :: ST h | eff) a
 
-data SchemaEntryType = SE_St | SE_N | SE_I | SE_B | SE_S | SE_A_St | SE_A_Cx | SE_M_N | SE_M_St
-data SchemaEntry = SchemaEntry SchemaEntryType String
-type Schema = Array SchemaEntry
-
 -- System
-type SystemConf = {
-    initEngineConf :: String
-  , initUIConf     :: String
-  , initPattern    :: String
-  , host           :: String
-  , seed           :: String
-}
-
-systemConfSchema :: Schema
-systemConfSchema = [
-    SchemaEntry SE_St "id"
-  , SchemaEntry SE_St "flags"
-  , SchemaEntry SE_M_St "props"
-  , SchemaEntry SE_St "parent"
-  , SchemaEntry SE_St "initEngineConf"
-  , SchemaEntry SE_St "initUIConf"
-  , SchemaEntry SE_St "initPattern"
-  , SchemaEntry SE_St "seed"
-]
+--type SystemConf = {
+--    initEngineConf :: String
+--  , initUIConf     :: String
+--  , initPattern    :: String
+--  , host           :: String
+--  , seed           :: String
+--}
 
 type SystemST h = {
     lastTimeMS :: Maybe Number
@@ -50,7 +34,6 @@ type SystemST h = {
   , t :: Number
   , paused :: Boolean
   , pauseAfterSwitch :: Boolean
-  , systemConfLib :: StrMap SystemConf
   , uiConfLib :: StrMap UIConf
   , engineConfLib :: StrMap EngineConf
   , patternLib :: StrMap Pattern
@@ -59,7 +42,6 @@ type SystemST h = {
   , indexLib :: StrMap Index
   , moduleRefPool :: StrMap (STRef h Module)
   , compPattern :: Maybe (STRef h Pattern) -- this is a bit weird
-  , library :: Maybe (Library h)
 }
 
 defaultSystemST :: forall h. SystemST h
@@ -71,7 +53,6 @@ defaultSystemST = {
   , t: 0.0
   , paused: false
   , pauseAfterSwitch: false
-  , systemConfLib: empty
   , uiConfLib: empty
   , engineConfLib: empty
   , patternLib: empty
@@ -80,7 +61,6 @@ defaultSystemST = {
   , componentLib: empty
   , indexLib: empty
   , compPattern: Nothing
-  , library: Nothing
 }
 
 -- Engine

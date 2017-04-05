@@ -64,8 +64,8 @@ initAuxTex engineConf ctx empty = do
       pure aux
 
 -- upload aux textures
-uploadAux :: forall eff. EngineST -> String -> Array String -> Epi eff Unit
-uploadAux es host names = do
+uploadAux :: forall eff. EngineST -> Array String -> Epi eff Unit
+uploadAux es names = do
   case es.auxTex of
     Nothing -> throwError "aux textures not initialized"
     (Just aux) -> do
@@ -77,16 +77,16 @@ uploadAux es host names = do
       let zipped = map mapIt $ filter doFilter $ zip aux (zip currentImages names)
 
       lift $ registerImages names
-      traverse (uploadImage es.ctx host) zipped
+      traverse (uploadImage es.ctx) zipped
   pure unit
   where
     doFilter (Tuple a (Tuple c n)) = c /= n
     mapIt (Tuple a (Tuple c n)) = (Tuple a n)
 
 
-uploadImage :: forall eff. WebGLContext -> String -> (Tuple WebGLTexture String) -> Epi eff Unit
-uploadImage ctx host (Tuple aux name) = do
-  src <- lift $ getImageSrc (host <> name)
+uploadImage :: forall eff. WebGLContext -> (Tuple WebGLTexture String) -> Epi eff Unit
+uploadImage ctx (Tuple aux name) = do
+  src <- lift $ getImageSrc (name)
   execGL ctx do
     liftEff $ GL.bindTexture ctx GLE.texture2d aux
     liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte src

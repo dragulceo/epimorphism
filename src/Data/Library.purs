@@ -1,14 +1,26 @@
 module Data.Library where
 
 import Prelude
---import Config (EpiS)
-import Control.Monad.Except.Trans (throwError)
+import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Class (liftEff)
+import Control.Monad.Except.Trans (ExceptT, throwError)
+import Control.Monad.ST (ST)
 import Control.Monad.Trans.Class (lift)
+import DOM (DOM)
 import Data.DateTime (DateTime)
 import Data.Maybe (Maybe(..))
 import Data.Set (Set)
 import Data.StrMap (StrMap)
 import Data.StrMap.ST (STStrMap, delete, peek, poke)
+import Graphics.Canvas (CANVAS)
+
+-- redundant
+type Epi eff a = ExceptT String (Eff (canvas :: CANVAS, dom :: DOM | eff)) a
+type EpiS eff h a = Epi (st :: ST h | eff) a
+
+data SchemaEntryType = SE_St | SE_N | SE_I | SE_B | SE_S | SE_A_St | SE_A_Cx | SE_M_N | SE_M_St
+data SchemaEntry = SchemaEntry SchemaEntryType String
+type Schema = Array SchemaEntry
 
 -- MAIN DATA TYPES
 newtype FamilyRef    = FamilyRef String
@@ -24,13 +36,30 @@ type Index = {
   , props  :: StrMap String
 }
 
+indexSchema :: Schema
+indexSchema = [
+    SchemaEntry SE_St "id"
+  , SchemaEntry SE_St "flags"
+  , SchemaEntry SE_M_St "props"
+  , SchemaEntry SE_St "parent"
+]
+
 -- System
 data SystemConf = SystemConf Index {
     initEngineConf :: String
   , initUIConf     :: String
-  , initPattern    :: PatternRef
+  , initPattern    :: String --PatternRef
   , seed           :: String
 }
+
+systemConfSchema :: Schema
+systemConfSchema = [
+    SchemaEntry SE_St "initEngineConf"
+  , SchemaEntry SE_St "initUIConf"
+  , SchemaEntry SE_St "initPattern"
+  , SchemaEntry SE_St "seed"
+]
+
 
 data EngineConf = EngineConf Index {
     kernelDim            :: Int
@@ -116,25 +145,28 @@ data Library h = Library {
   , sectionLib    :: STStrMap h Section
 }
 
---findLib :: forall a eff h. (Indexable a) => Library h -> String -> String -> EpiS eff h a
---findLib lib name msg = do
---  map <- lift $ peek (getLib lib) name
---  case map of
---    (Just ref) -> pure ref
---    Nothing  -> throwError $ msg <>" # Cant find in library: " <> name
---
---modLib :: forall a eff h. (Indexable a) => Library h -> String -> a -> EpiS eff h Unit
---modLib lib name new = do
---  lift $ poke (getLib lib) name new # void
---
---modLib' :: forall a eff h. (Indexable a) => Library h -> String -> (a -> a) -> EpiS eff h Unit
---modLib' lib name mut = do
---  old <- findLib lib name "modLib' mutator"
---  lift $ poke (getLib lib) name (mut old) # void
---
---delLib :: forall a eff h. (Indexable a) => Library h -> String -> EpiS eff h (STStrMap h a)
---delLib lib name = do
---  lift $ delete (getLib lib) name
+findLib :: forall a eff h. (Indexable a) => Library h -> String -> String -> EpiS eff h a
+findLib lib name msg = do
+  -- dbg $ getLib lib
+  res <- liftEff $ peek (getLib lib) name
+  -- <dbg res
+  case res of
+    Just x -> pure x
+    Nothing -> throwError $ msg <>" # Cant find in library: " <> name
+  --fromJustE res (msg <>" # Cant find in library: " <> name)
+
+modLib :: forall a eff h. (Indexable a) => Library h -> String -> a -> EpiS eff h Unit
+modLib lib name new = do
+  lift $ poke (getLib lib) name new # void
+
+modLib' :: forall a eff h. (Indexable a) => Library h -> String -> (a -> a) -> EpiS eff h Unit
+modLib' lib name mut = do
+  lib' <- mut <$> findLib lib name "modLib' mutator"
+  lift $ poke (getLib lib) name lib' # void
+
+delLib :: forall a eff h. (Indexable a) => Library h -> String -> EpiS eff h (STStrMap h a)
+delLib lib name = do
+  lift $ delete (getLib lib) name
 
 --searchLib
 

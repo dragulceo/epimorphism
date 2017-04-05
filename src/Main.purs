@@ -2,13 +2,15 @@ module Main where
 
 import Prelude
 import Compiler (compileShaders)
-import Config (PMut(PMutNone, PMut), SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, SystemConf, UIConf, CompOp(..))
+import Config (PMut(PMutNone, PMut), SystemST, UIST, EpiS, Pattern, EngineST, EngineConf, UIConf, CompOp(..))
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
 import Data.Array (null, updateAt, foldM, sort, concatMap, fromFoldable)
 import Data.Int (round, toNumber)
+import Data.Library (SystemConf(..))
+import Data.Library (Library, findLib)
 import Data.Maybe (isNothing, fromMaybe, Maybe(Nothing, Just))
 import Data.Set (member)
 import Data.StrMap (insert, values, keys, lookup)
@@ -20,7 +22,7 @@ import Layout (updateLayout)
 import Paths (runPath)
 import Pattern (importPattern)
 import Script (runScripts)
-import System (initSystemST, loadLib)
+import System (initLibrary, initSystemST, loadLib)
 import Texture (loadImages)
 import UI (initUIST)
 import Util (Now, dbg, fromJustE, getProfileCookie, handleError, imag, inj, isDev, isHalted, now, real, requestAnimationFrame, rndstr, seedRandom, urlArgs, zipI)
@@ -31,11 +33,11 @@ host = ""
 type State h = {
     ucRef :: STRef h UIConf
   , usRef :: STRef h UIST
-  , scRef :: STRef h SystemConf
   , ssRef :: STRef h (SystemST h)
   , ecRef :: STRef h EngineConf
   , esRef :: STRef h EngineST
   , pRef  :: STRef h Pattern
+  , lib   :: Library h
 }
 
 
@@ -48,12 +50,18 @@ getSysConfName = do
   pure conf
 
 
-initState :: forall eff h. SystemST h -> EpiS (now :: Now | eff) h (State h)
-initState systemST = do
+initState :: forall eff h. SystemST h -> Library h -> EpiS (now :: Now | eff) h (State h)
+initState systemST lib = do
   --  init config
   systemName <- lift $ getSysConfName
-  systemConf <- loadLib systemName systemST.systemConfLib "init system"
+  --systemConf <- loadLib systemName systemST.systemConfLib "init system"
+  obj@(SystemConf a systemConf) <- findLib lib systemName "init system" :: EpiS (now :: Now | eff) h SystemConf
 
+--  dbg "adsfsadf"
+--  dbg obj
+--  dbg a
+--  dbg systemConf
+--  dbg "11111"
   seed <- case systemConf.seed of
     "" -> do
       newSeed <- lift rndstr
@@ -61,8 +69,8 @@ initState systemST = do
       pure newSeed
     _ -> pure systemConf.seed
 
-  let systemConf' = systemConf {host = host, seed = seed}
-  lift $ seedRandom systemConf'.seed
+  let systemConf' = systemConf {seed = seed}
+  lift $ seedRandom systemConf'.seed -- PERSIST THIS!!!
 
   cookie_profile <- lift $ getProfileCookie
 
@@ -75,7 +83,7 @@ initState systemST = do
 
   -- build strefs
   ssRef <- lift $ newSTRef systemST
-  scRef <- lift $ newSTRef systemConf'
+  --scRef <- lift $ newSTRef systemConf'
   ecRef <- lift $ newSTRef engineConf
   ucRef <- lift $ newSTRef uiConf
   pRef  <- lift $ newSTRef pattern
@@ -90,22 +98,21 @@ initState systemST = do
   systemST' <- lift $ readSTRef ssRef
 
   -- init engine & ui states
-  esRef <- initEngineST systemConf' engineConf systemST' uiConf.canvasId Nothing
-  usRef <- initUIST ucRef ecRef esRef pRef scRef ssRef
+  esRef <- initEngineST engineConf systemST' lib uiConf.canvasId Nothing
+  usRef <- initUIST ucRef ecRef esRef pRef ssRef lib
 
-  pure {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef}
+  pure {ucRef, usRef, ssRef, ecRef, esRef, pRef, lib}
 
 
 animate :: forall h. (State h) -> Eff (canvas :: CANVAS, dom :: DOM, now :: Now, st :: ST h) Unit
 animate state = handleError do
   t0 <- lift $ now
   -- unpack state
-  {ucRef, usRef, ssRef, scRef, ecRef, esRef, pRef} <- pure state
+  {ucRef, usRef, ssRef, ecRef, esRef, pRef, lib} <- pure state
 
   uiConf     <- lift $ readSTRef ucRef
   uiST       <- lift $ readSTRef usRef
   systemST   <- lift $ readSTRef ssRef
-  systemConf <- lift $ readSTRef scRef
   engineConf <- lift $ readSTRef ecRef
   engineST   <- lift $ readSTRef esRef
   pattern    <- lift $ readSTRef pRef
@@ -147,7 +154,7 @@ animate state = handleError do
   -- execute compile queue
   when (not $ null engineST'.compQueue) do
     --t' <- lift $ now
-    compileShaders systemConf ssRef engineConf esRef pRef (isNothing engineST.mainProg)
+    compileShaders ssRef engineConf esRef pRef lib (isNothing engineST.mainProg)
     --t'' <- lift $ now
     --dbg $ inj "COMPILE :%0ms" [show (t'' - t')]
     --currentTimeMS2 <- lift $ now
@@ -224,5 +231,6 @@ main = do
   runST do
     handleError do
       systemST <- initSystemST host
-      state    <- initState systemST
+      lib      <- initLibrary host
+      state    <- initState systemST lib
       lift $ animate state

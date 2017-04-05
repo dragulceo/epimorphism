@@ -2,12 +2,13 @@ module Compiler where
 
 import Prelude
 import Data.TypedArray as T
-import Config (newCompST, UniformBindings, EpiS, Pattern, SystemST, EngineST, EngineConf, SystemConf, CompOp(..))
+import Config (newCompST, UniformBindings, EpiS, Pattern, SystemST, EngineST, EngineConf, CompOp(..))
 import Control.Alt ((<|>))
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (length, uncons)
+import Data.Library (Library)
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.String (stripPrefix)
 import Data.String (Pattern(..)) as S
@@ -22,8 +23,8 @@ import Texture (uploadAux)
 import Util (Now, dbg, lg, now, now2, replaceAll, unsafeCast)
 
 -- compile shaders and load into systemST
-compileShaders :: forall eff h. SystemConf -> STRef h (SystemST h) -> EngineConf -> STRef h EngineST -> STRef h Pattern -> Boolean -> EpiS (now :: Now | eff) h Boolean
-compileShaders sysConf ssRef engineConf esRef pRef full = do
+compileShaders :: forall eff h. STRef h (SystemST h) -> EngineConf -> STRef h EngineST -> STRef h Pattern -> Library h -> Boolean -> EpiS (now :: Now | eff) h Boolean
+compileShaders ssRef engineConf esRef pRef lib full = do
   systemST <- lift $ readSTRef ssRef
   es <- lift $ readSTRef esRef
   let compRef = fromMaybe pRef systemST.compPattern
@@ -67,7 +68,7 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
           -- aux
           case es.compST.auxImages of
             Just aux -> do
-              uploadAux es sysConf.host aux
+              uploadAux es aux
             Nothing -> pure unit
 
           -- unif
@@ -109,7 +110,7 @@ compileShaders sysConf ssRef engineConf esRef pRef full = do
 
       lift $ modifySTRef esRef (\es' -> es' {compQueue = rst})
       when (length rst /= 0 && full) do
-        compileShaders sysConf ssRef engineConf esRef pRef full
+        compileShaders ssRef engineConf esRef pRef lib full
         pure unit
 
       pure $ done || full

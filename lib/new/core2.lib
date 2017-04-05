@@ -27,3 +27,22 @@ initEngineConf default
 initUIConf dev
 initPattern analysis
 seed adfsadf
+
+### Component
+id seed_simple
+parent
+flags []
+props {}
+family_ref seed
+def_mod_ref seed_simple
+children {color:color}
+includes [f1, f2]
+code &&&
+	vec2 z_i = z;
+	%reduce%
+
+	float wx = (abs(z.x) + @w@ - 1.0) / @w@;
+	float wy = (abs(z.y) + @w@ - 1.0) / @w@;
+
+  float w = max(0.0, max(wx, wy));
+	float mask = ceil(w);

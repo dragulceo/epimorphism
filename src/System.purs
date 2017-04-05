@@ -1,7 +1,8 @@
 module System where
 
 import SLibrary
-import Config (Module, EpiS, moduleSchema, patternSchema, systemConfSchema, uiConfSchema, engineConfSchema, Schema, Epi, SystemST, defaultSystemST)
+import Config (Module, EpiS, moduleSchema, patternSchema, uiConfSchema, engineConfSchema, Epi, SystemST, defaultSystemST)
+import Data.Library (Schema)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
@@ -19,16 +20,15 @@ import Data.Traversable (traverse)
 import Data.Tuple (Tuple)
 import Library (parseLib)
 import Prelude (unit, Unit, (==), ($), not, (&&), (<>), pure, bind)
-import Util (dbg, urlGet)
+import Util (urlGet)
 
 data DataSource = LocalHTTP | LocalStorage | RemoteDB
 
 initSystemST :: forall eff h. String -> EpiS eff h (SystemST h)
 initSystemST host = do
-  -- gather system data here
+  -- gather system data here?  currently doing this in engine
 
   -- initialize libraries
-  systemConfLib <- buildLib systemConfSchema $ host <> "/lib/system_conf.lib"
   engineConfLib <- buildLib engineConfSchema $ host <> "/lib/engine_conf.lib"
   uiConfLib     <- buildLib uiConfSchema     $ host <> "/lib/ui_conf.lib"
   moduleLib     <- buildLib moduleSchema     $ host <> "/lib/modules.lib"
@@ -37,27 +37,21 @@ initSystemST host = do
   componentLib  <- buildSLib buildComponent  $ host <> "/lib/components.slib"
   indexLib      <- buildSLib buildIndex      $ host <> "/lib/indexes.slib"
 
-  library       <- buildLibrary $ host <> "/lib/new/core.lib"
-  dbg library
-
   pure $ defaultSystemST {
-      systemConfLib = systemConfLib
-    , engineConfLib = engineConfLib
+      engineConfLib = engineConfLib
     , uiConfLib     = uiConfLib
     , moduleLib     = moduleLib
     , patternLib    = patternLib
     , componentLib  = componentLib
     , indexLib      = indexLib
-    , library       = Just library
   }
 
-buildLibrary :: forall eff h. String -> EpiS eff h (Library h)
-buildLibrary loc = do
-  dt <- lift $ urlGet loc
+initLibrary :: forall eff h. String -> EpiS eff h (Library h)
+initLibrary host = do
+  dt <- lift $ urlGet (host <> "/lib/new/core.lib")
   case dt of
     (Left er) -> throwError $ "Error loading library : " <> er
     (Right res) -> parseLibData res
-
 
 buildLib :: forall eff a. Schema -> String -> Epi eff (StrMap a)
 buildLib schema loc = do

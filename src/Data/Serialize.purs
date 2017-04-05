@@ -8,8 +8,7 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (cons, filter, length, replicate, uncons, zip)
 import Data.Array (foldM) as A
-import Data.Library (Epi, EpiS, Index, Schema, SchemaEntry(..), SchemaEntryType(..), indexSchema, systemConfSchema)
-import Data.Library (Library(..), SystemConf(..), EngineConf, UIConf, Component)
+import Data.Library (Epi, EpiS, Component(..), EngineConf(..), SystemConf(..), UIConf(..), Index, Library(..), Schema, SchemaEntry(..), SchemaEntryType(..), indexSchema, systemConfSchema)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Set (Set, empty) as Set
 import Data.StrMap (StrMap, empty, insert, lookup, thawST)
@@ -17,8 +16,8 @@ import Data.StrMap (foldM) as S
 import Data.StrMap.ST (new)
 import Data.String (Pattern(..), Replacement(..), joinWith, replace, split, trim)
 import Data.Tuple (Tuple(..))
-import Library (parseCLst, parseLst, parseMp, parseNMp, parseSet, unsafeGenericObject)
-import Util (boolFromStringE, dbg, dbg2, fromJustE, inj, intFromStringE, numFromStringE, stick, unsafeSetAttr, zipI)
+import Library (parseCLst, parseLst, parseMp, parseNMp, parseSet)
+import Util (dbg, boolFromStringE, fromJustE, inj, intFromStringE, numFromStringE, zipI)
 
 foreign import unsafeSetIndexableAttr :: forall a b eff. a -> String -> String -> b -> Eff eff a
 foreign import unsafeGenericIndexableImpl :: forall a r. Schema -> Schema -> (Index -> (Record r) -> a) -> (Set.Set String) -> a
@@ -34,17 +33,17 @@ instance scSerializable :: Serializable SystemConf where
   schema a = systemConfSchema
   generic = unsafeGenericIndexable indexSchema systemConfSchema SystemConf
 
---instance ecSerializable :: Serializable EngineConf where
---  schema a = engineConfSchema
---  generic = unsafeGenericObject engineConfSchema
---
---instance ucSerializable :: Serializable UIConf where
---  schema a = uiConfSchema
---  generic = unsafeGenericObject uiConfSchema
---
---instance cSerializable :: Serializable Component where
---  schema a = componentSchema
---  generic = unsafeGenericObject componentSchema
+instance ecSerializable :: Serializable EngineConf where
+  schema a = engineConfSchema
+  generic = unsafeGenericIndexable indexSchema engineConfSchema EngineConf
+
+instance ucSerializable :: Serializable UIConf where
+  schema a = uiConfSchema
+  generic = unsafeGenericIndexable indexSchema uiConfSchema UIConf
+
+instance cSerializable :: Serializable Component where
+  schema a = componentSchema
+  generic = unsafeGenericIndexable indexSchema componentSchema Component
 
 
 type StrObj = StrMap String
@@ -153,17 +152,16 @@ parseLibData libData = do
     instantiateChunk lib@(Library val@{}) dataType objs = case dataType of
       "SystemConf" -> do
         obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
-        dbg obj
         pure $ Library val {systemConfLib = obj}
---      "EngineConf" -> do
---        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
---        pure $ Library val {engineConfLib = obj}
---      "UIConf" -> do
---        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
---        pure $ Library val {uiConfLib = obj}
---      "Component" -> do
---        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
---        pure $ Library val {componentLib = obj}
+      "EngineConf" -> do
+        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+        pure $ Library val {engineConfLib = obj}
+      "UIConf" -> do
+        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+        pure $ Library val {uiConfLib = obj}
+      "Component" -> do
+        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+        pure $ Library val {componentLib = obj}
       _ -> pure lib
     fields :: forall a. (Serializable a) => a -> String -> String -> EpiS eff h a
     fields obj fieldName fieldVal = do

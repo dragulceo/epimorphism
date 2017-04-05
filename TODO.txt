@@ -1,5 +1,6 @@
 PROJECTS:
 	- complex number library show hack
+	- turn of dbg compiler warnings?
 
 	- async (AFF?)
 	  - lib requests

@@ -54,36 +54,34 @@ initState :: forall eff h. SystemST h -> Library h -> EpiS (now :: Now | eff) h 
 initState systemST lib = do
   --  init config
   systemName <- lift $ getSysConfName
-  --systemConf <- loadLib systemName systemST.systemConfLib "init system"
-  obj@(SystemConf a systemConf) <- findLib lib systemName "init system" :: EpiS (now :: Now | eff) h SystemConf
 
---  dbg "adsfsadf"
---  dbg obj
---  dbg a
---  dbg systemConf
---  dbg "11111"
-  seed <- case systemConf.seed of
+  --dbg lib
+
+  (SystemConf _ systemConfD) <- findLib lib systemName "init system"
+
+  seed <- case systemConfD.seed of
     "" -> do
       newSeed <- lift rndstr
       dbg $ "GENERATING SEED: " <> newSeed
       pure newSeed
-    _ -> pure systemConf.seed
+    _ -> do
+      dbg $ "USING SEED: " <> systemConfD.seed
+      pure systemConfD.seed
 
-  let systemConf' = systemConf {seed = seed}
-  lift $ seedRandom systemConf'.seed -- PERSIST THIS!!!
+  --let systemConf' = systemConf {seed = seed}
+  lift $ seedRandom systemConfD.seed -- PERSIST THIS!!!
 
   cookie_profile <- lift $ getProfileCookie
 
   engineConf <- case (lookup cookie_profile systemST.engineConfLib) of
-    Nothing -> loadLib systemConf'.initEngineConf systemST.engineConfLib "init engine"
+    Nothing -> loadLib systemConfD.initEngineConf systemST.engineConfLib "init engine"
     (Just d) -> pure d
 
-  uiConf     <- loadLib systemConf'.initUIConf systemST.uiConfLib "init ui"
-  pattern    <- loadLib systemConf'.initPattern systemST.patternLib "init pattern"
+  uiConf     <- loadLib systemConfD.initUIConf systemST.uiConfLib "init ui"
+  pattern    <- loadLib systemConfD.initPattern systemST.patternLib "init pattern"
 
   -- build strefs
   ssRef <- lift $ newSTRef systemST
-  --scRef <- lift $ newSTRef systemConf'
   ecRef <- lift $ newSTRef engineConf
   ucRef <- lift $ newSTRef uiConf
   pRef  <- lift $ newSTRef pattern

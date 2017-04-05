@@ -1,14 +1,14 @@
 module Data.Serialize where
 
 import Prelude
-import Config (componentSchema, engineConfSchema, uiConfSchema)
+import Config (engineConfSchema, uiConfSchema)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (cons, filter, length, replicate, uncons, zip)
 import Data.Array (foldM) as A
-import Data.Library (Epi, EpiS, Component(..), EngineConf(..), SystemConf(..), UIConf(..), Index, Library(..), Schema, SchemaEntry(..), SchemaEntryType(..), indexSchema, systemConfSchema)
+import Data.Library (Epi, EpiS, Component(..), EngineConf(..), SystemConf(..), UIConf(..), Index, Library(..), Schema, SchemaEntry(..), SchemaEntryType(..), indexSchema, systemConfSchema, componentSchema)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Set (Set, empty) as Set
 import Data.StrMap (StrMap, empty, insert, lookup, thawST)
@@ -57,7 +57,7 @@ parseChunk res (Tuple i chunk) = do
     _ -> throwError ("Too many code blocks" <> errSuf)
 
   -- get data type
-  let lines = zipI $ split (Pattern "\n") chunk'
+  let lines = zipI $ filter ((/=) "") $ map trim $ split (Pattern "\n") chunk'
   {head: (Tuple _ dataType), tail} <- fromJustE (uncons lines) ("No dataType" <> errSuf)
 
   -- replace &&& with code in line
@@ -120,7 +120,6 @@ parseLibData libData = do
   let chunks = filter ((/=) "") $ map trim $ split (Pattern "###") libData
   let res = empty
   strobjs <- A.foldM parseChunk empty (zipI chunks)
-
   sc <- lift $ new
   ec <- lift $ new
   uc <- lift $ new
@@ -169,7 +168,8 @@ parseLibData libData = do
       let idx_entries' = zip idx_entries (replicate (length idx_entries) "value0")
       let entries      = filter (schemaSel fieldName) (schema obj)
       let entries'     = zip entries (replicate (length entries) "value1")
-      case (idx_entries' <> entries') of
+      let all_entries = idx_entries' <> entries'
+      case all_entries of
         [Tuple (SchemaEntry entryType _) accs] -> do
           case entryType of
             SE_St -> do
@@ -198,7 +198,7 @@ parseLibData libData = do
             SE_A_Cx -> do
               cx <- parseLst fieldVal >>= parseCLst
               liftEff $ unsafeSetIndexableAttr obj accs fieldName cx
-        _ -> throwError $ inj "Found %0 SchemaEntries for %1" [show $ length entries, fieldName]
+        _ -> throwError $ inj "Found %0 SchemaEntries for %1" [show $ length all_entries, fieldName]
     schemaSel n (SchemaEntry _ sen) = (n == sen)
 
 

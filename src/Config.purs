@@ -184,19 +184,6 @@ type Module = {
   , libName   :: String
 }
 
-componentSchema :: Schema
-componentSchema = [
-    SchemaEntry SE_St "id"
-  , SchemaEntry SE_St "flags"
-  , SchemaEntry SE_M_St "props"
-  , SchemaEntry SE_St "parent"
-  , SchemaEntry SE_St "family_ref"
-  , SchemaEntry SE_St "def_mod_ref"
-  , SchemaEntry SE_M_St "children"
-  , SchemaEntry SE_St "code"
-  , SchemaEntry SE_A_St "includes"
-]
-
 moduleSchema :: Schema
 moduleSchema = [
     SchemaEntry SE_St "component"

@@ -64,7 +64,7 @@ scripts [randomize dly:55 spd:0.5 lib:seed_a_main dim:float sub:a_exp typ:sub]
 family seed_color
 flags {lib,farm1, farm2}
 component simple_color
-par {spd: 0.0, rot: 0.15, sat:1.0, val:1.0}
+par {spd: 0.0, rot: 0.15, sat:1.0, val:1.0, pal:1.0}
 var seed
 dim vec4
 

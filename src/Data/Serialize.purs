@@ -49,7 +49,7 @@ parseChunk res (Tuple i chunk) = do
     _ -> throwError ("Too many code blocks" <> errSuf)
 
   -- get data type
-  let lines = zipI $ split (Pattern "\n") chunk
+  let lines = zipI $ split (Pattern "\n") chunk'
   {head: (Tuple _ dataType), tail} <- fromJustE (uncons lines) ("No dataType" <> errSuf)
 
   -- replace &&& with code in line
@@ -58,7 +58,7 @@ parseChunk res (Tuple i chunk) = do
     Just c -> do
       pure $ tail # map (\(Tuple i l) -> (Tuple i (replace (Pattern "&&&") (Replacement c) l)))
 
-  obj <- A.foldM (parseLine chunk) empty tail'
+  obj <- A.foldM (parseLine chunk') empty tail'
 
   let arr = maybe [] id (lookup dataType res)
   let arr' = cons obj arr
@@ -80,7 +80,6 @@ mapRefById res dataType vals = do
   where
     insertObj :: (StrMap StrObj) -> StrObj -> EpiS eff h (StrMap StrObj)
     insertObj res' obj = do
-      --dbg obj
       i <- fromJustE (lookup "id" obj) "Library object missing id :("
       pure $ insert i obj res'
 
@@ -135,7 +134,6 @@ parseLibData libData = do
     , sectionLib:    sl
     }
 
-  dbg strobjs
   objs <- S.foldM mapRefById empty strobjs
   S.foldM instantiateChunk lib objs
   where

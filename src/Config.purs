@@ -34,7 +34,7 @@ systemConfSchema :: Schema
 systemConfSchema = [
     SchemaEntry SE_St "id"
   , SchemaEntry SE_St "flags"
-  , SchemaEntry SE_St "props"
+  , SchemaEntry SE_M_St "props"
   , SchemaEntry SE_St "parent"
   , SchemaEntry SE_St "initEngineConf"
   , SchemaEntry SE_St "initUIConf"
@@ -96,7 +96,7 @@ engineConfSchema :: Schema
 engineConfSchema = [
     SchemaEntry SE_St "id"
   , SchemaEntry SE_St "flags"
-  , SchemaEntry SE_St "props"
+  , SchemaEntry SE_M_St "props"
   , SchemaEntry SE_St "parent"
   , SchemaEntry SE_I "kernelDim"
   , SchemaEntry SE_I "fract"
@@ -164,7 +164,7 @@ uiConfSchema :: Schema
 uiConfSchema = [
     SchemaEntry SE_St "id"
   , SchemaEntry SE_St "flags"
-  , SchemaEntry SE_St "props"
+  , SchemaEntry SE_M_St "props"
   , SchemaEntry SE_St "parent"
   , SchemaEntry SE_St "canvasId"
   , SchemaEntry SE_St "consoleId"
@@ -208,7 +208,7 @@ componentSchema :: Schema
 componentSchema = [
     SchemaEntry SE_St "id"
   , SchemaEntry SE_St "flags"
-  , SchemaEntry SE_St "props"
+  , SchemaEntry SE_M_St "props"
   , SchemaEntry SE_St "parent"
   , SchemaEntry SE_St "family_ref"
   , SchemaEntry SE_St "def_mod_ref"

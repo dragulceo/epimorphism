@@ -28,7 +28,7 @@ import Util (dbg, halt, Now, cxFromStringE, intFromStringE, numFromStringE, lg, 
 
 foreign import saveCanvas :: forall eff. Eff eff Unit
 
-command :: forall eff h. STRef h UIST -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h (SystemST h) -> Library h -> String -> EpiS (now :: Now | eff) h Unit
+command :: forall eff h. STRef h UIST -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h (SystemST h) -> Library h -> String -> Eff (canvas :: CANVAS, dom :: DOM, st :: ST h, now :: Now | eff) Unit
 command usRef ecRef esRef pRef ssRef lib msg = handleError do
   uiConfD <- getUIConfD lib "comman"
 

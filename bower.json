@@ -26,6 +26,10 @@
     "purescript-math": "2.0.0",
     "purescript-jquery": "3.1.0",
     "purescript-datetime": "2.2.0",
-		"purescript-psci-support": "2.0.0"
+    "purescript-lens-simple": "2.0.0",
+    "purescript-psci-support": "2.0.0"
+  },
+  "resolutions": {
+    "purescript-tuples": "3.2.0"
   }
 }

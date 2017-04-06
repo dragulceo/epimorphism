@@ -9,7 +9,7 @@ import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Array (uncons, updateAt, length)
-import Data.Library (EpiS, Library, Schema, getUIConfD)
+import Data.Library (EpiS, Library, Schema, UIConfD(..), getUIConfD)
 import Data.Maybe (Maybe(..))
 import Data.StrMap (values, insert, toUnfoldable)
 import Data.String (joinWith, split)
@@ -30,7 +30,7 @@ foreign import saveCanvas :: forall eff. Eff eff Unit
 
 command :: forall eff h. STRef h UIST -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h (SystemST h) -> Library h -> String -> Eff (canvas :: CANVAS, dom :: DOM, st :: ST h, now :: Now | eff) Unit
 command usRef ecRef esRef pRef ssRef lib msg = handleError do
-  uiConfD <- getUIConfD lib "comman"
+  (UIConfD uiConfD) <- getUIConfD lib "comman"
 
   systemST   <- lift $ readSTRef ssRef
   uiST       <- lift $ readSTRef usRef

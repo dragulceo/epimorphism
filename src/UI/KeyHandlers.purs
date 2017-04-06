@@ -8,7 +8,7 @@ import Control.Monad.Except.Trans (runExceptT)
 import Control.Monad.ST (ST, STRef, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Either (either)
-import Data.Library (EpiS, Library, getUIConfD)
+import Data.Library (EpiS, Library, UIConfD(..), getUIConfD)
 import Data.Maybe (Maybe(..))
 import Data.StrMap (insert, lookup)
 import Graphics.Canvas (CANVAS)
@@ -23,7 +23,7 @@ keyHandler :: KeyHandler
 keyHandler usRef lib char = do
   --let x = lg char
   res <- runExceptT do
-    uiConfD <- getUIConfD lib "keyHandler"
+    (UIConfD uiConfD) <- getUIConfD lib "keyHandler"
     case uiConfD.keySet of
       "dev"  -> devKeyHandler usRef lib char
       "prod" -> prodKeyHandler usRef lib char
@@ -34,7 +34,7 @@ keyHandler usRef lib char = do
 
 devKeyHandler :: EpiSKeyHandler
 devKeyHandler usRef lib char = do
-  uiConfD <- getUIConfD lib "devKeyHandler"
+  (UIConfD uiConfD) <- getUIConfD lib "devKeyHandler"
   uiST    <- liftEff $ readSTRef usRef
 
   case char of

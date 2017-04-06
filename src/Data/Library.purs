@@ -1,6 +1,7 @@
 module Data.Library where
 
 import Prelude
+import Optic.Lens.Simple
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Except.Trans (ExceptT, throwError)
@@ -9,8 +10,8 @@ import Control.Monad.Trans.Class (lift)
 import DOM (DOM)
 import Data.DateTime (DateTime)
 import Data.Maybe (Maybe(..))
-import Data.Set (Set)
-import Data.StrMap (StrMap)
+import Data.Set (Set, empty) as S
+import Data.StrMap (StrMap, empty)
 import Data.StrMap.ST (STStrMap, delete, peek, poke)
 import Graphics.Canvas (CANVAS)
 
@@ -29,10 +30,15 @@ newtype ComponentRef = ComponentRef String
 newtype PatternRef   = PatternRef String
 newtype ImageRef     = ImageRef String
 
+newtype Script = Script String
+newtype Path = Path String
+newtype Include = Include String
+type CodeBlock = String
+
 type Index = {
     id     :: String
   , parent :: String
-  , flags  :: Set String
+  , flags  :: S.Set String
   , props  :: StrMap String
 }
 
@@ -45,13 +51,14 @@ indexSchema = [
 ]
 
 -- System
-type SystemConfD = {
+newtype SystemConfD = SystemConfD {
     engineConf :: String
   , uiConf     :: String
   , pattern    :: String --PatternRef
   , seed       :: String
 }
 data SystemConf = SystemConf Index SystemConfD
+
 
 systemConfSchema :: Schema
 systemConfSchema = [
@@ -96,12 +103,6 @@ uiConfSchema = [
   , SchemaEntry SE_St "uiCompLib"
 ]
 
-
-newtype Script = Script String
-newtype Path = Path String
-newtype Include = Include String
-type CodeBlock = String
-
 data Pattern = Pattern Index {
     vert            :: ModuleRef
   , main            :: ModuleRef
@@ -114,7 +115,9 @@ data Pattern = Pattern Index {
   -- , 3d shit(everything between Engine & Modules)
 }
 
-data Family = Family Index {
+data Family = Family Index FamilyD
+
+newtype FamilyD = FamilyD {
     var          :: String
   , dim          :: Int
   , def_comp_ref :: ComponentRef
@@ -181,13 +184,65 @@ data Library h = Library {
   , system        :: Maybe String
 }
 
+class Indexable a where
+  libProj :: forall h. Library h -> STStrMap h a
+  index :: a -> Index
+
+instance indexSystemConf :: Indexable SystemConf where
+  libProj (Library {systemConfLib}) = systemConfLib
+  index   (SystemConf idx _)   = idx
+
+instance indexEngineConf :: Indexable EngineConf where
+  libProj (Library {engineConfLib}) = engineConfLib
+  index  (EngineConf idx _) = idx
+
+instance indexUIConf :: Indexable UIConf where
+  libProj (Library {uiConfLib}) = uiConfLib
+  index  (UIConf idx _) = idx
+
+instance indexComponent :: Indexable Component where
+  libProj (Library {componentLib}) = componentLib
+  index  (Component idx _) = idx
+
+class DataTable a ad | a -> ad where
+  libProj' :: forall h. Library h -> STStrMap h a
+  index' :: a -> Index
+  table :: a -> ad
+
+instance familyDT :: DataTable Family FamilyD where
+  libProj' (Library {familyLib}) = familyLib
+  index'  (Family idx _) = idx
+  table (Family _ dt) = dt
+
+
+--instance indexPattern :: Indexable Pattern where
+--  libProj (Library {patternLib}) = patternLib
+--  index  (Pattern idx _) = idx
+--
+--instance indexFamily :: Indexable Family where
+--  libProj (Library {familyLib}) = familyLib
+--  index  (Family idx _) = idx
+--
+--instance indexModule :: Indexable Module where
+--  libProj (Library {moduleLib}) = moduleLib
+--  index  (Module idx _) = idx
+--
+--instance indexImage :: Indexable Image where
+--  libProj (Library {imageLib}) = imageLib
+--  index  (Image idx _) = idx
+--
+--instance sectionIndex :: Indexable Section where
+--  libProj (Library {sectionLib}) = sectionLib
+--  index  (Section idx _) = idx
+
+
 -- general crud
 
 getLib :: forall a eff h. (Indexable a) => Library h -> String -> String -> EpiS eff h a
 getLib lib name msg = do
-  -- dbg $ inLib lib
-  res <- liftEff $ peek (inLib lib) name
-  -- <dbg res
+  -- dbg $ libProj lib
+  res <- liftEff $ peek (libProj lib) name
+  -- dbg res
   case res of
     Just x -> pure x
     Nothing -> throwError $ msg <>" # Can't find in library: " <> name
@@ -195,83 +250,60 @@ getLib lib name msg = do
 
 modLib :: forall a eff h. (Indexable a) => Library h -> String -> a -> EpiS eff h Unit
 modLib lib name new = do
-  lift $ poke (inLib lib) name new # void
+  lift $ poke (libProj lib) name new # void
 
 modLib' :: forall a eff h. (Indexable a) => Library h -> String -> (a -> a) -> EpiS eff h Unit
 modLib' lib name mut = do
   lib' <- mut <$> getLib lib name "modLib' mutator"
-  lift $ poke (inLib lib) name lib' # void
+  lift $ poke (libProj lib) name lib' # void
 
-delLib :: forall a eff h. (Indexable a) => Library h -> String -> EpiS eff h (STStrMap h a)
-delLib lib name = do
-  lift $ delete (inLib lib) name
+delLib :: forall a eff h. (Indexable a) => Library h -> a -> EpiS eff h Unit
+delLib lib obj = do
+  lift $ delete (libProj lib :: STStrMap h a) (index obj).id # void
 
---searchLib
+
+data LibSearch = LibSearch {flags::S.Set String, exclude::S.Set String, props::StrMap String}
+emptySearch :: LibSearch
+emptySearch = LibSearch {flags: S.empty, exclude: S.empty, props: empty}
+
+searchLib :: forall a eff h. (Indexable a) => Library h -> LibSearch -> EpiS eff h (Array a)
+searchLib lib search = do
+  pure []
 
 -- specific finders
+getSystemConf :: forall eff h.  Library h -> String -> EpiS eff h SystemConf
+getSystemConf (Library {system: Nothing}) msg = do
+  throwError $ msg <> ": System not initialized"
+getSystemConf lib@(Library {system: (Just system)}) msg = do
+  getLib lib system (msg <> ": Can't find system - " <> system)
 
 getSystemConfD :: forall eff h.  Library h -> String -> EpiS eff h SystemConfD
-getSystemConfD (Library {system: Nothing}) msg = do
-  throwError $ msg <> ": System not initialized"
-getSystemConfD lib@(Library {system: (Just system)}) msg = do
-  (SystemConf _ systemConfD) <- getLib lib system (msg <> ": Can't find system" <> system)
+getSystemConfD lib msg = do
+  (SystemConf _ systemConfD) <- getSystemConf lib msg
   pure systemConfD
 
-getUIConfD :: forall eff h.  Library h -> String -> EpiS eff h UIConfD
-getUIConfD (Library {system: Nothing}) msg = do
+getUIConf :: forall eff h.  Library h -> String -> EpiS eff h UIConf
+getUIConf (Library {system: Nothing}) msg = do
   throwError $ msg <> ": System not initialized"
-getUIConfD lib@(Library {system: (Just system)}) msg = do
-  systemConfD <- getSystemConfD lib "getUIConfD"
-  let name = systemConfD.uiConf
-  (UIConf _ uiConfD) <- getLib lib name (msg <> ": Can't find uiConf " <> name)
+getUIConf lib@(Library {system: (Just system)}) msg = do
+  (SystemConfD systemConfD) <- getSystemConfD lib "getUIConf"
+  let name = (systemConfD.uiConf)
+  getLib lib name (msg <> ": Can't find uiConf - " <> name)
+
+getUIConfD :: forall eff h.  Library h -> String -> EpiS eff h UIConfD
+getUIConfD lib msg = do
+  (UIConf _ uiConfD) <- getUIConf lib msg
   pure uiConfD
 
-getEngineConfD :: forall eff h.  Library h -> String -> EpiS eff h EngineConfD
-getEngineConfD (Library {system: Nothing}) msg = do
+getEngineConf :: forall eff h.  Library h -> String -> EpiS eff h EngineConf
+getEngineConf (Library {system: Nothing}) msg = do
   throwError $ msg <> ": System not initialized"
-getEngineConfD lib@(Library {system: (Just system)}) msg = do
-  systemConfD <- getSystemConfD lib "getEngineConfD"
-  let name = systemConfD.engineConf
-  (EngineConf _ engineConfD) <- getLib lib name (msg <> ": Can't find engineConf " <> name)
+getEngineConf lib@(Library {system: (Just system)}) msg = do
+  (SystemConfD systemConfD) <- getSystemConfD lib "getEngineConf"
+  let name = (systemConfD.engineConf)
+  getLib lib name (msg <> ": Can't find engineConf - " <> name)
+
+getEngineConfD :: forall eff h.  Library h -> String -> EpiS eff h EngineConfD
+getEngineConfD lib msg = do
+  (EngineConf _ engineConfD) <- getEngineConf lib msg
   pure engineConfD
-
-
-class Indexable a where
-  inLib :: forall h. Library h -> STStrMap h a
-  index  :: a -> Index
-
-instance indexSystemConf :: Indexable SystemConf where
-  inLib (Library {systemConfLib}) = systemConfLib
-  index  (SystemConf idx _) = idx
-
-instance indexEngineConf :: Indexable EngineConf where
-  inLib (Library {engineConfLib}) = engineConfLib
-  index  (EngineConf idx _) = idx
-
-instance indexUIConf :: Indexable UIConf where
-  inLib (Library {uiConfLib}) = uiConfLib
-  index  (UIConf idx _) = idx
-
-instance indexPattern :: Indexable Pattern where
-  inLib (Library {patternLib}) = patternLib
-  index  (Pattern idx _) = idx
-
-instance indexFamily :: Indexable Family where
-  inLib (Library {familyLib}) = familyLib
-  index  (Family idx _) = idx
-
-instance indexComponent :: Indexable Component where
-  inLib (Library {componentLib}) = componentLib
-  index  (Component idx _) = idx
-
-instance indexModule :: Indexable Module where
-  inLib (Library {moduleLib}) = moduleLib
-  index  (Module idx _) = idx
-
-instance indexImage :: Indexable Image where
-  inLib (Library {imageLib}) = imageLib
-  index  (Image idx _) = idx
-
-instance sectionIndex :: Indexable Section where
-  inLib (Library {sectionLib}) = sectionLib
-  index  (Section idx _) = idx

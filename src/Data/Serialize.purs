@@ -8,7 +8,7 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (cons, filter, length, replicate, uncons, zip)
 import Data.Array (foldM) as A
-import Data.Library (Component(..), ComponentD(..), EngineConf(..), EngineConfD(..), Epi, EpiS, Index, Library(..), Schema, SchemaEntry(..), SchemaEntryType(..), SystemConf(..), SystemConfD(..), UIConf(..), UIConfD(..), componentSchema, indexSchema, systemConfSchema, uiConfSchema)
+import Data.Library (Library(..))
 import Data.Maybe (Maybe(..), maybe)
 import Data.Set (Set, empty) as Set
 import Data.StrMap (StrMap, empty, insert, lookup, thawST)
@@ -16,6 +16,7 @@ import Data.StrMap (foldM) as S
 import Data.StrMap.ST (new)
 import Data.String (Pattern(..), Replacement(..), joinWith, replace, split, trim)
 import Data.Tuple (Tuple(..))
+import Data.Types (Component(Component), EngineConf(EngineConf), Epi, EpiS, Index, Schema, SchemaEntry(SchemaEntry), SchemaEntryType(SE_A_Cx, SE_A_St, SE_M_N, SE_M_St, SE_S, SE_B, SE_I, SE_N, SE_St), SystemConf(SystemConf), UIConf(UIConf), componentSchema, indexSchema, systemConfSchema, uiConfSchema)
 import Library (parseCLst, parseLst, parseMp, parseNMp, parseSet)
 import Util (dbg, boolFromStringE, fromJustE, inj, intFromStringE, numFromStringE, zipI)
 
@@ -31,23 +32,19 @@ class Serializable a where
 
 instance scSerializable :: Serializable SystemConf where
   schema a = systemConfSchema
-  generic = unsafeGenericDataTable indexSchema systemConfSchema $
-            (\a b -> SystemConf a (SystemConfD b))
+  generic = unsafeGenericDataTable indexSchema systemConfSchema SystemConf
 
 instance ecSerializable :: Serializable EngineConf where
   schema a = engineConfSchema
-  generic = unsafeGenericDataTable indexSchema engineConfSchema $
-            (\a b -> EngineConf a (EngineConfD b))
+  generic = unsafeGenericDataTable indexSchema engineConfSchema EngineConf
 
 instance ucSerializable :: Serializable UIConf where
   schema a = uiConfSchema
-  generic = unsafeGenericDataTable indexSchema uiConfSchema $
-            (\a b -> UIConf a (UIConfD b))
+  generic = unsafeGenericDataTable indexSchema uiConfSchema UIConf
 
 instance cSerializable :: Serializable Component where
   schema a = componentSchema
-  generic = unsafeGenericDataTable indexSchema componentSchema $
-            (\a b -> Component a (ComponentD b))
+  generic = unsafeGenericDataTable indexSchema componentSchema Component
 
 
 type StrObj = StrMap String

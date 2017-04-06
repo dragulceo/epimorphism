@@ -1,6 +1,6 @@
 module Library where
 import Prelude
-import Data.Library (Epi, Schema, SchemaEntry(..), SchemaEntryType(..))
+import Data.Types (Epi, Schema, SchemaEntry(..), SchemaEntryType(..))
 import Control.Monad.Except.Trans (throwError)
 import Data.Array (tail, head, cons, foldM, reverse, filter, length, index) as A
 import Data.Complex (Complex)

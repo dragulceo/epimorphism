@@ -195,53 +195,53 @@ data Library h = Library {
 
 class DataTable a ad | a -> ad where
   libProj :: forall h. Library h -> STStrMap h a
-  index :: a -> Index
-  table :: a -> ad
+  idx :: a -> Index
+  dat :: a -> ad
 
 instance dtSystemConf :: DataTable SystemConf SystemConfD where
   libProj (Library {systemConfLib}) = systemConfLib
-  index   (SystemConf idx _) = idx
-  table   (SystemConf _ dt) = dt
+  idx     (SystemConf ix _) = ix
+  dat     (SystemConf _ dt) = dt
 
 instance dtEngineConf :: DataTable EngineConf EngineConfD where
   libProj (Library {engineConfLib}) = engineConfLib
-  index   (EngineConf idx _) = idx
-  table   (EngineConf _ dt) = dt
+  idx     (EngineConf ix _) = ix
+  dat     (EngineConf _ dt) = dt
 
 instance dtUIConf :: DataTable UIConf UIConfD where
   libProj (Library {uiConfLib}) = uiConfLib
-  index   (UIConf idx _) = idx
-  table   (UIConf _ dt) = dt
+  idx     (UIConf ix _) = ix
+  dat     (UIConf _ dt) = dt
 
-instance dtPattern :: DataTable Pattern where
+instance dtPattern :: DataTable Pattern PatternD where
   libProj (Library {patternLib}) = patternLib
-  index   (Pattern idx _) = idx
-  table   (Pattern _ dt) = dt
+  idx     (Pattern ix _) = ix
+  dat     (Pattern _ dt) = dt
 
-instance dtModule :: DataTable Module where
+instance dtModule :: DataTable Module ModuleD where
   libProj (Library {moduleLib}) = moduleLib
-  index   (Module idx _) = idx
-  table   (Module _ dt) = dt
+  idx     (Module ix _) = ix
+  dat     (Module _ dt) = dt
 
 instance dtComponent :: DataTable Component ComponentD where
   libProj (Library {componentLib}) = componentLib
-  index   (Component idx _) = idx
-  table   (Component _ dt) = dt
+  idx     (Component ix _) = ix
+  dat     (Component _ dt) = dt
 
 instance dtFamily :: DataTable Family FamilyD where
   libProj (Library {familyLib}) = familyLib
-  index   (Family idx _) = idx
-  table   (Family _ dt) = dt
+  idx     (Family ix _) = ix
+  dat     (Family _ dt) = dt
 
-instance dtImage :: DataTable Image where
+instance dtImage :: DataTable Image ImageD where
   libProj (Library {imageLib}) = imageLib
-  index   (Image idx _) = idx
-  table   (Image _ dt) = dt
+  idx     (Image ix _) = ix
+  dat     (Image _ dt) = dt
 
-instance dtSection :: DataTable Section where
+instance dtSection :: DataTable Section SectionD where
   libProj (Library {sectionLib}) = sectionLib
-  index   (Section idx _) = idx
-  table   (Section _ dt) = dt
+  idx     (Section ix _) = ix
+  dat     (Section _ dt) = dt
 
 
 -- general crud
@@ -267,7 +267,7 @@ modLib' lib name mut = do
 
 delLib :: forall a ad eff h. (DataTable a ad) => Library h -> a -> EpiS eff h Unit
 delLib lib obj = do
-  lift $ delete (libProj lib :: STStrMap h a) (index obj).id # void
+  lift $ delete (libProj lib :: STStrMap h a) (idx obj).id # void
 
 
 data LibSearch = LibSearch {flags::S.Set String, exclude::S.Set String, props::StrMap String}

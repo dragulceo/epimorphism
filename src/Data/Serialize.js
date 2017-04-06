@@ -26,7 +26,7 @@ function defaultVal(elt, set){
 	}
 }
 
-exports.unsafeGenericIndexableImpl = function(idx_schema){
+exports.unsafeGenericDataTableImpl = function(idx_schema){
 	return function(schema){
 		return function (constr) {
 			return function(set) {
@@ -67,7 +67,7 @@ function functionName(fun) {
 }
 
 
-exports.unsafeSetIndexableAttr = function(obj){
+exports.unsafeSetDataTableAttr = function(obj){
 	return function(field){
 		return function(attrn){
 			return function(attrv){

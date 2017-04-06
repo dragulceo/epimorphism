@@ -19,11 +19,11 @@ import Data.Tuple (Tuple(..))
 import Library (parseCLst, parseLst, parseMp, parseNMp, parseSet)
 import Util (dbg, boolFromStringE, fromJustE, inj, intFromStringE, numFromStringE, zipI)
 
-foreign import unsafeSetIndexableAttr :: forall a b eff. a -> String -> String -> b -> Eff eff a
-foreign import unsafeGenericIndexableImpl :: forall a r. Schema -> Schema -> (Index -> (Record r) -> a) -> (Set.Set String) -> a
+foreign import unsafeSetDataTableAttr :: forall a b eff. a -> String -> String -> b -> Eff eff a
+foreign import unsafeGenericDataTableImpl :: forall a r. Schema -> Schema -> (Index -> (Record r) -> a) -> (Set.Set String) -> a
 
-unsafeGenericIndexable :: forall a r. Schema -> Schema -> (Index -> (Record r) -> a) -> a
-unsafeGenericIndexable idxSchema schema construct = unsafeGenericIndexableImpl idxSchema schema construct Set.empty
+unsafeGenericDataTable :: forall a r. Schema -> Schema -> (Index -> (Record r) -> a) -> a
+unsafeGenericDataTable idxSchema schema construct = unsafeGenericDataTableImpl idxSchema schema construct Set.empty
 
 class Serializable a where
   schema :: a -> Schema
@@ -31,22 +31,22 @@ class Serializable a where
 
 instance scSerializable :: Serializable SystemConf where
   schema a = systemConfSchema
-  generic = unsafeGenericIndexable indexSchema systemConfSchema $
+  generic = unsafeGenericDataTable indexSchema systemConfSchema $
             (\a b -> SystemConf a (SystemConfD b))
 
 instance ecSerializable :: Serializable EngineConf where
   schema a = engineConfSchema
-  generic = unsafeGenericIndexable indexSchema engineConfSchema $
+  generic = unsafeGenericDataTable indexSchema engineConfSchema $
             (\a b -> EngineConf a (EngineConfD b))
 
 instance ucSerializable :: Serializable UIConf where
   schema a = uiConfSchema
-  generic = unsafeGenericIndexable indexSchema uiConfSchema $
+  generic = unsafeGenericDataTable indexSchema uiConfSchema $
             (\a b -> UIConf a (UIConfD b))
 
 instance cSerializable :: Serializable Component where
   schema a = componentSchema
-  generic = unsafeGenericIndexable indexSchema componentSchema $
+  generic = unsafeGenericDataTable indexSchema componentSchema $
             (\a b -> Component a (ComponentD b))
 
 
@@ -178,31 +178,31 @@ parseLibData libData = do
         [Tuple (SchemaEntry entryType _) accs] -> do
           case entryType of
             SE_St -> do
-              liftEff $ unsafeSetIndexableAttr obj accs fieldName fieldVal
+              liftEff $ unsafeSetDataTableAttr obj accs fieldName fieldVal
             SE_N -> do
               n <- numFromStringE fieldVal
-              liftEff $ unsafeSetIndexableAttr obj accs fieldName n
+              liftEff $ unsafeSetDataTableAttr obj accs fieldName n
             SE_I -> do
               i <- intFromStringE fieldVal
-              liftEff $ unsafeSetIndexableAttr obj accs fieldName i
+              liftEff $ unsafeSetDataTableAttr obj accs fieldName i
             SE_B -> do
               b <- boolFromStringE fieldVal
-              liftEff $ unsafeSetIndexableAttr obj accs fieldName b
+              liftEff $ unsafeSetDataTableAttr obj accs fieldName b
             SE_S -> do
               s <- parseSet fieldVal
-              liftEff $ unsafeSetIndexableAttr obj accs fieldName s
+              liftEff $ unsafeSetDataTableAttr obj accs fieldName s
             SE_M_St -> do
               m <- parseMp fieldVal
-              liftEff $ unsafeSetIndexableAttr obj accs fieldName m
+              liftEff $ unsafeSetDataTableAttr obj accs fieldName m
             SE_M_N -> do
               mn <- parseMp fieldVal >>= parseNMp
-              liftEff $ unsafeSetIndexableAttr obj accs fieldName mn
+              liftEff $ unsafeSetDataTableAttr obj accs fieldName mn
             SE_A_St -> do
               l <- parseLst fieldVal
-              liftEff $ unsafeSetIndexableAttr obj accs fieldName l
+              liftEff $ unsafeSetDataTableAttr obj accs fieldName l
             SE_A_Cx -> do
               cx <- parseLst fieldVal >>= parseCLst
-              liftEff $ unsafeSetIndexableAttr obj accs fieldName cx
+              liftEff $ unsafeSetDataTableAttr obj accs fieldName cx
         _ -> throwError $ inj "Found %0 SchemaEntries for %1" [show $ length all_entries, fieldName]
     schemaSel n (SchemaEntry _ sen) = (n == sen)
 

@@ -35,6 +35,8 @@ newtype Path = Path String
 newtype Include = Include String
 type CodeBlock = String
 
+data Snapshot = Snapshot DateTime String
+
 type Index = {
     id     :: String
   , parent :: String
@@ -50,6 +52,7 @@ indexSchema = [
   , SchemaEntry SE_St   "parent"
 ]
 
+
 -- System
 newtype SystemConfD = SystemConfD {
     engineConf :: String
@@ -59,7 +62,6 @@ newtype SystemConfD = SystemConfD {
 }
 data SystemConf = SystemConf Index SystemConfD
 
-
 systemConfSchema :: Schema
 systemConfSchema = [
     SchemaEntry SE_St "engineConf"
@@ -68,7 +70,8 @@ systemConfSchema = [
   , SchemaEntry SE_St "seed"
 ]
 
-type EngineConfD= {
+
+newtype EngineConfD = EngineConfD {
     kernelDim            :: Int
   , fract                :: Int
   , numAuxBuffers        :: Int
@@ -77,7 +80,8 @@ type EngineConfD= {
 }
 data EngineConf = EngineConf Index EngineConfD
 
-type UIConfD = {
+
+newtype UIConfD = UIConfD {
     canvasId          :: String
   , consoleId         :: String
   , fpsId             :: String
@@ -103,7 +107,8 @@ uiConfSchema = [
   , SchemaEntry SE_St "uiCompLib"
 ]
 
-data Pattern = Pattern Index {
+
+newtype PatternD = PatternD{
     vert            :: ModuleRef
   , main            :: ModuleRef
   , disp            :: ModuleRef
@@ -114,14 +119,15 @@ data Pattern = Pattern Index {
   , imageLib        :: String
   -- , 3d shit(everything between Engine & Modules)
 }
+data Pattern = Pattern Index PatternD
 
-data Family = Family Index FamilyD
 
 newtype FamilyD = FamilyD {
     var          :: String
   , dim          :: Int
   , def_comp_ref :: ComponentRef
 }
+data Family = Family Index FamilyD
 
 familySchema :: Schema
 familySchema = [
@@ -131,14 +137,14 @@ familySchema = [
 ]
 
 
-data Component = Component Index ComponentD
-type ComponentD = {
+newtype ComponentD = ComponentD {
     family_ref  :: FamilyRef
   , def_mod_ref :: ModuleRef
   , children    :: StrMap FamilyRef
   , code        :: CodeBlock
   , includes    :: Array Include
 }
+data Component = Component Index ComponentD
 
 componentSchema :: Schema
 componentSchema = [
@@ -149,7 +155,7 @@ componentSchema = [
   , SchemaEntry SE_A_St "includes"
 ]
 
-data Module = Module Index {
+newtype ModuleD = ModuleD {
     comp_ref :: ComponentRef
   , scripts  :: Array Script
   , modules  :: StrMap ModuleRef
@@ -157,17 +163,20 @@ data Module = Module Index {
   , zn       :: Array Path
   , images   :: Array ImageRef
   , sub      :: StrMap String
- }
+}
+data Module = Module Index ModuleD
 
-data Image = Image Index {
+
+newtype ImageD = ImageD {
   path :: String
 }
+data Image = Image Index ImageD
 
-data Section = Section Index {
+
+newtype SectionD = SectionD {
   values :: Array String
 }
-
-data Snapshot = Snapshot DateTime String
+data Section = Section Index SectionD
 
 
 --- LIBRARY
@@ -184,61 +193,60 @@ data Library h = Library {
   , system        :: Maybe String
 }
 
-class Indexable a where
+class DataTable a ad | a -> ad where
   libProj :: forall h. Library h -> STStrMap h a
   index :: a -> Index
-
-instance indexSystemConf :: Indexable SystemConf where
-  libProj (Library {systemConfLib}) = systemConfLib
-  index   (SystemConf idx _)   = idx
-
-instance indexEngineConf :: Indexable EngineConf where
-  libProj (Library {engineConfLib}) = engineConfLib
-  index  (EngineConf idx _) = idx
-
-instance indexUIConf :: Indexable UIConf where
-  libProj (Library {uiConfLib}) = uiConfLib
-  index  (UIConf idx _) = idx
-
-instance indexComponent :: Indexable Component where
-  libProj (Library {componentLib}) = componentLib
-  index  (Component idx _) = idx
-
-class DataTable a ad | a -> ad where
-  libProj' :: forall h. Library h -> STStrMap h a
-  index' :: a -> Index
   table :: a -> ad
 
-instance familyDT :: DataTable Family FamilyD where
-  libProj' (Library {familyLib}) = familyLib
-  index'  (Family idx _) = idx
-  table (Family _ dt) = dt
+instance dtSystemConf :: DataTable SystemConf SystemConfD where
+  libProj (Library {systemConfLib}) = systemConfLib
+  index   (SystemConf idx _) = idx
+  table   (SystemConf _ dt) = dt
 
+instance dtEngineConf :: DataTable EngineConf EngineConfD where
+  libProj (Library {engineConfLib}) = engineConfLib
+  index   (EngineConf idx _) = idx
+  table   (EngineConf _ dt) = dt
 
---instance indexPattern :: Indexable Pattern where
---  libProj (Library {patternLib}) = patternLib
---  index  (Pattern idx _) = idx
---
---instance indexFamily :: Indexable Family where
---  libProj (Library {familyLib}) = familyLib
---  index  (Family idx _) = idx
---
---instance indexModule :: Indexable Module where
---  libProj (Library {moduleLib}) = moduleLib
---  index  (Module idx _) = idx
---
---instance indexImage :: Indexable Image where
---  libProj (Library {imageLib}) = imageLib
---  index  (Image idx _) = idx
---
---instance sectionIndex :: Indexable Section where
---  libProj (Library {sectionLib}) = sectionLib
---  index  (Section idx _) = idx
+instance dtUIConf :: DataTable UIConf UIConfD where
+  libProj (Library {uiConfLib}) = uiConfLib
+  index   (UIConf idx _) = idx
+  table   (UIConf _ dt) = dt
+
+instance dtPattern :: DataTable Pattern where
+  libProj (Library {patternLib}) = patternLib
+  index   (Pattern idx _) = idx
+  table   (Pattern _ dt) = dt
+
+instance dtModule :: DataTable Module where
+  libProj (Library {moduleLib}) = moduleLib
+  index   (Module idx _) = idx
+  table   (Module _ dt) = dt
+
+instance dtComponent :: DataTable Component ComponentD where
+  libProj (Library {componentLib}) = componentLib
+  index   (Component idx _) = idx
+  table   (Component _ dt) = dt
+
+instance dtFamily :: DataTable Family FamilyD where
+  libProj (Library {familyLib}) = familyLib
+  index   (Family idx _) = idx
+  table   (Family _ dt) = dt
+
+instance dtImage :: DataTable Image where
+  libProj (Library {imageLib}) = imageLib
+  index   (Image idx _) = idx
+  table   (Image _ dt) = dt
+
+instance dtSection :: DataTable Section where
+  libProj (Library {sectionLib}) = sectionLib
+  index   (Section idx _) = idx
+  table   (Section _ dt) = dt
 
 
 -- general crud
 
-getLib :: forall a eff h. (Indexable a) => Library h -> String -> String -> EpiS eff h a
+getLib :: forall a ad eff h. (DataTable a ad) => Library h -> String -> String -> EpiS eff h a
 getLib lib name msg = do
   -- dbg $ libProj lib
   res <- liftEff $ peek (libProj lib) name
@@ -248,16 +256,16 @@ getLib lib name msg = do
     Nothing -> throwError $ msg <>" # Can't find in library: " <> name
   --fromJustE res (msg <>" # Can't find in library: " <> name)
 
-modLib :: forall a eff h. (Indexable a) => Library h -> String -> a -> EpiS eff h Unit
+modLib :: forall a ad eff h. (DataTable a ad) => Library h -> String -> a -> EpiS eff h Unit
 modLib lib name new = do
   lift $ poke (libProj lib) name new # void
 
-modLib' :: forall a eff h. (Indexable a) => Library h -> String -> (a -> a) -> EpiS eff h Unit
+modLib' :: forall a ad eff h. (DataTable a ad) => Library h -> String -> (a -> a) -> EpiS eff h Unit
 modLib' lib name mut = do
   lib' <- mut <$> getLib lib name "modLib' mutator"
   lift $ poke (libProj lib) name lib' # void
 
-delLib :: forall a eff h. (Indexable a) => Library h -> a -> EpiS eff h Unit
+delLib :: forall a ad eff h. (DataTable a ad) => Library h -> a -> EpiS eff h Unit
 delLib lib obj = do
   lift $ delete (libProj lib :: STStrMap h a) (index obj).id # void
 
@@ -266,7 +274,7 @@ data LibSearch = LibSearch {flags::S.Set String, exclude::S.Set String, props::S
 emptySearch :: LibSearch
 emptySearch = LibSearch {flags: S.empty, exclude: S.empty, props: empty}
 
-searchLib :: forall a eff h. (Indexable a) => Library h -> LibSearch -> EpiS eff h (Array a)
+searchLib :: forall a ad eff h. (DataTable a ad) => Library h -> LibSearch -> EpiS eff h (Array a)
 searchLib lib search = do
   pure []
 

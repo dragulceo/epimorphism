@@ -8,7 +8,7 @@ import Control.Monad.ST (readSTRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array ((!!), length, (..), (:), filter, partition)
 import Data.DOM.Simple.Element (setInnerHTML)
-import Data.Library (Library(..), UIConfD(..), getUIConfD)
+import Data.Library (Library(..), getUIConfD)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.StrMap (StrMap)
 import Data.String (Replacement(..), joinWith, trim, split, replace)
@@ -18,6 +18,7 @@ import Data.String.Regex.Flags (noFlags)
 import Data.String.Regex.Unsafe (unsafeRegex)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
+import Data.Types (UIConfD)
 import Paths (isConstantPath, runPath)
 import Serialize (showCX, unsafeSerialize)
 import System (family, loadLib)
@@ -29,7 +30,7 @@ foreign import addEventListeners :: forall eff. Eff eff Unit
 
 renderConsole :: forall eff h. UIST -> SystemST h -> Pattern -> Library h -> EpiS eff h Unit
 renderConsole uiST systemST pattern lib = do
-  (UIConfD uiConfD) <- getUIConfD lib "renderConsole"
+  uiConfD <- getUIConfD lib "renderConsole"
   dsmDiv <- findElt "debugMain"
   str0 <- renderModule systemST uiConfD.uiCompLib pattern.main "MAIN" Nothing
   lift $ setInnerHTML str0 dsmDiv

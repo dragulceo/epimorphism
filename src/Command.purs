@@ -9,13 +9,14 @@ import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Array (uncons, updateAt, length)
-import Data.Library (EpiS, Library, Schema, UIConfD(..), getUIConfD)
+import Data.Library (Library, getUIConfD)
 import Data.Maybe (Maybe(..))
 import Data.StrMap (values, insert, toUnfoldable)
 import Data.String (joinWith, split)
 import Data.String (Pattern(..)) as S
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
+import Data.Types (EpiS, Schema)
 import Engine (initEngineST)
 import Graphics.Canvas (CANVAS)
 import Layout (updateLayout, initLayout)
@@ -30,7 +31,7 @@ foreign import saveCanvas :: forall eff. Eff eff Unit
 
 command :: forall eff h. STRef h UIST -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h (SystemST h) -> Library h -> String -> Eff (canvas :: CANVAS, dom :: DOM, st :: ST h, now :: Now | eff) Unit
 command usRef ecRef esRef pRef ssRef lib msg = handleError do
-  (UIConfD uiConfD) <- getUIConfD lib "comman"
+  uiConfD <- getUIConfD lib "comman"
 
   systemST   <- lift $ readSTRef ssRef
   uiST       <- lift $ readSTRef usRef

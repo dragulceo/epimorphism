@@ -6,14 +6,15 @@ import Console (renderConsole)
 import Control.Monad.Trans.Class (lift)
 import Data.DOM.Simple.Element (classRemove, classAdd, setInnerHTML, setStyleAttr)
 import Data.DOM.Simple.Window (innerHeight, innerWidth, document, globalWindow)
-import Data.Library (EpiS, Library, UIConfD(..), getUIConfD)
+import Data.Library (Library, getUIConfD)
 import Data.Maybe (Maybe(Just, Nothing))
+import Data.Types (EpiS)
 import UIUtil (findElt)
 import Util (lg)
 
 initLayout :: forall eff h. UIST -> Library h -> EpiS eff h Unit
 initLayout uiST lib = do
-  (UIConfD uiConfD)  <- getUIConfD lib "initUIST"
+  uiConfD <- getUIConfD lib "initUIST"
 
   let window = globalWindow
   doc <- lift $ document window
@@ -57,7 +58,7 @@ initLayout uiST lib = do
 -- hides malformed html issues
 updateLayout :: forall eff h. UIST -> SystemST h -> Pattern -> Library h -> Boolean -> EpiS eff h Unit
 updateLayout uiST systemST pattern lib force = do
-  (UIConfD uiConfD) <- getUIConfD lib "updateLayout"
+  uiConfD <- getUIConfD lib "updateLayout"
   when (force ||
         (systemST.frameNum `mod` uiConfD.uiUpdateFreq == 0 && not systemST.paused)) do
 

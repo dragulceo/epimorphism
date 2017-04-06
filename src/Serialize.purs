@@ -1,7 +1,7 @@
 module Serialize where
 
 import Prelude
-import Data.Library (Epi, Schema, SchemaEntry(..), SchemaEntryType(..))
+import Data.Types (Epi, Schema, SchemaEntry(..), SchemaEntryType(..))
 import Data.Array (null)
 import Data.Array (sortBy, foldM) as A
 import Data.Complex (inCartesian, Cartesian(Cartesian), Complex)

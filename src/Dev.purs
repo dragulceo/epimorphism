@@ -1,13 +1,12 @@
 module Dev where
 
 import Prelude
-import Optic.Core
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE, logShow)
 import Control.Monad.ST (runST)
 import DOM (DOM)
-import Data.Library (SystemConf(..), SystemConfD(..), apI)
+--import Data.Library (SystemConf(..), SystemConfD(..), apI)
 import Data.Set (empty) as S
 import Data.StrMap (empty) as SM
 import Graphics.Canvas (CANVAS)

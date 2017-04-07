@@ -1,9 +1,9 @@
 module ScriptUtil where
 
 import Prelude
-import Config (EpiS, Pattern, SystemST, Script(Script))
+import Config (SystemST, Script(Script))
 import Control.Monad.Except.Trans (throwError)
-import Control.Monad.ST (modifySTRef, newSTRef, readSTRef, STRef)
+import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (head, foldM, uncons, deleteAt, cons)
 import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
@@ -11,6 +11,7 @@ import Data.StrMap (StrMap, insert, empty, toUnfoldable)
 import Data.String (split, joinWith, trim)
 import Data.String (Pattern(..)) as S
 import Data.Tuple (Tuple(Tuple))
+import Data.Types (EpiS, PatternD)
 import Pattern (clonePattern, findModule, findAddr, CloneRes(CloneRes))
 import System (mUp)
 import Text.Format (precision, format)
@@ -58,27 +59,24 @@ serializeScript (Script name phase args) =
   inj "%0@%1 %2" [name, (format (precision 2) phase), (serializeArgs args)]
   where
     serializeArgs :: StrMap String -> String
-    serializeArgs args = joinWith " " $ map (\(Tuple k v) -> k <> ":" <> v) (toUnfoldable args)
+    serializeArgs args' = joinWith " " $ map (\(Tuple k v) -> k <> ":" <> v) (toUnfoldable args')
 
 
--- This method is called by scripts that modify the state tree.  we perform modificatiosn in a cloned tree so we can compile asynchronously
+-- This method is called by scripts that modify the state tree.  we perform modifications in a cloned tree so we can compile asynchronously
 -- I don't like how this modifies ssRef
-getClone :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> String -> EpiS eff h CloneRes
-getClone ssRef pRef mid = do
+getClone :: forall eff h. STRef h (SystemST h) -> PatternD -> String -> EpiS eff h CloneRes
+getClone ssRef patternD mid = do
   systemST <- lift $ readSTRef ssRef
-  pattern  <- lift $ readSTRef pRef
-  pRef' <- case systemST.compPattern of
-    Just ref -> pure ref
+  patternD' <- case systemST.compPattern of
+    Just pd -> pure pd
     Nothing -> do
       -- dbg "cloning pattern"
-      pattern' <- clonePattern ssRef pattern
-      ref <- lift $ newSTRef pattern'
-      lift $ modifySTRef ssRef (\s -> s {compPattern = Just ref})
-      pure ref
+      patternD' <- clonePattern ssRef patternD
+      lift $ modifySTRef ssRef (\s -> s {compPattern = Just patternD'})
+      pure patternD'
 
   systemST' <- lift $ readSTRef ssRef
-  pClone <- lift $ readSTRef pRef'
-  addr <- findAddr systemST'.moduleRefPool pattern mid
-  mid' <- findModule systemST'.moduleRefPool pClone addr false
+  addr <- findAddr systemST'.moduleRefPool patternD mid
+  mid' <- findModule systemST'.moduleRefPool patternD' addr false
   root <- fromJustE (head $ split (S.Pattern ".") addr) "getClone invalid addr"
-  pure $ CloneRes root pClone mid'
+  pure $ CloneRes root patternD' mid'

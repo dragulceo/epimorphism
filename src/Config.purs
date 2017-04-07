@@ -6,11 +6,11 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (ExceptT)
 import Control.Monad.ST (STRef, ST)
 import DOM (DOM)
-import Data.Types (Schema, SchemaEntry(..), SchemaEntryType(..))
 import Data.Maybe (Maybe(..))
 import Data.Set (union, Set)
 import Data.StrMap (StrMap, empty)
 import Data.Tuple (Tuple)
+import Data.Types (Pattern, Schema, SchemaEntry(..), SchemaEntryType(..), PatternD)
 import Graphics.Canvas (CANVAS)
 import Graphics.WebGL.Types (WebGLProgram, WebGLTexture, WebGLFramebuffer, WebGLContext)
 
@@ -31,7 +31,7 @@ type SystemST h = {
   , componentLib :: StrMap Component
   , indexLib :: StrMap Index
   , moduleRefPool :: StrMap (STRef h Module)
-  , compPattern :: Maybe (STRef h Pattern) -- this is a bit weird
+  , compPattern :: Maybe PatternD
 }
 
 defaultSystemST :: forall h. SystemST h
@@ -135,35 +135,6 @@ moduleSchema = [
   , SchemaEntry SE_St "var"
   , SchemaEntry SE_St "dim"
   , SchemaEntry SE_St "libName"
-]
-
-
-type Pattern = {
-    vert :: String
-  , main :: String
-  , disp :: String
-  , flags :: Set String
-  , props :: StrMap String
-  , includes :: Array String
-  , defaultImageLib :: String
-  , imageLib :: String
-  , tPhase :: Number
-  , tSpd   :: Number
-  -- , 3d shit
-}
-
-patternSchema :: Schema
-patternSchema = [
-    SchemaEntry SE_St "vert"
-  , SchemaEntry SE_St "main"
-  , SchemaEntry SE_St "disp"
-  , SchemaEntry SE_S "flags"
-  , SchemaEntry SE_M_St "props"
-  , SchemaEntry SE_A_St "includes"
-  , SchemaEntry SE_St "defaultImageLib"
-  , SchemaEntry SE_St "imageLib"
-  , SchemaEntry SE_N "tPhase"
-  , SchemaEntry SE_N "tSpd"
 ]
 
 data PMut = PMutNone | PMut Pattern (Set String)

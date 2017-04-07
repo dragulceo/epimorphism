@@ -2,13 +2,13 @@ module Compiler where
 
 import Prelude
 import Data.TypedArray as T
-import Config (newCompST, UniformBindings, Pattern, SystemST, EngineST, CompOp(..))
+import Config (newCompST, UniformBindings, SystemST, EngineST, CompOp(..))
 import Control.Alt ((<|>))
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (length, uncons)
-import Data.Library (Library, getEngineConfD)
+import Data.Library (Library, getEngineConfD, getPatternD)
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.String (stripPrefix)
 import Data.String (Pattern(..)) as S
@@ -24,12 +24,14 @@ import Texture (uploadAux)
 import Util (Now, dbg, lg, now, now2, replaceAll, unsafeCast)
 
 -- compile shaders and load into systemST
-compileShaders :: forall eff h. STRef h (SystemST h) -> STRef h EngineST -> STRef h Pattern -> Library h -> Boolean -> EpiS (now :: Now | eff) h Boolean
-compileShaders ssRef esRef pRef lib full = do
+compileShaders :: forall eff h. STRef h (SystemST h) -> STRef h EngineST -> Library h -> Boolean -> EpiS (now :: Now | eff) h Boolean
+compileShaders ssRef esRef lib full = do
   systemST <- lift $ readSTRef ssRef
   es <- lift $ readSTRef esRef
-  let compRef = fromMaybe pRef systemST.compPattern
-  pattern <- lift $ readSTRef compRef
+
+  patternD' <- getPatternD lib "patternD compileShaders"
+  compPatternD = fromMaybe patternD systemST.compPattern
+
   engineConfD <- getEngineConfD lib "compileShaders"
 
   case (uncons es.compQueue) of
@@ -94,11 +96,11 @@ compileShaders ssRef esRef pRef lib full = do
 
           -- clean old pattern
           pold <- lift $ readSTRef pRef
-          when (pold.main /= pattern.main) do
+          when (pold.main /= patternD.main) do
             purgeModule ssRef pold.main
-          when (pold.disp /= pattern.disp) do
+          when (pold.disp /= patternD.disp) do
             purgeModule ssRef pold.disp
-          when (pold.vert /= pattern.vert) do
+          when (pold.vert /= patternD.vert) do
             purgeModule ssRef pold.vert
 
           -- update pattern & reset comp info
@@ -119,9 +121,9 @@ compileShaders ssRef esRef pRef lib full = do
     Nothing -> throwError "shouldn't call compile with an empty queue chump!"
 
 
-parseMain :: forall eff h. SystemST h -> Pattern -> Maybe Int -> EpiS eff h (Tuple String (Array String))
-parseMain systemST pattern fract = do
-  Tuple main'' aux <- parseShader systemST pattern.main pattern.includes
+parseMain :: forall eff h. SystemST h -> PatternD -> Maybe Int -> EpiS eff h (Tuple String (Array String))
+parseMain systemST patternD fract = do
+  Tuple main'' aux <- parseShader systemST patternD.main patternD.includes
 
   -- kind of ghetto
   main <- case fract of
@@ -135,11 +137,11 @@ parseMain systemST pattern fract = do
 
   pure $ Tuple main aux
 
-parseDisp :: forall eff h. SystemST h -> Pattern -> EpiS eff h String
-parseDisp systemST pattern = fst <$> parseShader systemST pattern.disp pattern.includes
+parseDisp :: forall eff h. SystemST h -> PatternD -> EpiS eff h String
+parseDisp systemST patternD = fst <$> parseShader systemST patternD.disp patternD.includes
 
-parseVert :: forall eff h. SystemST h -> Pattern -> EpiS eff h String
-parseVert systemST pattern = fst <$> parseShader systemST pattern.vert []
+parseVert :: forall eff h. SystemST h -> PatternD -> EpiS eff h String
+parseVert systemST patternD = fst <$> parseShader systemST patternD.vert []
 
 linkShader :: forall eff h. EngineST -> WebGLProgram -> EpiS eff h UniformBindings
 linkShader es prog = execGL es.ctx do

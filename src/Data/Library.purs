@@ -73,12 +73,12 @@ instance dtUIConf :: DataTable UIConf {
   apD     (UIConf ix dt) mut = UIConf ix (mut dt)
 
 instance dtPattern :: DataTable Pattern {
-    vert            :: ModuleRef
-  , main            :: ModuleRef
-  , disp            :: ModuleRef
-  , vertC           :: ComponentRef
-  , mainC           :: ComponentRef
-  , dispC           :: ComponentRef
+    vert            :: String -- ModuleRef
+  , main            :: String -- ModuleRef
+  , disp            :: String -- ModuleRef
+  , vertC           :: String -- ComponentRef
+  , mainC           :: String -- ComponentRef
+  , dispC           :: String -- ComponentRef
   , defaultImageLib :: String
   , imageLib        :: String
   -- , 3d shit(everything between Engine & Modules)

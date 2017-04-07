@@ -1,3 +1,5 @@
+
+  - ensure key is obj.id?
   - relying to heavily on lib?  sometimes pass, EngineConfD vs lib etc
 
   - any need to persist parent?
@@ -36,7 +38,7 @@
 			  - yes, but how?
 
 
-- how do phases work again?  do we need module level phases
+- how do phases work again?  do we need module level phases?  probably
 
 
 

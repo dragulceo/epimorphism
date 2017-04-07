@@ -2,7 +2,7 @@ module Command where
 
 import Prelude
 import Compiler (compileShaders)
-import Config (patternSchema, moduleSchema, Pattern, SystemST, EngineST, UIST)
+import Config (moduleSchema, Pattern, SystemST, EngineST, UIST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
@@ -174,24 +174,26 @@ command usRef esRef pRef ssRef lib msg = handleError do
 -- PRIVATE
 save :: forall eff h. (SystemST h) -> Pattern -> EpiS eff h Unit
 save systemST pattern = do
-  -- pattern
-  id <- lift $ uuid
-  ps <- unsafeSerialize patternSchema (Just id) pattern
-
-  -- modules
-  mods <- (traverse (serializeTup moduleSchema) $ toUnfoldable systemST.moduleRefPool) :: EpiS eff h (Array String)
-  let mres = joinWith "\n\n" mods
-
-  let res = "#PATTERN\n" <> ps <> "\n\n#MODULES\n" <> mres
-  let a = lg res
-
-  lift $ saveCanvas
-
   pure unit
-
-  where
-    serializeTup :: forall a. Schema -> (Tuple String (STRef h a)) -> EpiS eff h String
-    serializeTup schema (Tuple n ref) = do
-      obj <- lift $ readSTRef ref
-      st <- unsafeSerialize schema (Just n) obj
-      pure st
+  -- pattern
+--  id <- lift $ uuid
+--  ps <- unsafeSerialize patternSchema (Just id) pattern
+--
+--  -- modules
+--  mods <- (traverse (serializeTup moduleSchema) $ toUnfoldable systemST.moduleRefPool) :: EpiS eff h (Array String)
+--  let mres = joinWith "\n\n" mods
+--
+--  let res = "#PATTERN\n" <> ps <> "\n\n#MODULES\n" <> mres
+--  let a = lg res
+--
+--  lift $ saveCanvas
+--
+--  pure unit
+--
+--  where
+--    serializeTup :: forall a. Schema -> (Tuple String (STRef h a)) -> EpiS eff h String
+--    serializeTup schema (Tuple n ref) = do
+--      obj <- lift $ readSTRef ref
+--      st <- unsafeSerialize schema (Just n) obj
+--      pure st
+--

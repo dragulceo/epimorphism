@@ -2,14 +2,14 @@ module Main where
 
 import Prelude
 import Compiler (compileShaders)
-import Config (PMut(PMutNone, PMut), SystemST, UIST, EpiS, Pattern, EngineST, CompOp(..))
+import Config (PMut(PMutNone, PMut), SystemST, UIST, EpiS, EngineST, CompOp(..))
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
 import Data.Array (null, updateAt, foldM, sort, concatMap, fromFoldable)
 import Data.Int (round, toNumber)
-import Data.Library (Library(Library), dat, getLibM, getSystemConf, getSystemConfD, getUIConfD, modLibD)
+import Data.Library (Library(Library), Pattern, dat, getLibM, getPattern, getSystemConf, getSystemConfD, getUIConfD, modLibD)
 import Data.Maybe (isNothing, fromMaybe, Maybe(Nothing, Just))
 import Data.Set (member)
 import Data.StrMap (insert, values, keys, lookup)
@@ -34,7 +34,6 @@ type State h = {
     usRef :: STRef h UIST
   , ssRef :: STRef h (SystemST h)
   , esRef :: STRef h EngineST
-  , pRef  :: STRef h Pattern
   , lib   :: Library h
 }
 
@@ -50,13 +49,14 @@ getSysConfName = do
 
 initState :: forall eff h. SystemST h -> Library h -> EpiS (now :: Now | eff) h (State h)
 initState systemST lib'@(Library libVar) = do
-  --  init config
+  --  init config & system
   systemName <- lift $ getSysConfName
   let lib = Library libVar{system = Just systemName}
 
   systemConf <- getSystemConf lib "init system"
   let systemConfD = dat systemConf
 
+  -- set random seed
   seed <- case systemConfD.seed of
     "" -> do
       newSeed <- lift rndstr
@@ -67,12 +67,10 @@ initState systemST lib'@(Library libVar) = do
       pure systemConfD.seed
 
   modLibD lib systemConf _ {seed = seed}
-
   lift $ seedRandom systemConfD.seed
 
-  cookie_profile <- lift $ getProfileCookie
-
   -- if the cookie_profile sets a valid profile, update the system
+  cookie_profile <- lift $ getProfileCookie
   elt <- getLibM lib cookie_profile
   case (elt :: Maybe EngineConf) of
     (Just d) -> modLibD lib systemConf _ {engineConf = cookie_profile}
@@ -81,34 +79,32 @@ initState systemST lib'@(Library libVar) = do
       pure unit
 
   uiConfD <- getUIConfD lib "init system"
-
-  pattern <- loadLib systemConfD.pattern systemST.patternLib "init pattern"
+  patternD <- getPatternD lib "init pattern"
 
   -- build strefs
   ssRef <- lift $ newSTRef systemST
-  pRef  <- lift $ newSTRef pattern
 
   -- load image libraries
-  index' <- fromJustE (lookup pattern.defaultImageLib systemST.indexLib) "can't find default image lib!"
-  index <- fromJustE (lookup pattern.imageLib systemST.indexLib) "can't find image lib!"
+  index' <- fromJustE (lookup patternD.defaultImageLib systemST.indexLib) "can't find default image lib!"
+  index <- fromJustE (lookup patternD.imageLib systemST.indexLib) "can't find image lib!"
   lift $ loadImages index'.lib index.lib
 
   -- import pattern
-  importPattern ssRef pRef
+  importPattern ssRef lib
   systemST' <- lift $ readSTRef ssRef
 
   -- init engine & ui states
   esRef <- initEngineST systemST' lib uiConfD.canvasId Nothing
-  usRef <- initUIST esRef pRef ssRef lib
+  usRef <- initUIST esRef ssRef lib
 
-  pure {usRef, ssRef, esRef, pRef, lib}
+  pure {usRef, ssRef, esRef, lib}
 
 
 animate :: forall h. (State h) -> Eff (canvas :: CANVAS, dom :: DOM, now :: Now, st :: ST h) Unit
 animate state = handleError do
   t0 <- lift $ now
   -- unpack state
-  {usRef, ssRef, esRef, pRef, lib} <- pure state
+  {usRef, ssRef, esRef, lib} <- pure state
 
   systemConfD <- getSystemConfD lib "animate"
   uiConfD <- getUIConfD lib "animate"
@@ -116,13 +112,12 @@ animate state = handleError do
   uiST       <- lift $ readSTRef usRef
   systemST   <- lift $ readSTRef ssRef
   engineST   <- lift $ readSTRef esRef
-  pattern    <- lift $ readSTRef pRef
 
   -- update time
   currentTimeMS <- lift $ now
   let lastTimeMS = fromMaybe currentTimeMS systemST.lastTimeMS
 
-  let delta = 0.02 * pattern.tSpd -- a fixed increment of time looks better
+  let delta = 0.02 -- a fixed increment of time looks better (also maybe stick this # in system?
   --let delta = (currentTimeMS - lastTimeMS) * pattern.tSpd / 1000.0
   let pauseF = if systemST.paused then 0.0 else 1.0
   let t' = systemST.t + pauseF * delta
@@ -138,10 +133,10 @@ animate state = handleError do
   t1 <- lift $ now
   -- run scripts if not compiling
   when (null engineST.compQueue) do
-    sRes <- runScripts ssRef pRef
+    sRes <- runScripts ssRef lib
     case sRes of
       PMutNone -> pure unit
-      PMut pattern' new -> do
+      PMut _ new -> do
         let queue = (if (member "main" new) then [CompMainShader, CompMainProg] else []) <>
                     (if (member "disp" new) then [CompDispShader, CompDispProg] else []) <>
                     [CompFinish]
@@ -155,7 +150,7 @@ animate state = handleError do
   -- execute compile queue
   when (not $ null engineST'.compQueue) do
     --t' <- lift $ now
-    compileShaders ssRef esRef pRef lib (isNothing engineST.mainProg)
+    compileShaders ssRef esRef lib (isNothing engineST.mainProg)
     --t'' <- lift $ now
     --dbg $ inj "COMPILE :%0ms" [show (t'' - t')]
     --currentTimeMS2 <- lift $ now
@@ -166,19 +161,18 @@ animate state = handleError do
 
   engineST'' <- lift $ readSTRef esRef
   systemST'' <- lift $ readSTRef ssRef
-  pattern'   <- lift $ readSTRef pRef
 
   -- render!
   t3 <- lift $ now
-  (Tuple parM znM) <- getParZn systemST'' (Tuple [] []) pattern'.main
-  tex <- renderFrame systemST'' engineST'' pattern' lib parM znM systemST''.frameNum
+  (Tuple parM znM) <- getParZn systemST'' (Tuple [] []) patternD.main
+  tex <- renderFrame systemST'' engineST'' lib parM znM systemST''.frameNum
 
-  (Tuple parD znD) <- getParZn systemST'' (Tuple [] []) pattern'.disp
+  (Tuple parD znD) <- getParZn systemST'' (Tuple [] []) patternD.disp
   postprocessFrame systemST'' engineST'' lib tex parD znD
   t4 <- lift $ now
 
   -- update ui
-  updateLayout uiST systemST'' pattern' lib false
+  updateLayout uiST systemST'' lib false
   t5 <- lift $ now
 
   -- request next frame

@@ -1,18 +1,19 @@
 module Pattern where
 
 import Prelude
-import Config (EpiS, Module, Pattern, SystemST)
-import Control.Monad (when)
+import Config (Module, SystemST)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, modifySTRef, newSTRef, readSTRef)
-import Data.Array (cons, head, tail, foldM, length, last, init, uncons, reverse)
+import Data.Array (cons, head, tail, foldM, uncons, reverse)
+import Data.Library (Library, dat, getPattern, modLibD)
 import Data.Maybe (Maybe(..), maybe)
 import Data.StrMap (member, StrMap, delete, insert, values, toUnfoldable)
 import Data.String (Pattern(..)) as S
 import Data.String (split, joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
+import Data.Types (EpiS, PatternD)
 import System (loadLib)
 import Util (dbg, uuid, fromJustE)
 
@@ -20,8 +21,8 @@ import Util (dbg, uuid, fromJustE)
 ------------------------ FIND ------------------------
 
 -- find a module given an address - ie main.application.t or a reference
-findModule :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> Boolean -> EpiS eff h String
-findModule mpool pattern dt followSwitch = do
+findModule :: forall eff h. StrMap (STRef h Module) -> PatternD -> String -> Boolean -> EpiS eff h String
+findModule mpool patternD dt followSwitch = do
   case (member dt mpool) of
     true -> pure dt
     false -> do
@@ -29,9 +30,9 @@ findModule mpool pattern dt followSwitch = do
         Nothing -> throwError $ "invalid address: " <> dt
         Just {head: addr, tail: rst} -> do
           case addr of
-            "vert" -> findModule' mpool pattern.vert rst followSwitch
-            "disp" -> findModule' mpool pattern.disp rst followSwitch
-            "main" -> findModule' mpool pattern.main rst followSwitch
+            "vert" -> findModule' mpool patternD.vert rst followSwitch
+            "disp" -> findModule' mpool patternD.disp rst followSwitch
+            "main" -> findModule' mpool patternD.main rst followSwitch
             x      -> throwError $ "value should be main, vert, or disp : " <> x
 
 
@@ -52,11 +53,11 @@ findModule' mpool mid addr followSwitch = do
         false -> findModule' mpool childId addr' followSwitch
 
 
-findAddr :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> EpiS eff h String
-findAddr mpool pattern mid = do
-  m0 <- find' "main" pattern.main
-  m1 <- find' "disp" pattern.disp
-  m2 <- find' "vert" pattern.vert
+findAddr :: forall eff h. StrMap (STRef h Module) -> PatternD -> String -> EpiS eff h String
+findAddr mpool patternD mid = do
+  m0 <- find' "main" patternD.main
+  m1 <- find' "disp" patternD.disp
+  m2 <- find' "vert" patternD.vert
 
   fromJustE (m0 <> m1 <> m2) ("orphan module? " <> mid)
   where
@@ -72,32 +73,34 @@ findAddr mpool pattern mid = do
       pure $ val <> res
 
 
-findParent :: forall eff h. StrMap (STRef h Module) -> Pattern -> String -> EpiS eff h (Tuple String String)
-findParent mpool pattern mid = do
-  addr <- findAddr mpool pattern mid
+findParent :: forall eff h. StrMap (STRef h Module) -> PatternD -> String -> EpiS eff h (Tuple String String)
+findParent mpool patternD mid = do
+  addr <- findAddr mpool patternD mid
 
   let cmp = split (S.Pattern ".") addr
 
   case (uncons $ reverse cmp) of
     Nothing -> throwError $ "malformed address" <> addr
     Just {head: lst, tail: addr'} -> do
-      pId <- findModule mpool pattern (joinWith "." $ reverse addr') false
+      pId <- findModule mpool patternD (joinWith "." $ reverse addr') false
       pure $ Tuple pId lst
 
 ------------------------ IMPORTING ------------------------
 
 -- import the modules of a pattern into the ref pool
 data ImportObj = ImportModule Module | ImportRef String
-importPattern :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h Unit
-importPattern ssRef pRef =  do
+importPattern :: forall eff h. STRef h (SystemST h) -> Library h -> EpiS eff h Unit
+importPattern ssRef lib =  do
   systemST <- lift $ readSTRef ssRef
-  pattern  <- lift $ readSTRef pRef
+  pattern <- getPattern lib "importPattern"
+  let patternD = dat pattern
 
   -- import all modules
-  main <- importModule ssRef (ImportRef pattern.main)
-  disp <- importModule ssRef (ImportRef pattern.disp)
-  vert <- importModule ssRef (ImportRef pattern.vert)
-  lift $ modifySTRef pRef (\p -> p {main = main, disp = disp, vert = vert})
+  main <- importModule ssRef (ImportRef patternD.main)
+  disp <- importModule ssRef (ImportRef patternD.disp)
+  vert <- importModule ssRef (ImportRef patternD.vert)
+
+  modLibD lib pattern _ {main = main, disp = disp, vert = vert}
 
   pure unit
 
@@ -132,12 +135,12 @@ importModule ssRef obj = do
 
   where
     importChild :: STRef h (SystemST h) -> String -> (Tuple String String) -> EpiS eff h Unit
-    importChild ssRef mid (Tuple k v) = do
+    importChild ssRef' mid (Tuple k v) = do
       when (v /= "") do
-        systemST <- lift $ readSTRef ssRef
+        systemST <- lift $ readSTRef ssRef'
 
         -- import child
-        child <- importModule ssRef (ImportRef v)
+        child <- importModule ssRef' (ImportRef v)
 
         -- update parent
         mRef <- loadLib mid systemST.moduleRefPool "import module - update parent"
@@ -185,13 +188,13 @@ replaceModule ssRef mid subN cid obj = do
 
 
 --  slightly janky
-data CloneRes = CloneRes String Pattern String
-clonePattern :: forall eff h. STRef h (SystemST h) -> Pattern -> EpiS eff h Pattern
-clonePattern ssRef pattern = do
+data CloneRes = CloneRes String PatternD String
+clonePattern :: forall eff h. STRef h (SystemST h) -> PatternD -> EpiS eff h PatternD
+clonePattern ssRef patternD = do
   systemST <- lift $ readSTRef ssRef
 
-  main' <- importModule ssRef (ImportRef pattern.main)
-  disp' <- importModule ssRef (ImportRef pattern.disp)
-  vert' <- importModule ssRef (ImportRef pattern.vert)
+  main' <- importModule ssRef (ImportRef patternD.main)
+  disp' <- importModule ssRef (ImportRef patternD.disp)
+  vert' <- importModule ssRef (ImportRef patternD.vert)
 
-  pure $ pattern {main = main', disp = disp', vert = vert'}
+  pure $ patternD {main = main', disp = disp', vert = vert'}

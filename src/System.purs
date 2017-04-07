@@ -1,7 +1,7 @@
 module System where
 
 import SLibrary
-import Config (Module, moduleSchema, patternSchema, SystemST, defaultSystemST)
+import Config (Module, moduleSchema, SystemST, defaultSystemST)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
@@ -30,14 +30,11 @@ initSystemST host = do
 
   -- initialize libraries
   moduleLib     <- buildLib moduleSchema     $ host <> "/lib/modules.lib"
-  patternLib    <- buildLib patternSchema    $ host <> "/lib/patterns.lib"
-
   componentLib  <- buildSLib buildComponent  $ host <> "/lib/components.slib"
   indexLib      <- buildSLib buildIndex      $ host <> "/lib/indexes.slib"
 
   pure $ defaultSystemST {
       moduleLib     = moduleLib
-    , patternLib    = patternLib
     , componentLib  = componentLib
     , indexLib      = indexLib
   }

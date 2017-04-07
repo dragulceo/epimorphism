@@ -5,7 +5,7 @@ import Data.TypedArray as T
 import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Audio (audioData, initAudio)
-import Config (EngineProfile, EngineST, Pattern, SystemST, UniformBindings, fullCompile, newCompST)
+import Config (EngineProfile, EngineST, SystemST, UniformBindings, fullCompile, newCompST)
 import Control.Monad.Eff (Eff, foreachE)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Error.Class (throwError)
@@ -125,8 +125,8 @@ initEngineST systemST lib canvasId esRef' = do
   pure esRef
 
 -- do the thing!
-renderFrame :: forall eff h. SystemST h -> EngineST -> Pattern -> Library h -> Array Number -> Array Number -> Int -> EpiS eff h WebGLTexture
-renderFrame systemST engineST pattern lib par zn frameNum = do
+renderFrame :: forall eff h. SystemST h -> EngineST -> Library h -> Array Number -> Array Number -> Int -> EpiS eff h WebGLTexture
+renderFrame systemST engineST lib par zn frameNum = do
   let ctx = engineST.ctx
   engineConfD <- getEngineConfD lib "postprocessFrams"
 
@@ -153,7 +153,7 @@ renderFrame systemST engineST pattern lib par zn frameNum = do
 
   execGL ctx do
     -- bind main uniforms
-    uniform1f (unsafeGetAttr mainUnif "time") (systemST.t - pattern.tPhase)
+    uniform1f (unsafeGetAttr mainUnif "time") systemST.t -- - pattern.tPhase
     uniform1f (unsafeGetAttr mainUnif "kernel_dim") (toNumber engineConfD.kernelDim)
 
     -- BUG!!! audio has to be before aux???

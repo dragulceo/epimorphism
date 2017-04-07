@@ -111,17 +111,28 @@ uiConfSchema = [
 
 data Pattern = Pattern Index PatternD
 type PatternD = {
-    vert            :: ModuleRef
-  , main            :: ModuleRef
-  , disp            :: ModuleRef
-  , vertC           :: ComponentRef
-  , mainC           :: ComponentRef
-  , dispC           :: ComponentRef
+    vert            :: String -- ModuleRef
+  , main            :: String -- ModuleRef
+  , disp            :: String -- ModuleRef
+  , vertC           :: String -- ComponentRef
+  , mainC           :: String -- ComponentRef
+  , dispC           :: String -- ComponentRef
   , defaultImageLib :: String
   , imageLib        :: String
   -- , 3d shit(everything between Engine & Modules)
 }
 
+patternSchema :: Schema
+patternSchema = [
+    SchemaEntry SE_St "vert"
+  , SchemaEntry SE_St "main"
+  , SchemaEntry SE_St "disp"
+  , SchemaEntry SE_St "vertC"
+  , SchemaEntry SE_St "mainC"
+  , SchemaEntry SE_St "dispC"
+  , SchemaEntry SE_St "defaultImageLib"
+  , SchemaEntry SE_St "imageLib"
+]
 
 data Family = Family Index FamilyD
 type FamilyD = {

@@ -9,19 +9,19 @@ import Data.Complex (Cartesian(..), outCartesian, inPolar, Polar(Polar))
 import Data.Tuple (Tuple(..))
 import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
 import Data.StrMap (insert, member)
-import Math (max, round)
+import Math (max, round) as M
 import ScriptUtil (addScript, purgeScript)
 import System (loadLib)
 import Text.Format (format, precision)
 import Util (dbg, cxFromString, intFromStringE, inj, numFromStringE, clickPause)
 
 null :: forall eff h. ScriptFn eff h
-null ssRef pRef t mid idx dt = do
+null ssRef lib t mid idx dt = do
   pure $ ScriptRes PMutNone Nothing
 
 -- get rid of this abomination
 pause :: forall eff h. ScriptFn eff h
-pause ssRef pRef t mid idx dt = do
+pause ssRef lib t mid idx dt = do
   systemST <- lift $ readSTRef ssRef
 
   lift $ clickPause
@@ -30,7 +30,7 @@ pause ssRef pRef t mid idx dt = do
 
 -- increment Zn
 incZn :: forall eff h. ScriptFn eff h
-incZn ssRef pRef t mid scrIdx dt = do
+incZn ssRef lib t mid scrIdx dt = do
   systemST <- lift $ readSTRef ssRef
 
   mRef <- loadLib mid systemST.moduleRefPool "incZn module"
@@ -51,16 +51,16 @@ incZn ssRef pRef t mid scrIdx dt = do
 
         (Polar toTh toR) <- case ofs of
           "1" -> do
-            let new = max ((round (fromR / incR + 1.0)) * incR) 0.0
+            let new = M.max ((M.round (fromR / incR + 1.0)) * incR) 0.0
             pure $ (Polar fromTh new)
           "-1" -> do
-            let new = max ((round (fromR / incR - 1.0)) * incR) 0.0
+            let new = M.max ((M.round (fromR / incR - 1.0)) * incR) 0.0
             pure $ (Polar fromTh new)
           "i" -> do
-            let new = (round (fromTh / incTh + 1.0)) * incTh
+            let new = (M.round (fromTh / incTh + 1.0)) * incTh
             pure $ (Polar new fromR)
           "-i" -> do
-            let new = (round (fromTh / incTh - 1.0)) * incTh
+            let new = (M.round (fromTh / incTh - 1.0)) * incTh
             pure $ (Polar new fromR)
           _ -> throwError "offset should be +-1 or +-i"
 
@@ -78,14 +78,14 @@ incZn ssRef pRef t mid scrIdx dt = do
 
 
 randomize :: forall eff h. ScriptFn eff h
-randomize ssRef pRef t mid scrIdx dt = do
+randomize ssRef lib t mid scrIdx dt = do
   systemST <- lift $ readSTRef ssRef
 
-  dly <- (loadLib "dly" dt "randomComponent") >>= numFromStringE
-  spd <-  loadLib "spd" dt "randomComponent"
-  lib <-  loadLib "lib" dt "randomComponent"
-  sub <-  loadLib "sub" dt "randomComponent"
-  typ <-  loadLib "typ" dt "randomComponent"
+  dly  <- (loadLib "dly" dt "randomComponent") >>= numFromStringE
+  spd  <-  loadLib "spd" dt "randomComponent"
+  lib' <-  loadLib "lib" dt "randomComponent"
+  sub  <-  loadLib "sub" dt "randomComponent"
+  typ  <-  loadLib "typ" dt "randomComponent"
 
   nxt <- case (member "nxt" dt) of
     false -> pure t
@@ -96,8 +96,8 @@ randomize ssRef pRef t mid scrIdx dt = do
     t' | t' >= nxt -> do
       --let a = lg "ITERATE COMPONENT"
       args <- pure $ case typ of
-        "mod" -> inj "childN:%0 op:load by:query typ:mod query:%1 accs:rand spd:%2" [sub, lib, spd]
-        _     -> inj "mut:%0 idx:%1 op:clone by:query typ:idx query:%2 accs:rand spd:%3" [typ, sub, lib, spd]
+        "mod" -> inj "childN:%0 op:load by:query typ:mod query:%1 accs:rand spd:%2" [sub, lib', spd]
+        _     -> inj "mut:%0 idx:%1 op:clone by:query typ:idx query:%2 accs:rand spd:%3" [typ, sub, lib', spd]
 
       addScript systemST mid "switch" args
 

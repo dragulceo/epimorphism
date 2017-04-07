@@ -13,9 +13,10 @@ import Data.Set (Set, empty) as Set
 import Data.StrMap (StrMap, empty, insert, lookup, thawST)
 import Data.StrMap (foldM) as S
 import Data.StrMap.ST (new)
-import Data.String (Pattern(..), Replacement(..), joinWith, replace, split, trim)
+import Data.String (Replacement(..), joinWith, replace, split, trim)
+import Data.String (Pattern(..)) as S
 import Data.Tuple (Tuple(..))
-import Data.Types (Component(Component), EngineConf(EngineConf), Epi, EpiS, Index, Schema, SchemaEntry(SchemaEntry), SchemaEntryType(SE_A_Cx, SE_A_St, SE_M_N, SE_M_St, SE_S, SE_B, SE_I, SE_N, SE_St), SystemConf(SystemConf), UIConf(UIConf), componentSchema, indexSchema, systemConfSchema, uiConfSchema, engineConfSchema)
+import Data.Types (Component(Component), EngineConf(EngineConf), Epi, EpiS, Index, Pattern(..), Schema, SchemaEntry(SchemaEntry), SchemaEntryType(SE_A_Cx, SE_A_St, SE_M_N, SE_M_St, SE_S, SE_B, SE_I, SE_N, SE_St), SystemConf(SystemConf), UIConf(UIConf), componentSchema, engineConfSchema, indexSchema, patternSchema, systemConfSchema, uiConfSchema)
 import Library (parseCLst, parseLst, parseMp, parseNMp, parseSet)
 import Util (dbg, boolFromStringE, fromJustE, inj, intFromStringE, numFromStringE, zipI)
 
@@ -41,6 +42,10 @@ instance ucSerializable :: Serializable UIConf where
   schema a = uiConfSchema
   generic = unsafeGenericDataTable indexSchema uiConfSchema UIConf
 
+instance pSerializable :: Serializable Pattern where
+  schema a = patternSchema
+  generic = unsafeGenericDataTable indexSchema patternSchema Pattern
+
 instance cSerializable :: Serializable Component where
   schema a = componentSchema
   generic = unsafeGenericDataTable indexSchema componentSchema Component
@@ -51,20 +56,20 @@ type StrObj = StrMap String
 parseChunk :: forall eff. (StrMap (Array StrObj)) -> (Tuple Int String) -> Epi eff (StrMap (Array StrObj))
 parseChunk res (Tuple i chunk) = do
   -- extract code block
-  (Tuple chunk' code) <- case split (Pattern "&&&\n") chunk of
+  (Tuple chunk' code) <- case split (S.Pattern "&&&\n") chunk of
     [l] -> pure $ Tuple l Nothing
     [l, c] -> pure $ Tuple (l <> "&&&") (Just c)
     _ -> throwError ("Too many code blocks" <> errSuf)
 
   -- get data type
-  let lines = zipI $ filter ((/=) "") $ map trim $ split (Pattern "\n") chunk'
+  let lines = zipI $ filter ((/=) "") $ map trim $ split (S.Pattern "\n") chunk'
   {head: (Tuple _ dataType), tail} <- fromJustE (uncons lines) ("No dataType" <> errSuf)
 
   -- replace &&& with code in line
   tail' <- case code of
     Nothing -> pure tail
     Just c -> do
-      pure $ tail # map (\(Tuple i l) -> (Tuple i (replace (Pattern "&&&") (Replacement c) l)))
+      pure $ tail # map (\(Tuple i l) -> (Tuple i (replace (S.Pattern "&&&") (Replacement c) l)))
 
   obj <- A.foldM (parseLine chunk') empty tail'
 
@@ -76,7 +81,7 @@ parseChunk res (Tuple i chunk) = do
 
 parseLine :: forall eff. String -> StrObj -> (Tuple Int String) -> Epi eff StrObj
 parseLine chunk obj (Tuple i line) = do
-  let comp = filter ((/=) "") $ split (Pattern " ") line
+  let comp = filter ((/=) "") $ split (S.Pattern " ") line
   {head, tail} <- fromJustE (uncons comp) ("Error parsing line " <> (show i) <> " of chunk:\n###" <> chunk)
 
   pure $ insert head (joinWith " " tail) obj
@@ -117,7 +122,7 @@ mapRefById res dataType vals = do
 
 parseLibData :: forall eff h. String -> EpiS eff h (Library h)
 parseLibData libData = do
-  let chunks = filter ((/=) "") $ map trim $ split (Pattern "###") libData
+  let chunks = filter ((/=) "") $ map trim $ split (S.Pattern "###") libData
   let res = empty
   strobjs <- A.foldM parseChunk empty (zipI chunks)
   sc <- lift $ new
@@ -159,6 +164,9 @@ parseLibData libData = do
       "UIConf" -> do
         obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
         pure $ Library val {uiConfLib = obj}
+      "Pattern" -> do
+        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+        pure $ Library val {patternLib = obj}
       "Component" -> do
         obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
         pure $ Library val {componentLib = obj}

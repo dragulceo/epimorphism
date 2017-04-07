@@ -1,14 +1,14 @@
 module Console where
 
 import Prelude
-import Config (EpiS, moduleSchema, Module, Pattern, SystemST, UIST)
+import Config (EpiS, moduleSchema, Module, SystemST, UIST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (readSTRef)
 import Control.Monad.Trans.Class (lift)
-import Data.Array ((!!), length, (..), (:), filter, partition)
+import Data.Array ((:), filter, partition)
 import Data.DOM.Simple.Element (setInnerHTML)
-import Data.Library (Library(..), getUIConfD)
+import Data.Library (Library, getPatternD, getUIConfD)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.StrMap (StrMap)
 import Data.String (Replacement(..), joinWith, trim, split, replace)
@@ -18,25 +18,25 @@ import Data.String.Regex.Flags (noFlags)
 import Data.String.Regex.Unsafe (unsafeRegex)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
-import Data.Types (UIConfD)
 import Paths (isConstantPath, runPath)
 import Serialize (showCX, unsafeSerialize)
 import System (family, loadLib)
 import Text.Format (format, precision)
 import UIUtil (findElt)
-import Util (dbg, indentLines, inj, lg, real, tryRegex, zipI)
+import Util (dbg, indentLines, inj, real, zipI)
 
 foreign import addEventListeners :: forall eff. Eff eff Unit
 
-renderConsole :: forall eff h. UIST -> SystemST h -> Pattern -> Library h -> EpiS eff h Unit
-renderConsole uiST systemST pattern lib = do
-  uiConfD <- getUIConfD lib "renderConsole"
+renderConsole :: forall eff h. UIST -> SystemST h -> Library h -> EpiS eff h Unit
+renderConsole uiST systemST lib = do
+  uiConfD  <- getUIConfD lib "renderConsole uiConf"
+  patternD <- getPatternD lib "renderConsole pattern"
   dsmDiv <- findElt "debugMain"
-  str0 <- renderModule systemST uiConfD.uiCompLib pattern.main "MAIN" Nothing
+  str0 <- renderModule systemST uiConfD.uiCompLib patternD.main "MAIN" Nothing
   lift $ setInnerHTML str0 dsmDiv
 
   dsdDiv <- findElt "debugDisp"
-  str1 <- renderModule systemST uiConfD.uiCompLib pattern.disp "DISP" Nothing
+  str1 <- renderModule systemST uiConfD.uiCompLib patternD.disp "DISP" Nothing
   lift $ setInnerHTML str1 dsdDiv
 
   lift $ addEventListeners
@@ -85,7 +85,7 @@ renderModule systemST modLib mid title pid = do
         (Just _) -> true
         _ -> false
     parseModLine :: String -> Module -> String -> EpiS eff h String
-    parseModLine mid mod line = do
+    parseModLine _ mod line = do
       let rgx = unsafeRegex "modules \\{([^\\{\\}]*)\\}" noFlags
       case (match rgx line) of
         (Just [(Just _), (Just "")]) -> do

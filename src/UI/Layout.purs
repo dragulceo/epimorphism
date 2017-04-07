@@ -1,7 +1,7 @@
 module Layout where
 
 import Prelude
-import Config (Pattern, SystemST, UIST)
+import Config (SystemST, UIST)
 import Console (renderConsole)
 import Control.Monad.Trans.Class (lift)
 import Data.DOM.Simple.Element (classRemove, classAdd, setInnerHTML, setStyleAttr)
@@ -56,8 +56,8 @@ initLayout uiST lib = do
 
 
 -- hides malformed html issues
-updateLayout :: forall eff h. UIST -> SystemST h -> Pattern -> Library h -> Boolean -> EpiS eff h Unit
-updateLayout uiST systemST pattern lib force = do
+updateLayout :: forall eff h. UIST -> SystemST h -> Library h -> Boolean -> EpiS eff h Unit
+updateLayout uiST systemST lib force = do
   uiConfD <- getUIConfD lib "updateLayout"
   when (force ||
         (systemST.frameNum `mod` uiConfD.uiUpdateFreq == 0 && not systemST.paused)) do
@@ -70,6 +70,6 @@ updateLayout uiST systemST pattern lib force = do
         Nothing -> pure unit
 
     when (uiConfD.windowState == "dev") do
-      renderConsole uiST systemST pattern lib
+      renderConsole uiST systemST lib
 
     pure unit

@@ -13,7 +13,7 @@ import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.String (stripPrefix)
 import Data.String (Pattern(..)) as S
 import Data.Tuple (fst, Tuple(Tuple))
-import Data.Types (EpiS)
+import Data.Types (EpiS, PatternD)
 import EngineUtil (execGL)
 import Graphics.WebGL.Methods (vertexAttribPointer, enableVertexAttribArray, bindBuffer, bufferData, createBuffer)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram, linkProgram)
@@ -30,7 +30,7 @@ compileShaders ssRef esRef lib full = do
   es <- lift $ readSTRef esRef
 
   patternD' <- getPatternD lib "patternD compileShaders"
-  compPatternD = fromMaybe patternD systemST.compPattern
+  let patternD = fromMaybe patternD' systemST.compPattern
 
   engineConfD <- getEngineConfD lib "compileShaders"
 
@@ -42,15 +42,15 @@ compileShaders ssRef esRef lib full = do
           let no_fract = es.profile.angle ||
                          (isJust $ stripPrefix (S.Pattern "Windows") es.profile.os)
           let fract = if no_fract then Nothing else Just engineConfD.fract
-          Tuple main aux <- parseMain systemST pattern fract
+          Tuple main aux <- parseMain systemST patternD fract
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainSrc = Just main, auxImages = Just aux}})
           pure false
         CompDispShader -> do
-          disp <- parseDisp systemST pattern
+          disp <- parseDisp systemST patternD
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {dispSrc = Just disp}})
           pure false
         CompVertShader -> do
-          vert <- parseVert systemST pattern
+          vert <- parseVert systemST patternD
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {vertSrc = Just vert}})
           pure false
         --CompUploadAux -> do
@@ -95,17 +95,15 @@ compileShaders ssRef esRef lib full = do
                                           currentImages = es.compST.auxImages <|> es'.currentImages})
 
           -- clean old pattern
-          pold <- lift $ readSTRef pRef
-          when (pold.main /= patternD.main) do
-            purgeModule ssRef pold.main
-          when (pold.disp /= patternD.disp) do
-            purgeModule ssRef pold.disp
-          when (pold.vert /= patternD.vert) do
-            purgeModule ssRef pold.vert
+          when (patternD'.main /= patternD.main) do
+            purgeModule ssRef patternD'.main
+          when (patternD'.disp /= patternD.disp) do
+            purgeModule ssRef patternD'.disp
+          when (patternD'.vert /= patternD.vert) do
+            purgeModule ssRef patternD'.vert
 
           -- update pattern & reset comp info
           lift $ modifySTRef ssRef (\s -> s {compPattern = Nothing})
-          lift $ modifySTRef pRef (\_ -> pattern)
           lift $ modifySTRef esRef (\es' -> es' {compST = newCompST {vertSrc = es.compST.vertSrc}})
 
           pure true
@@ -114,7 +112,7 @@ compileShaders ssRef esRef lib full = do
 
       lift $ modifySTRef esRef (\es' -> es' {compQueue = rst})
       when (length rst /= 0 && full) do
-        compileShaders ssRef esRef pRef lib full
+        compileShaders ssRef esRef lib full
         pure unit
 
       pure $ done || full

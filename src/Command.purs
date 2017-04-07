@@ -2,41 +2,39 @@ module Command where
 
 import Prelude
 import Compiler (compileShaders)
-import Config (moduleSchema, Pattern, SystemST, EngineST, UIST)
+import Config (SystemST, EngineST, UIST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Array (uncons, updateAt, length)
-import Data.Library (Library, getEngineConf, getEngineConfD, getLibM, getSystemConf, getUIConf, getUIConfD, modLibD)
+import Data.Library (Library, getEngineConf, getLibM, getPatternD, getSystemConf, getUIConf, getUIConfD, modLibD)
 import Data.Maybe (Maybe(..))
-import Data.StrMap (values, insert, toUnfoldable)
+import Data.StrMap (values, insert)
 import Data.String (joinWith, split)
 import Data.String (Pattern(..)) as S
 import Data.Traversable (traverse)
-import Data.Tuple (Tuple(..))
-import Data.Types (EngineConf, EpiS, Schema)
+import Data.Types (EngineConf, EpiS, PatternD)
 import Engine (initEngineST)
 import Graphics.Canvas (CANVAS)
 import Layout (updateLayout, initLayout)
 import Pattern (findModule)
 import ScriptUtil (addScript)
-import Serialize (unsafeSerialize)
 import System (mUp, loadLib)
 import Texture (clearFB)
 import Util (dbg, halt, Now, cxFromStringE, intFromStringE, numFromStringE, lg, uuid, handleError)
 
 foreign import saveCanvas :: forall eff. Eff eff Unit
 
-command :: forall eff h. STRef h UIST -> STRef h EngineST -> STRef h Pattern -> STRef h (SystemST h) -> Library h -> String -> Eff (canvas :: CANVAS, dom :: DOM, st :: ST h, now :: Now | eff) Unit
-command usRef esRef pRef ssRef lib msg = handleError do
-  uiConfD <- getUIConfD lib "command"
+command :: forall eff h. STRef h UIST -> STRef h EngineST -> STRef h (SystemST h) -> Library h -> String -> Eff (canvas :: CANVAS, dom :: DOM, st :: ST h, now :: Now | eff) Unit
+command usRef esRef ssRef lib msg = handleError do
+  uiConfD    <- getUIConfD lib "command uiConf"
+  patternD   <- getPatternD lib "command pattern"
 
   systemST   <- lift $ readSTRef ssRef
   uiST       <- lift $ readSTRef usRef
   engineST   <- lift $ readSTRef esRef
-  pattern    <- lift $ readSTRef pRef
 
   --let x = lg $ "EXECUTE: " <> (show msg)
 
@@ -70,14 +68,14 @@ command usRef esRef pRef ssRef lib msg = handleError do
                 case uncons rst of
                   Nothing -> throwError $ "invalid script args " <> msg
                   Just {head: name, tail: rst'} -> do
-                    mid <- findModule systemST.moduleRefPool pattern addr true
+                    mid <- findModule systemST.moduleRefPool patternD addr true
                     addScript systemST mid name (joinWith " " rst')
                     pure unit
           "setP" -> do
             case args of
               [addr, par, val] -> do
                 val' <- numFromStringE val
-                mid  <- findModule systemST.moduleRefPool pattern addr true
+                mid  <- findModule systemST.moduleRefPool patternD addr true
                 mUp systemST mid \m ->
                   m {par = insert par (show val') m.par}
 
@@ -88,7 +86,7 @@ command usRef esRef pRef ssRef lib msg = handleError do
               [addr, idx, val] -> do
                 val' <- cxFromStringE val
                 idx' <- intFromStringE idx
-                mid  <- findModule systemST.moduleRefPool pattern addr true
+                mid  <- findModule systemST.moduleRefPool patternD addr true
                 mRef <- loadLib mid systemST.moduleRefPool "find module - setP"
                 mod <- lift $ readSTRef mRef
 
@@ -101,14 +99,14 @@ command usRef esRef pRef ssRef lib msg = handleError do
               _ -> throwError "invalid format: setPar addr par val"
           "setT" -> do
             let tExp = joinWith "" args
-            mid <- findModule systemST.moduleRefPool pattern "main.application.t.t_inner" true
+            mid <- findModule systemST.moduleRefPool patternD "main.application.t.t_inner" true
             mUp systemST mid \m ->
               m {sub = insert "t_expr" tExp m.sub}
-            compileShaders ssRef esRef pRef lib false
+            compileShaders ssRef esRef lib false
 
             pure unit
           "save" -> do
-            save systemST pattern
+            save systemST patternD
           "fullWindow" -> do
             uiConf <- getUIConf lib "fullWindow"
             modLibD lib uiConf _ {windowState = "full"}
@@ -125,7 +123,7 @@ command usRef esRef pRef ssRef lib msg = handleError do
             initLayout uiST lib
             pure unit
           "updateLayout" -> do
-            updateLayout uiST systemST pattern lib true
+            updateLayout uiST systemST lib true
           "showFps" -> do
             uiConf <- getUIConf lib "showFps"
             modLibD lib uiConf $ \x -> x {showFps = not x.showFps}
@@ -135,8 +133,8 @@ command usRef esRef pRef ssRef lib msg = handleError do
           "setKernelDim" -> do
             case args of
               [dim] -> do
-                engineConf <- getEngineConf lib "setKernelDim"
                 dim' <- intFromStringE dim
+                engineConf <- getEngineConf lib "setKernelDim engineConf"
                 modLibD lib engineConf _ {kernelDim = dim'}
                 initEngineST systemST lib uiConfD.canvasId (Just esRef)
 
@@ -145,10 +143,10 @@ command usRef esRef pRef ssRef lib msg = handleError do
           "setFract" -> do
             case args of
               [fract] -> do
-                engineConf <- getEngineConf lib "setKernelDim"
                 fract' <- intFromStringE fract
+                engineConf <- getEngineConf lib "fract engineConf"
                 modLibD lib engineConf _ {fract = fract'}
-                compileShaders ssRef esRef pRef lib false
+                compileShaders ssRef esRef lib false
 
               _ -> throwError "invalid format: setFract fract"
             pure unit
@@ -172,8 +170,8 @@ command usRef esRef pRef ssRef lib msg = handleError do
 
 
 -- PRIVATE
-save :: forall eff h. (SystemST h) -> Pattern -> EpiS eff h Unit
-save systemST pattern = do
+save :: forall eff h. (SystemST h) -> PatternD -> EpiS eff h Unit
+save systemST patternD = do
   pure unit
   -- pattern
 --  id <- lift $ uuid

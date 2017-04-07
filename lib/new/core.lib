@@ -8,7 +8,7 @@ pattern dev
 id prod
 engineConf default
 uiConf prod
-pattern main4
+pattern prod
 
 ### SystemConf
 id analysis
@@ -54,7 +54,6 @@ keySet prod
 uiCompLib lib
 
 
-
 ### EngineConf
 id default
 kernelDim 1024
@@ -95,6 +94,32 @@ numAuxBuffers 10
 audioAnalysisEnabled false
 audioBufferSize 128
 
+### Pattern
+id dev
+vert   default_vert
+main   epimorphism_dev_main
+disp   disp_id
+includes [header, additional_funcs, colorspace, math]
+defaultImageLib default_images
+imageLib all_images
+
+### Pattern
+id analysis
+vert   default_vert
+main   analysis_main
+disp   disp_id
+includes [header, additional_funcs, colorspace, math]
+defaultImageLib default_images
+imageLib all_images
+
+### Pattern
+id prod
+vert   default_vert
+main   epimorphism_main4
+disp   disp_main4
+includes [header, additional_funcs, colorspace, math]
+defaultImageLib default_images
+imageLib all_images
 
 ### Component
 id seed_simple

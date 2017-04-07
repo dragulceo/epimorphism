@@ -81,6 +81,7 @@ instance dtPattern :: DataTable Pattern {
   , dispC           :: String -- ComponentRef
   , defaultImageLib :: String
   , imageLib        :: String
+  , includes        :: Array String -- REMOVE ME
   -- , 3d shit(everything between Engine & Modules)
 } where
   libProj (Library {patternLib}) = patternLib
@@ -157,7 +158,7 @@ getLib lib name msg = do
   res <- getLibM lib name
   case res of
     Just x -> pure x
-    Nothing -> throwError $ msg <>" # Can't find in library: " <> name
+    Nothing -> throwError $ msg <> " - Can't find in library: " <> name
   --fromJustE res (msg <>" # Can't find in library: " <> name)
 
 --getLibD :: forall a ad eff h. (DataTable a ad) => Library h -> String -> String -> EpiS eff h ad
@@ -194,7 +195,7 @@ getSystemConf :: forall eff h.  Library h -> String -> EpiS eff h SystemConf
 getSystemConf (Library {system: Nothing}) msg = do
   throwError $ msg <> ": System not initialized"
 getSystemConf lib@(Library {system: (Just system)}) msg = do
-  getLib lib system (msg <> ": Can't find system - " <> system)
+  getLib lib system (msg <> ": getSystemConf : ")
 
 getSystemConfD :: forall eff h.  Library h -> String -> EpiS eff h SystemConfD
 getSystemConfD lib msg = dat <$> getSystemConf lib msg
@@ -206,7 +207,7 @@ getUIConf (Library {system: Nothing}) msg = do
 getUIConf lib@(Library {system: (Just system)}) msg = do
   systemConfD <- dat <$> getSystemConf lib "getUIConf"
   let name = (systemConfD.uiConf)
-  getLib lib name (msg <> ": Can't find uiConf - " <> name)
+  getLib lib name (msg <> ": getUIConf : ")
 
 getUIConfD :: forall eff h.  Library h -> String -> EpiS eff h UIConfD
 getUIConfD lib msg = dat <$> getUIConf lib msg
@@ -217,7 +218,7 @@ getEngineConf (Library {system: Nothing}) msg = do
 getEngineConf lib@(Library {system: (Just system)}) msg = do
   systemConfD <- dat <$> getSystemConf lib "getEngineConf"
   let name = (systemConfD.engineConf)
-  getLib lib name (msg <> ": Can't find engineConf - " <> name)
+  getLib lib name (msg <> ": getEngineConf :")
 
 getEngineConfD :: forall eff h.  Library h -> String -> EpiS eff h EngineConfD
 getEngineConfD lib msg = dat <$> getEngineConf lib msg
@@ -229,7 +230,7 @@ getPattern (Library {system: Nothing}) msg = do
 getPattern lib@(Library {system: (Just system)}) msg = do
   systemConfD <- dat <$> getSystemConf lib "getPattern"
   let name = (systemConfD.pattern)
-  getLib lib name (msg <> ": Can't find pattern - " <> name)
+  getLib lib name (msg <> ": getPattern :")
 
 getPatternD :: forall eff h.  Library h -> String -> EpiS eff h PatternD
 getPatternD lib msg = dat <$> getPattern lib msg

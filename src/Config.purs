@@ -6,6 +6,7 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (ExceptT)
 import Control.Monad.ST (STRef, ST)
 import DOM (DOM)
+import Data.Library (Library)
 import Data.Maybe (Maybe(..))
 import Data.Set (union, Set)
 import Data.StrMap (StrMap, empty)
@@ -137,7 +138,7 @@ moduleSchema = [
   , SchemaEntry SE_St "libName"
 ]
 
-data PMut = PMutNone | PMut Pattern (Set String)
+data PMut = PMutNone | PMut PatternD (Set String)
 instance mutSemi :: Semigroup PMut where
   append (PMut p0 s0) (PMut p1 s1) = PMut p0 (union s0 s1) -- sketchy if p0 != p1
   append PMutNone x = x
@@ -145,7 +146,7 @@ instance mutSemi :: Semigroup PMut where
 
 -- Script
 -- sys -> time -> mid -> idx -> args -> res
-type ScriptFn eff h = STRef h (SystemST h) -> STRef h Pattern -> Number -> String -> Int -> StrMap String -> EpiS eff h ScriptRes
+type ScriptFn eff h = STRef h (SystemST h) -> Library h -> Number -> String -> Int -> StrMap String -> EpiS eff h ScriptRes
 
 data ScriptConfig = ScriptConfig String
 data ScriptRes = ScriptRes PMut (Maybe (StrMap String)) -- possible new root, possibly updated state

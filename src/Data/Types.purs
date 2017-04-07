@@ -117,6 +117,7 @@ type PatternD = {
   , vertC           :: String -- ComponentRef
   , mainC           :: String -- ComponentRef
   , dispC           :: String -- ComponentRef
+  , includes        :: Array String -- REMOVE ME
   , defaultImageLib :: String
   , imageLib        :: String
   -- , 3d shit(everything between Engine & Modules)
@@ -130,6 +131,7 @@ patternSchema = [
   , SchemaEntry SE_St "vertC"
   , SchemaEntry SE_St "mainC"
   , SchemaEntry SE_St "dispC"
+  , SchemaEntry SE_A_St "includes"
   , SchemaEntry SE_St "defaultImageLib"
   , SchemaEntry SE_St "imageLib"
 ]

@@ -9,7 +9,7 @@ import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
 import Data.Array (null, updateAt, foldM, sort, concatMap, fromFoldable)
 import Data.Int (round, toNumber)
-import Data.Library (Library(Library), Pattern, dat, getLibM, getPattern, getSystemConf, getSystemConfD, getUIConfD, modLibD)
+import Data.Library (Library(Library), dat, getLibM, getPatternD, getSystemConf, getSystemConfD, getUIConfD, modLibD)
 import Data.Maybe (isNothing, fromMaybe, Maybe(Nothing, Just))
 import Data.Set (member)
 import Data.StrMap (insert, values, keys, lookup)
@@ -52,6 +52,7 @@ initState systemST lib'@(Library libVar) = do
   --  init config & system
   systemName <- lift $ getSysConfName
   let lib = Library libVar{system = Just systemName}
+  dbg lib
 
   systemConf <- getSystemConf lib "init system"
   let systemConfD = dat systemConf
@@ -106,8 +107,9 @@ animate state = handleError do
   -- unpack state
   {usRef, ssRef, esRef, lib} <- pure state
 
-  systemConfD <- getSystemConfD lib "animate"
-  uiConfD <- getUIConfD lib "animate"
+  systemConfD <- getSystemConfD lib "animate systemConf"
+  uiConfD     <- getUIConfD lib "animate uiConf"
+  patternD    <- getPatternD lib "animate pattern"
 
   uiST       <- lift $ readSTRef usRef
   systemST   <- lift $ readSTRef ssRef

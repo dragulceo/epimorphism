@@ -1,18 +1,14 @@
 module Script where
 
 import Prelude
-import Config (PMut(PMut, PMutNone), Script(Script), ScriptRes(ScriptRes), Pattern, SystemST, ScriptFn, EpiS)
-import Control.Monad (when)
+import Config (PMut(PMut, PMutNone), Script(Script), ScriptRes(ScriptRes), SystemST, ScriptFn, EpiS)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
-import Data.Array (length, foldM, elemIndex, updateAt, (..), zip)
-import Data.Foldable (or)
+import Data.Array (foldM, elemIndex, updateAt)
+import Data.Library (Library, getPatternD)
 import Data.Maybe (Maybe(Just))
 import Data.Set (union)
-import Data.StrMap (keys, member)
-import Data.Traversable (traverse)
-import Data.Tuple (Tuple(Tuple))
 import ScriptUtil (serializeScript, parseScript)
 import Scripts (null, randomize, pause, incZn)
 import Switch (finishSwitch, switch)
@@ -32,25 +28,25 @@ lookupScriptFN n = case n of
 
 
 -- execute all scripts & script pool. abort as soon as something mutates the pattern
-runScripts :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> EpiS eff h PMut
-runScripts ssRef pRef = do
-  pattern <- lift $ readSTRef pRef
-  r0 <- mFold ssRef PMutNone pattern.main (runModScripts ssRef pRef)
-  r1 <- mFold ssRef r0 pattern.disp (runModScripts ssRef pRef)
-  mFold ssRef r1 pattern.vert (runModScripts ssRef pRef)
+runScripts :: forall eff h. STRef h (SystemST h) -> Library h -> EpiS eff h PMut
+runScripts ssRef lib = do
+  patternD <- getPatternD lib "runScripts pattern"
+  r0 <- mFold ssRef PMutNone patternD.main (runModScripts ssRef lib)
+  r1 <- mFold ssRef r0 patternD.disp (runModScripts ssRef lib)
+  mFold ssRef r1 patternD.vert (runModScripts ssRef lib)
 
 
-runModScripts :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> PMut -> String -> EpiS eff h PMut
-runModScripts ssRef pRef mut mid = do
+runModScripts :: forall eff h. STRef h (SystemST h) -> Library h -> PMut -> String -> EpiS eff h PMut
+runModScripts ssRef lib mut mid = do
   systemST <- lift $ readSTRef ssRef
   mRef     <- loadLib mid systemST.moduleRefPool "mid! runScripts"
   m        <- lift $ readSTRef mRef
 
-  foldM (runScript ssRef pRef mid) mut m.scripts
+  foldM (runScript ssRef lib mid) mut m.scripts
 
 
-runScript :: forall eff h. STRef h (SystemST h) -> STRef h Pattern -> String -> PMut -> String -> EpiS eff h PMut
-runScript ssRef pRef mid pmut scr = do
+runScript :: forall eff h. STRef h (SystemST h) -> Library h -> String -> PMut -> String -> EpiS eff h PMut
+runScript ssRef lib mid pmut scr = do
   --dbg $ "running script : " <> scr <> " : for " <> mid
   --dbg x
   (Script name phase args) <- parseScript scr
@@ -61,7 +57,7 @@ runScript ssRef pRef mid pmut scr = do
   mRef <- loadLib mid systemST.moduleRefPool "mid! runScript"
   m    <- lift $ readSTRef mRef
   idx  <- fromJustE (elemIndex scr m.scripts) "script not found m"
-  (ScriptRes mut update) <- fn ssRef pRef t' mid idx args
+  (ScriptRes mut update) <- fn ssRef lib t' mid idx args
   case update of
     Just dt -> do
       let new = serializeScript (Script name phase dt)

@@ -2,11 +2,11 @@ module Switch where
 
 import Prelude
 import Config (PMut(..), ScriptRes(ScriptRes), Module, ScriptFn, EpiS, SystemST)
-import Control.Monad (when)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, STRef, readSTRef)
 import Data.Array (index, length, updateAt) as A
+import Data.Library (getPatternD)
 import Data.Maybe (Maybe(Nothing), fromMaybe)
 import Data.Set (singleton)
 import Data.StrMap (insert, fromFoldable, union)
@@ -19,8 +19,10 @@ import Util (dbg, intFromStringE, inj, randInt, numFromStringE, gmod, fromJustE)
 
 
 switch :: forall eff h. ScriptFn eff h
-switch ssRef pRef t midPre idx dt = do
-  CloneRes newRootN pattern mid <- getClone ssRef pRef midPre
+switch ssRef lib t midPre idx dt = do
+  patternD' <- getPatternD lib "switch pattern"
+  CloneRes newRootN patternD mid <- getClone ssRef patternD' midPre
+
   systemST <- lift $ readSTRef ssRef
 
   spd <- (loadLib "spd" dt "switch spd") >>= numFromStringE
@@ -32,7 +34,7 @@ switch ssRef pRef t midPre idx dt = do
       childN' <- loadLib "childN" dt "switch childN"
       pure $ Tuple mid childN'
     "clone" -> do
-      findParent systemST.moduleRefPool pattern mid
+      findParent systemST.moduleRefPool patternD mid
     x -> throwError $ "invalid 'op' for switch, must be load | clone : " <> x
 
   -- get the relevant name to be used to either load or for the mutator
@@ -44,23 +46,23 @@ switch ssRef pRef t midPre idx dt = do
       accs <- loadLib "accs" dt "switch accs"
       query <- loadLib "query" dt "switch query"
       typ <- loadLib "typ" dt "switch typ" -- either mod or idx
-      lib <- case typ of
+      lib' <- case typ of
         "mod" -> do
           pure $ family systemST.moduleLib childN [query] [] -- using childN here is wrong - seed1, etc
         "idx" -> loadLib query systemST.indexLib "switch index" >>= \x -> pure x.lib
         x -> throwError $ "invalid 'typ' for switch, must be mod | idx : " <> x
 
-      when (lib == []) do
+      when (lib' == []) do
         throwError "your index is empty!"
 
-      idx <- case accs of
+      idx' <- case accs of
         "rand" -> do
-          lift $ randInt $ A.length lib
+          lift $ randInt $ A.length lib'
         iS -> do
           i <- (pure iS) >>= intFromStringE
-          pure $ i `gmod` (A.length lib)
+          pure $ i `gmod` (A.length lib')
 
-      fromJustE (A.index lib idx) "idx out of bounds in switch"
+      fromJustE (A.index lib' idx') "idx out of bounds in switch"
 
     x -> throwError $ "invalid 'by' for switch, must be query | val : " <> x
 
@@ -73,9 +75,9 @@ switch ssRef pRef t midPre idx dt = do
   -- if cloning, perform mutation
   when (op == "clone") do
     nxtRef <- loadLib nxtId systemST'.moduleRefPool "switch nxtId"
-    idx <- loadLib "idx" dt "switch idx"
+    idx' <- loadLib "idx" dt "switch idx"
     mutatorN <- loadLib "mut" dt "switch mut"
-    mutator <- getMutator mutatorN idx name
+    mutator <- getMutator mutatorN idx' name
     lift $ modifySTRef nxtRef mutator
 
     pure unit
@@ -84,7 +86,7 @@ switch ssRef pRef t midPre idx dt = do
   let tPhase = systemST'.t - t -- recover phase
   switchModules ssRef (t + tPhase) rootId childN nxtId spd
 
-  pure $ ScriptRes (PMut pattern (singleton newRootN)) Nothing
+  pure $ ScriptRes (PMut patternD (singleton newRootN)) Nothing
 
 
 getMutator :: forall eff h. String -> String -> String -> EpiS eff h (Module -> Module)
@@ -143,7 +145,9 @@ switchModules ssRef t rootId childN m1 spd = do
 
 
 finishSwitch :: forall eff h. ScriptFn eff h
-finishSwitch ssRef pRef t rootIdPre idx dt = do
+finishSwitch ssRef lib t rootIdPre idx dt = do
+  patternD' <- getPatternD lib "switch pattern"
+
   -- get data
   delay <- (loadLib "delay" dt "finishSwitch delay") >>= numFromStringE
 
@@ -151,7 +155,7 @@ finishSwitch ssRef pRef t rootIdPre idx dt = do
     -- we're done
     x | x >= 1.0 -> do
       --let a = lg "DONE SWITCHING"
-      CloneRes newRootN pattern rootId <- getClone ssRef pRef rootIdPre
+      CloneRes newRootN pattern rootId <- getClone ssRef patternD' rootIdPre
 
       systemST <- lift $ readSTRef ssRef
 

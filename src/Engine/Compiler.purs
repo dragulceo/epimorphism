@@ -8,7 +8,7 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (length, uncons)
-import Data.Library (Library, getEngineConfD, getPatternD)
+import Data.Library (Library, getEngineConfD, getPattern, getPatternD, modLibD)
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.String (stripPrefix)
 import Data.String (Pattern(..)) as S
@@ -103,6 +103,9 @@ compileShaders ssRef esRef lib full = do
             purgeModule ssRef patternD'.vert
 
           -- update pattern & reset comp info
+          pattern <- getPattern lib "CompFinish pattern"
+          modLibD lib pattern (\_ -> patternD)
+
           lift $ modifySTRef ssRef (\s -> s {compPattern = Nothing})
           lift $ modifySTRef esRef (\es' -> es' {compST = newCompST {vertSrc = es.compST.vertSrc}})
 

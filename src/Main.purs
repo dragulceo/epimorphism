@@ -110,6 +110,7 @@ animate state = handleError do
   systemConfD <- getSystemConfD lib "animate systemConf"
   uiConfD     <- getUIConfD lib "animate uiConf"
   patternD    <- getPatternD lib "animate pattern"
+  --dbg patternD.main
 
   uiST       <- lift $ readSTRef usRef
   systemST   <- lift $ readSTRef ssRef
@@ -163,13 +164,14 @@ animate state = handleError do
 
   engineST'' <- lift $ readSTRef esRef
   systemST'' <- lift $ readSTRef ssRef
+  patternD' <- getPatternD lib "animate pattern'"
 
   -- render!
   t3 <- lift $ now
-  (Tuple parM znM) <- getParZn systemST'' (Tuple [] []) patternD.main
+  (Tuple parM znM) <- getParZn systemST'' (Tuple [] []) patternD'.main
   tex <- renderFrame systemST'' engineST'' lib parM znM systemST''.frameNum
 
-  (Tuple parD znD) <- getParZn systemST'' (Tuple [] []) patternD.disp
+  (Tuple parD znD) <- getParZn systemST'' (Tuple [] []) patternD'.disp
   postprocessFrame systemST'' engineST'' lib tex parD znD
   t4 <- lift $ now
 

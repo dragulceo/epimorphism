@@ -31,7 +31,6 @@ newtype CodeBlock = CodeBlock String
 
 data Snapshot = Snapshot DateTime String
 
-
 type Index = {
     id     :: String
   , parent :: String
@@ -42,7 +41,7 @@ type Index = {
 indexSchema :: Schema
 indexSchema = [
     SchemaEntry SE_St   "id"
-  , SchemaEntry SE_St   "flags"
+  , SchemaEntry SE_S    "flags"
   , SchemaEntry SE_M_St "props"
   , SchemaEntry SE_St   "parent"
 ]
@@ -198,6 +197,7 @@ moduleSchema = [
   , SchemaEntry SE_St "var"
   , SchemaEntry SE_St "dim"
   , SchemaEntry SE_St "libName"
+  , SchemaEntry SE_St "family"
 ]
 
 

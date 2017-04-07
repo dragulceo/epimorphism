@@ -13,15 +13,33 @@ import Data.Maybe (Maybe(..))
 import Data.Serialize (parseLibData)
 import Data.Set (Set)
 import Data.Set (member) as S
-import Data.StrMap (values, empty, insert, fold, lookup, StrMap)
+import Data.StrMap (StrMap, empty, fold, insert, lookup, values)
+import Data.StrMap (foldM) as SM
+import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple)
-import Data.Types (Epi, EpiS, Module, Schema)
+import Data.Types (Epi, EpiS, Module, Schema, ModuleD, moduleSchema)
 import Library (parseLib)
 import SLibrary (SHandle, SLib, SLibError(..), buildComponent, buildIndex, parseSLib)
-import Util (urlGet)
+import Serialize (unsafeSerialize)
+import Util (dbg, urlGet)
 
 data DataSource = LocalHTTP | LocalStorage | RemoteDB
+
+serializeModules :: forall eff h. EpiS eff h String
+serializeModules = do
+  modules <- buildLib moduleSchema "/lib/modules.lib"
+
+  serialized <- SM.foldM serialize empty (modules :: StrMap ModuleD)
+
+  let all = (toUnfoldable $ values serialized) :: Array String
+  pure $ joinWith "\n\n" all
+  where
+    serialize :: StrMap String -> String -> ModuleD -> EpiS eff h (StrMap String)
+    serialize res k modD = do
+      ser <- unsafeSerialize moduleSchema Nothing modD
+      let ser' = "###Module\nid " <> k <> ser
+      pure $ insert k ser' res
 
 initSystemST :: forall eff h. String -> EpiS eff h (SystemST h)
 initSystemST host = do
@@ -39,7 +57,9 @@ initSystemST host = do
 initLibrary :: forall eff h. String -> EpiS eff h (Library h)
 initLibrary host = do
   dt <- lift $ urlGet (host <> "/lib/new/core.lib")
-  case dt of
+  mod <- lift $ urlGet (host <> "/lib/new/all_modules.lib")
+
+  case (dt <> mod) of
     (Left er) -> throwError $ "Error loading library : " <> er
     (Right res) -> parseLibData res
 

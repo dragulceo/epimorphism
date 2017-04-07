@@ -49,6 +49,7 @@ switch ssRef lib t midPre idx dt = do
       typ <- loadLib "typ" dt "switch typ" -- either mod or idx
       lib' <- case typ of
         "mod" -> do
+          dbg "blorp"
           -- pure $ family systemST.moduleLib childN [query] [] -- using childN here is wrong - seed1, etc
           pure $ []
         "idx" -> loadLib query systemST.indexLib "switch index" >>= \x -> pure x.lib

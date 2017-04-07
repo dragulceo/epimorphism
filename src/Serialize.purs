@@ -15,7 +15,7 @@ import Math (abs)
 import Text.Format (format, precision)
 import Util (unsafeCast, unsafeGetAttr)
 
--- serializes an object.  will crase if object doesnt match schema
+-- serializes an object.  will crash if object doesnt match schema
 unsafeSerialize :: forall eff a. Schema -> Maybe String -> a -> Epi eff String
 unsafeSerialize schema name obj = do
   dt <- A.foldM (serializeEntry obj) "" (A.sortBy schemaSort schema)

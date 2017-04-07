@@ -22,7 +22,7 @@ import Layout (updateLayout)
 import Paths (runPath)
 import Pattern (importPattern)
 import Script (runScripts)
-import System (initLibrary, initSystemST)
+import System (initLibrary, initSystemST, serializeModules)
 import Texture (loadImages)
 import UI (initUIST)
 import Util (Now, dbg, fromJustE, getProfileCookie, handleError, imag, inj, isDev, isHalted, now, real, requestAnimationFrame, rndstr, seedRandom, urlArgs, zipI)
@@ -53,6 +53,8 @@ initState systemST lib'@(Library libVar) = do
   systemName <- lift $ getSysConfName
   let lib = Library libVar{system = Just systemName}
   dbg lib
+  --ser <- serializeModules
+  --dbg ser
 
   systemConf <- getSystemConf lib "init system"
   let systemConfD = dat systemConf

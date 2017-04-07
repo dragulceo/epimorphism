@@ -55,8 +55,8 @@ getEngineProfile ctx = do
 
 -- initialize the rendering engine & create state.  updates an existing state if passed
 -- maybe validate that kernelDim > 0?
-initEngineST :: forall eff h. SystemST h -> Library h -> String -> Maybe (STRef h EngineST) -> EpiS (now :: Now | eff) h (STRef h EngineST)
-initEngineST systemST lib canvasId esRef' = do
+initEngineST :: forall eff h. Library h -> String -> Maybe (STRef h EngineST) -> EpiS (now :: Now | eff) h (STRef h EngineST)
+initEngineST lib canvasId esRef' = do
   engineConfD <- getEngineConfD lib "compileShaders"
 
   -- find canvas & create context

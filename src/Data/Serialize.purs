@@ -220,3 +220,7 @@ parseLibData libData = do
 
 serializeLibData :: forall eff h. Library h -> EpiS eff h String
 serializeLibData lib = pure ""
+
+
+--serializeLib :: forall a eff h. (Serializable a) => StStrMap h a -> EpiS eff h String
+--serializeLib dta = do

@@ -9,7 +9,7 @@ import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
 import Data.Array (null, updateAt, foldM, sort, concatMap, fromFoldable)
 import Data.Int (round, toNumber)
-import Data.Library (Library(..), getSystemConf, getSystemConfD, getUIConfD, modLib)
+import Data.Library (Library(Library), dat, getLib, getSystemConf, getSystemConfD, getUIConfD, modLib, modLibD)
 import Data.Maybe (isNothing, fromMaybe, Maybe(Nothing, Just))
 import Data.Set (member)
 import Data.StrMap (insert, values, keys, lookup)
@@ -50,13 +50,13 @@ getSysConfName = do
 
 
 initState :: forall eff h. SystemST h -> Library h -> EpiS (now :: Now | eff) h (State h)
-initState systemST lib'@(Library libVar@{}) = do
+initState systemST lib'@(Library libVar) = do
   --  init config
   systemName <- lift $ getSysConfName
   let lib = Library libVar{system = Just systemName}
-  dbg lib
 
-  sc@(SystemConf sci systemConfD) <- getSystemConf lib "init system"
+  sc <- getSystemConf lib "init system"
+  let systemConfD = dat sc
 
   seed <- case systemConfD.seed of
     "" -> do
@@ -67,9 +67,7 @@ initState systemST lib'@(Library libVar@{}) = do
       dbg $ "USING SEED: " <> systemConfD.seed
       pure systemConfD.seed
 
-  --let systemConf' = systemConf {seed = seed}
-  let scn = (SystemConf sci systemConfD{seed=seed})
-  modLib lib sci.id scn
+  modLibD lib sc _ {seed = seed}
 
   lift $ seedRandom systemConfD.seed
 

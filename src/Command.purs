@@ -9,7 +9,7 @@ import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Array (uncons, updateAt, length)
-import Data.Library (Library, getUIConfD)
+import Data.Library (Library, getUIConf, getUIConfD, modLibD)
 import Data.Maybe (Maybe(..))
 import Data.StrMap (values, insert, toUnfoldable)
 import Data.String (joinWith, split)
@@ -31,7 +31,7 @@ foreign import saveCanvas :: forall eff. Eff eff Unit
 
 command :: forall eff h. STRef h UIST -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h (SystemST h) -> Library h -> String -> Eff (canvas :: CANVAS, dom :: DOM, st :: ST h, now :: Now | eff) Unit
 command usRef ecRef esRef pRef ssRef lib msg = handleError do
-  uiConfD <- getUIConfD lib "comman"
+  uiConfD <- getUIConfD lib "command"
 
   systemST   <- lift $ readSTRef ssRef
   uiST       <- lift $ readSTRef usRef
@@ -111,14 +111,14 @@ command usRef ecRef esRef pRef ssRef lib msg = handleError do
           "save" -> do
             save systemST pattern
           "fullWindow" -> do
-            --lift $ modifySTRef ucRef (\ui -> ui {windowState = "full"})
-            --uiConf' <- lift $ readSTRef ucRef
+            uiConf <- getUIConf lib "fullWindow"
+            modLibD lib uiConf _ {windowState = "full"}
             initLayout uiST lib
 
             pure unit
           "dev" -> do
-            --lift $ modifySTRef ucRef (\ui -> ui {windowState = "dev", keySet = "dev", showFps = true})
-            --uiConf' <- lift $ readSTRef ucRef
+            uiConf <- getUIConf lib "dev"
+            modLibD lib uiConf _ {windowState = "dev", keySet = "dev", showFps = true}
             initLayout uiST lib
 
             pure unit
@@ -128,8 +128,8 @@ command usRef ecRef esRef pRef ssRef lib msg = handleError do
           "updateLayout" -> do
             updateLayout uiST systemST pattern lib true
           "showFps" -> do
-            --lift $ modifySTRef ucRef (\ui -> ui {showFps = not ui.showFps})
-            --uiConf' <- lift $ readSTRef ucRef
+            uiConf <- getUIConf lib "showFps"
+            modLibD lib uiConf $ \x -> x {showFps = not x.showFps}
             initLayout uiST lib
 
             pure unit

@@ -1,19 +1,20 @@
 module Switch where
 
 import Prelude
-import Config (PMut(..), ScriptRes(ScriptRes), Module, ScriptFn, EpiS, SystemST)
+import Config (PMut(..), ScriptRes(ScriptRes), ScriptFn)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
-import Control.Monad.ST (modifySTRef, STRef, readSTRef)
+import Control.Monad.ST (modifySTRef, readSTRef)
 import Data.Array (index, length, updateAt) as A
-import Data.Library (getPatternD)
+import Data.Library (Library, apD, dat, getLib, getPatternD, mD, modLibD)
 import Data.Maybe (Maybe(Nothing), fromMaybe)
 import Data.Set (singleton)
 import Data.StrMap (insert, fromFoldable, union)
 import Data.Tuple (Tuple(..))
+import Data.Types (EpiS, Module, ModuleD)
 import Pattern (CloneRes(CloneRes), purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
 import ScriptUtil (getClone, addScript, purgeScript)
-import System (loadLib, family)
+import System (loadLib)
 import Text.Format (precision, format)
 import Util (dbg, intFromStringE, inj, randInt, numFromStringE, gmod, fromJustE)
 
@@ -21,7 +22,7 @@ import Util (dbg, intFromStringE, inj, randInt, numFromStringE, gmod, fromJustE)
 switch :: forall eff h. ScriptFn eff h
 switch ssRef lib t midPre idx dt = do
   patternD' <- getPatternD lib "switch pattern"
-  CloneRes newRootN patternD mid <- getClone ssRef patternD' midPre
+  CloneRes newRootN patternD mid <- getClone ssRef lib patternD' midPre
 
   systemST <- lift $ readSTRef ssRef
 
@@ -34,7 +35,7 @@ switch ssRef lib t midPre idx dt = do
       childN' <- loadLib "childN" dt "switch childN"
       pure $ Tuple mid childN'
     "clone" -> do
-      findParent systemST.moduleRefPool patternD mid
+      findParent lib patternD mid
     x -> throwError $ "invalid 'op' for switch, must be load | clone : " <> x
 
   -- get the relevant name to be used to either load or for the mutator
@@ -48,7 +49,8 @@ switch ssRef lib t midPre idx dt = do
       typ <- loadLib "typ" dt "switch typ" -- either mod or idx
       lib' <- case typ of
         "mod" -> do
-          pure $ family systemST.moduleLib childN [query] [] -- using childN here is wrong - seed1, etc
+          -- pure $ family systemST.moduleLib childN [query] [] -- using childN here is wrong - seed1, etc
+          pure $ []
         "idx" -> loadLib query systemST.indexLib "switch index" >>= \x -> pure x.lib
         x -> throwError $ "invalid 'typ' for switch, must be mod | idx : " <> x
 
@@ -67,29 +69,34 @@ switch ssRef lib t midPre idx dt = do
     x -> throwError $ "invalid 'by' for switch, must be query | val : " <> x
 
   -- import new module
-  purgeScript systemST mid idx
+  purgeScript lib mid idx
   let nxtN = if (op == "load") then name else mid
-  nxtId <- importModule ssRef (ImportRef nxtN)
-  systemST' <- lift $ readSTRef ssRef
+  nxtId <- importModule lib (ImportRef nxtN)
 
   -- if cloning, perform mutation
   when (op == "clone") do
-    nxtRef <- loadLib nxtId systemST'.moduleRefPool "switch nxtId"
+    nxt <- getLib lib nxtId "switch nxtId" :: EpiS eff h Module
     idx' <- loadLib "idx" dt "switch idx"
+
     mutatorN <- loadLib "mut" dt "switch mut"
     mutator <- getMutator mutatorN idx' name
-    lift $ modifySTRef nxtRef mutator
+
+    modLibD lib nxt mutator
 
     pure unit
 
   -- switch! (should we inline this?)
-  let tPhase = systemST'.t - t -- recover phase
-  switchModules ssRef (t + tPhase) rootId childN nxtId spd
+
+  switchModules lib t rootId childN nxtId spd
+
+  -- WE WERE DOING SOMETHING WEIRD W/ PHASE?
+  -- let tPhase = systemST'.t - t -- recover phase
+  -- switchModules lib (t + tPhase) rootId childN nxtId spd
 
   pure $ ScriptRes (PMut patternD (singleton newRootN)) Nothing
 
 
-getMutator :: forall eff h. String -> String -> String -> EpiS eff h (Module -> Module)
+getMutator :: forall eff h. String -> String -> String -> EpiS eff h (ModuleD -> ModuleD)
 getMutator mut idx name  = do
   case mut of
     "image" -> do
@@ -112,34 +119,30 @@ getMutator mut idx name  = do
 
 -- should check if dim & var are the same across m0 & m1
 -- m1 is a reference id(we assume also that it was previously imported & floating)
-switchModules :: forall eff h. STRef h (SystemST h) -> Number -> String -> String -> String -> Number -> EpiS eff h Unit
-switchModules ssRef t rootId childN m1 spd = do
-  systemST <- lift $ readSTRef ssRef
+switchModules :: forall eff h. Library h -> Number -> String -> String -> String -> Number -> EpiS eff h Unit
+switchModules lib t rootId childN m1 spd = do
+  modD <- mD <$> getLib lib rootId "switch module"
 
-  mRef  <- loadLib rootId systemST.moduleRefPool "switch module"
-  m     <- lift $ readSTRef mRef
-  m0    <- loadLib childN m.modules "switch find child"
-  m0Ref <- loadLib m0 systemST.moduleRefPool "switch m0"
-  m0M   <- lift $ readSTRef m0Ref
 
-  m1Ref <- loadLib m1 systemST.moduleRefPool "switch m1"
-  m1M   <- lift $ readSTRef m1Ref
+  m0    <- loadLib childN modD.modules "switch find child"
+  mod0D <- mD <$> getLib lib m0 "switch m0"
+  mod1D <- mD <$> getLib lib m1 "switch m0"
 
   -- create switch module
-  switchMod <- loadLib "smooth_switch" systemST.moduleLib "switchModules"
+  switchMod <- getLib lib "smooth_switch" "switchMod"
+  let switchModD = dat (switchMod :: Module)
 
   let modules = fromFoldable [(Tuple "m0" m0), (Tuple "m1" m1)]
-  let sub'    = union (fromFoldable [(Tuple "dim" m0M.dim), (Tuple "var" m0M.var)]) switchMod.sub
+  let sub'    = union (fromFoldable [(Tuple "dim" mod0D.dim), (Tuple "var" mod0D.var)]) switchModD.sub
   let path    = inj "linear@%0 %1" [(format (precision 2) t), (format (precision 2) spd)]
   let par     = fromFoldable [(Tuple "intrp" path)]
-  let switch' = switchMod {par=par, sub = sub', modules = modules, var = m0M.var, dim = m0M.dim}
+  let switch' = apD switchMod _ {par=par, sub = sub', modules = modules, var = mod0D.var, dim = mod1D.dim}
 
-  swid <- replaceModule ssRef rootId childN m0 (ImportModule switch')
-  purgeModule ssRef m1 -- we assume this was imported previously, so it was imported again by replace
+  swid <- replaceModule lib rootId childN m0 (ImportModule switch')
+  purgeModule lib m1 -- we assume this was imported previously, so it was imported again by replace
 
   -- create & import blending script
-  systemST' <- lift $ readSTRef ssRef
-  addScript systemST' swid "finishSwitch" (inj "delay:%0" [show spd])
+  addScript lib t swid "finishSwitch" (inj "delay:%0" [show spd])
 
   pure unit
 
@@ -155,25 +158,24 @@ finishSwitch ssRef lib t rootIdPre idx dt = do
     -- we're done
     x | x >= 1.0 -> do
       --let a = lg "DONE SWITCHING"
-      CloneRes newRootN pattern rootId <- getClone ssRef patternD' rootIdPre
+      CloneRes newRootN pattern rootId <- getClone ssRef lib patternD' rootIdPre
 
       systemST <- lift $ readSTRef ssRef
 
       -- find parent & m1
-      (Tuple parent subN) <- findParent systemST.moduleRefPool pattern rootId
-      mRef   <- loadLib rootId systemST.moduleRefPool "finishSwitch module"
-      m      <- lift $ readSTRef mRef
-      m1id   <- loadLib "m1" m.modules "finishSwitch module m1"
-      m1Ref  <- loadLib m1id systemST.moduleRefPool "finishSwitch m1"
-      m1     <- lift $ readSTRef m1Ref
+      (Tuple parent subN) <- findParent lib pattern rootId
+
+      modD <- mD <$> getLib lib rootId "finishSwitch module"
+      m1id <- loadLib "m1" modD.modules "finishSwitch module m1"
+      m1 <- getLib lib m1id "finishSwitch m1"
 
       -- replace.  this removes all scripts wrt this as well
-      replaceModule ssRef parent subN rootId (ImportModule m1)
+      replaceModule lib parent subN rootId (ImportModule m1)
 
       -- this is pretty ghetto.  its for the dev ui
       when systemST.pauseAfterSwitch do
         lift $ modifySTRef ssRef (\s -> s {pauseAfterSwitch = false})
-        addScript systemST parent "pause" ""
+        addScript lib t parent "pause" ""
         pure unit
 
       --dbg "finish switch!!!!"

@@ -16,7 +16,7 @@ import Data.StrMap.ST (new)
 import Data.String (Replacement(..), joinWith, replace, split, trim)
 import Data.String (Pattern(..)) as S
 import Data.Tuple (Tuple(..))
-import Data.Types (Component(Component), EngineConf(EngineConf), Epi, EpiS, Index, Pattern(..), Schema, SchemaEntry(SchemaEntry), SchemaEntryType(SE_A_Cx, SE_A_St, SE_M_N, SE_M_St, SE_S, SE_B, SE_I, SE_N, SE_St), SystemConf(SystemConf), UIConf(UIConf), componentSchema, engineConfSchema, indexSchema, patternSchema, systemConfSchema, uiConfSchema)
+import Data.Types (Component(Component), EngineConf(EngineConf), Epi, EpiS, Index, Module(..), Pattern(..), Schema, SchemaEntry(SchemaEntry), SchemaEntryType(SE_A_Cx, SE_A_St, SE_M_N, SE_M_St, SE_S, SE_B, SE_I, SE_N, SE_St), SystemConf(SystemConf), UIConf(UIConf), componentSchema, engineConfSchema, indexSchema, moduleSchema, patternSchema, systemConfSchema, uiConfSchema)
 import Library (parseCLst, parseLst, parseMp, parseNMp, parseSet)
 import Util (dbg, boolFromStringE, fromJustE, inj, intFromStringE, numFromStringE, zipI)
 
@@ -45,6 +45,10 @@ instance ucSerializable :: Serializable UIConf where
 instance pSerializable :: Serializable Pattern where
   schema a = patternSchema
   generic = unsafeGenericDataTable indexSchema patternSchema Pattern
+
+instance mSerializable :: Serializable Module where
+  schema a = moduleSchema
+  generic = unsafeGenericDataTable indexSchema moduleSchema Module
 
 instance cSerializable :: Serializable Component where
   schema a = componentSchema
@@ -167,6 +171,9 @@ parseLibData libData = do
       "Pattern" -> do
         obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
         pure $ Library val {patternLib = obj}
+      "Module" -> do
+        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+        pure $ Library val {moduleLib = obj}
       "Component" -> do
         obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
         pure $ Library val {componentLib = obj}

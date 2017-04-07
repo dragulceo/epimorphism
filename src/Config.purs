@@ -2,21 +2,14 @@ module Config where
 
 import Prelude
 import Graphics.WebGL.Raw.Types as GLT
-import Control.Monad.Eff (Eff)
-import Control.Monad.Except.Trans (ExceptT)
-import Control.Monad.ST (STRef, ST)
-import DOM (DOM)
+import Control.Monad.ST (STRef)
 import Data.Library (Library)
 import Data.Maybe (Maybe(..))
 import Data.Set (union, Set)
 import Data.StrMap (StrMap, empty)
 import Data.Tuple (Tuple)
-import Data.Types (Pattern, Schema, SchemaEntry(..), SchemaEntryType(..), PatternD)
-import Graphics.Canvas (CANVAS)
+import Data.Types (EpiS, Pattern, Schema, SchemaEntry(..), SchemaEntryType(..), PatternD)
 import Graphics.WebGL.Types (WebGLProgram, WebGLTexture, WebGLFramebuffer, WebGLContext)
-
-type Epi eff a = ExceptT String (Eff (canvas :: CANVAS, dom :: DOM | eff)) a
-type EpiS eff h a = Epi (st :: ST h | eff) a
 
 -- System
 type SystemST h = {
@@ -27,11 +20,8 @@ type SystemST h = {
   , t :: Number
   , paused :: Boolean
   , pauseAfterSwitch :: Boolean
-  , patternLib :: StrMap Pattern
-  , moduleLib :: StrMap Module
   , componentLib :: StrMap Component
   , indexLib :: StrMap Index
-  , moduleRefPool :: StrMap (STRef h Module)
   , compPattern :: Maybe PatternD
 }
 
@@ -44,9 +34,6 @@ defaultSystemST = {
   , t: 0.0
   , paused: false
   , pauseAfterSwitch: false
-  , patternLib: empty
-  , moduleLib: empty
-  , moduleRefPool: empty
   , componentLib: empty
   , indexLib: empty
   , compPattern: Nothing
@@ -102,41 +89,6 @@ defaultUIST :: UIST
 defaultUIST = {
     incIdx: empty
 }
-
-
--- Pattern
-type Module = {
-    component :: String
-  , family    :: String
-  , flags     :: Set String
-  , props     :: StrMap String
-  , scripts   :: Array String
-  , modules   :: StrMap String
-  , par       :: StrMap String
-  , zn        :: Array String
-  , images    :: Array String
-  , sub       :: StrMap String
-  , var       :: String
-  , dim       :: String
-  , libName   :: String
-}
-
-moduleSchema :: Schema
-moduleSchema = [
-    SchemaEntry SE_St "component"
-  , SchemaEntry SE_St "family"
-  , SchemaEntry SE_S "flags"
-  , SchemaEntry SE_M_St "props"
-  , SchemaEntry SE_A_St "scripts"
-  , SchemaEntry SE_M_St "modules"
-  , SchemaEntry SE_M_St "par"
-  , SchemaEntry SE_A_St "zn"
-  , SchemaEntry SE_A_St "images"
-  , SchemaEntry SE_M_St "sub"
-  , SchemaEntry SE_St "var"
-  , SchemaEntry SE_St "dim"
-  , SchemaEntry SE_St "libName"
-]
 
 data PMut = PMutNone | PMut PatternD (Set String)
 instance mutSemi :: Semigroup PMut where

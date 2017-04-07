@@ -6,26 +6,28 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (head, foldM, uncons, deleteAt, cons)
+import Data.Library (Library, getLib, modLibD)
 import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
 import Data.StrMap (StrMap, insert, empty, toUnfoldable)
 import Data.String (split, joinWith, trim)
 import Data.String (Pattern(..)) as S
 import Data.Tuple (Tuple(Tuple))
-import Data.Types (EpiS, PatternD)
+import Data.Types (EpiS, Module, PatternD)
 import Pattern (clonePattern, findModule, findAddr, CloneRes(CloneRes))
-import System (mUp)
 import Text.Format (precision, format)
 import Util (dbg, inj, numFromStringE, fromJustE)
 
-addScript :: forall eff h. SystemST h -> String -> String -> String -> EpiS eff h Unit
-addScript systemST mid name args = do
-  let scr = inj "%0@%1 %2" [name, (format (precision 2) systemST.t), args]
-  mUp systemST mid \m ->
+addScript :: forall eff h. Library h -> Number -> String -> String -> String -> EpiS eff h Unit
+addScript lib t mid name args = do
+  let scr = inj "%0@%1 %2" [name, (format (precision 2) t), args]
+  mod <- getLib lib mid "addScript" :: EpiS eff h Module
+  modLibD lib mod \m ->
     m {scripts = cons scr m.scripts}
 
-purgeScript :: forall eff h. SystemST h -> String -> Int -> EpiS eff h Unit
-purgeScript systemST mid idx = do
-  mUp systemST mid \m ->
+purgeScript :: forall eff h. Library h -> String -> Int -> EpiS eff h Unit
+purgeScript lib mid idx = do
+  mod <- getLib lib mid "purgeScript" :: EpiS eff h Module
+  modLibD lib mod \m ->
     m {scripts = fromMaybe m.scripts $ deleteAt idx m.scripts}
 
 parseScript :: forall eff h. String -> EpiS eff h Script
@@ -64,19 +66,18 @@ serializeScript (Script name phase args) =
 
 -- This method is called by scripts that modify the state tree.  we perform modifications in a cloned tree so we can compile asynchronously
 -- I don't like how this modifies ssRef
-getClone :: forall eff h. STRef h (SystemST h) -> PatternD -> String -> EpiS eff h CloneRes
-getClone ssRef patternD mid = do
+getClone :: forall eff h. STRef h (SystemST h) -> Library h -> PatternD -> String -> EpiS eff h CloneRes
+getClone ssRef lib patternD mid = do
   systemST <- lift $ readSTRef ssRef
   patternD' <- case systemST.compPattern of
     Just pd -> pure pd
     Nothing -> do
       -- dbg "cloning pattern"
-      patternD' <- clonePattern ssRef patternD
+      patternD' <- clonePattern lib patternD
       lift $ modifySTRef ssRef (\s -> s {compPattern = Just patternD'})
       pure patternD'
 
-  systemST' <- lift $ readSTRef ssRef
-  addr <- findAddr systemST'.moduleRefPool patternD mid
-  mid' <- findModule systemST'.moduleRefPool patternD' addr false
+  addr <- findAddr lib patternD mid
+  mid' <- findModule lib patternD' addr false
   root <- fromJustE (head $ split (S.Pattern ".") addr) "getClone invalid addr"
   pure $ CloneRes root patternD' mid'

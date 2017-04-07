@@ -1,31 +1,29 @@
 module Parser where
 
 import Prelude
-import System (loadLib)
-import Config (Module, SystemST)
-import Control.Monad.Except.Trans (lift)
-import Control.Monad.ST (STRef, readSTRef)
+import Config (SystemST)
 import Data.Array (length)
 import Data.Array (sort, length, (..)) as A
 import Data.Foldable (foldl)
+import Data.Library (Library, getLib, mD)
 import Data.Maybe (Maybe(Nothing, Just))
 import Data.StrMap (lookup, StrMap, fold, empty, keys, size, foldM, insert)
 import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
-import Data.Types (EpiS, Epi)
-import Util (forceInt, indentLines, replaceAll)
+import Data.Types (Epi, EpiS, ModuleD)
+import System (loadLib)
+import Util (dbg, forceInt, indentLines, replaceAll)
 
 type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}
 type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array String}
 
 foreign import parseT :: String -> String
 
-parseShader :: forall eff h. SystemST h -> String -> Array String -> EpiS eff h (Tuple String (Array String))
-parseShader systemST mid includes = do
-  modRef <- loadLib mid systemST.moduleRefPool "parseShaders mid"
-  mod    <- lift $ readSTRef modRef
-  modRes <- parseModule mod systemST 0 0 []
+parseShader :: forall eff h. SystemST h -> Library h -> String -> Array String -> EpiS eff h (Tuple String (Array String))
+parseShader systemST lib mid includes = do
+  modD <- mD <$> getLib lib mid "parseShader mid"
+  modRes <- parseModule modD systemST lib 0 0 []
 
   let modRes' = spliceUniformSizes modRes
   allIncludes' <- traverse (\x -> loadLib x systemST.componentLib "includes") includes
@@ -42,8 +40,8 @@ spliceUniformSizes cmp@{ component, zOfs, parOfs, images } =
     component''' = replaceAll "#aux#" (show $ length images + 1) component''
 
 -- parse a shader.  substitutions, submodules, par & zn
-parseModule :: forall eff h. Module -> SystemST h -> Int -> Int -> (Array String) -> EpiS eff h CompRes
-parseModule mod systemST zOfs parOfs images = do
+parseModule :: forall eff h. ModuleD -> SystemST h -> Library h -> Int -> Int -> (Array String) -> EpiS eff h CompRes
+parseModule mod systemST lib zOfs parOfs images = do
   -- substitutions (make sure this is always first)
   comp <- loadLib mod.component systemST.componentLib "parse component"
   sub' <- preProcessSub mod.sub
@@ -63,15 +61,16 @@ parseModule mod systemST zOfs parOfs images = do
   let images' = images <> mod.images
 
   -- submodules
-  mod' <- loadModules mod.modules systemST.moduleRefPool
+  mod' <- loadModules mod.modules lib
   foldM (handleChild systemST) { component: component'''', zOfs: zOfs', parOfs: parOfs', images: images' } mod'
   where
     handleSub dt k v = replaceAll ("\\$" <> k <> "\\$") v dt
     handlePar (Tuple n dt) v = Tuple (n + 1) (replaceAll ("@" <> v <> "@") ("par[" <> show n <> "]") dt)
     handleZn dt v = replaceAll ("zn\\[#" <> show v <> "\\]") ("zn[" <> (show $ (v + zOfs)) <> "]") dt
     handleImg dt v = replaceAll ("aux\\[#" <> show v <> "\\]") ("aux[" <> (show $ (v + (A.length images))) <> "]") dt
+    handleChild :: SystemST h -> CompRes -> String -> ModuleD -> EpiS eff h CompRes
     handleChild systemST' {component, zOfs: zOfs', parOfs: parOfs', images: images'} k v = do
-      res <- parseModule v systemST' zOfs' parOfs' images'
+      res <- parseModule v systemST' lib zOfs' parOfs' images'
       let iC = "//" <> k <> "\n  {\n" <> (indentLines 2 res.component) <> "\n  }"
       let child = replaceAll ("%" <> k <> "%") iC component
       pure $ res { component = child }
@@ -90,7 +89,6 @@ preProcessSub sub = do
 parseTexp :: forall eff. String -> Epi eff String
 parseTexp expr = do
   let expr1 = parseT expr
-
   let subs = [["\\+","A"],["\\-","S"],["\\~","CONJ"],["\\+","A"],["\\-","S"],["\\*","M"],["/","D"],["sinh","SINHZ"],
               ["cosh","COSHZ"],["tanh","TANHZ"],["sin","SINZ"],["cos","COSZ"],["tan","TANZ"],["exp","EXPZ"],["sq","SQZ"]]
 
@@ -101,11 +99,11 @@ parseTexp expr = do
 
 
 -- Bulk load a list of modules
-loadModules :: forall eff h. StrMap String -> (StrMap (STRef h Module)) -> EpiS eff h (StrMap Module)
+loadModules :: forall eff h. StrMap String -> Library h -> EpiS eff h (StrMap ModuleD)
 loadModules mr lib = do
   foldM handle empty mr
   where
+    handle :: (StrMap ModuleD) -> String -> String -> EpiS eff h (StrMap ModuleD)
     handle dt k v = do
-      mRef <- loadLib v lib "parse loadModules"
-      m    <- lift $ readSTRef mRef
-      pure $ insert k m dt
+      modD <- mD <$> getLib lib v "parse loadModules"
+      pure $ insert k modD dt

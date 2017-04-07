@@ -1,16 +1,14 @@
 module Console where
 
 import Prelude
-import Config (EpiS, moduleSchema, Module, SystemST, UIST)
+import Config (SystemST, UIST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (throwError)
-import Control.Monad.ST (readSTRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array ((:), filter, partition)
 import Data.DOM.Simple.Element (setInnerHTML)
-import Data.Library (Library, getPatternD, getUIConfD)
+import Data.Library (Library, getLib, getPatternD, getUIConfD, mD)
 import Data.Maybe (Maybe(Just, Nothing))
-import Data.StrMap (StrMap)
 import Data.String (Replacement(..), joinWith, trim, split, replace)
 import Data.String (Pattern(..)) as S
 import Data.String.Regex (match)
@@ -18,6 +16,7 @@ import Data.String.Regex.Flags (noFlags)
 import Data.String.Regex.Unsafe (unsafeRegex)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
+import Data.Types (EpiS, ModuleD, moduleSchema)
 import Paths (isConstantPath, runPath)
 import Serialize (showCX, unsafeSerialize)
 import System (family, loadLib)
@@ -32,51 +31,47 @@ renderConsole uiST systemST lib = do
   uiConfD  <- getUIConfD lib "renderConsole uiConf"
   patternD <- getPatternD lib "renderConsole pattern"
   dsmDiv <- findElt "debugMain"
-  str0 <- renderModule systemST uiConfD.uiCompLib patternD.main "MAIN" Nothing
+  str0 <- renderModule systemST lib uiConfD.uiCompLib patternD.main "MAIN" Nothing
   lift $ setInnerHTML str0 dsmDiv
 
   dsdDiv <- findElt "debugDisp"
-  str1 <- renderModule systemST uiConfD.uiCompLib patternD.disp "DISP" Nothing
+  str1 <- renderModule systemST lib uiConfD.uiCompLib patternD.disp "DISP" Nothing
   lift $ setInnerHTML str1 dsdDiv
 
   lift $ addEventListeners
 
 -- serializes the modRefPool into an html string for debugging.  shitcode
-renderModule :: forall eff h. SystemST h -> String -> String -> String -> Maybe String -> EpiS eff h String
-renderModule systemST modLib mid title pid = do
-  let lib = systemST.moduleLib
-  let pool = systemST.moduleRefPool
-
-  mRef <- loadLib mid pool "renderModule"
-  mod <- lift $ readSTRef mRef
-  str <- unsafeSerialize moduleSchema Nothing mod
+renderModule :: forall eff h. SystemST h -> Library h -> String -> String -> String -> Maybe String -> EpiS eff h String
+renderModule systemST lib modLib mid title pid = do
+  modD <- mD <$> getLib lib mid "renderModule module"
+  str <- unsafeSerialize moduleSchema Nothing modD
 
   -- find & parse module line
   let lines = split (S.Pattern "\n") str
   {yes: modules, no: rst} <- pure $ partition isModules lines
   modRes <- case modules of
-    [line] -> parseModLine mid mod line
+    [line] -> parseModLine mid modD line
     _ -> pure ""
 
   -- parse other lines
   let rst' = filter (\x -> x /= "") rst
   let idLine = "id " <> mid
-  lines' <- traverse (handleLine mod) (idLine : rst')
+  lines' <- traverse (handleLine modD) (idLine : rst')
   let res = joinWith "" $ lines'
 
   -- title
   let titlePre = "<span class='consoleModTitle prefix'>" <> title <> ": </span>"
   sel <- case pid of
     Just pid' -> do
-      sel' <- renderSelect modLib lib mod pid' title
-      pure $ sel' <> "<span class='consoleModTitle consoleUI'>" <> mod.libName <> "</span>"
-    _ -> pure $ "<span class='consoleModTitle'>"  <> mod.libName <> "</span>"
+      sel' <- renderSelect modLib lib modD pid' title
+      pure $ sel' <> "<span class='consoleModTitle consoleUI'>" <> modD.libName <> "</span>"
+    _ -> pure $ "<span class='consoleModTitle'>"  <> modD.libName <> "</span>"
 
   let title' = titlePre <> sel
 
   let res' = title' <> indentLines 2 (res <> modRes)
 
-  pure res'
+  pure "" --res'
   where
     isModules :: String -> Boolean
     isModules line =
@@ -84,8 +79,8 @@ renderModule systemST modLib mid title pid = do
       case (match rgx line) of
         (Just _) -> true
         _ -> false
-    parseModLine :: String -> Module -> String -> EpiS eff h String
-    parseModLine _ mod line = do
+    parseModLine :: String -> ModuleD -> String -> EpiS eff h String
+    parseModLine _ modD line = do
       let rgx = unsafeRegex "modules \\{([^\\{\\}]*)\\}" noFlags
       case (match rgx line) of
         (Just [(Just _), (Just "")]) -> do
@@ -97,9 +92,9 @@ renderModule systemST modLib mid title pid = do
         _ ->
           throwError "not a module line, dingus"
     exp [a, b] = do
-      renderModule systemST modLib (trim b) (trim a) (Just mid)
+      renderModule systemST lib modLib (trim b) (trim a) (Just mid)
     exp _ = throwError $ "invalid map syntax in " <> mid
-    handleLine mod line = do
+    handleLine modD line = do
       let rgx = unsafeRegex "^(component|par|zn|images|sub|scripts|--)\\s?(.*)$" noFlags
       res <- case (match rgx line) of
         (Just [(Just _), (Just m0), (Just m1)]) -> do
@@ -216,11 +211,11 @@ renderModule systemST modLib mid title pid = do
 
       pure res
 
-renderSelect :: forall eff h. String -> StrMap Module -> Module -> String -> String -> EpiS eff h String
-renderSelect modLib lib mod pid cname = do
-  let fam = family lib mod.family [modLib] []
+renderSelect :: forall eff h. String -> Library h -> ModuleD -> String -> String -> EpiS eff h String
+renderSelect modLib lib modD pid cname = do
+  let fam = [] --family lib modD.family [modLib] []
   let fam' = map (\x -> inj "<option value='%0'>%0</option>" [x]) fam
   let options = joinWith "\n" fam'
-  let options' = (inj "<option selected disabled>%0</option>" [mod.libName]) <> options
+  let options' = (inj "<option selected disabled>%0</option>" [modD.libName]) <> options
   let r0 = inj "<select class='consoleUI switchChild' style='display:none;' data-mid='%0' data-cname='%1'>%2</select>" [pid, cname, options']
   pure r0

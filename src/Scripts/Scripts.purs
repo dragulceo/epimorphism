@@ -3,12 +3,14 @@ module Scripts where
 import Prelude
 import Config (PMut(PMutNone), ScriptRes(ScriptRes), ScriptFn)
 import Control.Monad.Except.Trans (throwError, lift)
-import Control.Monad.ST (modifySTRef, readSTRef)
+import Control.Monad.ST (readSTRef)
 import Data.Array (updateAt, index)
 import Data.Complex (Cartesian(..), outCartesian, inPolar, Polar(Polar))
-import Data.Tuple (Tuple(..))
+import Data.Library (dat, getLib, modLibD)
 import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
 import Data.StrMap (insert, member)
+import Data.Tuple (Tuple(..))
+import Data.Types (Module)
 import Math (max, round) as M
 import ScriptUtil (addScript, purgeScript)
 import System (loadLib)
@@ -22,10 +24,8 @@ null ssRef lib t mid idx dt = do
 -- get rid of this abomination
 pause :: forall eff h. ScriptFn eff h
 pause ssRef lib t mid idx dt = do
-  systemST <- lift $ readSTRef ssRef
-
   lift $ clickPause
-  purgeScript systemST mid idx
+  purgeScript lib mid idx
   pure $ ScriptRes PMutNone Nothing
 
 -- increment Zn
@@ -33,13 +33,13 @@ incZn :: forall eff h. ScriptFn eff h
 incZn ssRef lib t mid scrIdx dt = do
   systemST <- lift $ readSTRef ssRef
 
-  mRef <- loadLib mid systemST.moduleRefPool "incZn module"
-  mod  <- lift $ readSTRef mRef
+  mod <- getLib lib mid "incZn module"
+  let modD = dat (mod :: Module)
 
   idx <- (loadLib "idx" dt "incZn idx") >>= intFromStringE
   ofs <-  loadLib "ofs" dt "incZn ofs"
 
-  case (index mod.zn idx) of
+  case (index modD.zn idx) of
     Nothing -> throwError "index out of bounds - incZn"
     Just z' -> case cxFromString z' of
       Nothing -> pure unit
@@ -67,12 +67,11 @@ incZn ssRef lib t mid scrIdx dt = do
         let tPhase = systemST.t - t -- recover phase
         let path = inj "intrp@%0 4.0 %1 %2 %3 %4" [(show $ t + tPhase), (show fromR), (show fromTh), (show toR), (show toTh)]
 
-        let zn' = fromMaybe mod.zn (updateAt idx path mod.zn)
-        lift $ modifySTRef mRef (\m -> m {zn = zn'})
-        pure unit
+        let zn' = fromMaybe modD.zn (updateAt idx path modD.zn)
+        modLibD lib mod _ {zn = zn'}
 
   -- remove self
-  purgeScript systemST mid scrIdx
+  purgeScript lib mid scrIdx
 
   pure $ ScriptRes PMutNone Nothing
 
@@ -99,7 +98,7 @@ randomize ssRef lib t mid scrIdx dt = do
         "mod" -> inj "childN:%0 op:load by:query typ:mod query:%1 accs:rand spd:%2" [sub, lib', spd]
         _     -> inj "mut:%0 idx:%1 op:clone by:query typ:idx query:%2 accs:rand spd:%3" [typ, sub, lib', spd]
 
-      addScript systemST mid "switch" args
+      addScript lib t mid "switch" args
 
       let nxt' = (format (precision 2) (t + dly))
       let dt' = insert "nxt" nxt' dt

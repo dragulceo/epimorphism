@@ -1,13 +1,13 @@
 module Paths where
 
 import Prelude
-import Config (EpiS)
 import Control.Monad.Except.Trans (throwError)
 import Data.Array (uncons)
 import Data.Complex (outCartesian, Cartesian(Cartesian), Polar(Polar), outPolar, Complex)
 import Data.Maybe (Maybe(..))
 import Data.String (Pattern(..), split, trim)
 import Data.Tuple (Tuple(Tuple))
+import Data.Types (EpiS)
 import Math (pi, min, cos, floor)
 import Util (dbg, cxFromString, lg, cxFromStringE, numFromStringE)
 

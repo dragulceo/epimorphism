@@ -42,15 +42,15 @@ compileShaders ssRef esRef lib full = do
           let no_fract = es.profile.angle ||
                          (isJust $ stripPrefix (S.Pattern "Windows") es.profile.os)
           let fract = if no_fract then Nothing else Just engineConfD.fract
-          Tuple main aux <- parseMain systemST patternD fract
+          Tuple main aux <- parseMain systemST lib patternD fract
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainSrc = Just main, auxImages = Just aux}})
           pure false
         CompDispShader -> do
-          disp <- parseDisp systemST patternD
+          disp <- parseDisp systemST lib patternD
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {dispSrc = Just disp}})
           pure false
         CompVertShader -> do
-          vert <- parseVert systemST patternD
+          vert <- parseVert systemST lib patternD
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {vertSrc = Just vert}})
           pure false
         --CompUploadAux -> do
@@ -96,11 +96,11 @@ compileShaders ssRef esRef lib full = do
 
           -- clean old pattern
           when (patternD'.main /= patternD.main) do
-            purgeModule ssRef patternD'.main
+            purgeModule lib patternD'.main
           when (patternD'.disp /= patternD.disp) do
-            purgeModule ssRef patternD'.disp
+            purgeModule lib patternD'.disp
           when (patternD'.vert /= patternD.vert) do
-            purgeModule ssRef patternD'.vert
+            purgeModule lib patternD'.vert
 
           -- update pattern & reset comp info
           pattern <- getPattern lib "CompFinish pattern"
@@ -122,9 +122,9 @@ compileShaders ssRef esRef lib full = do
     Nothing -> throwError "shouldn't call compile with an empty queue chump!"
 
 
-parseMain :: forall eff h. SystemST h -> PatternD -> Maybe Int -> EpiS eff h (Tuple String (Array String))
-parseMain systemST patternD fract = do
-  Tuple main'' aux <- parseShader systemST patternD.main patternD.includes
+parseMain :: forall eff h. SystemST h -> Library h -> PatternD -> Maybe Int -> EpiS eff h (Tuple String (Array String))
+parseMain systemST lib patternD fract = do
+  Tuple main'' aux <- parseShader systemST lib patternD.main patternD.includes
 
   -- kind of ghetto
   main <- case fract of
@@ -138,11 +138,11 @@ parseMain systemST patternD fract = do
 
   pure $ Tuple main aux
 
-parseDisp :: forall eff h. SystemST h -> PatternD -> EpiS eff h String
-parseDisp systemST patternD = fst <$> parseShader systemST patternD.disp patternD.includes
+parseDisp :: forall eff h. SystemST h -> Library h -> PatternD -> EpiS eff h String
+parseDisp systemST lib patternD = fst <$> parseShader systemST lib patternD.disp patternD.includes
 
-parseVert :: forall eff h. SystemST h -> PatternD -> EpiS eff h String
-parseVert systemST patternD = fst <$> parseShader systemST patternD.vert []
+parseVert :: forall eff h. SystemST h -> Library h -> PatternD -> EpiS eff h String
+parseVert systemST lib patternD = fst <$> parseShader systemST lib patternD.vert []
 
 linkShader :: forall eff h. EngineST -> WebGLProgram -> EpiS eff h UniformBindings
 linkShader es prog = execGL es.ctx do

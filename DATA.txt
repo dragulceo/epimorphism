@@ -1,3 +1,22 @@
+TODO:
+	get rid of slib
+	images
+
+	family/search (in console & switch!!)
+
+
+	importing = clone
+	flag modules/data as live somehow
+	remove ssRef from ScriptFn
+  rewrite clonePattern
+	remove includes from pattern
+	remove compPattern
+	mainC, dispC, etc
+	refactor module
+	references?
+
+
+
 
   - ensure key is obj.id?
   - relying to heavily on lib?  sometimes pass, EngineConfD vs lib etc

@@ -9,19 +9,17 @@ import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Array (uncons, updateAt, length)
-import Data.Library (Library, getEngineConf, getLibM, getPatternD, getSystemConf, getUIConf, getUIConfD, modLibD)
+import Data.Library (Library, dat, getEngineConf, getLib, getLibM, getPatternD, getSystemConf, getUIConf, getUIConfD, modLibD)
 import Data.Maybe (Maybe(..))
-import Data.StrMap (values, insert)
+import Data.StrMap (insert)
 import Data.String (joinWith, split)
 import Data.String (Pattern(..)) as S
-import Data.Traversable (traverse)
-import Data.Types (EngineConf, EpiS, PatternD)
+import Data.Types (EngineConf, EpiS, Module, PatternD)
 import Engine (initEngineST)
 import Graphics.Canvas (CANVAS)
 import Layout (updateLayout, initLayout)
 import Pattern (findModule)
 import ScriptUtil (addScript)
-import System (mUp, loadLib)
 import Texture (clearFB)
 import Util (dbg, halt, Now, cxFromStringE, intFromStringE, numFromStringE, lg, uuid, handleError)
 
@@ -57,8 +55,9 @@ command usRef esRef ssRef lib msg = handleError do
             lift $ modifySTRef ssRef (\s -> s {pauseAfterSwitch = true})
             pure unit
           "killScripts" -> do
-            let upd = (\r -> lift $ modifySTRef r (\m -> m {scripts = []}))
-            traverse upd (values systemST.moduleRefPool)
+            -- BROKEN:  need to find only the modules that are 'live'
+            --let upd = (\r -> lift $ modifySTRef r (\m -> m {scripts = []}))
+            --traverse upd (values systemST.moduleRefPool)
 
             pure unit
           "scr" -> do
@@ -68,40 +67,43 @@ command usRef esRef ssRef lib msg = handleError do
                 case uncons rst of
                   Nothing -> throwError $ "invalid script args " <> msg
                   Just {head: name, tail: rst'} -> do
-                    mid <- findModule systemST.moduleRefPool patternD addr true
-                    addScript systemST mid name (joinWith " " rst')
+                    mid <- findModule lib patternD addr true
+                    addScript lib systemST.t mid name (joinWith " " rst')
                     pure unit
           "setP" -> do
             case args of
               [addr, par, val] -> do
                 val' <- numFromStringE val
-                mid  <- findModule systemST.moduleRefPool patternD addr true
-                mUp systemST mid \m ->
-                  m {par = insert par (show val') m.par}
+                mid <- findModule lib patternD addr true
+                mod <- getLib lib mid "setP"
+                let modD = dat (mod :: Module)
 
-                pure unit
+                modLibD lib mod _ {par = insert par (show val') modD.par}
               _ -> throwError "invalid format: setP addr par val"
           "setZn" -> do
             case args of
               [addr, idx, val] -> do
                 val' <- cxFromStringE val
                 idx' <- intFromStringE idx
-                mid  <- findModule systemST.moduleRefPool patternD addr true
-                mRef <- loadLib mid systemST.moduleRefPool "find module - setP"
-                mod <- lift $ readSTRef mRef
+                mid  <- findModule lib patternD addr true
 
-                zn' <- case (updateAt idx' (show val') mod.zn) of
+                mod <- getLib lib mid "find module - setZn"
+                let modD = dat (mod :: Module)
+
+                zn' <- case (updateAt idx' (show val') modD.zn) of
                   Just x -> pure x
                   _ -> throwError "zn idx out of bounds setZn"
-                lift $ modifySTRef mRef (\m -> m {zn = zn'})
+                modLibD lib mod _ {zn = zn'}
 
                 pure unit
               _ -> throwError "invalid format: setPar addr par val"
           "setT" -> do
-            let tExp = joinWith "" args
-            mid <- findModule systemST.moduleRefPool patternD "main.application.t.t_inner" true
-            mUp systemST mid \m ->
-              m {sub = insert "t_expr" tExp m.sub}
+            let tExp = "" -- joinWith "" args
+            mid <- findModule lib patternD "main.application.t.t_inner" true
+            mod <- getLib lib mid "setT"
+            let modD = dat (mod :: Module)
+
+            modLibD lib mod _ {sub = insert "t_expr" tExp modD.sub}
             compileShaders ssRef esRef lib false
 
             pure unit
@@ -136,7 +138,7 @@ command usRef esRef ssRef lib msg = handleError do
                 dim' <- intFromStringE dim
                 engineConf <- getEngineConf lib "setKernelDim engineConf"
                 modLibD lib engineConf _ {kernelDim = dim'}
-                initEngineST systemST lib uiConfD.canvasId (Just esRef)
+                initEngineST lib uiConfD.canvasId (Just esRef)
 
               _ -> throwError "invalid format: setKerneldim dim"
             pure unit
@@ -160,7 +162,7 @@ command usRef esRef ssRef lib msg = handleError do
                     systemConf <- getSystemConf lib "setEngineProfile"
                     modLibD lib systemConf _ {engineConf = prof}
 
-                initEngineST systemST lib uiConfD.canvasId (Just esRef)
+                initEngineST lib uiConfD.canvasId (Just esRef)
 
               _ -> throwError "invalid format: setProfile profile"
             pure unit

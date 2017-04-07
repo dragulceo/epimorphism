@@ -6,9 +6,9 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
 import Data.Maybe (Maybe(..))
 import Data.Set (Set, empty) as S
-import Data.StrMap (StrMap, empty, member, pureST)
+import Data.StrMap (StrMap, empty)
 import Data.StrMap.ST (STStrMap, delete, peek, poke)
-import Data.Types (CodeBlock, Component(Component), ComponentRef, EngineConf(EngineConf), EngineConfD, EpiS, Family(Family), FamilyRef, Image(Image), ImageRef, Include, Index, Module(Module), ModuleRef, Path, Pattern(Pattern), PatternD, Script, Section(Section), SystemConf(SystemConf), UIConf(UIConf), UIConfD, SystemConfD)
+import Data.Types (CodeBlock, Component(Component), ComponentRef, EngineConf(EngineConf), EngineConfD, EpiS, Family(Family), FamilyRef, Image(Image), ImageRef, Include, Index, Module(..), ModuleD, ModuleRef, Path, Pattern(Pattern), PatternD, Script, Section(Section), SystemConf(SystemConf), SystemConfD, UIConf(UIConf), UIConfD)
 
 data Library h = Library {
     systemConfLib :: STStrMap h SystemConf
@@ -91,13 +91,24 @@ instance dtPattern :: DataTable Pattern {
   apD     (Pattern ix dt) mut = Pattern ix (mut dt)
 
 instance dtModule :: DataTable Module {
-    comp_ref :: ComponentRef
-  , scripts  :: Array Script
-  , modules  :: StrMap ModuleRef
-  , par      :: StrMap Path
-  , zn       :: Array Path
-  , images   :: Array ImageRef
-  , sub      :: StrMap String
+--    comp_ref :: ComponentRef
+--  , scripts  :: Array Script
+--  , modules  :: StrMap ModuleRef
+--  , par      :: StrMap Path
+--  , zn       :: Array Path
+--  , images   :: Array ImageRef
+--  , sub      :: StrMap String
+    component :: String
+  , scripts   :: Array String
+  , modules   :: StrMap String
+  , par       :: StrMap String
+  , zn        :: Array String
+  , images    :: Array String
+  , sub       :: StrMap String
+  , var       :: String
+  , dim       :: String
+  , libName   :: String
+  , family    :: String
 } where
   libProj (Library {moduleLib}) = moduleLib
   idx     (Module ix _) = ix
@@ -147,6 +158,17 @@ instance dtSection :: DataTable Section {
   apI     (Section ix dt) mut = Section (mut ix) dt
   apD     (Section ix dt) mut = Section ix (mut dt)
 
+type Ref a = String
+type SCRef = Ref SystemConf
+type ECRef = Ref EngineConf
+type UCRef = Ref UIConf
+type PRef = Ref Pattern
+type CRef = Ref Component
+type FRef = Ref Family
+type MRef = Ref Module
+type IRef = Ref Image
+type SRef = Ref Section
+
 
 -- LIBRARY CRUD
 getLibM :: forall a ad eff h. (DataTable a ad) => Library h -> String -> EpiS eff h (Maybe a)
@@ -161,8 +183,6 @@ getLib lib name msg = do
     Nothing -> throwError $ msg <> " - Can't find in library: " <> name
   --fromJustE res (msg <>" # Can't find in library: " <> name)
 
---getLibD :: forall a ad eff h. (DataTable a ad) => Library h -> String -> String -> EpiS eff h ad
---getLibD lib name msg = getLib lib name msg
 
 setLib :: forall a ad eff h. (DataTable a ad) => Library h -> String -> a -> EpiS eff h Unit
 setLib lib name new = do
@@ -234,3 +254,7 @@ getPattern lib@(Library {system: (Just system)}) msg = do
 
 getPatternD :: forall eff h.  Library h -> String -> EpiS eff h PatternD
 getPatternD lib msg = dat <$> getPattern lib msg
+
+
+mD :: Module -> ModuleD
+mD = dat

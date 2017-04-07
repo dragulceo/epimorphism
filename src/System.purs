@@ -1,25 +1,24 @@
 module System where
 
-import SLibrary
-import Config (Module, moduleSchema, SystemST, defaultSystemST)
+import Prelude
+import Config (SystemST, defaultSystemST)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
-import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Data.Array (concat, foldM, sort, snoc)
 import Data.Either (Either(..))
 import Data.Foldable (foldl)
-import Data.Library (Library)
+import Data.Library (Library, dat, getLibM)
 import Data.List (toUnfoldable)
 import Data.Maybe (Maybe(..))
 import Data.Serialize (parseLibData)
 import Data.Set (Set)
 import Data.Set (member) as S
-import Data.StrMap (member, values, empty, insert, fold, lookup, StrMap)
+import Data.StrMap (values, empty, insert, fold, lookup, StrMap)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple)
-import Data.Types (EpiS, Epi, Schema)
+import Data.Types (Epi, EpiS, Module, Schema)
 import Library (parseLib)
-import Prelude (unit, Unit, (==), ($), not, (&&), (<>), pure, bind)
+import SLibrary (SHandle, SLib, SLibError(..), buildComponent, buildIndex, parseSLib)
 import Util (urlGet)
 
 data DataSource = LocalHTTP | LocalStorage | RemoteDB
@@ -29,13 +28,11 @@ initSystemST host = do
   -- gather system data here?  currently doing this in engine
 
   -- initialize libraries
-  moduleLib     <- buildLib moduleSchema     $ host <> "/lib/modules.lib"
   componentLib  <- buildSLib buildComponent  $ host <> "/lib/components.slib"
   indexLib      <- buildSLib buildIndex      $ host <> "/lib/indexes.slib"
 
   pure $ defaultSystemST {
-      moduleLib     = moduleLib
-    , componentLib  = componentLib
+      componentLib  = componentLib
     , indexLib      = indexLib
   }
 
@@ -95,8 +92,8 @@ family col fam inc exc = flagFamily (fold handle empty col) inc exc
 
 
 -- implement a breadth first fold over the modules rooted at mid
-mFold :: forall eff h a. STRef h (SystemST h) -> a -> String -> (a -> String -> EpiS eff h a) -> EpiS eff h a
-mFold ssRef val mid fn = bff val [mid]
+mFold :: forall eff h a. Library h -> a -> String -> (a -> String -> EpiS eff h a) -> EpiS eff h a
+mFold lib val mid fn = bff val [mid]
   where
     bff :: a -> Array String -> EpiS eff h a
     bff tval [] = pure tval
@@ -106,17 +103,8 @@ mFold ssRef val mid fn = bff val [mid]
       bff tval' (concat children)
     childValues :: String -> EpiS eff h (Array String)
     childValues cid = do
-      systemST <- lift $ readSTRef ssRef
-      case (member cid systemST.moduleRefPool) of -- calling fn may have removed the module
-        true -> do
-          cRef <- loadLib cid systemST.moduleRefPool "mFold cid"
-          child <- lift $ readSTRef cRef
-          pure $ toUnfoldable $ values child.modules
-        false -> pure []
-
-
-mUp :: forall eff h. SystemST h -> String -> (Module -> Module) -> EpiS eff h Unit
-mUp systemST mid func = do
-  mRef <- loadLib mid systemST.moduleRefPool "mUp"
-  lift $ modifySTRef mRef (\m -> func m)
-  pure unit
+      elt <- getLibM lib cid
+      case (elt :: Maybe Module) of -- calling fn may have removed the module
+        Just mod -> do
+          pure $ toUnfoldable $ values (dat mod).modules
+        Nothing -> pure []

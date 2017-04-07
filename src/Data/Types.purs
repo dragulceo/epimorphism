@@ -169,16 +169,48 @@ componentSchema = [
   , SchemaEntry SE_A_St "includes"
 ]
 
+-- Pattern
 data Module = Module Index ModuleD
+
 type ModuleD = {
-    comp_ref :: ComponentRef
-  , scripts  :: Array Script
-  , modules  :: StrMap ModuleRef
-  , par      :: StrMap Path
-  , zn       :: Array Path
-  , images   :: Array ImageRef
-  , sub      :: StrMap String
+    component :: String
+  , scripts   :: Array String
+  , modules   :: StrMap String
+  , par       :: StrMap String
+  , zn        :: Array String
+  , images    :: Array String
+  , sub       :: StrMap String
+  , var       :: String
+  , dim       :: String
+  , libName   :: String
+  , family    :: String
 }
+
+moduleSchema :: Schema
+moduleSchema = [
+    SchemaEntry SE_St "component"
+  , SchemaEntry SE_A_St "scripts"
+  , SchemaEntry SE_M_St "modules"
+  , SchemaEntry SE_M_St "par"
+  , SchemaEntry SE_A_St "zn"
+  , SchemaEntry SE_A_St "images"
+  , SchemaEntry SE_M_St "sub"
+  , SchemaEntry SE_St "var"
+  , SchemaEntry SE_St "dim"
+  , SchemaEntry SE_St "libName"
+]
+
+
+--data Module = Module Index ModuleD
+--type ModuleD = {
+--    comp_ref :: ComponentRef
+--  , scripts  :: Array Script
+--  , modules  :: StrMap ModuleRef
+--  , par      :: StrMap Path
+--  , zn       :: Array Path
+--  , images   :: Array ImageRef
+--  , sub      :: StrMap String
+--}
 
 
 data Image = Image Index ImageD

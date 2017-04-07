@@ -2,27 +2,27 @@ module Main where
 
 import Prelude
 import Compiler (compileShaders)
-import Config (PMut(PMutNone, PMut), SystemST, UIST, EpiS, EngineST, CompOp(..))
+import Config (PMut(PMutNone, PMut), SystemST, UIST, EngineST, CompOp(..))
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import DOM (DOM)
 import Data.Array (null, updateAt, foldM, sort, concatMap, fromFoldable)
 import Data.Int (round, toNumber)
-import Data.Library (Library(Library), dat, getLibM, getPatternD, getSystemConf, getSystemConfD, getUIConfD, modLibD)
+import Data.Library (Library(Library), dat, getLib, getLibM, getPatternD, getSystemConf, getSystemConfD, getUIConfD, modLibD)
 import Data.Maybe (isNothing, fromMaybe, Maybe(Nothing, Just))
 import Data.Set (member)
 import Data.StrMap (insert, values, keys, lookup)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
-import Data.Types (EngineConf)
+import Data.Types (EngineConf, EpiS, Module)
 import Engine (postprocessFrame, initEngineST, renderFrame)
 import Graphics.Canvas (CANVAS)
 import Layout (updateLayout)
 import Paths (runPath)
 import Pattern (importPattern)
 import Script (runScripts)
-import System (initLibrary, initSystemST, loadLib)
+import System (initLibrary, initSystemST)
 import Texture (loadImages)
 import UI (initUIST)
 import Util (Now, dbg, fromJustE, getProfileCookie, handleError, imag, inj, isDev, isHalted, now, real, requestAnimationFrame, rndstr, seedRandom, urlArgs, zipI)
@@ -91,11 +91,10 @@ initState systemST lib'@(Library libVar) = do
   lift $ loadImages index'.lib index.lib
 
   -- import pattern
-  importPattern ssRef lib
-  systemST' <- lift $ readSTRef ssRef
+  importPattern lib
 
   -- init engine & ui states
-  esRef <- initEngineST systemST' lib uiConfD.canvasId Nothing
+  esRef <- initEngineST lib uiConfD.canvasId Nothing
   usRef <- initUIST esRef ssRef lib
 
   pure {usRef, ssRef, esRef, lib}
@@ -168,10 +167,10 @@ animate state = handleError do
 
   -- render!
   t3 <- lift $ now
-  (Tuple parM znM) <- getParZn systemST'' (Tuple [] []) patternD'.main
+  (Tuple parM znM) <- getParZn lib t' (Tuple [] []) patternD'.main
   tex <- renderFrame systemST'' engineST'' lib parM znM systemST''.frameNum
 
-  (Tuple parD znD) <- getParZn systemST'' (Tuple [] []) patternD'.disp
+  (Tuple parD znD) <- getParZn lib t' (Tuple [] []) patternD'.disp
   postprocessFrame systemST'' engineST'' lib tex parD znD
   t4 <- lift $ now
 
@@ -191,38 +190,37 @@ animate state = handleError do
   pure unit
 
 -- recursively flatten par & zn lists in compilation order
-getParZn :: forall eff h. SystemST h -> (Tuple (Array Number) (Array Number)) -> String -> EpiS eff h (Tuple (Array Number) (Array Number))
-getParZn systemST (Tuple par zn) mid = do
-  mRef <- loadLib mid systemST.moduleRefPool "mid getParZn"
-  mod  <- lift $ readSTRef mRef
-  let t = systemST.t
+getParZn :: forall eff h. Library h -> Number -> (Tuple (Array Number) (Array Number)) -> String -> EpiS eff h (Tuple (Array Number) (Array Number))
+getParZn lib t (Tuple par zn) mid = do
+  mod <- getLib lib mid "mid getParZn"
+  let modD = dat (mod :: Module)
 
-  znV <- traverse (runZnPath mRef t) (zipI mod.zn)
+  znV <- traverse (runZnPath mid t) (zipI modD.zn)
   let znV' = concatMap (\x -> [real x, imag x]) znV
   let zn' = zn <> znV'
 
-  parV <- traverse (runParPath mRef t) (sort $ keys mod.par)
+  parV <- traverse (runParPath mid t) (sort $ keys modD.par)
   let par' = par <> parV
 
-  foldM (getParZn systemST) (Tuple par' zn') (fromFoldable $ values mod.modules)
+  foldM (getParZn lib t) (Tuple par' zn') (fromFoldable $ values modD.modules)
   where
-    runZnPath mRef t (Tuple idx val) = do
-      (Tuple res remove) <- runPath t val
+    runZnPath mid' t' (Tuple idx val) = do
+      (Tuple res remove) <- runPath t' val
       when remove do -- replace with constant
-        m <- lift $ readSTRef mRef
-        zn' <- fromJustE (updateAt idx (show res) m.zn) "should be safe getParZn"
-        lift $ modifySTRef mRef (\m' -> m' {zn = zn'})
-        pure unit
+        mod <- getLib lib mid' "mid runZnPath"
+        let modD = dat (mod :: Module)
+        zn' <- fromJustE (updateAt idx (show res) modD.zn) "should be safe getParZn"
+        modLibD lib mod _ {zn = zn'}
       pure res
-    runParPath mRef t key = do
-      m <- lift $ readSTRef mRef
-      val <- fromJustE (lookup key m.par) "cant find val getParZn"
-      (Tuple res remove) <- runPath t val
+    runParPath mid' t' key = do
+      mod <- getLib lib mid' "mid runParPath"
+      let modD = dat (mod :: Module)
+      val <- fromJustE (lookup key modD.par) "cant find val getParZn"
+      (Tuple res remove) <- runPath t' val
       let res' = real res
       when remove do -- replace with constant
-        let par' = insert key (show res') m.par
-        lift $ modifySTRef mRef (\m' -> m' {par = par'})
-        pure unit
+        let par' = insert key (show res') modD.par
+        modLibD lib mod _ {par = par'}
       pure res'
 
 main :: Eff (canvas :: CANVAS, dom :: DOM, now :: Now) Unit

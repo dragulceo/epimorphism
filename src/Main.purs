@@ -68,7 +68,7 @@ initState systemST lib'@(Library libVar) = do
       pure systemConfD.seed
 
   modLibD lib systemConf _ {seed = seed}
-  lift $ seedRandom systemConfD.seed
+  lift $ seedRandom seed
 
   -- if the cookie_profile sets a valid profile, update the system
   cookie_profile <- lift $ getProfileCookie

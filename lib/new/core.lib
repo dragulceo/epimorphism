@@ -3,6 +3,7 @@ id dev
 engineConf default
 uiConf dev
 pattern dev
+seed 8563
 
 ### SystemConf
 id prod

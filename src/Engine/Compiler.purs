@@ -2,17 +2,18 @@ module Compiler where
 
 import Prelude
 import Data.TypedArray as T
-import Config (newCompST, UniformBindings, EpiS, Pattern, SystemST, EngineST, EngineConf, CompOp(..))
+import Config (newCompST, UniformBindings, Pattern, SystemST, EngineST, CompOp(..))
 import Control.Alt ((<|>))
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (length, uncons)
-import Data.Library (Library)
+import Data.Library (Library, getEngineConfD)
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.String (stripPrefix)
 import Data.String (Pattern(..)) as S
 import Data.Tuple (fst, Tuple(Tuple))
+import Data.Types (EpiS)
 import EngineUtil (execGL)
 import Graphics.WebGL.Methods (vertexAttribPointer, enableVertexAttribArray, bindBuffer, bufferData, createBuffer)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram, linkProgram)
@@ -23,12 +24,13 @@ import Texture (uploadAux)
 import Util (Now, dbg, lg, now, now2, replaceAll, unsafeCast)
 
 -- compile shaders and load into systemST
-compileShaders :: forall eff h. STRef h (SystemST h) -> EngineConf -> STRef h EngineST -> STRef h Pattern -> Library h -> Boolean -> EpiS (now :: Now | eff) h Boolean
-compileShaders ssRef engineConf esRef pRef lib full = do
+compileShaders :: forall eff h. STRef h (SystemST h) -> STRef h EngineST -> STRef h Pattern -> Library h -> Boolean -> EpiS (now :: Now | eff) h Boolean
+compileShaders ssRef esRef pRef lib full = do
   systemST <- lift $ readSTRef ssRef
   es <- lift $ readSTRef esRef
   let compRef = fromMaybe pRef systemST.compPattern
   pattern <- lift $ readSTRef compRef
+  engineConfD <- getEngineConfD lib "compileShaders"
 
   case (uncons es.compQueue) of
     Just {head: op, tail: rst} -> do
@@ -37,7 +39,7 @@ compileShaders ssRef engineConf esRef pRef lib full = do
         CompMainShader -> do
           let no_fract = es.profile.angle ||
                          (isJust $ stripPrefix (S.Pattern "Windows") es.profile.os)
-          let fract = if no_fract then Nothing else Just engineConf.fract
+          let fract = if no_fract then Nothing else Just engineConfD.fract
           Tuple main aux <- parseMain systemST pattern fract
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainSrc = Just main, auxImages = Just aux}})
           pure false
@@ -110,7 +112,7 @@ compileShaders ssRef engineConf esRef pRef lib full = do
 
       lift $ modifySTRef esRef (\es' -> es' {compQueue = rst})
       when (length rst /= 0 && full) do
-        compileShaders ssRef engineConf esRef pRef lib full
+        compileShaders ssRef esRef pRef lib full
         pure unit
 
       pure $ done || full

@@ -1,7 +1,6 @@
 module Data.Serialize where
 
 import Prelude
-import Config (engineConfSchema)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Except.Trans (throwError)
@@ -16,7 +15,7 @@ import Data.StrMap (foldM) as S
 import Data.StrMap.ST (new)
 import Data.String (Pattern(..), Replacement(..), joinWith, replace, split, trim)
 import Data.Tuple (Tuple(..))
-import Data.Types (Component(Component), EngineConf(EngineConf), Epi, EpiS, Index, Schema, SchemaEntry(SchemaEntry), SchemaEntryType(SE_A_Cx, SE_A_St, SE_M_N, SE_M_St, SE_S, SE_B, SE_I, SE_N, SE_St), SystemConf(SystemConf), UIConf(UIConf), componentSchema, indexSchema, systemConfSchema, uiConfSchema)
+import Data.Types (Component(Component), EngineConf(EngineConf), Epi, EpiS, Index, Schema, SchemaEntry(SchemaEntry), SchemaEntryType(SE_A_Cx, SE_A_St, SE_M_N, SE_M_St, SE_S, SE_B, SE_I, SE_N, SE_St), SystemConf(SystemConf), UIConf(UIConf), componentSchema, indexSchema, systemConfSchema, uiConfSchema, engineConfSchema)
 import Library (parseCLst, parseLst, parseMp, parseNMp, parseSet)
 import Util (dbg, boolFromStringE, fromJustE, inj, intFromStringE, numFromStringE, zipI)
 

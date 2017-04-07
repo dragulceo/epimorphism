@@ -2,11 +2,12 @@ module UI where
 
 import Prelude
 import Command (command)
-import Config (UIST, EpiS, SystemST, Pattern, EngineST, EngineConf, defaultUIST)
+import Config (UIST, SystemST, Pattern, EngineST, defaultUIST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, readSTRef, newSTRef)
 import Data.Library (Library, getUIConfD)
+import Data.Types (EpiS)
 import KeyHandlers (keyHandler)
 import Layout (initLayout)
 import System (loadLib)
@@ -19,8 +20,8 @@ foreign import registerAuxImages :: forall eff. Array String -> Eff eff Unit
 foreign import doneLoading :: forall eff. Eff eff Unit
 
 -- PUBLIC
-initUIST :: forall eff h. STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h (SystemST h) -> Library h -> EpiS (now :: Now | eff) h (STRef h UIST)
-initUIST ecRef esRef pRef ssRef lib = do
+initUIST :: forall eff h. STRef h EngineST -> STRef h Pattern -> STRef h (SystemST h) -> Library h -> EpiS (now :: Now | eff) h (STRef h UIST)
+initUIST esRef pRef ssRef lib = do
   let uiST = defaultUIST
   uiConfD  <- getUIConfD lib "initUIST"
 
@@ -29,7 +30,7 @@ initUIST ecRef esRef pRef ssRef lib = do
 
   initLayout uiST lib
 
-  let handler = command usRef ecRef esRef pRef ssRef lib
+  let handler = command usRef esRef pRef ssRef lib
   lift $ addGlobalEventListeners handler
   lift $ registerEventHandler handler
   lift $ registerKeyHandler (keyHandler usRef lib)

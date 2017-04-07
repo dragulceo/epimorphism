@@ -1,7 +1,7 @@
 module System where
 
 import SLibrary
-import Config (Module, EpiS, moduleSchema, patternSchema, engineConfSchema, Epi, SystemST, defaultSystemST)
+import Config (Module, moduleSchema, patternSchema, SystemST, defaultSystemST)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
@@ -17,7 +17,7 @@ import Data.Set (member) as S
 import Data.StrMap (member, values, empty, insert, fold, lookup, StrMap)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple)
-import Data.Types (Schema)
+import Data.Types (EpiS, Epi, Schema)
 import Library (parseLib)
 import Prelude (unit, Unit, (==), ($), not, (&&), (<>), pure, bind)
 import Util (urlGet)
@@ -29,7 +29,6 @@ initSystemST host = do
   -- gather system data here?  currently doing this in engine
 
   -- initialize libraries
-  engineConfLib <- buildLib engineConfSchema $ host <> "/lib/engine_conf.lib"
   moduleLib     <- buildLib moduleSchema     $ host <> "/lib/modules.lib"
   patternLib    <- buildLib patternSchema    $ host <> "/lib/patterns.lib"
 
@@ -37,8 +36,7 @@ initSystemST host = do
   indexLib      <- buildSLib buildIndex      $ host <> "/lib/indexes.slib"
 
   pure $ defaultSystemST {
-      engineConfLib = engineConfLib
-    , moduleLib     = moduleLib
+      moduleLib     = moduleLib
     , patternLib    = patternLib
     , componentLib  = componentLib
     , indexLib      = indexLib

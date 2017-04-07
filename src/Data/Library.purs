@@ -6,7 +6,7 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
 import Data.Maybe (Maybe(..))
 import Data.Set (Set, empty) as S
-import Data.StrMap (StrMap, empty)
+import Data.StrMap (StrMap, empty, member, pureST)
 import Data.StrMap.ST (STStrMap, delete, peek, poke)
 import Data.Types (CodeBlock, Component(Component), ComponentRef, EngineConf(EngineConf), EngineConfD, EpiS, Family(Family), FamilyRef, Image(Image), ImageRef, Include, Index, Module(Module), ModuleRef, Path, Pattern(Pattern), PatternD, Script, Section(Section), SystemConf(SystemConf), UIConf(UIConf), UIConfD, SystemConfD)
 
@@ -148,9 +148,13 @@ instance dtSection :: DataTable Section {
 
 
 -- LIBRARY CRUD
+getLibM :: forall a ad eff h. (DataTable a ad) => Library h -> String -> EpiS eff h (Maybe a)
+getLibM lib name = do
+  liftEff $ peek (libProj lib) name
+
 getLib :: forall a ad eff h. (DataTable a ad) => Library h -> String -> String -> EpiS eff h a
 getLib lib name msg = do
-  res <- liftEff $ peek (libProj lib) name
+  res <- getLibM lib name
   case res of
     Just x -> pure x
     Nothing -> throwError $ msg <>" # Can't find in library: " <> name

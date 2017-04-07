@@ -2,21 +2,21 @@ module Command where
 
 import Prelude
 import Compiler (compileShaders)
-import Config (patternSchema, moduleSchema, Pattern, SystemST, EngineST, EngineConf, UIST)
+import Config (patternSchema, moduleSchema, Pattern, SystemST, EngineST, UIST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
-import Control.Monad.ST (writeSTRef, STRef, ST, modifySTRef, readSTRef)
+import Control.Monad.ST (STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Array (uncons, updateAt, length)
-import Data.Library (Library, getUIConf, getUIConfD, modLibD)
+import Data.Library (Library, getEngineConf, getEngineConfD, getLibM, getSystemConf, getUIConf, getUIConfD, modLibD)
 import Data.Maybe (Maybe(..))
 import Data.StrMap (values, insert, toUnfoldable)
 import Data.String (joinWith, split)
 import Data.String (Pattern(..)) as S
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Data.Types (EpiS, Schema)
+import Data.Types (EngineConf, EpiS, Schema)
 import Engine (initEngineST)
 import Graphics.Canvas (CANVAS)
 import Layout (updateLayout, initLayout)
@@ -29,13 +29,12 @@ import Util (dbg, halt, Now, cxFromStringE, intFromStringE, numFromStringE, lg, 
 
 foreign import saveCanvas :: forall eff. Eff eff Unit
 
-command :: forall eff h. STRef h UIST -> STRef h EngineConf -> STRef h EngineST -> STRef h Pattern -> STRef h (SystemST h) -> Library h -> String -> Eff (canvas :: CANVAS, dom :: DOM, st :: ST h, now :: Now | eff) Unit
-command usRef ecRef esRef pRef ssRef lib msg = handleError do
+command :: forall eff h. STRef h UIST -> STRef h EngineST -> STRef h Pattern -> STRef h (SystemST h) -> Library h -> String -> Eff (canvas :: CANVAS, dom :: DOM, st :: ST h, now :: Now | eff) Unit
+command usRef esRef pRef ssRef lib msg = handleError do
   uiConfD <- getUIConfD lib "command"
 
   systemST   <- lift $ readSTRef ssRef
   uiST       <- lift $ readSTRef usRef
-  engineConf <- lift $ readSTRef ecRef
   engineST   <- lift $ readSTRef esRef
   pattern    <- lift $ readSTRef pRef
 
@@ -105,7 +104,7 @@ command usRef ecRef esRef pRef ssRef lib msg = handleError do
             mid <- findModule systemST.moduleRefPool pattern "main.application.t.t_inner" true
             mUp systemST mid \m ->
               m {sub = insert "t_expr" tExp m.sub}
-            compileShaders ssRef engineConf esRef pRef lib false
+            compileShaders ssRef esRef pRef lib false
 
             pure unit
           "save" -> do
@@ -136,35 +135,39 @@ command usRef ecRef esRef pRef ssRef lib msg = handleError do
           "setKernelDim" -> do
             case args of
               [dim] -> do
+                engineConf <- getEngineConf lib "setKernelDim"
                 dim' <- intFromStringE dim
-                lift $ modifySTRef ecRef (\ec -> ec {kernelDim = dim'})
-                engineConf' <- lift $ readSTRef ecRef
-                initEngineST engineConf' systemST lib uiConfD.canvasId (Just esRef)
+                modLibD lib engineConf _ {kernelDim = dim'}
+                initEngineST systemST lib uiConfD.canvasId (Just esRef)
 
               _ -> throwError "invalid format: setKerneldim dim"
             pure unit
           "setFract" -> do
             case args of
               [fract] -> do
+                engineConf <- getEngineConf lib "setKernelDim"
                 fract' <- intFromStringE fract
-                lift $ modifySTRef ecRef (\ec -> ec {fract = fract'})
-                engineConf' <- lift $ readSTRef ecRef
-                compileShaders ssRef engineConf' esRef pRef lib false
+                modLibD lib engineConf _ {fract = fract'}
+                compileShaders ssRef esRef pRef lib false
 
               _ -> throwError "invalid format: setFract fract"
             pure unit
           "setEngineProfile" -> do
             case args of
               [prof] -> do
-                engineConf' <- loadLib prof systemST.engineConfLib "setEngineProfile"
-                lift $ writeSTRef ecRef engineConf'
+                elt <- getLibM lib prof
+                case (elt :: Maybe EngineConf) of
+                  Nothing -> throwError $ "Unknown profile: " <> prof
+                  Just d -> do
+                    systemConf <- getSystemConf lib "setEngineProfile"
+                    modLibD lib systemConf _ {engineConf = prof}
 
-                initEngineST engineConf' systemST lib uiConfD.canvasId (Just esRef)
+                initEngineST systemST lib uiConfD.canvasId (Just esRef)
 
-              _ -> throwError "invalid format: setFract fract"
+              _ -> throwError "invalid format: setProfile profile"
             pure unit
           "clear" -> do
-            clearFB engineConf engineST
+            clearFB engineST
           _ -> throwError $ "Unknown command: " <> msg
 
 

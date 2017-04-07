@@ -1,7 +1,8 @@
 module Parser where
 
-import System
-import Config (Epi, Module, EpiS, SystemST)
+import Prelude
+import System (loadLib)
+import Config (Module, SystemST)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, readSTRef)
 import Data.Array (length)
@@ -12,8 +13,8 @@ import Data.StrMap (lookup, StrMap, fold, empty, keys, size, foldM, insert)
 import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
-import Prelude (pure, ($), bind, map, (<>), (-), (+), show)
-import Util (dbg, forceInt, indentLines, replaceAll)
+import Data.Types (EpiS, Epi)
+import Util (forceInt, indentLines, replaceAll)
 
 type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}
 type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array String}
@@ -62,15 +63,15 @@ parseModule mod systemST zOfs parOfs images = do
   let images' = images <> mod.images
 
   -- submodules
-  mod <- loadModules mod.modules systemST.moduleRefPool
-  foldM (handleChild systemST) { component: component'''', zOfs: zOfs', parOfs: parOfs', images: images' } mod
+  mod' <- loadModules mod.modules systemST.moduleRefPool
+  foldM (handleChild systemST) { component: component'''', zOfs: zOfs', parOfs: parOfs', images: images' } mod'
   where
     handleSub dt k v = replaceAll ("\\$" <> k <> "\\$") v dt
     handlePar (Tuple n dt) v = Tuple (n + 1) (replaceAll ("@" <> v <> "@") ("par[" <> show n <> "]") dt)
     handleZn dt v = replaceAll ("zn\\[#" <> show v <> "\\]") ("zn[" <> (show $ (v + zOfs)) <> "]") dt
     handleImg dt v = replaceAll ("aux\\[#" <> show v <> "\\]") ("aux[" <> (show $ (v + (A.length images))) <> "]") dt
-    handleChild systemST {component, zOfs, parOfs, images} k v = do
-      res <- parseModule v systemST zOfs parOfs images
+    handleChild systemST' {component, zOfs: zOfs', parOfs: parOfs', images: images'} k v = do
+      res <- parseModule v systemST' zOfs' parOfs' images'
       let iC = "//" <> k <> "\n  {\n" <> (indentLines 2 res.component) <> "\n  }"
       let child = replaceAll ("%" <> k <> "%") iC component
       pure $ res { component = child }

@@ -73,6 +73,14 @@ type EngineConfD = {
   , audioBufferSize      :: Int
 }
 
+engineConfSchema :: Schema
+engineConfSchema = [
+    SchemaEntry SE_I "kernelDim"
+  , SchemaEntry SE_I "fract"
+  , SchemaEntry SE_I "numAuxBuffers"
+  , SchemaEntry SE_B "audioAnalysisEnabled"
+  , SchemaEntry SE_I "audioBufferSize"
+]
 
 data UIConf = UIConf Index UIConfD
 type UIConfD = {

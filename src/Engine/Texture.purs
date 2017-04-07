@@ -4,7 +4,8 @@ import Prelude
 import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Graphics.WebGL.Raw.Types as GLT
-import Config (EpiS, EngineST, EngineConf, Epi)
+import Config (EngineST)
+import Data.Types (EpiS, Epi, EngineConfD)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Error.Class (throwError)
@@ -53,9 +54,9 @@ initTexFb dim = do
 
 
 -- initialize auxiliary textures
-initAuxTex :: EngineConf -> WebGLContext -> GLT.TexImageSource -> WebGL (Array WebGLTexture)
-initAuxTex engineConf ctx empty = do
-  traverse doInit (0..(engineConf.numAuxBuffers - 1))
+initAuxTex :: EngineConfD -> WebGLContext -> GLT.TexImageSource -> WebGL (Array WebGLTexture)
+initAuxTex engineConfD ctx empty = do
+  traverse doInit (0..(engineConfD.numAuxBuffers - 1))
   where
     doInit i = do
       aux <- newTex
@@ -91,8 +92,8 @@ uploadImage ctx (Tuple aux name) = do
     liftEff $ GL.bindTexture ctx GLE.texture2d aux
     liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte src
 
-clearFB :: forall eff h. EngineConf -> EngineST -> EpiS eff h Unit
-clearFB engineConf engineST = do
+clearFB :: forall eff h. EngineST -> EpiS eff h Unit
+clearFB engineST = do
   let ctx = engineST.ctx
   tex <- fromJustE engineST.tex "engine textures not initialized!"
   execGL ctx do

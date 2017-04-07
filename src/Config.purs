@@ -26,7 +26,6 @@ type SystemST h = {
   , t :: Number
   , paused :: Boolean
   , pauseAfterSwitch :: Boolean
-  , engineConfLib :: StrMap EngineConf
   , patternLib :: StrMap Pattern
   , moduleLib :: StrMap Module
   , componentLib :: StrMap Component
@@ -44,7 +43,6 @@ defaultSystemST = {
   , t: 0.0
   , paused: false
   , pauseAfterSwitch: false
-  , engineConfLib: empty
   , patternLib: empty
   , moduleLib: empty
   , moduleRefPool: empty
@@ -52,28 +50,6 @@ defaultSystemST = {
   , indexLib: empty
   , compPattern: Nothing
 }
-
--- Engine
-type EngineConf = {
-    kernelDim :: Int
-  , fract :: Int
-  , numAuxBuffers :: Int
-  , audioAnalysisEnabled :: Boolean
-  , audioBufferSize :: Int
-}
-
-engineConfSchema :: Schema
-engineConfSchema = [
-    SchemaEntry SE_St "id"
-  , SchemaEntry SE_St "flags"
-  , SchemaEntry SE_M_St "props"
-  , SchemaEntry SE_St "parent"
-  , SchemaEntry SE_I "kernelDim"
-  , SchemaEntry SE_I "fract"
-  , SchemaEntry SE_I "numAuxBuffers"
-  , SchemaEntry SE_B "audioAnalysisEnabled"
-  , SchemaEntry SE_I "audioBufferSize"
-]
 
 foreign import data AudioAnalyser :: *
 foreign import data UniformBindings :: *

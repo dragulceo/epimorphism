@@ -5,7 +5,7 @@ import Data.TypedArray as T
 import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Audio (audioData, initAudio)
-import Config (EngineConf, EngineProfile, EngineST, EpiS, Pattern, SystemST, UniformBindings, Epi, fullCompile, newCompST)
+import Config (EngineProfile, EngineST, Pattern, SystemST, UniformBindings, fullCompile, newCompST)
 import Control.Monad.Eff (Eff, foreachE)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Error.Class (throwError)
@@ -13,9 +13,10 @@ import Control.Monad.Reader.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, newSTRef, modifySTRef, readSTRef)
 import Data.Array (length, (..))
 import Data.Int (toNumber)
-import Data.Library (Library)
+import Data.Library (Library, getEngineConfD)
 import Data.Maybe (maybe, Maybe(Nothing, Just))
 import Data.Tuple (Tuple(Tuple), snd, fst)
+import Data.Types (EpiS, Epi)
 import EngineUtil (execGL)
 import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
 import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
@@ -54,8 +55,10 @@ getEngineProfile ctx = do
 
 -- initialize the rendering engine & create state.  updates an existing state if passed
 -- maybe validate that kernelDim > 0?
-initEngineST :: forall eff h. EngineConf -> SystemST h -> Library h -> String -> Maybe (STRef h EngineST) -> EpiS (now :: Now | eff) h (STRef h EngineST)
-initEngineST engineConf systemST lib canvasId esRef' = do
+initEngineST :: forall eff h. SystemST h -> Library h -> String -> Maybe (STRef h EngineST) -> EpiS (now :: Now | eff) h (STRef h EngineST)
+initEngineST systemST lib canvasId esRef' = do
+  engineConfD <- getEngineConfD lib "compileShaders"
+
   -- find canvas & create context
   canvasM <- liftEff $ getCanvasElementById canvasId
   canvas <-
@@ -79,7 +82,7 @@ initEngineST engineConf systemST lib canvasId esRef' = do
   --liftEff $ getExtension ctx "OES_texture_float"
   --liftEff $ getExtension ctx "OES_texture_float_linear"
 
-  empty <- lift $ emptyImage engineConf.kernelDim
+  empty <- lift $ emptyImage engineConfD.kernelDim
 
   -- get reference
   esRef <- case esRef' of
@@ -94,7 +97,7 @@ initEngineST engineConf systemST lib canvasId esRef' = do
   es <- lift $ readSTRef esRef
 
   -- if we change kernel_dim we need to redo this
-  let dim = engineConf.kernelDim
+  let dim = engineConfD.kernelDim
   lift $ setCanvasWidth (toNumber dim) canvas
   lift $ setCanvasHeight (toNumber dim) canvas
 
@@ -102,8 +105,8 @@ initEngineST engineConf systemST lib canvasId esRef' = do
   res <- execGL ctx do
     Tuple tex0 fb0 <- initTexFb dim
     Tuple tex1 fb1 <- initTexFb dim
-    auxTex <- initAuxTex engineConf es.ctx empty
-    audio <- initAudio engineConf es.ctx empty
+    auxTex <- initAuxTex engineConfD es.ctx empty
+    audio <- initAudio engineConfD es.ctx empty
 
     clearColor 0.0 0.0 0.0 1.0
     liftEff $ GL.clear ctx GLE.colorBufferBit
@@ -122,9 +125,10 @@ initEngineST engineConf systemST lib canvasId esRef' = do
   pure esRef
 
 -- do the thing!
-renderFrame :: forall eff h. SystemST h -> EngineConf -> EngineST -> Pattern -> Array Number -> Array Number -> Int -> EpiS eff h WebGLTexture
-renderFrame systemST engineConf engineST pattern par zn frameNum = do
+renderFrame :: forall eff h. SystemST h -> EngineST -> Pattern -> Library h -> Array Number -> Array Number -> Int -> EpiS eff h WebGLTexture
+renderFrame systemST engineST pattern lib par zn frameNum = do
   let ctx = engineST.ctx
+  engineConfD <- getEngineConfD lib "postprocessFrams"
 
   -- unpack
   tex <- case engineST.tex of
@@ -150,7 +154,7 @@ renderFrame systemST engineConf engineST pattern par zn frameNum = do
   execGL ctx do
     -- bind main uniforms
     uniform1f (unsafeGetAttr mainUnif "time") (systemST.t - pattern.tPhase)
-    uniform1f (unsafeGetAttr mainUnif "kernel_dim") (toNumber engineConf.kernelDim)
+    uniform1f (unsafeGetAttr mainUnif "kernel_dim") (toNumber engineConfD.kernelDim)
 
     -- BUG!!! audio has to be before aux???
     --audio info
@@ -162,7 +166,7 @@ renderFrame systemST engineConf engineST pattern par zn frameNum = do
           true -> do
             liftEff $ GL.bindTexture ctx GLE.texture2d audioTex
             dta <- lift $ lift $ audioData analyser
-            liftEff $ GL.texImage2D_ ctx GLE.texture2d 0 GLE.alpha engineConf.audioBufferSize 1 0 GLE.alpha GLE.unsignedByte dta
+            liftEff $ GL.texImage2D_ ctx GLE.texture2d 0 GLE.alpha engineConfD.audioBufferSize 1 0 GLE.alpha GLE.unsignedByte dta
 
             let ofs = numAux + 1
             liftEff $ GL.uniform1i ctx (unsafeGetAttr mainUnif "audioData") ofs
@@ -195,9 +199,10 @@ renderFrame systemST engineConf engineST pattern par zn frameNum = do
     pure td
 
 
-postprocessFrame :: forall eff h. SystemST h -> EngineConf -> EngineST -> WebGLTexture -> Array Number -> Array Number -> EpiS eff h Unit
-postprocessFrame systemST engineConf engineST tex par zn = do
+postprocessFrame :: forall eff h. SystemST h -> EngineST -> Library h -> WebGLTexture -> Array Number -> Array Number -> EpiS eff h Unit
+postprocessFrame systemST engineST lib tex par zn = do
   let ctx = engineST.ctx
+  engineConfD <- getEngineConfD lib "postprocessFrams"
 
   disp <- case engineST.dispProg of
     Just x -> pure x
@@ -211,7 +216,7 @@ postprocessFrame systemST engineConf engineST tex par zn = do
 
   execGL ctx do
     -- bind disp uniforms
-    uniform1f (unsafeGetAttr dispUnif "kernel_dim") (toNumber engineConf.kernelDim)
+    uniform1f (unsafeGetAttr dispUnif "kernel_dim") (toNumber engineConfD.kernelDim)
 
     -- draw
     liftEff $ GL.bindTexture ctx GLE.texture2d tex

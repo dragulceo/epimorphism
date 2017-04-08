@@ -72,7 +72,7 @@ renderModule systemST lib modLib mid title pid = do
 
   let res' = title' <> indentLines 2 (res <> modRes)
 
-  pure "" --res'
+  pure res'
   where
     isModules :: String -> Boolean
     isModules line =

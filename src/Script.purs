@@ -9,7 +9,7 @@ import Data.Array (foldM, elemIndex, updateAt)
 import Data.Library (Library, dat, getLib, getPatternD, mD, modLibD)
 import Data.Maybe (Maybe(Just))
 import Data.Set (union)
-import Data.Types (EpiS, Module)
+import Data.Types (EpiS, Module(..))
 import ScriptUtil (serializeScript, parseScript)
 import Scripts (null, randomize, pause, incZn)
 import Switch (finishSwitch, switch)
@@ -53,16 +53,14 @@ runScript ssRef lib mid pmut scr = do
   fn <- lookupScriptFN name
   let t' = systemST.t - phase
 
-  mod <- getLib lib mid "mid! runScript"
-  let modD = dat (mod :: Module)
+  mod@(Module _ modD) <- getLib lib mid "mid! runScript"
+  idx <- fromJustE (elemIndex scr modD.scripts) "script not found m"
 
-  idx  <- fromJustE (elemIndex scr modD.scripts) "script not found m"
   (ScriptRes mut update) <- fn ssRef lib t' mid idx args
   case update of
     Just dt -> do
       let new = serializeScript (Script name phase dt)
-      modD' <- mD <$> getLib lib mid "mid' runScript"
-
+      modD'     <- mD <$> getLib lib mid "mid' runScript"
       idx'      <- fromJustE (elemIndex scr modD'.scripts) "script not found m'"
       scripts'  <- fromJustE (updateAt idx' new modD'.scripts) "should be safe runScript"
 

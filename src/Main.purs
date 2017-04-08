@@ -15,7 +15,7 @@ import Data.Set (member)
 import Data.StrMap (insert, values, keys, lookup)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
-import Data.Types (EngineConf, EpiS, Module)
+import Data.Types (EngineConf, EpiS, Module(..))
 import Engine (postprocessFrame, initEngineST, renderFrame)
 import Graphics.Canvas (CANVAS)
 import Layout (updateLayout)
@@ -194,8 +194,7 @@ animate state = handleError do
 -- recursively flatten par & zn lists in compilation order
 getParZn :: forall eff h. Library h -> Number -> (Tuple (Array Number) (Array Number)) -> String -> EpiS eff h (Tuple (Array Number) (Array Number))
 getParZn lib t (Tuple par zn) mid = do
-  mod <- getLib lib mid "mid getParZn"
-  let modD = dat (mod :: Module)
+  mod@(Module _ modD) <- getLib lib mid "mid getParZn"
 
   znV <- traverse (runZnPath mid t) (zipI modD.zn)
   let znV' = concatMap (\x -> [real x, imag x]) znV
@@ -209,14 +208,14 @@ getParZn lib t (Tuple par zn) mid = do
     runZnPath mid' t' (Tuple idx val) = do
       (Tuple res remove) <- runPath t' val
       when remove do -- replace with constant
-        mod <- getLib lib mid' "mid runZnPath"
-        let modD = dat (mod :: Module)
+        mod@(Module _ modD) <- getLib lib mid' "mid runZnPath"
+
         zn' <- fromJustE (updateAt idx (show res) modD.zn) "should be safe getParZn"
         modLibD lib mod _ {zn = zn'}
       pure res
     runParPath mid' t' key = do
-      mod <- getLib lib mid' "mid runParPath"
-      let modD = dat (mod :: Module)
+      mod@(Module _ modD) <- getLib lib mid' "mid runParPath"
+
       val <- fromJustE (lookup key modD.par) "cant find val getParZn"
       (Tuple res remove) <- runPath t' val
       let res' = real res

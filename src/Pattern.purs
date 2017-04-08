@@ -12,7 +12,7 @@ import Data.String (Pattern(..)) as S
 import Data.String (split, joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Data.Types (EpiS, Module(..), PatternD)
+import Data.Types (EpiS, Module(..), PatternD, ModuleD(..))
 import System (loadLib)
 import Util (dbg, uuid, fromJustE)
 
@@ -105,27 +105,16 @@ importModule :: forall eff h. Library h -> ImportObj -> EpiS eff h String
 importModule lib obj = do
   id <- lift $ uuid
   -- find module
-  mod <- case obj of
+  mod@(Module iD modD) <- case obj of
     ImportModule m -> pure m
     ImportRef n -> do
-      m <- getLib lib n "importModule" :: EpiS eff h Module
-      case (dat m).libName of
+      m@(Module _ modD) <- getLib lib n "importModule"
+      case modD.libName of
         "" -> pure $ apD m _ {libName = n}
-        _ -> pure $ apD m _ {libName = (dat m).libName}
-
---      case (member n systemST.moduleRefPool) of
---      true -> do
---        ref <- loadLib n systemST.moduleRefPool "reimport from pool"
---        lift $ readSTRef ref
---      false -> do
---        minit <- loadLib n systemST.moduleLib "import module lib"
---        pure $ minit {libName = n}
+        _ ->  pure $ apD m _ {libName = modD.libName}
 
   -- update library
-  let iD = idx mod
-  let idx' = iD {id = id, flags = Set.insert "live" iD.flags }
-  let modD = dat mod
-
+  let idx' = iD { id = id, flags = Set.insert "live" iD.flags }
   setLib lib id (Module idx' modD)
 
   -- import children
@@ -133,7 +122,6 @@ importModule lib obj = do
   traverse (importChild id) d
 
   pure id
-
   where
     importChild :: String -> (Tuple String String) -> EpiS eff h Unit
     importChild mid (Tuple k v) = do
@@ -142,19 +130,16 @@ importModule lib obj = do
         child <- importModule lib (ImportRef v)
 
         -- update parent
-        mod <- getLib lib mid "import module - update parent"
-        let modD = dat (mod :: Module)
-        let modules' = insert k child modD.modules
-        modLibD lib mod _ {modules = modules'}
+        mod@(Module _ modD) <- getLib lib mid "import module - update parent"
+        modLibD lib mod _ {modules = insert k child modD.modules}
 
 -- remove a module from the ref pool
 purgeModule :: forall eff h. Library h -> String -> EpiS eff h Unit
 purgeModule lib mid = do
   when (mid /= "") do
-    mod <- getLib lib mid "purge module"
-    let modD = dat (mod :: Module)
 
     -- delete self
+    mod@(Module _ modD) <- getLib lib mid "purge module"
     delLib lib mod
 
     -- purge children
@@ -166,16 +151,14 @@ purgeModule lib mid = do
 -- replace child subN:cid(in ref pool) with child subN:obj
 replaceModule :: forall eff h. Library h -> String -> String -> String -> ImportObj -> EpiS eff h String
 replaceModule lib mid subN cid obj = do
-  mod <- getLib lib mid "replace module"
-  let modD = dat (mod :: Module)
+  mod@(Module _ modD) <- getLib lib mid "replace module"
 
   -- import & purge
   n' <- importModule lib obj
   purgeModule lib cid
 
   -- update
-  let modules' = insert subN n' modD.modules
-  modLibD lib mod _ {modules = modules'}
+  modLibD lib mod _ {modules = insert subN n' modD.modules}
 
   pure n'
 

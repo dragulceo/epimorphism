@@ -9,19 +9,19 @@ import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Array (uncons, updateAt, length)
-import Data.Library (Library, dat, getEngineConf, getLib, getLibM, getPatternD, getSystemConf, getUIConf, getUIConfD, modLibD)
+import Data.Library (Library, getEngineConf, getLib, getLibM, getPatternD, getSystemConf, getUIConf, getUIConfD, idM, modLibD, modLibD')
 import Data.Maybe (Maybe(..))
 import Data.StrMap (insert)
 import Data.String (joinWith, split)
 import Data.String (Pattern(..)) as S
-import Data.Types (EngineConf, EpiS, Module, PatternD)
+import Data.Types (EngineConf, EpiS, Module(..), PatternD)
 import Engine (initEngineST)
 import Graphics.Canvas (CANVAS)
 import Layout (updateLayout, initLayout)
 import Pattern (findModule)
 import ScriptUtil (addScript)
 import Texture (clearFB)
-import Util (dbg, halt, Now, cxFromStringE, intFromStringE, numFromStringE, lg, uuid, handleError)
+import Util (dbg, halt, Now, cxFromStringE, intFromStringE, numFromStringE, lg, handleError)
 
 foreign import saveCanvas :: forall eff. Eff eff Unit
 
@@ -75,10 +75,10 @@ command usRef esRef ssRef lib msg = handleError do
               [addr, par, val] -> do
                 val' <- numFromStringE val
                 mid <- findModule lib patternD addr true
-                mod <- getLib lib mid "setP"
-                let modD = dat (mod :: Module)
 
-                modLibD lib mod _ {par = insert par (show val') modD.par}
+                modLibD' lib idM mid "find module - setP" $ \m ->
+                  m {par = insert par (show val') m.par}
+
               _ -> throwError "invalid format: setP addr par val"
           "setZn" -> do
             case args of
@@ -87,9 +87,7 @@ command usRef esRef ssRef lib msg = handleError do
                 idx' <- intFromStringE idx
                 mid  <- findModule lib patternD addr true
 
-                mod <- getLib lib mid "find module - setZn"
-                let modD = dat (mod :: Module)
-
+                mod@(Module _ modD) <- getLib lib mid "find module - setZn"
                 zn' <- case (updateAt idx' (show val') modD.zn) of
                   Just x -> pure x
                   _ -> throwError "zn idx out of bounds setZn"
@@ -100,10 +98,10 @@ command usRef esRef ssRef lib msg = handleError do
           "setT" -> do
             let tExp = "" -- joinWith "" args
             mid <- findModule lib patternD "main.application.t.t_inner" true
-            mod <- getLib lib mid "setT"
-            let modD = dat (mod :: Module)
 
-            modLibD lib mod _ {sub = insert "t_expr" tExp modD.sub}
+            modLibD' lib idM mid "find module - setT" $ \m ->
+              m {sub = insert "t_expr" tExp m.sub}
+
             compileShaders ssRef esRef lib false
 
             pure unit

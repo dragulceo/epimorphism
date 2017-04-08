@@ -6,13 +6,13 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (head, foldM, uncons, deleteAt, cons)
-import Data.Library (Library, getLib, modLibD)
+import Data.Library (Library, getLib, idM, modLibD)
 import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
 import Data.StrMap (StrMap, insert, empty, toUnfoldable)
 import Data.String (split, joinWith, trim)
 import Data.String (Pattern(..)) as S
 import Data.Tuple (Tuple(Tuple))
-import Data.Types (EpiS, Module, PatternD)
+import Data.Types (EpiS, PatternD)
 import Pattern (clonePattern, findModule, findAddr, CloneRes(CloneRes))
 import Text.Format (precision, format)
 import Util (dbg, inj, numFromStringE, fromJustE)
@@ -20,13 +20,13 @@ import Util (dbg, inj, numFromStringE, fromJustE)
 addScript :: forall eff h. Library h -> Number -> String -> String -> String -> EpiS eff h Unit
 addScript lib t mid name args = do
   let scr = inj "%0@%1 %2" [name, (format (precision 2) t), args]
-  mod <- getLib lib mid "addScript" :: EpiS eff h Module
+  mod <- idM <$> getLib lib mid "addScript"
   modLibD lib mod \m ->
     m {scripts = cons scr m.scripts}
 
 purgeScript :: forall eff h. Library h -> String -> Int -> EpiS eff h Unit
 purgeScript lib mid idx = do
-  mod <- getLib lib mid "purgeScript" :: EpiS eff h Module
+  mod <- idM <$> getLib lib mid "purgeScript"
   modLibD lib mod \m ->
     m {scripts = fromMaybe m.scripts $ deleteAt idx m.scripts}
 

@@ -7,12 +7,12 @@ import Control.Monad.Trans.Class (lift)
 import Data.Array (filter, sortBy)
 import Data.List (toUnfoldable)
 import Data.Maybe (Maybe(..))
-import Data.Set (Set, empty, subset, isEmpty, intersection, fromFoldable) as S
-import Data.StrMap (StrMap, empty, freezeST, insert, isSubmap, values, fromFoldable)
+import Data.Set (Set, subset, isEmpty, intersection, fromFoldable) as S
+import Data.StrMap (StrMap, freezeST, insert, isSubmap, values, fromFoldable)
 import Data.StrMap.ST (STStrMap, delete, peek, poke)
-import Data.Tuple (Tuple(..))
+import Data.Tuple (Tuple)
 import Data.Types (CodeBlock, Component(Component), ComponentRef, EngineConf(EngineConf), EngineConfD, EpiS, Family(Family), FamilyRef, Image(Image), ImageRef, Include, Index, Module(..), ModuleD, ModuleRef, Path, Pattern(Pattern), PatternD, Script, Section(Section), SystemConf(SystemConf), SystemConfD, UIConf(UIConf), UIConfD)
-import Util (dbg)
+import Util (dbg, fromJustE)
 
 data Library h = Library {
     systemConfLib :: STStrMap h SystemConf
@@ -182,15 +182,12 @@ getLibM lib name = do
 getLib :: forall a ad eff h. (DataTable a ad) => Library h -> String -> String -> EpiS eff h a
 getLib lib name msg = do
   res <- getLibM lib name
-  case res of
-    Just x -> pure x
-    Nothing -> throwError $ msg <> " - Can't find in library: " <> name
-  --fromJustE res (msg <>" # Can't find in library: " <> name)
-
+  fromJustE res (msg <> " - Can't find in library: " <> name)
 
 setLib :: forall a ad eff h. (DataTable a ad) => Library h -> String -> a -> EpiS eff h Unit
 setLib lib name new = do
-  lift $ poke (libProj lib) name new # void
+  let new' = apI new _ {id = name} -- make sure index.id is set correctly
+  lift $ poke (libProj lib) name new' # void
 
 modLib :: forall a ad eff h. (DataTable a ad) => Library h -> a -> (a -> a) -> EpiS eff h Unit
 modLib lib obj mut = do
@@ -200,11 +197,17 @@ modLibD :: forall a ad eff h. (DataTable a ad) => Library h -> a -> (ad -> ad) -
 modLibD lib obj mut = do
   lift $ poke (libProj lib) (idx obj).id (apD obj mut) # void
 
+modLibD' :: forall a ad eff h. (DataTable a ad) => Library h -> (a -> a) -> String -> String -> (ad -> ad) -> EpiS eff h Unit
+modLibD' lib idDT name msg mut = do
+  obj <- idDT <$> getLib lib name msg
+  lift $ poke (libProj lib) name (apD obj mut) # void
+
 delLib :: forall a ad eff h. (DataTable a ad) => Library h -> a -> EpiS eff h Unit
 delLib lib obj = do
   lift $ delete (libProj lib :: STStrMap h a) (idx obj).id # void
 
 
+-- SEARCH
 data LibSearch = LibSearch {flags::S.Set String, exclude::S.Set String, props::StrMap String}
 buildSearch :: Array String -> Array String -> Array (Tuple String String) -> LibSearch
 buildSearch flags exclude props =
@@ -227,7 +230,7 @@ matchSearch (LibSearch {flags, exclude, props}) elt =
     eltFlags = (idx elt).flags
 
 
--- specific finders
+-- GLOBAL FINDERS
 getSystemConf :: forall eff h.  Library h -> String -> EpiS eff h SystemConf
 getSystemConf (Library {system: Nothing}) msg = do
   throwError $ msg <> ": System not initialized"
@@ -273,5 +276,9 @@ getPatternD :: forall eff h.  Library h -> String -> EpiS eff h PatternD
 getPatternD lib msg = dat <$> getPattern lib msg
 
 
+-- CAST
 mD :: Module -> ModuleD
 mD = dat
+
+idM :: Module -> Module
+idM = id

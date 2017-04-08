@@ -6,13 +6,13 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, readSTRef)
 import Data.Array (index, length, updateAt) as A
-import Data.Library (Library, apD, buildSearch, dat, getLib, getPatternD, mD, modLibD, searchLib)
+import Data.Library (Library, apD, buildSearch, dat, getLib, getPatternD, idM, mD, modLibD, searchLib)
 import Data.Library (idx) as L
 import Data.Maybe (Maybe(Nothing), fromMaybe)
 import Data.Set (singleton)
 import Data.StrMap (insert, fromFoldable, union)
 import Data.Tuple (Tuple(..))
-import Data.Types (EpiS, Module, ModuleD)
+import Data.Types (EpiS, Module(..), ModuleD)
 import Pattern (CloneRes(CloneRes), purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
 import ScriptUtil (getClone, addScript, purgeScript)
 import System (loadLib)
@@ -78,7 +78,7 @@ switch ssRef lib t midPre idx dt = do
 
   -- if cloning, perform mutation
   when (op == "clone") do
-    nxt <- getLib lib nxtId "switch nxtId" :: EpiS eff h Module
+    nxt <- idM <$> getLib lib nxtId "switch nxtId"
     idx' <- loadLib "idx" dt "switch idx"
 
     mutatorN <- loadLib "mut" dt "switch mut"
@@ -124,16 +124,13 @@ getMutator mut idx name  = do
 -- m1 is a reference id(we assume also that it was previously imported & floating)
 switchModules :: forall eff h. Library h -> Number -> String -> String -> String -> Number -> EpiS eff h Unit
 switchModules lib t rootId childN m1 spd = do
-  modD <- mD <$> getLib lib rootId "switch module"
-
-
+  modD  <- mD <$> getLib lib rootId "switch module"
   m0    <- loadLib childN modD.modules "switch find child"
   mod0D <- mD <$> getLib lib m0 "switch m0"
   mod1D <- mD <$> getLib lib m1 "switch m0"
 
   -- create switch module
-  switchMod <- getLib lib "smooth_switch" "switchMod"
-  let switchModD = dat (switchMod :: Module)
+  switchMod@(Module _ switchModD) <- getLib lib "smooth_switch" "switchMod"
 
   let modules = fromFoldable [(Tuple "m0" m0), (Tuple "m1" m1)]
   let sub'    = union (fromFoldable [(Tuple "dim" mod0D.dim), (Tuple "var" mod0D.var)]) switchModD.sub

@@ -1,16 +1,16 @@
 TODO:
-  fix family problem
-	remove var, dim from module
-	get rid of libName
 	remove compPattern
 	mainC, dispC, etc
 	cleanup library data files/org?
 	remove includes from pattern
 
+	figure out phases
 	remove ssRef from ScriptFn
 	importing = clone
   rewrite clonePattern
+	component indentation :/
 
+	remove variables from components
 	references?
 	get rid of slib?
 	images

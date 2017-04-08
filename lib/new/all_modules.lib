@@ -1,95 +1,71 @@
 ###Module
 id default_app
 component test_pattern
-dim vec4
 flags {lib}
-var color
 
 ###Module
 id epimorphism_dev
 component epimorphism
-dim vec4
 flags {lib}
 modules {seed:seed_simple, t:t_wrap_zo, color:color_id, reduce:torus_reduce}
-var color
 
 ###Module
 id epimorphism_dev_ponies
 component epimorphism
-dim vec4
 flags {lib}
 modules {seed:seed_wca_tex_ponies, t:t_wrap_zo, color:color_id, reduce:torus_reduce}
-var color
 
 ###Module
 id epimorphism
 component epimorphism
-dim vec4
 flags {lib}
 modules {seed:seed_wca_tex, t:t_wrap_zo, color:rotate_hsv1, reduce:torus_reduce}
-var color
 
 ###Module
 id analysis
 component epimorphism
-dim vec4
 flags {lib}
 modules {seed:seed_analysis, t:t_wrap_zo, color:color_id, reduce:torus_reduce}
-var color
 
 ###Module
 id julia
 component julia
-dim vec4
 flags {farm1, lib}
 modules {t:t_julia}
-var color
 
 ###Module
 id interference
 component interference
-dim vec4
 flags {farm1, lib}
 modules {t:t_wrap}
 par {N:2.0, waves:4.0, spd:0.02}
-var color
 
 ###Module
 id color_id
 component color_id
-dim vec4
 flags {color_main, farm1, lib}
-var color
 
 ###Module
 id color_bgr
 component color_bgr
-dim vec4
 flags {farm1, lib}
-var color
 
 ###Module
 id color_gbr
 component color_gbr
-dim vec4
 flags {farm1, lib}
-var color
 
 ###Module
 id rotate_hsv0
 component rotate_hsv
-dim vec4
 flags {color_main, farm1, lib}
 par {sat_sc:1.05, rot:0.0, len_sc:0.0, len_sc_amt:0.0, th_spd:0.0}
-var color
 
 ###Module
 id rotate_hsv1
 component rotate_hsv
-dim vec4
 flags {color_main, farm1, lib}
 par {sat_sc:1.05, rot:0.01, len_sc:1.0, len_sc_amt:0.05, th_spd:0.00}
-var color
 
 ###Module
 id disp_id
@@ -149,452 +125,344 @@ modules {application:epimorphism_auto2}
 ###Module
 id post_id
 component post_id
-dim vec4
 flags {farm1, farm2, lib}
-var frame
 
 ###Module
 id post_hlim1
 component post_hlim
-dim vec4
 flags {farm1, farm2, lib, post_hlim}
 par {gamma:1.5, hue:0.0, spread:0.5, lgv:0.5, sat_sc:1.0, inc_sc:0.0}
-var frame
 
 ###Module
 id post_hlim2
 component post_hlim
-dim vec4
 flags {lib, post_hlim}
 par {gamma:1.5, hue:0.33, spread:0.5, lgv:0.5, sat_sc:1.0, inc_sc:0.0}
-var frame
 
 ###Module
 id post_hlim3
 component post_hlim
-dim vec4
 flags {lib, post_hlim}
 par {gamma:1.5, hue:0.66, spread:0.5, lgv:0.5, sat_sc:1.0, inc_sc:0.0}
-var frame
 
 ###Module
 id post_hlim_anim
 component post_hlim
-dim vec4
 flags {farm1, farm2, lib}
 par {hue:loop 0.01, spread:wave 0.011 0.35 1.5, lgv:wave 0.07 0.125 0.5, sat_sc:1.0, inc_sc:0.0}
-var frame
 
 ###Module
 id post_hlim_anim2
 component post_hlim
-dim vec4
 flags {lib, post_main}
 par {hue:loop 0.01, spread:wave 0.011 0.35 1.5, lgv:wave 0.07 0.125 0.5, gamma:wave 0.03 0.3 1.7, inc_sc:0.0}
-var frame
 
 ###Module
 id post_main4
 component post_hlim
-dim vec4
 flags {farm1, farm2, lib}
 par {hue:loop 0.01, spread:wave 0.011 0.35 1.3, lgv:wave 0.07 0.225 0.5, inc_sc:0.0, sat_sc:wave 0.006 0.3 1.4}
-var frame
 
 ###Module
 id grid_reduce
 component reduce
-dim vec2
 flags {lib}
 sub {reduce:grid_reduce(z)}
-var z
 
 ###Module
 id torus_reduce
 component reduce
-dim vec2
 flags {lib}
 sub {reduce:torus_reduce(z)}
-var z
 
 ###Module
 id seed_nothing
 component seed_nothing
-dim vec4
 flags {lib}
-var seed
 
 ###Module
 id seed_analysis
 component seed_analysis
-dim vec4
 flags {analysis}
 par {w:0.05}
-var seed
 
 ###Module
 id seed_simple
 component seed_simple
-dim vec4
 flags {lib, t_test}
 par {w:0.2, alpha:1.0}
-var seed
 
 ###Module
 id seed_img1
 component seed_simple_img
-dim vec4
 flags {img, t_test}
 images [textures/simplegeom/tile_grid1.png]
 par {w:0.2, alpha:1.0}
-var seed
 
 ###Module
 id seed_wca
 component seed_wca
-dim vec4
 flags {lib, wca}
 modules {t:t_wrap, w:w_lines_border, wt:wt_id, a:alpha_id, seed_color:simple_color}
-var seed
 
 ###Module
 id seed_wca_tex
 component seed_wca
-dim vec4
 flags {lib, wca}
 modules {t:t_wrap, w:w_lines_border, wt:wt_id, a:alpha_id, seed_color:tex_color}
-var seed
 
 ###Module
 id seed_multi
 component seed_multi
-dim vec4
 flags {lib, multi}
 modules {t:t_wrap, seed0:seed_wca, seed1:seed_nothing, seed2:seed_nothing}
-var seed
 
 ###Module
 id seed_wca_tex_ponies
 component seed_wca
-dim vec4
 flags {lib, wca}
 modules {t:t_wrap, w:w_lines_border, wt:wt_id, a:alpha_id, seed_color:tex_color_ponies}
-var seed
 
 ###Module
 id wt_id
 component wt
-dim float
 flags {farm1, farm2, lib}
 sub {wt_exp:w}
-var w
 
 ###Module
 id wt_inv
 component wt
-dim float
 sub {wt_exp:1.0 - w}
-var w
 
 ###Module
 id wt_circ
 component wt
-dim float
 flags {farm1, farm2, lib}
 sub {wt_exp:sqrt(1.0 - (1.0 - w) * (1.0 - w))}
-var w
 
 ###Module
 id wt_inv_circ
 component wt
-dim float
 sub {wt_exp:1.0 - sqrt(1.0 - (1.0 - w) * (1.0 - w))}
-var w
 
 ###Module
 id wt_anim1
 component wt
-dim float
 flags {lib}
 scripts [randomize dly:45 spd:0.1 lib:seed_wt_main dim:float sub:wt_exp typ:sub]
 sub {wt_exp:w}
-var w
 
 ###Module
 id wt_anim2
 component wt
-dim float
 flags {lib}
 scripts [randomize dly:40 spd:0.1 lib:seed_wt_main dim:float sub:wt_exp typ:sub]
 sub {wt_exp:w}
-var w
 
 ###Module
 id alpha_id
 component alpha
-dim float
 flags {farm1, farm2, lib}
 par {alpha:1.0}
 sub {a_exp:a}
-var a
 
 ###Module
 id alpha_no
 component alpha
-dim float
 flags {farm1, farm2, lib}
 par {alpha:1.0}
 sub {a_exp:1.0}
-var a
 
 ###Module
 id alpha_solid
 component alpha
-dim float
 flags {farm1, farm2, lib}
 par {alpha:1.0}
 sub {a_exp:a * @alpha@}
-var a
 
 ###Module
 id alpha_linear
 component alpha
-dim float
 flags {farm1, farm2, lib}
 par {alpha:1.0}
 sub {a_exp:w * a * @alpha@}
-var a
 
 ###Module
 id alpha_circ
 component alpha
-dim float
 flags {farm1, farm2, lib}
 par {alpha:1.0}
 sub {a_exp:sqrt(1.0 - (1.0 - w) * (1.0 - w)) * a * @alpha@}
-var a
 
 ###Module
 id alpha_anim1
 component alpha
-dim float
 flags {farm1, lib}
 par {alpha:wave 0.048 0.2 0.8}
 scripts [randomize dly:40 spd:0.5 lib:seed_a_main dim:float sub:a_exp typ:sub]
 sub {a_exp:a * @alpha@}
-var a
 
 ###Module
 id alpha_anim2
 component alpha
-dim float
 flags {farm1, lib}
 par {alpha:wave 0.038 0.2 0.77}
 scripts [randomize dly:55 spd:0.5 lib:seed_a_main dim:float sub:a_exp typ:sub]
 sub {a_exp:a * @alpha@}
-var a
 
 ###Module
 id simple_color
 component simple_color
-dim vec4
 flags {farm1, farm2, lib}
 par {spd:0.0, rot:0.15, sat:1.0, val:1.0, pal:1.0}
-var seed
 
 ###Module
 id tex_color
 component tex_color_scroll
-dim vec4
 flags {farm1, farm2, lib}
 images [textures/simplegeom/tile_grid1.png]
 par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:1.0}
-var seed
 
 ###Module
 id simple_color_anim1
 component simple_color
-dim vec4
 flags {anim1, anim3}
 par {spd:0.05, rot:0.15, sat:1.0, val:1.0, pal:1.0}
-var seed
 
 ###Module
 id tex_color_anim1
 component tex_color_scroll
-dim vec4
 flags {anim1}
 images [textures/simplegeom/tile_grid1.png]
 par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:1.0}
 scripts [randomize dly:55 spd:0.05 lib:images1 dim:vec4 sub:0 typ:image]
-var seed
 
 ###Module
 id tex_color_anim2
 component tex_color_scroll
-dim vec4
 flags {anim2}
 images [textures/simplegeom/tile_grid1.png]
 par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:1.0}
 scripts [randomize dly:65 spd:0.05 lib:images2 dim:vec4 sub:0 typ:image]
-var seed
 
 ###Module
 id tex_color_anim3
 component tex_color_scroll
-dim vec4
 flags {anim2}
 images [textures/simplegeom/tile_grid1.png]
 par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:1.0}
 scripts [randomize dly:15 spd:0.3 lib:images3 dim:vec4 sub:0 typ:image]
-var seed
 
 ###Module
 id tex_color_anim4
 component tex_color_scroll
-dim vec4
 flags {anim3}
 images [textures/simplegeom/tile_grid1.png]
 par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:1.0}
 scripts [randomize dly:35 spd:0.05 lib:images1 dim:vec4 sub:0 typ:image]
-var seed
 
 ###Module
 id tex_color_anim5
 component tex_color_scroll
-dim vec4
 images [textures/simplegeom/tile_grid1.png]
 par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:1.0}
 scripts [randomize dly:40 spd:0.05 lib:images2 dim:vec4 sub:0 typ:image]
-var seed
 
 ###Module
 id fb_color
 component fb_color
-dim vec4
 flags {lib}
 par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0}
-var seed
 
 ###Module
 id tex_color_ponies
 component tex_color
-dim vec4
 flags {farm1, farm2, lib}
 images [textures/ponies_1.png]
 par {scale:0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, pal:1.0}
-var seed
 
 ###Module
 id w_nul
 component w_nul
-dim vec4
 flags {farm1, farm2, lib}
-var wdt
 
 ###Module
 id w_circle
 component w_circle
-dim vec4
 flags {farm1, farm2, lib}
 par {w:0.2, r:0.7}
-var wdt
 
 ###Module
 id w_lines_inner
 component w_lines_inner
-dim vec4
 flags {farm1, farm2, lib}
 par {w:0.2}
-var wdt
 
 ###Module
 id w_lines_border
 component w_lines_border
-dim vec4
 flags {farm1, farm2, lib}
 par {w:0.2}
-var wdt
 
 ###Module
 id w_lines_lr
 component w_lines_lr
-dim vec4
 flags {farm1, farm2, lib}
 par {w:0.2}
-var wdt
 
 ###Module
 id w_lines_stag
 component w_lines_stag
-dim vec4
 flags {farm1, farm2, lib}
 par {w:0.2}
-var wdt
 
 ###Module
 id w_square
 component w_square
-dim vec4
 flags {farm1, farm2, lib}
 par {w:0.3}
-var wdt
 
 ###Module
 id w_square_full
 component w_square
-dim vec4
 flags {farm1, farm2, lib}
 par {w:1.0}
-var wdt
 
 ###Module
 id w_circle_anim
 component w_circle
-dim vec4
 flags {anim}
 par {w:wave 0.034 0.1 0.35, r:wave 0.02 0.15 0.65}
-var wdt
 
 ###Module
 id w_lines_inner_anim
 component w_lines_inner
-dim vec4
 flags {anim}
 par {w:wave 0.03 0.1 0.35}
-var wdt
 
 ###Module
 id w_lines_border_anim
 component w_lines_border
-dim vec4
 flags {anim}
 par {w:wave 0.028 0.1 0.35}
-var wdt
 
 ###Module
 id w_lines_lr_anim
 component w_lines_lr
-dim vec4
 flags {anim}
 par {w:wave 0.025 0.1 0.35}
-var wdt
 
 ###Module
 id w_lines_stag_anim
 component w_lines_stag
-dim vec4
 flags {anim}
 par {w:wave 0.039 0.1 0.35}
-var wdt
 
 ###Module
 id w_square_anim
 component w_square
-dim vec4
 flags {anim}
 par {w:wave 0.043 0.20 0.50}
-var wdt
 
 ###Module
 id switch
@@ -610,435 +478,335 @@ modules {m0:id, m1:id}
 par {intrp:0.0}
 sub {var:v0, dim:float}
 
+### Module
+id id
+component id
+
 ###Module
 id t_id
 component t_id
-dim vec2
-var z
 
 ###Module
 id t_wrap
 component t_wrap
-dim vec2
 flags {lib, wrap}
 modules {t_inner:t_z}
-var z
 zn [1.0+0.0i, 0.0+0.0i, 1.0+0.0i, 0.0+0.0i]
 
 ###Module
 id t_affine
 component t_affine
-dim vec2
 flags {farm1, lib, wrap}
 modules {t_inner:t_z}
-var z
 zn [1.0+0.0i, 0.0+0.0i]
 
 ###Module
 id t_wrap_zo
 component t_wrap
-dim vec2
 flags {all, lib, wrap}
 modules {t_inner:t_z}
-var z
 zn [1.1+0.0i, 0.0+0.0i, 1.0+0.0i, 0.0+0.0i]
 
 ###Module
 id t_wrap_z1
 component t_wrap
-dim vec2
 flags {all, lib, wrap}
 modules {t_inner:t_z}
-var z
 zn [4.0+0.0i, 0.0+0.0i, 1.0+0.0i, 0.0+0.0i]
 
 ###Module
 id t_wrap_zo'
 component t_wrap
-dim vec2
 flags {all, lib, wrap}
 modules {t_inner:t_z}
-var z
 zn [1.1+0.0i, 0.0+0.0i, 0.0+1.0i, 1.0+0.0i]
 
 ###Module
 id t_wrap_zo'1
 component t_wrap
-dim vec2
 flags {all', wrap}
 modules {t_inner:t_z}
-var z
 zn [circle 0.005 1.0, 0.0+0.0i, 0.0+1.0i, 1.0+0.0i]
 
 ###Module
 id t_wrap_zo'2
 component t_wrap
-dim vec2
 flags {all', wrap}
 modules {t_inner:t_z}
-var z
 zn [1.1+0.0i, rose 0.004 0.8 5.0 -0.8, 0.0+1.0i, 1.0+0.0i]
 
 ###Module
 id t_wrap_zo'3
 component t_wrap
-dim vec2
 flags {all', wrap}
 modules {t_inner:t_z}
-var z
 zn [1.1+0.0i, 0.0+0.0i, 0.0+1.0i, rose 0.002 1.1 4.0 0.0]
 
 ###Module
 id t_wrap_zo'4
 component t_wrap
-dim vec2
 flags {all', wrap}
 modules {t_inner:t_z}
-var z
 zn [circle 0.005 1.0, 0.0+0.0i, 0.0+1.0i, rose 0.0025 1.1 4.0 0.0]
 
 ###Module
 id t_main1
 component t_wrap
-dim vec2
 flags {all'', lib, wrap}
 modules {t_inner:t_sinh}
 scripts [randomize dly:50 spd:0.04 lib:all dim:vec2 sub:t_inner typ:mod]
-var z
 zn [circle 0.005 1.0, rose 0.004 0.8 5.0 -0.8, 0.0+1.1i, rose 0.0025 1.1 4.0 0.0]
 
 ###Module
 id t_seed_anim1
 component t_wrap
-dim vec2
 flags {wrap}
 modules {t_inner:t_id}
 scripts [randomize dly:35 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
-var z
 zn [rose 0.003 0.4 6.0 0.9, rose 0.001 0.8 5.0 -0.8, rose 0.0027 0.3 7.0 0.9, rose 0.0035 1.2 4.0 0.0]
 
 ###Module
 id t_seed_anim2
 component t_wrap
-dim vec2
 flags {wrap}
 modules {t_inner:t_id}
 scripts [randomize dly:45 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
-var z
 zn [rose 0.0025 0.4 6.0 0.9, rose 0.001 0.8 5.0 -0.8, rose 0.002 0.3 7.0 0.9, rose 0.003 1.2 4.0 0.0]
 
 ###Module
 id t_julia
 component t_wrap
-dim vec2
 flags {lib, wrap}
 modules {t_inner:t_p4}
-var z
 zn [1.0+0.0i, 0.0+0.0i, 1.0+0.0i, circle 0.035 1.0]
 
 ###Module
 id t_main_test
 component t_wrap
-dim vec2
 flags {lib, wrap}
 modules {t_inner:t_sinh}
 scripts [randomize dly:20 spd:0.08 lib:all dim:vec2 sub:t_inner typ:mod]
-var z
 zn [rose 0.003 0.4 6.0 0.9, 0.0 + 0.0i, 0.0 + 1.1i, 1.0 + 0.0i]
 
 ###Module
 id t_z
 component t_sub
-dim vec2
 flags {all, all_seed, farm1, farm2, lib}
 sub {t_expr:z}
-var z
 
 ###Module
 id t_cos
 component t_sub
-dim vec2
 flags {all, all_seed, farm1, farm2, lib}
 sub {t_expr:cos(z)}
-var z
 
 ###Module
 id t_sin
 component t_sub
-dim vec2
 flags {all, all_seed, farm1, farm2, lib}
 sub {t_expr:sin(z)}
-var z
 
 ###Module
 id t_cosh
 component t_sub
-dim vec2
 flags {all, all_seed, farm1, farm2, lib}
 sub {t_expr:cosh(z)}
-var z
 
 ###Module
 id t_sinh
 component t_sub
-dim vec2
 flags {all, all_seed, farm1, farm2, lib}
 sub {t_expr:sinh(z)}
-var z
 
 ###Module
 id t_tan
 component t_sub
-dim vec2
 flags {all, lib}
 sub {t_expr:tan(z)}
-var z
 
 ###Module
 id t_tanh
 component t_sub
-dim vec2
 flags {all, lib}
 sub {t_expr:tanh(z)}
-var z
 
 ###Module
 id t_exp
 component t_sub
-dim vec2
 flags {all, all_seed, farm1, farm2, lib}
 sub {t_expr:exp(z)}
-var z
 
 ###Module
 id t_p0
 component t_sub
-dim vec2
 sub {t_expr:z / (z + 1) + z / (z - 1)}
-var z
 
 ###Module
 id t_p1
 component t_sub
-dim vec2
 flags {all, all_seed, farm1, farm2, lib}
 sub {t_expr:0.5 * (1 - 5 * z * z * z / 3)}
-var z
 
 ###Module
 id t_p2
 component t_sub
-dim vec2
 flags {all, all_seed, farm1, farm2, lib}
 sub {t_expr:0.9*(1 - z * z)}
-var z
 
 ###Module
 id t_p3
 component t_sub
-dim vec2
 flags {all, all_seed, farm1, farm2, lib}
 sub {t_expr:z * (1 + z) / 2}
-var z
 
 ###Module
 id t_p4
 component t_sub
-dim vec2
 flags {all, all_seed, farm1, farm2, lib}
 sub {t_expr:z * z}
-var z
 
 ###Module
 id t_tp0
 component t_sub
-dim vec2
 flags {all, lib}
 sub {t_expr:1.2 * (1 - (z * z + tanh(z)) / 2)}
-var z
 
 ###Module
 id t_tp1
 component t_sub
-dim vec2
 flags {all, lib}
 sub {t_expr:cos(z) - tanh(z)}
-var z
 
 ###Module
 id t_tp2
 component t_sub
-dim vec2
 flags {all, all_seed, farm1, farm2, lib}
 sub {t_expr:(z + exp(z)) / 2}
-var z
 
 ###Module
 id t_tp3
 component t_sub
-dim vec2
 flags {all, lib}
 sub {t_expr:(sin(z) + tan(z)) / 2}
-var z
 
 ###Module
 id t_tp4
 component t_sub
-dim vec2
 flags {all, all_seed, farm1, farm2, lib}
 sub {t_expr:cosh(z) + exp(z)}
-var z
 
 ###Module
 id t_tp5
 component t_sub
-dim vec2
 flags {all, all_seed, farm1, farm2, lib}
 sub {t_expr:z * cos(z)}
-var z
 
 ###Module
 id t_tp6
 component t_sub
-dim vec2
 flags {all, all_seed, farm1, farm2, lib}
 sub {t_expr:(cosh(z) + sinh(z)) / 2}
-var z
 
 ###Module
 id t_inv
 component t_sub
-dim vec2
 sub {t_expr:1.0 / z}
-var z
 
 ###Module
 id t_zti
 component t_sub
-dim vec2
 flags {all, lib}
 sub {t_expr:2.0 * z / tan (z * i)}
-var z
 
 ###Module
 id t_f0
 component t_sub
-dim vec2
 flags {all, lib, new}
 sub {t_expr:z * cosh(z)}
-var z
 
 ###Module
 id t_f1
 component t_sub
-dim vec2
 flags {lib}
 sub {t_expr:0.8 * (cosh(z) + z * z + i)}
-var z
 
 ###Module
 id t_f2
 component t_sub
-dim vec2
 flags {all, lib, new}
 sub {t_expr:sin(z) * cosh(z)}
-var z
 
 ###Module
 id t_f3
 component t_sub
-dim vec2
 flags {lib}
 sub {t_expr:sin(z*z) * sin(z * i)}
-var z
 
 ###Module
 id t_f4
 component t_sub
-dim vec2
 flags {all, lib, new}
 sub {t_expr:0.8 * (cos(z) + exp(i * z))}
-var z
 
 ###Module
 id t_f5
 component t_sub
-dim vec2
 flags {all, lib, new}
 sub {t_expr:1.3 * cos(sin(z))}
-var z
 
 ###Module
 id t_f6
 component t_sub
-dim vec2
 flags {all, lib, new}
 sub {t_expr:1.3 * cos(i * sin(z))}
-var z
 
 ###Module
 id t_f7
 component t_sub
-dim vec2
 flags {all, lib, new}
 sub {t_expr:sin(i * z)}
-var z
 
 ###Module
 id t_f8
 component t_sub
-dim vec2
 flags {all, lib, new}
 sub {t_expr:0.5 * (cos(i * z) + z * z)}
-var z
 
 ###Module
 id t_f9
 component t_sub
-dim vec2
 flags {all, lib, new}
 sub {t_expr:0.8 * z * tanh(z)}
-var z
 
 ###Module
 id t_f10
 component t_sub
-dim vec2
 flags {all, lib, new}
 sub {t_expr:0.9*(z*tanh(z)+cos(exp(z)))}
-var z
 
 ###Module
 id t_f11
 component t_sub
-dim vec2
 flags {all, lib, new}
 sub {t_expr:0.7*(cos(z)+tan(z))*z}
-var z
 
 ###Module
 id t_f12
 component t_sub
-dim vec2
 flags {lib}
 sub {t_expr:0.7 * (z-1)*(z+1)*(z-i)*(z+i)}
-var z
 
 ###Module
 id t_f13
 component t_sub
-dim vec2
 flags {all, lib, new}
 sub {t_expr:(0.8 * (cos(z)-1)*(sin(z)+1))}
-var z
 
 ###Module
 id t_f14
 component t_sub
-dim vec2
 flags {lib}
 sub {t_expr:z+i*cos(i*sin(i*z))}
-var z
 
 ###Module
 id default_vert
@@ -1048,133 +816,101 @@ flags {root}
 ###Module
 id farm_epimorphism
 component epimorphism
-dim vec4
 flags {farm1}
 modules {seed:seed_frame, t:t_affine, color:color_id, reduce:torus_reduce}
-var color
 
 ###Module
 id tex_color1
 component tex_color_scroll
-dim vec4
 flags {farm1, farm2, lib}
 images [textures/simplegeom/tile_hexagons1.png]
 par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:1.0}
-var seed
 
 ###Module
 id tex_color2
 component tex_color_scroll
-dim vec4
 flags {farm1, farm2, lib}
 images [textures/simplegeom/tile_grid3.png]
 par {scale:0.5, spd:0.0, rot:0.0, sat:0.4, val:1.0}
-var seed
 
 ###Module
 id tex_color3
 component tex_color_scroll
-dim vec4
 flags {farm1, farm2, lib}
 images [textures/Vasarely/tile_vasarely8.png]
 par {scale:0.25, spd:0.0, rot:0.0, sat:1.0, val:1.0}
-var seed
 
 ###Module
 id seed_frame
 component seed_simple
-dim vec4
 flags {farm1}
 par {w:0.2, alpha:1.0}
-var seed
 
 ###Module
 id seed_farm1
 component seed_wca
-dim vec4
 flags {farm1}
 modules {t:t_affine, w:w_lines_border, wt:wt_inv, a:alpha_id, seed_color:tex_color1}
-var seed
 
 ###Module
 id seed_farm2
 component seed_wca
-dim vec4
 flags {farm1}
 modules {t:t_affine, w:w_lines_inner, wt:wt_id, a:alpha_solid1, seed_color:simple_color}
-var seed
 
 ###Module
 id seed_farm3
 component seed_wca
-dim vec4
 flags {farm1}
 modules {t:t_affine, w:w_lines_lr, wt:wt_inv, a:alpha_id, seed_color:tex_color}
-var seed
 
 ###Module
 id seed_farm4
 component seed_wca
-dim vec4
 flags {farm1}
 modules {t:t_affine, w:w_square, wt:wt_id, a:alpha_id, seed_color:tex_color3}
-var seed
 
 ###Module
 id seed_farm5
 component seed_wca
-dim vec4
 flags {farm1}
 modules {t:t_affine1, w:w_lines_inner, wt:wt_id, a:alpha_linear, seed_color:simple_color}
-var seed
 
 ###Module
 id seed_farm6
 component seed_wca
-dim vec4
 flags {farm1}
 modules {t:t_affine2, w:w_circle, wt:wt_id, a:alpha_id, seed_color:tex_color2}
-var seed
 
 ###Module
 id seed_farm_multi
 component seed_multi
-dim vec4
 flags {farm1}
 modules {t:t_wrap, seed0:seed_farm1, seed1:seed_farm4, seed2:seed_farm6}
-var seed
 
 ###Module
 id t_affine1
 component t_affine
-dim vec2
 modules {t_inner:t_exp}
-var z
 zn [1.3 + 0.0i, 0.0 + 0.0i]
 
 ###Module
 id t_affine2
 component t_affine
-dim vec2
 modules {t_inner:t_tp5}
-var z
 zn [1.0+0.0i, 0.0+0.0i]
 
 ###Module
 id alpha_solid1
 component alpha
-dim float
 par {alpha:0.7}
 sub {a_exp:a * @alpha@}
-var a
 
 ###Module
 id t_farm_anim
 component t_wrap
-dim vec2
 flags {farm1}
 modules {t_inner:t_sinh}
-var z
 zn [circle 0.005 1.0, rose 0.004 0.8 5.0 -0.8, 0.0+1.1i, rose 0.0025 1.1 4.0 0.0]
 
 ###Module
@@ -1186,34 +922,26 @@ modules {application:epimorphism_auto1}
 ###Module
 id epimorphism_auto1
 component epimorphism
-dim vec4
 flags {lib}
 modules {t:t_main1, seed:seed_borderM, color:rotate_hsv1, reduce:torus_reduce}
-var color
 
 ###Module
 id seed_borderM
 component seed_simple
-dim vec4
 modules {t:ts_wrap_linx3', reduce:torus_reduce}
 par {w:wave 0.032 0.45 0.55, alpha:wave 0.048 0.35 0.65}
-var seed
 
 ###Module
 id seed_borderM1
 component seed_simple_img
-dim vec4
 images [textures/simplegeom/tile_grid1.png]
 modules {t:ts_wrap_linx3', reduce:torus_reduce}
 par {w:wave 0.032 0.45 0.55, alpha:wave 0.048 0.35 0.65}
-var seed
 
 ###Module
 id ts_wrap_linx3'
 component t_wrap
-dim vec2
 modules {t_inner:t_z}
-var z
 zn [1.1 + 0.0i, 0.0 + 0.0i, 1.0 + 0.0i, rose 0.003 1.1 4.0 0.0]
 
 ###Module
@@ -1230,53 +958,41 @@ modules {application:epimorphism_auto2}
 ###Module
 id epimorphism_auto2
 component epimorphism
-dim vec4
 flags {lib}
 modules {seed:seed_multi_anim, t:t_main2, color:rotate_hsv1, reduce:torus_reduce}
-var color
 
 ###Module
 id seed_wca_anim
 component seed_wca
-dim vec4
 flags {lib, wca}
 modules {t:t_wrap, w:w_lines_border, wt:wt_anim, a:alpha_id, seed_color:simple_color}
-var seed
 
 ###Module
 id seed_wca_anim1
 component seed_wca
-dim vec4
 flags {lib, wca}
 modules {t:t_seed_anim1, w:w_lines_border_anim, wt:wt_anim1, a:alpha_anim1, seed_color:simple_color_anim1}
 scripts [randomize dly:55 spd:0.3 lib:anim dim:vec4 sub:w typ:mod, randomize dly:65 spd:0.3 lib:anim1 dim:vec4 sub:seed_color typ:mod]
-var seed
 
 ###Module
 id seed_wca_anim2
 component seed_wca
-dim vec4
 flags {lib, wca}
 modules {t:t_seed_anim2, w:w_lines_border_anim, wt:wt_anim2, a:alpha_anim2, seed_color:tex_color_anim2}
 scripts [randomize dly:63 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
-var seed
 
 ###Module
 id seed_multi_anim
 component seed_multi
-dim vec4
 flags {multi}
 modules {t:t_wrap, seed0:seed_wca_anim1, seed1:seed_wca_anim2, seed2:seed_nothing}
-var seed
 
 ###Module
 id t_main2
 component t_wrap
-dim vec2
 flags {lib, wrap}
 modules {t_inner:t_sinh}
 scripts [randomize dly:50 spd:0.04 lib:new dim:vec2 sub:t_inner typ:mod]
-var z
 zn [0.95 + 0.0i, 0.0 + 0.0i, 0.0 + 1.1i, 1.0 + 0.0i]
 
 ###Module
@@ -1293,37 +1009,29 @@ modules {application:epimorphism_auto3}
 ###Module
 id epimorphism_auto3
 component epimorphism
-dim vec4
 flags {lib}
 modules {seed:seed_multi_anim2, t:t_main2, color:rotate_hsv1, reduce:torus_reduce}
 scripts [randomize dly:35 spd:0.3 lib:color_main dim:vec4 sub:color typ:mod]
-var color
 
 ###Module
 id seed_wca_anim3
 component seed_wca
-dim vec4
 flags {lib, wca}
 modules {t:t_seed_anim1, w:w_lines_border_anim, wt:wt_id, a:alpha_anim1, seed_color:simple_color_anim1}
 scripts [randomize dly:27 spd:0.3 lib:anim dim:vec4 sub:w typ:mod, randomize dly:30 spd:0.3 lib:anim3 dim:vec4 sub:seed_color typ:mod]
-var seed
 
 ###Module
 id seed_wca_anim4
 component seed_wca
-dim vec4
 flags {lib, wca}
 modules {t:t_seed_anim2, w:w_lines_border_anim, wt:wt_anim2, a:alpha_anim1, seed_color:tex_color_anim5}
 scripts [randomize dly:40 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
-var seed
 
 ###Module
 id seed_multi_anim2
 component seed_multi
-dim vec4
 flags {multi}
 modules {t:t_wrap, seed0:seed_wca_anim3, seed1:seed_wca_anim4, seed2:seed_nothing}
-var seed
 
 ###Module
 id epimorphism_ponies
@@ -1334,50 +1042,38 @@ modules {application:epimorphism_ponies_app}
 ###Module
 id epimorphism_ponies_app
 component epimorphism
-dim vec4
 flags {lib}
 modules {seed:seed_multi_anim_ponies, t:t_main2, color:rotate_hsv1, reduce:torus_reduce}
 scripts [randomize dly:35 spd:0.3 lib:color_main dim:vec4 sub:color typ:mod]
-var color
 
 ###Module
 id seed_multi_anim_ponies
 component seed_multi
-dim vec4
 flags {multi}
 modules {t:t_wrap, seed0:seed_wca_anim1_ponies, seed1:seed_wca_anim2_ponies, seed2:seed_nothing}
-var seed
 
 ###Module
 id seed_wca_anim1_ponies
 component seed_wca
-dim vec4
 modules {t:t_seed_anim1, w:w_lines_border_anim, wt:wt_id, a:alpha_id, seed_color:tex_color_ponies1}
 scripts [randomize dly:55 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
-var seed
 
 ###Module
 id seed_wca_anim2_ponies
 component seed_wca
-dim vec4
 modules {t:t_seed_anim2, w:w_lines_border_anim, wt:wt_anim2, a:alpha_anim1, seed_color:tex_color_ponies2}
 scripts [randomize dly:65 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
-var seed
 
 ###Module
 id tex_color_ponies1
 component tex_color_scroll
-dim vec4
 images [textures/ponies/ponies_1.png]
 par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:1.0}
 scripts [randomize dly:55 spd:0.05 lib:ponies dim:vec4 sub:0 typ:image]
-var seed
 
 ###Module
 id tex_color_ponies2
 component tex_color_scroll
-dim vec4
 images [textures/ponies/ponies_9.png]
 par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:1.0}
 scripts [randomize dly:45 spd:0.05 lib:ponies dim:vec4 sub:0 typ:image]
-var seed

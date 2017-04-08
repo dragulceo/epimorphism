@@ -12,7 +12,7 @@ import Data.Maybe (Maybe(Nothing), fromMaybe)
 import Data.Set (singleton)
 import Data.StrMap (insert, fromFoldable, union)
 import Data.Tuple (Tuple(..))
-import Data.Types (Component(..), EpiS, Module(..), ModuleD, Section(..))
+import Data.Types (Component(..), EpiS, Family(..), Module(..), ModuleD, Section(..))
 import Pattern (CloneRes(CloneRes), purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
 import ScriptUtil (getClone, addScript, purgeScript)
 import System (loadLib)
@@ -125,23 +125,31 @@ getMutator mut idx name  = do
 
 
 
--- should check if dim & var are the same across m0 & m1
+-- should check if dim & var are  the same across m0 & m1
 -- m1 is a reference id(we assume also that it was previously imported & floating)
 switchModules :: forall eff h. Library h -> Number -> String -> String -> String -> Number -> EpiS eff h Unit
 switchModules lib t rootId childN m1 spd = do
   modD  <- mD <$> getLib lib rootId "switch module"
   m0    <- loadLib childN modD.modules "switch find child"
-  mod0D <- mD <$> getLib lib m0 "switch m0"
+  mod0@(Module _ mod0D) <- getLib lib m0 "switch m0"
   mod1D <- mD <$> getLib lib m1 "switch m0"
+
+  (Family _ fm) <- family lib mod0
+  dim <- case (fm.dim) of
+    0 -> pure ""
+    1 -> pure "float"
+    2 -> pure "vec2"
+    4 -> pure "vec4"
+    _ -> throwError $ "invalid dim: " <> (show fm.dim)
 
   -- create switch module
   switchMod@(Module _ switchModD) <- getLib lib "smooth_switch" "switchMod"
 
   let modules = fromFoldable [(Tuple "m0" m0), (Tuple "m1" m1)]
-  let sub'    = union (fromFoldable [(Tuple "dim" mod0D.dim), (Tuple "var" mod0D.var)]) switchModD.sub
+  let sub'    = union (fromFoldable [(Tuple "dim" dim), (Tuple "var" fm.var)]) switchModD.sub
   let path    = inj "linear@%0 %1" [(format (precision 2) t), (format (precision 2) spd)]
   let par     = fromFoldable [(Tuple "intrp" path)]
-  let switch' = apD switchMod _ {par=par, sub = sub', modules = modules, var = mod0D.var, dim = mod1D.dim}
+  let switch' = apD switchMod _ {par=par, sub = sub', modules = modules}
 
   swid <- replaceModule lib rootId childN m0 (ImportModule switch')
   purgeModule lib m1 -- we assume this was imported previously, so it was imported again by replace

@@ -4,7 +4,7 @@ import Prelude
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
-import Data.Array (cons, foldM, sortBy)
+import Data.Array (cons, foldM, head, modifyAt, sortBy)
 import Data.List (toUnfoldable)
 import Data.Maybe (Maybe(..))
 import Data.Set (Set, subset, isEmpty, intersection, fromFoldable) as S
@@ -100,13 +100,6 @@ instance dtPattern :: DataTable Pattern {
   sidx _ = pure <<< idx
 
 instance dtModule :: DataTable Module {
---    comp_ref :: ComponentRef
---  , scripts  :: Array Script
---  , modules  :: StrMap ModuleRef
---  , par      :: StrMap Path
---  , zn       :: Array Path
---  , images   :: Array ImageRef
---  , sub      :: StrMap String
     component :: String
   , scripts   :: Array String
   , modules   :: StrMap String
@@ -114,8 +107,6 @@ instance dtModule :: DataTable Module {
   , zn        :: Array String
   , images    :: Array String
   , sub       :: StrMap String
-  , var       :: String
-  , dim       :: String
 } where
   libProj (Library {moduleLib}) = moduleLib
   idx     (Module ix dt) = ix
@@ -307,6 +298,14 @@ component lib (Module _ modD) = do
   getLib lib modD.component "get component"
 
 family :: forall eff h. Library h -> Module -> EpiS eff h Family
-family lib mod = do
+family lib mod@(Module _ modD) = do
   (Component _ comp) <- component lib mod
-  getLib lib comp.family "get family"
+  fm <- getLib lib comp.family "get family"
+  case (dat fm).var == "*" of
+    false -> pure fm
+    true -> do -- inherit family from first child
+      case (head $ toUnfoldable $ values modD.modules) of
+        Nothing -> throwError "Family has type *, but no children"
+        Just c -> do
+          child <- getLib lib c "family * child"
+          family lib child

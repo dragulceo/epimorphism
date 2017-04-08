@@ -179,8 +179,6 @@ type ModuleD = {
   , zn        :: Array String
   , images    :: Array String
   , sub       :: StrMap String
-  , var       :: String
-  , dim       :: String
 }
 
 moduleSchema :: Schema
@@ -192,22 +190,7 @@ moduleSchema = [
   , SchemaEntry SE_A_St "zn"
   , SchemaEntry SE_A_St "images"
   , SchemaEntry SE_M_St "sub"
-  , SchemaEntry SE_St "var"
-  , SchemaEntry SE_St "dim"
 ]
-
-
---data Module = Module Index ModuleD
---type ModuleD = {
---    comp_ref :: ComponentRef
---  , scripts  :: Array Script
---  , modules  :: StrMap ModuleRef
---  , par      :: StrMap Path
---  , zn       :: Array Path
---  , images   :: Array ImageRef
---  , sub      :: StrMap String
---}
-
 
 data Image = Image Index ImageD
 type ImageD = {

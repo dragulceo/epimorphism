@@ -246,8 +246,7 @@ getUIConf (Library {system: Nothing}) msg = do
   throwError $ msg <> ": System not initialized"
 getUIConf lib@(Library {system: (Just system)}) msg = do
   systemConfD <- dat <$> getSystemConf lib "getUIConf"
-  let name = (systemConfD.uiConf)
-  getLib lib name (msg <> ": getUIConf : ")
+  getLib lib systemConfD.uiConf (msg <> ": getUIConf : ")
 
 getUIConfD :: forall eff h.  Library h -> String -> EpiS eff h UIConfD
 getUIConfD lib msg = dat <$> getUIConf lib msg
@@ -257,8 +256,7 @@ getEngineConf (Library {system: Nothing}) msg = do
   throwError $ msg <> ": System not initialized"
 getEngineConf lib@(Library {system: (Just system)}) msg = do
   systemConfD <- dat <$> getSystemConf lib "getEngineConf"
-  let name = (systemConfD.engineConf)
-  getLib lib name (msg <> ": getEngineConf :")
+  getLib lib systemConfD.engineConf (msg <> ": getEngineConf :")
 
 getEngineConfD :: forall eff h.  Library h -> String -> EpiS eff h EngineConfD
 getEngineConfD lib msg = dat <$> getEngineConf lib msg
@@ -269,8 +267,7 @@ getPattern (Library {system: Nothing}) msg = do
   throwError $ msg <> ": System not initialized"
 getPattern lib@(Library {system: (Just system)}) msg = do
   systemConfD <- dat <$> getSystemConf lib "getPattern"
-  let name = (systemConfD.pattern)
-  getLib lib name (msg <> ": getPattern :")
+  getLib lib systemConfD.pattern (msg <> ": getPattern :")
 
 getPatternD :: forall eff h.  Library h -> String -> EpiS eff h PatternD
 getPatternD lib msg = dat <$> getPattern lib msg

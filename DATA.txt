@@ -1,10 +1,11 @@
+
+
+
 TODO:
 	get rid of slib
 	images
 
-	family/search (in console & switch!!)
-
-
+	get rid of libName
 	importing = clone
 	flag modules/data as live somehow
 	remove ssRef from ScriptFn
@@ -12,7 +13,7 @@ TODO:
 	remove includes from pattern
 	remove compPattern
 	mainC, dispC, etc
-	refactor module
+	refactor module -> component, family, etc
 	references?
 
 

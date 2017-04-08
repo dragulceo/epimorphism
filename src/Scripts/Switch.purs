@@ -53,11 +53,10 @@ switch ssRef lib t midPre idx dt = do
           let search = buildSearch [query] [] [Tuple "family" childN]
           res <- searchLib lib search
           pure $ map (\x -> (L.idx x).id) (res :: Array Module)
-          -- pure $ family systemST.moduleLib childN [query] [] -- using childN here is wrong - seed1, etc
         "idx" -> loadLib query systemST.indexLib "switch index" >>= \x -> pure x.lib
         x -> throwError $ "invalid 'typ' for switch, must be mod | idx : " <> x
 
-      dbg lib'
+      --dbg lib'
       when (lib' == []) do
         throwError "your index is empty!"
 

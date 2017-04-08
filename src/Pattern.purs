@@ -4,7 +4,7 @@ import Prelude
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Data.Array (cons, head, tail, foldM, uncons, reverse)
-import Data.Library (Library, dat, delLib, getLib, getLibM, getPattern, idx, mD, modLibD, setLib)
+import Data.Library (Library, apD, dat, delLib, getLib, getLibM, getPattern, idx, mD, modLibD, setLib)
 import Data.Maybe (Maybe(..), maybe)
 import Data.StrMap (insert, values, toUnfoldable)
 import Data.String (Pattern(..)) as S
@@ -107,7 +107,8 @@ importModule lib obj = do
   mod <- case obj of
     ImportModule m -> pure m
     ImportRef n -> do
-      getLib lib n "importModule" :: EpiS eff h Module
+      m <- getLib lib n "importModule" :: EpiS eff h Module
+      pure $ apD m _ {libName = n}
 
 --      case (member n systemST.moduleRefPool) of
 --      true -> do

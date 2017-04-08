@@ -4,7 +4,7 @@ import Prelude
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
-import Data.Array (filter)
+import Data.Array (filter, sortBy)
 import Data.List (toUnfoldable)
 import Data.Maybe (Maybe(..))
 import Data.Set (Set, empty, subset, isEmpty, intersection, fromFoldable) as S
@@ -214,7 +214,8 @@ buildSearch flags exclude props =
 searchLib :: forall a ad eff h. (DataTable a ad) => Library h -> LibSearch -> EpiS eff h (Array a)
 searchLib lib search = do
   lib' <- liftEff $ freezeST (libProj lib)
-  pure $ filter (matchSearch search) (toUnfoldable $ values lib')
+  pure $ sortBy (\a b -> compare (idx a).id (idx b).id) $
+    filter (matchSearch search) (toUnfoldable $ values lib')
 
 matchSearch :: forall a ad. (DataTable a ad) => LibSearch -> a -> Boolean
 matchSearch (LibSearch {flags, exclude, props}) elt =

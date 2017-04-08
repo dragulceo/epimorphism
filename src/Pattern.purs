@@ -109,7 +109,9 @@ importModule lib obj = do
     ImportModule m -> pure m
     ImportRef n -> do
       m <- getLib lib n "importModule" :: EpiS eff h Module
-      pure $ apD m _ {libName = n}
+      case (dat m).libName of
+        "" -> pure $ apD m _ {libName = n}
+        _ -> pure $ apD m _ {libName = (dat m).libName}
 
 --      case (member n systemST.moduleRefPool) of
 --      true -> do

@@ -20,7 +20,6 @@ type SystemST h = {
   , t :: Number
   , paused :: Boolean
   , pauseAfterSwitch :: Boolean
-  , compPattern :: Maybe PatternD
 }
 
 defaultSystemST :: forall h. SystemST h
@@ -32,23 +31,7 @@ defaultSystemST = {
   , t: 0.0
   , paused: false
   , pauseAfterSwitch: false
-  , compPattern: Nothing
 }
-
-foreign import data AudioAnalyser :: *
-foreign import data UniformBindings :: *
-
-type CompST = { auxImages :: Maybe (Array String),
-                mainSrc :: Maybe String, dispSrc :: Maybe String, vertSrc :: Maybe String,
-                mainProg :: Maybe WebGLProgram, dispProg :: Maybe WebGLProgram,
-                mainUnif :: Maybe UniformBindings, dispUnif :: Maybe UniformBindings}
-newCompST :: CompST
-newCompST = {mainSrc: Nothing, dispSrc: Nothing, vertSrc: Nothing, auxImages: Nothing, mainProg: Nothing, dispProg: Nothing, mainUnif: Nothing, dispUnif: Nothing}
-
-data CompOp = CompMainShader | CompDispShader | CompVertShader | CompMainProg | CompDispProg | CompFinish | CompStall
-
-fullCompile :: Array CompOp
-fullCompile = [CompVertShader, CompMainShader, CompMainProg, CompDispShader, CompDispProg, CompFinish]
 
 type EngineProfile = {
     os                :: String
@@ -85,6 +68,21 @@ defaultUIST :: UIST
 defaultUIST = {
     incIdx: empty
 }
+
+foreign import data AudioAnalyser :: *
+foreign import data UniformBindings :: *
+
+type CompST = { auxImages :: Maybe (Array String),
+                mainSrc :: Maybe String, dispSrc :: Maybe String, vertSrc :: Maybe String,
+                mainProg :: Maybe WebGLProgram, dispProg :: Maybe WebGLProgram,
+                mainUnif :: Maybe UniformBindings, dispUnif :: Maybe UniformBindings}
+newCompST :: CompST
+newCompST = {mainSrc: Nothing, dispSrc: Nothing, vertSrc: Nothing, auxImages: Nothing, mainProg: Nothing, dispProg: Nothing, mainUnif: Nothing, dispUnif: Nothing}
+
+data CompOp = CompMainShader | CompDispShader | CompVertShader | CompMainProg | CompDispProg | CompFinish | CompStall
+
+fullCompile :: Array CompOp
+fullCompile = [CompVertShader, CompMainShader, CompMainProg, CompDispShader, CompDispProg, CompFinish]
 
 data PMut = PMutNone | PMut PatternD (Set String)
 instance mutSemi :: Semigroup PMut where

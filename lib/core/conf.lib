@@ -1,0 +1,97 @@
+### SystemConf
+id dev
+engineConf default
+uiConf dev
+pattern dev
+seed 8563
+
+### SystemConf
+id prod
+engineConf default
+uiConf prod
+pattern prod
+seed 8563
+
+### SystemConf
+id analysis
+engineConf default
+uiConf dev
+pattern analysis
+
+
+### UIConf
+id dev
+canvasId glcanvas
+consoleId console
+fpsId showFps
+showFps true
+windowState dev
+uiUpdateFreq 20
+keyboardSwitchSpd 1.0
+keySet dev
+uiCompLib lib
+
+### UIConf
+id debug
+canvasId glcanvas
+consoleId console
+fpsId showFps
+showFps true
+windowState dev
+uiUpdateFreq 1
+keyboardSwitchSpd 1.0
+keySet dev
+uiCompLib lib
+
+### UIConf
+id prod
+canvasId glcanvas
+consoleId console
+fpsId showFps
+showFps false
+windowState fullWindow
+uiUpdateFreq 20
+keyboardSwitchSpd 1.0
+keySet prod
+uiCompLib lib
+
+
+### EngineConf
+id default
+kernelDim 1024
+fract 3
+numAuxBuffers 10
+audioAnalysisEnabled false
+audioBufferSize 128
+
+### EngineConf
+id low
+kernelDim 512
+fract 4
+numAuxBuffers 10
+audioAnalysisEnabled false
+audioBufferSize 128
+
+### EngineConf
+id high
+kernelDim 2048
+fract 2
+numAuxBuffers 10
+audioAnalysisEnabled false
+audioBufferSize 128
+
+### EngineConf
+id ultra
+kernelDim 3072
+fract 2
+numAuxBuffers 10
+audioAnalysisEnabled false
+audioBufferSize 128
+
+### EngineConf
+id insane
+kernelDim 4096
+fract 2
+numAuxBuffers 10
+audioAnalysisEnabled false
+audioBufferSize 128

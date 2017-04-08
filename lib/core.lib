@@ -96,58 +96,10 @@ numAuxBuffers 10
 audioAnalysisEnabled false
 audioBufferSize 128
 
-### Pattern
-id dev
-vert   id
-main   epimorphism_dev
-disp   post_id
-vertC  vert
-dispC  disp
-mainC  main
-includes [header, additional_funcs, colorspace, math]
-defaultImageLib default_images
-imageLib all_images
-
-### Pattern
-id analysis
-vert   id
-main   analysis
-disp   post_id
-vertC  vert
-dispC  disp
-mainC  main
-includes [header, additional_funcs, colorspace, math]
-defaultImageLib default_images
-imageLib all_images
-
-### Pattern
-id prod
-vert   id
-main   epimorphism_auto2
-disp   post_main4
-vertC  vert
-dispC  disp
-mainC  main
-includes [header, additional_funcs, colorspace, math]
-defaultImageLib default_images
-imageLib all_images
 
 
 ### Family
 id library
-
-### Family
-id main
-var color
-dim 4
-
-### Family
-id disp
-var color
-dim 4
-
-### Family
-id vert
 
 ### Family
 id application
@@ -229,3 +181,43 @@ default_comp
 
 ### Family
 id nul
+
+
+### Pattern
+id dev
+vert   id
+main   epimorphism_dev
+disp   post_id
+vertC  vert
+dispC  disp
+mainC  main
+includes [header, additional_funcs, colorspace, math]
+defaultImageLib default_images
+imageLib all_images
+
+### Pattern
+id analysis
+vert   id
+main   analysis
+disp   post_id
+vertC  vert
+dispC  disp
+mainC  main
+includes [header, additional_funcs, colorspace, math]
+defaultImageLib default_images
+imageLib all_images
+
+### Pattern
+id prod
+vert   id
+main   epimorphism_auto2
+disp   post_main4
+vertC  vert
+dispC  disp
+mainC  main
+includes [header, additional_funcs, colorspace, math]
+defaultImageLib default_images
+imageLib all_images
+
+
+

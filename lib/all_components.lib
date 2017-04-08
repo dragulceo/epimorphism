@@ -579,7 +579,6 @@ vec3 rotate3D(vec3 v, vec3 axis, float th){
 
 ### Component
 id main
-family main
 children {application:application}
 includes []
 code &&&

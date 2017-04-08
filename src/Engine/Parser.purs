@@ -11,7 +11,7 @@ import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
 import Data.Types (Component(..), Epi, EpiS, ModuleD)
-import Util (dbg, forceInt, indentLines, replaceAll)
+import Util (dbg, forceInt, indentLines, inj, replaceAll)
 
 type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}
 type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array String}
@@ -36,9 +36,18 @@ spliceUniformSizes :: CompRes -> CompRes
 spliceUniformSizes cmp@{ component, zOfs, parOfs, images } =
   cmp{component = component'''}
   where
-    component'   = replaceAll "#par#" (show $ parOfs + 1) component
-    component''  = replaceAll "#zn#" (show $ zOfs + 1) component'
-    component''' = replaceAll "#aux#" (show $ length images + 1) component''
+    component'   = case parOfs of
+                        0 -> replaceAll "#par#" "" component
+                        _ -> replaceAll "#par#"
+                             (inj "uniform float par[%0];" [show $ parOfs]) component
+    component''  = case zOfs of
+                        0 -> replaceAll "#zn#" "" component'
+                        _ -> replaceAll "#zn#"
+                             (inj "uniform vec2 zn[%0];" [show $ zOfs]) component'
+    component''' = case (length images) of
+                        0 -> replaceAll "#aux#" "" component''
+                        _ -> replaceAll "#aux#"
+                             (inj "uniform sampler2D aux[%0];" [show $ length images]) component''
 
 -- parse a shader.  substitutions, submodules, par & zn
 parseModule :: forall eff h. ModuleD -> Library h -> Int -> Int -> (Array String) -> EpiS eff h CompRes

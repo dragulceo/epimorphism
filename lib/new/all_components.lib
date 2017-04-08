@@ -212,8 +212,8 @@ precision mediump float;
 uniform sampler2D fb;
 uniform float kernel_dim;
 
-uniform float par[#par#];
-uniform vec2 zn[#zn#];
+#par#
+#zn#
 
 void main() {
   vec4 frame;
@@ -587,20 +587,16 @@ code &&&
 uniform sampler2D fb;
 uniform float time;
 uniform float kernel_dim;
-uniform float par[#par#];
-uniform vec2 zn[#zn#];
-uniform sampler2D aux[#aux#];
 uniform sampler2D audioData;
+#par#
+#zn#
+#aux#
 
 $NO_FRACT$
 
 void main() {
   vec4 color;
   vec2 z, z_in;
-
-	// a bit hackish, we do this to make sure the uniforms aren't optimized out
-	float nul0 = zn[0].x;
-	float nul1 = par[0];
 
   // into z coordinates
   z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(kernel_dim, kernel_dim) - vec2(1.0, 1.0);

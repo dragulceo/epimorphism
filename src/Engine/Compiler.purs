@@ -28,12 +28,11 @@ compileShaders :: forall eff h. STRef h EngineST -> Library h -> Boolean -> EpiS
 compileShaders esRef lib full = do
   es <- lift $ readSTRef esRef
 
-  pattern'@(Pattern _ patternD') <- getPattern lib "patternD compileShaders"
+  currentP@(Pattern _ currentD') <- getPattern lib "patternD compileShaders"
 
-
-  compP <- getLibM lib "$$Comp"
-  pattern@(Pattern _ patternD) <- case (compP :: Maybe Pattern) of
-    Nothing -> pure pattern'
+  mCompP <- getLibM lib "$$Comp"
+  compP@(Pattern _ compD) <- case (mCompP :: Maybe Pattern) of
+    Nothing -> pure currentP
     Just p -> pure p
 
   engineConfD <- getEngineConfD lib "compileShaders"
@@ -46,15 +45,15 @@ compileShaders esRef lib full = do
           let no_fract = es.profile.angle ||
                          (isJust $ stripPrefix (S.Pattern "Windows") es.profile.os)
           let fract = if no_fract then Nothing else Just engineConfD.fract
-          Tuple main aux <- parseMain lib patternD fract
+          Tuple main aux <- parseMain lib compD fract
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainSrc = Just main, auxImages = Just aux}})
           pure false
         CompDispShader -> do
-          disp <- parseDisp lib patternD
+          disp <- parseDisp lib compD
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {dispSrc = Just disp}})
           pure false
         CompVertShader -> do
-          vert <- parseVert lib patternD
+          vert <- parseVert lib compD
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {vertSrc = Just vert}})
           pure false
         --CompUploadAux -> do
@@ -99,17 +98,17 @@ compileShaders esRef lib full = do
                                           currentImages = es.compST.auxImages <|> es'.currentImages})
 
           -- clean old pattern
-          when (patternD'.main /= patternD.main) do
-            purgeModule lib patternD'.main
-          when (patternD'.disp /= patternD.disp) do
-            purgeModule lib patternD'.disp
-          when (patternD'.vert /= patternD.vert) do
-            purgeModule lib patternD'.vert
+          when (currentD'.main /= compD.main) do
+            purgeModule lib currentD'.main
+          when (currentD'.disp /= compD.disp) do
+            purgeModule lib currentD'.disp
+          when (currentD'.vert /= compD.vert) do
+            purgeModule lib currentD'.vert
 
           -- update pattern & reset comp info
-          modLibD lib pattern' (\_ -> patternD)
-          when ((idx pattern).id == "$$Comp") do
-            delLib lib pattern
+          modLibD lib currentP (\_ -> compD)
+          when ((idx compP).id == "$$Comp") do
+            delLib lib compP
 
           lift $ modifySTRef esRef (\es' -> es' {compST = newCompST {vertSrc = es.compST.vertSrc}})
 

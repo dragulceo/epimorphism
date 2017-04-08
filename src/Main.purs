@@ -153,7 +153,7 @@ animate state = handleError do
   -- execute compile queue
   when (not $ null engineST'.compQueue) do
     --t' <- lift $ now
-    compileShaders ssRef esRef lib (isNothing engineST.mainProg)
+    compileShaders esRef lib (isNothing engineST.mainProg)
     --t'' <- lift $ now
     --dbg $ inj "COMPILE :%0ms" [show (t'' - t')]
     --currentTimeMS2 <- lift $ now

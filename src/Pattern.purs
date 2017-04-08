@@ -12,7 +12,7 @@ import Data.String (Pattern(..)) as S
 import Data.String (split, joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Data.Types (EpiS, Module(..), PatternD)
+import Data.Types (EpiS, Module(..), Pattern(..), PatternD)
 import System (loadLib)
 import Util (dbg, uuid, fromJustE)
 
@@ -165,11 +165,11 @@ replaceModule lib mid subN cid obj = do
 
 
 --  slightly janky
-data CloneRes = CloneRes String PatternD String
-clonePattern :: forall eff h. Library h -> PatternD -> EpiS eff h PatternD
-clonePattern lib patternD = do
+data CloneRes = CloneRes String Pattern String
+clonePattern :: forall eff h. Library h -> Pattern -> EpiS eff h Pattern
+clonePattern lib pattern@(Pattern _ patternD) = do
   main' <- importModule lib (ImportRef patternD.main)
   disp' <- importModule lib (ImportRef patternD.disp)
   vert' <- importModule lib (ImportRef patternD.vert)
 
-  pure $ patternD {main = main', disp = disp', vert = vert'}
+  pure $ apD pattern _ {main = main', disp = disp', vert = vert'}

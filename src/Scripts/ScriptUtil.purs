@@ -1,18 +1,16 @@
 module ScriptUtil where
 
 import Prelude
-import Config (SystemST, Script(Script))
+import Config (Script(Script))
 import Control.Monad.Except.Trans (throwError)
-import Control.Monad.ST (modifySTRef, readSTRef, STRef)
-import Control.Monad.Trans.Class (lift)
 import Data.Array (head, foldM, uncons, deleteAt, cons)
-import Data.Library (Library, getLib, idM, modLibD)
+import Data.Library (Library, dat, getLib, getLibM, idM, modLibD, setLib)
 import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
 import Data.StrMap (StrMap, insert, empty, toUnfoldable)
 import Data.String (split, joinWith, trim)
 import Data.String (Pattern(..)) as S
 import Data.Tuple (Tuple(Tuple))
-import Data.Types (EpiS, PatternD)
+import Data.Types (EpiS, Pattern)
 import Pattern (clonePattern, findModule, findAddr, CloneRes(CloneRes))
 import Text.Format (precision, format)
 import Util (dbg, inj, numFromStringE, fromJustE)
@@ -66,18 +64,18 @@ serializeScript (Script name phase args) =
 
 -- This method is called by scripts that modify the state tree.  we perform modifications in a cloned tree so we can compile asynchronously
 -- I don't like how this modifies ssRef
-getClone :: forall eff h. STRef h (SystemST h) -> Library h -> PatternD -> String -> EpiS eff h CloneRes
-getClone ssRef lib patternD mid = do
-  systemST <- lift $ readSTRef ssRef
-  patternD' <- case systemST.compPattern of
+getClone :: forall eff h. Library h -> Pattern -> String -> EpiS eff h CloneRes
+getClone lib pattern mid = do
+  compP <- getLibM lib "$$Comp"
+  pattern' <- case (compP :: Maybe Pattern) of
     Just pd -> pure pd
     Nothing -> do
       -- dbg "cloning pattern"
-      patternD' <- clonePattern lib patternD
-      lift $ modifySTRef ssRef (\s -> s {compPattern = Just patternD'})
-      pure patternD'
+      pattern' <- clonePattern lib pattern
+      setLib lib "$$Comp" pattern'
+      pure pattern'
 
-  addr <- findAddr lib patternD mid
-  mid' <- findModule lib patternD' addr false
+  addr <- findAddr lib (dat pattern) mid
+  mid' <- findModule lib (dat pattern') addr false
   root <- fromJustE (head $ split (S.Pattern ".") addr) "getClone invalid addr"
-  pure $ CloneRes root patternD' mid'
+  pure $ CloneRes root pattern' mid'

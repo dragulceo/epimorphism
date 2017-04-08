@@ -221,7 +221,7 @@ void main() {
   vec2 z = vec2(2.0, 2.0) * clipSpace - vec2(1.0, 1.0);
   frame = texture2D(fb, clipSpace);
 
-  %post%
+  %body%
 
 	frame.a = 1.0; // this value is used by webgl
   gl_FragColor = frame;
@@ -606,7 +606,7 @@ void main() {
   z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(kernel_dim, kernel_dim) - vec2(1.0, 1.0);
   z_in = z;
 
-  %application%
+  %body%
 
   gl_FragColor = color;
 }
@@ -1164,7 +1164,7 @@ code &&&
 	z = $t_expr$;
 
 ### Component
-id default_vert
+id vert
 family vert
 code &&&
 attribute vec2 a_position;

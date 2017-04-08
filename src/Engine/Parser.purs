@@ -18,12 +18,15 @@ type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array
 
 foreign import parseT :: String -> String
 
-parseShader :: forall eff h. Library h -> String -> Array String -> EpiS eff h (Tuple String (Array String))
-parseShader lib mid includes = do
+parseShader :: forall eff h. Library h -> String -> String -> Array String -> EpiS eff h (Tuple String (Array String))
+parseShader lib rootCid mid includes = do
   modD <- mD <$> getLib lib mid "parseShader mid"
   modRes <- parseModule modD lib 0 0 []
 
-  let modRes' = spliceUniformSizes modRes
+  rootC <- cD <$> getLib lib rootCid "parseShader rootC"
+  let root = replaceAll "%body%" modRes.component rootC.code
+
+  let modRes' = spliceUniformSizes $ modRes {component = root}
   allIncludes' <- traverse (\x -> cD <$> getLib lib x "includes") includes
   let allIncludes = "//INCLUDES\n" <> (joinWith "\n\n" (map _.code allIncludes')) <> "\n//END INCLUDES\n"
 

@@ -1,0 +1,96 @@
+###Module
+id default_vert
+component default_vert
+flags {root}
+
+
+###Module
+id disp_id
+component disp
+flags {root}
+modules {post:post_id}
+
+###Module
+id disp_id2
+component disp
+flags {root}
+modules {post:post_id}
+scripts [randomize dly:75 spd:0.4 lib:post_main dim:vec4 sub:post typ:mod]
+
+###Module
+id disp_main3
+component disp
+flags {root}
+modules {post:post_hlim_anim2}
+
+###Module
+id disp_main4
+component disp
+flags {root}
+modules {post:post_main4}
+
+###Module
+id disp_main1
+component disp
+modules {post:post_hlim_anim}
+
+###Module
+id disp_main2
+component disp
+modules {post:post_hlim_anim2}
+
+
+
+###Module
+id epimorphism_dev_main
+component main
+flags {dev, epimorphism, root}
+modules {application:epimorphism_dev}
+
+###Module
+id epimorphism_dev_ponies_main
+component main
+flags {dev, epimorphism, root}
+modules {application:epimorphism_dev_ponies}
+
+###Module
+id epimorphism_main
+component main
+flags {epimorphism, root}
+modules {application:epimorphism}
+
+###Module
+id farm_main
+component main
+flags {epimorphism, root}
+modules {application:farm_epimorphism}
+
+###Module
+id epimorphism_main4
+component main
+flags {epimorphism, root}
+modules {application:epimorphism_auto2}
+
+###Module
+id epimorphism1_main
+component main
+flags {epimorphism, root}
+modules {application:epimorphism_auto1}
+
+###Module
+id epimorphism2_main
+component main
+flags {epimorphism, root}
+modules {application:epimorphism_auto2}
+
+###Module
+id epimorphism3_main
+component main
+flags {epimorphism, root}
+modules {application:epimorphism_auto3}
+
+###Module
+id epimorphism_ponies
+component main
+flags {epimorphism, root}
+modules {application:epimorphism_ponies_app}

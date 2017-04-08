@@ -102,7 +102,7 @@ command usRef esRef ssRef lib msg = handleError do
             modLibD' lib idM mid "find module - setT" $ \m ->
               m {sub = insert "t_expr" tExp m.sub}
 
-            compileShaders ssRef esRef lib false
+            compileShaders esRef lib false
 
             pure unit
           "save" -> do
@@ -146,7 +146,7 @@ command usRef esRef ssRef lib msg = handleError do
                 fract' <- intFromStringE fract
                 engineConf <- getEngineConf lib "fract engineConf"
                 modLibD lib engineConf _ {fract = fract'}
-                compileShaders ssRef esRef lib false
+                compileShaders esRef lib false
 
               _ -> throwError "invalid format: setFract fract"
             pure unit

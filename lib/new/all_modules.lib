@@ -809,11 +809,6 @@ flags {lib}
 sub {t_expr:z+i*cos(i*sin(i*z))}
 
 ###Module
-id default_vert
-component default_vert
-flags {root}
-
-###Module
 id farm_epimorphism
 component epimorphism
 flags {farm1}

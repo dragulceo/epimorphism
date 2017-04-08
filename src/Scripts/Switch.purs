@@ -6,7 +6,7 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, readSTRef)
 import Data.Array (index, length, updateAt) as A
-import Data.Library (Library, apD, buildSearch, component, dat, family, getLib, getPatternD, idM, mD, modLibD, searchLib)
+import Data.Library (Library, apD, buildSearch, component, dat, family, getLib, getPattern, idM, mD, modLibD, searchLib)
 import Data.Library (idx) as L
 import Data.Maybe (Maybe(Nothing), fromMaybe)
 import Data.Set (singleton)
@@ -22,8 +22,8 @@ import Util (dbg, intFromStringE, inj, randInt, numFromStringE, gmod, fromJustE)
 
 switch :: forall eff h. ScriptFn eff h
 switch ssRef lib t midPre idx dt = do
-  patternD' <- getPatternD lib "switch pattern"
-  CloneRes newRootN patternD mid <- getClone ssRef lib patternD' midPre
+  pattern' <- getPattern lib "switch pattern"
+  CloneRes newRootN pattern mid <- getClone lib pattern' midPre
 
   systemST <- lift $ readSTRef ssRef
 
@@ -36,7 +36,7 @@ switch ssRef lib t midPre idx dt = do
       childN' <- loadLib "childN" dt "switch childN"
       pure $ Tuple mid childN'
     "clone" -> do
-      findParent lib patternD mid
+      findParent lib (dat pattern) mid
     x -> throwError $ "invalid 'op' for switch, must be load | clone : " <> x
 
   -- get the relevant name to be used to either load or for the mutator
@@ -101,7 +101,7 @@ switch ssRef lib t midPre idx dt = do
   -- let tPhase = systemST'.t - t -- recover phase
   -- switchModules lib (t + tPhase) rootId childN nxtId spd
 
-  pure $ ScriptRes (PMut patternD (singleton newRootN)) Nothing
+  pure $ ScriptRes (PMut (dat pattern) (singleton newRootN)) Nothing
 
 
 getMutator :: forall eff h. String -> String -> String -> EpiS eff h (ModuleD -> ModuleD)
@@ -162,7 +162,7 @@ switchModules lib t rootId childN m1 spd = do
 
 finishSwitch :: forall eff h. ScriptFn eff h
 finishSwitch ssRef lib t rootIdPre idx dt = do
-  patternD' <- getPatternD lib "switch pattern"
+  pattern' <- getPattern lib "switch pattern"
 
   -- get data
   delay <- (loadLib "delay" dt "finishSwitch delay") >>= numFromStringE
@@ -171,12 +171,12 @@ finishSwitch ssRef lib t rootIdPre idx dt = do
     -- we're done
     x | x >= 1.0 -> do
       --let a = lg "DONE SWITCHING"
-      CloneRes newRootN pattern rootId <- getClone ssRef lib patternD' rootIdPre
+      CloneRes newRootN pattern rootId <- getClone lib pattern' rootIdPre
 
       systemST <- lift $ readSTRef ssRef
 
       -- find parent & m1
-      (Tuple parent subN) <- findParent lib pattern rootId
+      (Tuple parent subN) <- findParent lib (dat pattern) rootId
 
       modD <- mD <$> getLib lib rootId "finishSwitch module"
       m1id <- loadLib "m1" modD.modules "finishSwitch module m1"
@@ -192,6 +192,6 @@ finishSwitch ssRef lib t rootIdPre idx dt = do
         pure unit
 
       --dbg "finish switch!!!!"
-      pure $ ScriptRes (PMut pattern (singleton newRootN)) Nothing
+      pure $ ScriptRes (PMut (dat pattern) (singleton newRootN)) Nothing
     _ -> do
       pure $ ScriptRes PMutNone Nothing

@@ -116,7 +116,6 @@ instance dtModule :: DataTable Module {
   , sub       :: StrMap String
   , var       :: String
   , dim       :: String
-  , libName   :: String
 } where
   libProj (Library {moduleLib}) = moduleLib
   idx     (Module ix dt) = ix

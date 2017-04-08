@@ -181,7 +181,6 @@ type ModuleD = {
   , sub       :: StrMap String
   , var       :: String
   , dim       :: String
-  , libName   :: String
 }
 
 moduleSchema :: Schema
@@ -195,7 +194,6 @@ moduleSchema = [
   , SchemaEntry SE_M_St "sub"
   , SchemaEntry SE_St "var"
   , SchemaEntry SE_St "dim"
-  , SchemaEntry SE_St "libName"
 ]
 
 

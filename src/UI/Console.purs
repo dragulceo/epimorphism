@@ -64,8 +64,8 @@ renderModule systemST lib modLib mid title pid = do
   sel <- case pid of
     Just pid' -> do
       sel' <- renderSelect modLib lib mod pid' title
-      pure $ sel' <> "<span class='consoleModTitle consoleUI'>" <> modD.libName <> "</span>"
-    _ -> pure $ "<span class='consoleModTitle'>"  <> modD.libName <> "</span>"
+      pure $ sel' <> "<span class='consoleModTitle consoleUI'>" <> (idx mod).orig <> "</span>"
+    _ -> pure $ "<span class='consoleModTitle'>"  <> (idx mod).orig <> "</span>"
 
   let title' = titlePre <> sel
 
@@ -219,6 +219,6 @@ renderSelect modLib lib mod@(Module _ modD) pid cname = do
   let fam = map (\x -> (L.idx x).id) (res :: Array Module)
   let fam' = map (\x -> inj "<option value='%0'>%0</option>" [x]) fam
   let options = joinWith "\n" fam'
-  let options' = (inj "<option selected disabled>%0</option>" [modD.libName]) <> options
+  let options' = (inj "<option selected disabled>%0</option>" [(idx mod).orig]) <> options
   let r0 = inj "<select class='consoleUI switchChild' style='display:none;' data-mid='%0' data-cname='%1'>%2</select>" [pid, cname, options']
   pure r0

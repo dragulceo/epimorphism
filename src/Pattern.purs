@@ -4,7 +4,7 @@ import Prelude
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Data.Array (cons, head, tail, foldM, uncons, reverse)
-import Data.Library (Library, apD, dat, delLib, family, getLib, getLibM, getPattern, idx, mD, modLibD, setLib)
+import Data.Library (Library, apD, apI, dat, delLib, family, getLib, getLibM, getPattern, idx, mD, modLibD, setLib)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Set (insert) as Set
 import Data.StrMap (insert, values, toUnfoldable)
@@ -110,9 +110,9 @@ importModule lib obj = do
     ImportModule m -> pure m
     ImportRef n -> do
       m@(Module _ modD) <- getLib lib n "importModule"
-      case modD.libName of
-        "" -> pure $ apD m _ {libName = n}
-        _ ->  pure $ apD m _ {libName = modD.libName}
+      case (idx m).orig of
+        "" -> pure $ apI m _ {orig = n}
+        _ ->  pure $ apI m _ {orig = (idx m).orig}
 
   -- update library
   let idx' = iD { id = id, flags = Set.insert "live" iD.flags }

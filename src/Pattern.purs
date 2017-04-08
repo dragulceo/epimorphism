@@ -6,6 +6,7 @@ import Control.Monad.Except.Trans (lift)
 import Data.Array (cons, head, tail, foldM, uncons, reverse)
 import Data.Library (Library, apD, dat, delLib, getLib, getLibM, getPattern, idx, mD, modLibD, setLib)
 import Data.Maybe (Maybe(..), maybe)
+import Data.Set (insert) as Set
 import Data.StrMap (insert, values, toUnfoldable)
 import Data.String (Pattern(..)) as S
 import Data.String (split, joinWith)
@@ -119,8 +120,10 @@ importModule lib obj = do
 --        pure $ minit {libName = n}
 
   -- update library
-  let idx' = (idx mod) {id = id}
+  let iD = idx mod
+  let idx' = iD {id = id, flags = Set.insert "live" iD.flags }
   let modD = dat mod
+
   setLib lib id (Module idx' modD)
 
   -- import children

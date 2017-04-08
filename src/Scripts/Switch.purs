@@ -50,7 +50,7 @@ switch ssRef lib t midPre idx dt = do
       typ <- loadLib "typ" dt "switch typ" -- either mod or idx
       lib' <- case typ of
         "mod" -> do
-          let search = buildSearch [query] [] [Tuple "family" childN]
+          let search = buildSearch [query] ["live"] [Tuple "family" childN]
           res <- searchLib lib search
           pure $ map (\x -> (L.idx x).id) (res :: Array Module)
         "idx" -> loadLib query systemST.indexLib "switch index" >>= \x -> pure x.lib
@@ -90,7 +90,7 @@ switch ssRef lib t midPre idx dt = do
 
   -- switch! (should we inline this?)
 
-  switchModules lib t rootId childN nxtId spd
+  switchModules lib (systemST.t) rootId childN nxtId spd
 
   -- WE WERE DOING SOMETHING WEIRD W/ PHASE?
   -- let tPhase = systemST'.t - t -- recover phase

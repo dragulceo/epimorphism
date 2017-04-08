@@ -33,9 +33,9 @@ data Snapshot = Snapshot DateTime String
 
 type Index = {
     id     :: String
-  , parent :: String
   , flags  :: S.Set String
   , props  :: StrMap String
+  , orig   :: String
 }
 
 indexSchema :: Schema
@@ -43,7 +43,7 @@ indexSchema = [
     SchemaEntry SE_St   "id"
   , SchemaEntry SE_S    "flags"
   , SchemaEntry SE_M_St "props"
-  , SchemaEntry SE_St   "parent"
+  , SchemaEntry SE_St   "orig"
 ]
 
 -- System
@@ -182,7 +182,6 @@ type ModuleD = {
   , var       :: String
   , dim       :: String
   , libName   :: String
-  , family    :: String
 }
 
 moduleSchema :: Schema
@@ -197,7 +196,6 @@ moduleSchema = [
   , SchemaEntry SE_St "var"
   , SchemaEntry SE_St "dim"
   , SchemaEntry SE_St "libName"
-  , SchemaEntry SE_St "family"
 ]
 
 

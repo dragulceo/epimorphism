@@ -7,7 +7,7 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
 import Data.Array ((:), filter, partition)
 import Data.DOM.Simple.Element (setInnerHTML)
-import Data.Library (Library, buildSearch, getLib, getPatternD, getUIConfD, mD, searchLib)
+import Data.Library (Library, buildSearch, family, getLib, getPatternD, getUIConfD, idM, idx, mD, searchLib)
 import Data.Library (idx) as L
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.String (Replacement(..), joinWith, trim, split, replace)
@@ -17,7 +17,7 @@ import Data.String.Regex.Flags (noFlags)
 import Data.String.Regex.Unsafe (unsafeRegex)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
-import Data.Types (Component(..), EpiS, Module, ModuleD, moduleSchema)
+import Data.Types (Component(..), EpiS, Module(..), ModuleD, moduleSchema)
 import Paths (isConstantPath, runPath)
 import Serialize (showCX, unsafeSerialize)
 import Text.Format (format, precision)
@@ -43,7 +43,7 @@ renderConsole uiST systemST lib = do
 -- serializes the modRefPool into an html string for debugging.  shitcode
 renderModule :: forall eff h. SystemST h -> Library h -> String -> String -> String -> Maybe String -> EpiS eff h String
 renderModule systemST lib modLib mid title pid = do
-  modD <- mD <$> getLib lib mid "renderModule module"
+  mod@(Module _ modD) <- getLib lib mid "renderModule module"
   str <- unsafeSerialize moduleSchema Nothing modD
 
   -- find & parse module line
@@ -63,7 +63,7 @@ renderModule systemST lib modLib mid title pid = do
   let titlePre = "<span class='consoleModTitle prefix'>" <> title <> ": </span>"
   sel <- case pid of
     Just pid' -> do
-      sel' <- renderSelect modLib lib modD pid' title
+      sel' <- renderSelect modLib lib mod pid' title
       pure $ sel' <> "<span class='consoleModTitle consoleUI'>" <> modD.libName <> "</span>"
     _ -> pure $ "<span class='consoleModTitle'>"  <> modD.libName <> "</span>"
 
@@ -211,9 +211,10 @@ renderModule systemST lib modLib mid title pid = do
 
       pure res
 
-renderSelect :: forall eff h. String -> Library h -> ModuleD -> String -> String -> EpiS eff h String
-renderSelect modLib lib modD pid cname = do
-  let search = buildSearch [modLib] [] [Tuple "family" modD.family]
+renderSelect :: forall eff h. String -> Library h -> Module -> String -> String -> EpiS eff h String
+renderSelect modLib lib mod@(Module _ modD) pid cname = do
+  fm <- family lib mod
+  let search = buildSearch [modLib] ["live"] [Tuple "family" (idx fm).id]
   res <- searchLib lib search
   let fam = map (\x -> (L.idx x).id) (res :: Array Module)
   let fam' = map (\x -> inj "<option value='%0'>%0</option>" [x]) fam

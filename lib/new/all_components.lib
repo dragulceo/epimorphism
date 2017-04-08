@@ -1,7 +1,7 @@
 ### Component
 id test_pattern
 family application
-default_mod
+default_mod default_app
 children {}
 includes []
 code &&&
@@ -22,8 +22,8 @@ code &&&
 ### Component
 id epimorphism
 family application
-default_mod
-children {}
+default_mod epimorphism
+children {t:t, reduce:reduce, seed:seed, color:color}
 includes []
 code &&&
   vec4 seed, frame;
@@ -80,8 +80,8 @@ code &&&
 ### Component
 id julia
 family application
-default_mod
-children {}
+default_mod julia
+children {t:t}
 includes []
 code &&&
   int j = 0;
@@ -120,16 +120,16 @@ code &&&
 ### Component
 id color_id
 family color
-default_mod
+default_mod color_id
 children {}
 includes []
 code &&&
-//
+// Nothing
 
 ### Component
 id color_bgr
 family color
-default_mod
+default_mod color_bgr
 children {}
 includes []
 code &&&
@@ -138,7 +138,7 @@ code &&&
 ### Component
 id color_gbr
 family color
-default_mod
+default_mod color_gbr
 children {}
 includes []
 code &&&
@@ -147,7 +147,7 @@ code &&&
 ### Component
 id rotate_hsv
 family color
-default_mod
+default_mod rotate_hsv
 children {}
 includes []
 code &&&
@@ -168,7 +168,7 @@ code &&&
 ### Component
 id rotate_hsls
 family color
-default_mod
+default_mod rotate_hsls
 children {}
 includes []
 code &&&
@@ -203,9 +203,9 @@ code &&&
 
 ### Component
 id disp
-family disp_frag
-default_mod
-children {}
+family disp
+default_mod disp_id
+children {post:post}
 includes []
 code &&&
 precision mediump float;
@@ -230,7 +230,7 @@ void main() {
 ### Component
 id interference
 family application
-default_mod
+default_mod interference
 children {}
 includes []
 code &&&
@@ -579,9 +579,8 @@ vec3 rotate3D(vec3 v, vec3 axis, float th){
 
 ### Component
 id main
-family main_frag
-default_mod
-children {}
+family main
+children {application:application}
 includes []
 code &&&
 
@@ -613,51 +612,18 @@ void main() {
 }
 
 ### Component
-id main_func
-family main_frag
-default_mod
-children {}
-includes []
-code &&&
-
-uniform sampler2D fb;
-uniform float time;
-uniform float kernel_dim;
-uniform float par[#par#];
-uniform vec2 zn[#zn#];
-uniform sampler2D aux[#aux#];
-uniform sampler2D audioData;
-
-void main() {
-  vec4 color;
-  vec2 z, z_in;
-
-	// a bit hackish, we do this to make sure the uniforms aren't optimized out
-	float nul0 = zn[0].x;
-	float nul1 = par[0];
-
-  // into z coordinates
-  z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(kernel_dim, kernel_dim) - vec2(1.0, 1.0);
-  z_in = z;
-
-  %application%
-
-  gl_FragColor = color;
-}
-
-### Component
 id post_id
 family post
-default_mod
+default_mod post_id
 children {}
 includes []
 code &&&
-//
+// Nothing
 
 ### Component
 id post_hlim
 family post
-default_mod
+default_mod post_hlim1
 children {}
 includes []
 code &&&
@@ -701,7 +667,7 @@ code &&&
 ### Component
 id post_pallet1
 family post
-default_mod
+default_mod post_pallet1
 children {}
 includes []
 code &&&
@@ -724,7 +690,7 @@ code &&&
 ### Component
 id reduce
 family reduce
-default_mod
+default_mod torus_reduce
 children {}
 includes []
 code &&&
@@ -733,7 +699,7 @@ code &&&
 ### Component
 id seed_nothing
 family seed
-default_mod
+default_mod seed_nothing
 children {}
 includes []
 code &&&
@@ -742,8 +708,8 @@ code &&&
 ### Component
 id seed_analysis
 family seed
-default_mod
-children {}
+default_mod seed_analysis
+children {t:t, reduce:reduce}
 includes []
 code &&&
 	vec2 z_i = z;
@@ -769,8 +735,8 @@ code &&&
 ### Component
 id seed_simple
 family seed
-default_mod
-children {}
+default_mod seed_simple
+children {reduce:reduce}
 includes []
 code &&&
 	vec2 z_i = z;
@@ -788,8 +754,8 @@ code &&&
 ### Component
 id seed_simple_img
 family seed
-default_mod
-children {}
+default_mod seed_simple_img
+children {t:t, reduce:reduce}
 includes []
 code &&&
 	vec2 z_i = z;
@@ -819,8 +785,8 @@ code &&&
 ### Component
 id seed_wca
 family seed
-default_mod
-children {}
+default_mod seed_wca
+children {t:t, reduce:reduce, w:w, wt:wt, a:a, seed_color:seed_color}
 includes []
 code &&&
 	vec4 wdt;
@@ -845,8 +811,8 @@ code &&&
 ### Component
 id seed_multi
 family seed
-default_mod
-children {}
+default_mod seed_multi
+children {t:t, reduce:reduce, seed0:seed, seed1:seed, seed2:seed}
 includes []
 code &&&
 	vec4 seed0, seed1, seed2;
@@ -878,7 +844,7 @@ code &&&
 ### Component
 id wt
 family wt
-default_mod
+default_mod wt_id
 children {}
 includes []
 code &&&
@@ -887,7 +853,7 @@ code &&&
 ### Component
 id alpha
 family alpha
-default_mod
+default_mod alpha_id
 children {}
 includes []
 code &&&
@@ -895,8 +861,8 @@ code &&&
 
 ### Component
 id simple_color
-family color
-default_mod
+family seed_color
+default_mod simple_color
 children {}
 includes []
 code &&&
@@ -908,8 +874,8 @@ code &&&
 
 ### Component
 id tex_color_scroll
-family color
-default_mod
+family seed_color
+default_mod tex_color_scroll
 children {}
 includes []
 code &&&
@@ -931,8 +897,8 @@ code &&&
 
 ### Component
 id tex_color
-family color
-default_mod
+family seed_color
+default_mod tex_color
 children {}
 includes []
 code &&&
@@ -950,8 +916,8 @@ code &&&
 
 ### Component
 id fb_color
-family color
-default_mod
+family seed_color
+default_mod fb_color
 children {}
 includes []
 code &&&
@@ -969,7 +935,7 @@ code &&&
 ### Component
 id w_nul
 family w
-default_mod
+default_mod w_nul
 children {}
 includes []
 code &&&
@@ -978,7 +944,7 @@ code &&&
 ### Component
 id w_circle
 family w
-default_mod
+default_mod w_circle
 children {}
 includes []
 code &&&
@@ -994,7 +960,7 @@ code &&&
 ### Component
 id w_lines_border
 family w
-default_mod
+default_mod w_lines_border
 children {}
 includes []
 code &&&
@@ -1009,7 +975,7 @@ code &&&
 ### Component
 id w_lines_inner
 family w
-default_mod
+default_mod w_lines_inner
 children {}
 includes []
 code &&&
@@ -1025,7 +991,7 @@ code &&&
 ### Component
 id w_lines_stag
 family w
-default_mod
+default_mod w_lines_stag
 children {}
 includes []
 code &&&
@@ -1045,7 +1011,7 @@ code &&&
 ### Component
 id w_lines_lr
 family w
-default_mod
+default_mod w_lines_lr
 children {}
 includes []
 code &&&
@@ -1065,7 +1031,7 @@ code &&&
 ### Component
 id w_square
 family w
-default_mod
+default_mod w_square
 children {}
 includes []
 code &&&
@@ -1083,7 +1049,7 @@ code &&&
 ### Component
 id anti_grid_fade
 family w
-default_mod
+default_mod anti_grid_fade
 children {}
 includes []
 code &&&
@@ -1100,7 +1066,7 @@ code &&&
 ### Component
 id grid_fade
 family w
-default_mod
+default_mod grid_fade
 children {}
 includes []
 code &&&
@@ -1119,21 +1085,12 @@ code &&&
 	}
   wdt = vec4(w, (w < 0.0 ? 0.0 : 1.0), wx, wy);
 
-### Component
-id id
-family id
-default_mod
-children {}
-includes []
-code &&&
-//
-
 
 ### Component
 id switch
 family switch
-default_mod
-children {}
+default_mod switch
+children {m0:*, m1:*}
 includes []
 code &&&
 	$dim$ v0, v1, init;
@@ -1150,8 +1107,8 @@ code &&&
 ### Component
 id smooth_switch
 family switch
-default_mod
-children {}
+default_mod smooth_switch
+children {m0:*, m1:*}
 includes []
 code &&&
 	$dim$ v0, v1, init;
@@ -1169,18 +1126,18 @@ code &&&
 ### Component
 id t_id
 family t
-default_mod
+default_mod t_id
 children {}
 includes []
 code &&&
-//
+// Nothing
 
 
 ### Component
 id t_wrap
 family t
-default_mod
-children {}
+default_mod t_wrap
+children {t_inner:t_inner}
 includes []
 code &&&
   z = M(zn[#0], z) + zn[#1];
@@ -1190,8 +1147,8 @@ code &&&
 ### Component
 id t_affine
 family t
-default_mod
-children {}
+default_mod t_affine
+children {t_inner:t_inner}
 includes []
 code &&&
   z = M(zn[#0], z) + zn[#1];
@@ -1200,7 +1157,7 @@ code &&&
 ### Component
 id t_sub
 family t_inner
-default_mod
+default_mod t_sub
 children {}
 includes []
 code &&&
@@ -1209,9 +1166,6 @@ code &&&
 ### Component
 id default_vert
 family vert
-default_mod
-children {}
-includes []
 code &&&
 attribute vec2 a_position;
 

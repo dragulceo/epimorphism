@@ -4,11 +4,11 @@ import Prelude
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
-import Data.Array (filter, sortBy)
+import Data.Array (cons, foldM, sortBy)
 import Data.List (toUnfoldable)
 import Data.Maybe (Maybe(..))
 import Data.Set (Set, subset, isEmpty, intersection, fromFoldable) as S
-import Data.StrMap (StrMap, freezeST, insert, isSubmap, values, fromFoldable)
+import Data.StrMap (StrMap, freezeST, fromFoldable, insert, isSubmap, values)
 import Data.StrMap.ST (STStrMap, delete, peek, poke)
 import Data.Tuple (Tuple)
 import Data.Types (CodeBlock, Component(Component), ComponentRef, EngineConf(EngineConf), EngineConfD, EpiS, Family(Family), FamilyRef, Image(Image), ImageRef, Include, Index, Module(..), ModuleD, ModuleRef, Path, Pattern(Pattern), PatternD, Script, Section(Section), SystemConf(SystemConf), SystemConfD, UIConf(UIConf), UIConfD, ComponentD)
@@ -33,6 +33,7 @@ class DataTable a ad | a -> ad where
   dat :: a -> ad
   apI :: a -> (Index -> Index) -> a
   apD :: a -> (ad -> ad) -> a
+  sidx :: forall eff h. Library h -> a -> EpiS eff h Index
 
 instance dtSystemConf :: DataTable SystemConf {
     engineConf :: String
@@ -45,6 +46,7 @@ instance dtSystemConf :: DataTable SystemConf {
   dat     (SystemConf _ dt) = dt
   apI     (SystemConf ix dt) mut = SystemConf (mut ix) dt
   apD     (SystemConf ix dt) mut = SystemConf ix (mut dt)
+  sidx _ = pure <<< idx
 
 instance dtEngineConf :: DataTable EngineConf {
     kernelDim            :: Int
@@ -58,6 +60,7 @@ instance dtEngineConf :: DataTable EngineConf {
   dat     (EngineConf _ dt) = dt
   apI     (EngineConf ix dt) mut = EngineConf (mut ix) dt
   apD     (EngineConf ix dt) mut = EngineConf ix (mut dt)
+  sidx _ = pure <<< idx
 
 instance dtUIConf :: DataTable UIConf {
     canvasId          :: String
@@ -75,6 +78,7 @@ instance dtUIConf :: DataTable UIConf {
   dat     (UIConf _ dt) = dt
   apI     (UIConf ix dt) mut = UIConf (mut ix) dt
   apD     (UIConf ix dt) mut = UIConf ix (mut dt)
+  sidx _ = pure <<< idx
 
 instance dtPattern :: DataTable Pattern {
     vert            :: String -- ModuleRef
@@ -93,6 +97,7 @@ instance dtPattern :: DataTable Pattern {
   dat     (Pattern _ dt) = dt
   apI     (Pattern ix dt) mut = Pattern (mut ix) dt
   apD     (Pattern ix dt) mut = Pattern ix (mut dt)
+  sidx _ = pure <<< idx
 
 instance dtModule :: DataTable Module {
 --    comp_ref :: ComponentRef
@@ -112,13 +117,15 @@ instance dtModule :: DataTable Module {
   , var       :: String
   , dim       :: String
   , libName   :: String
-  , family    :: String
 } where
   libProj (Library {moduleLib}) = moduleLib
-  idx     (Module ix dt) = ix {props = insert "family" dt.family ix.props} -- hrm
+  idx     (Module ix dt) = ix
   dat     (Module _ dt) = dt
   apI     (Module ix dt) mut = Module (mut ix) dt
   apD     (Module ix dt) mut = Module ix (mut dt)
+  sidx    lib m@(Module ix dt) = do
+    fm <- family lib m
+    pure $ ix {props = insert "family" (idx fm).id ix.props}
 
 instance dtComponent :: DataTable Component {
     family      :: String -- FamilyRef
@@ -132,6 +139,7 @@ instance dtComponent :: DataTable Component {
   dat     (Component _ dt) = dt
   apI     (Component ix dt) mut = Component (mut ix) dt
   apD     (Component ix dt) mut = Component ix (mut dt)
+  sidx _ = pure <<< idx
 
 instance dtFamily :: DataTable Family {
     var          :: String
@@ -143,6 +151,7 @@ instance dtFamily :: DataTable Family {
   dat     (Family _ dt) = dt
   apI     (Family ix dt) mut = Family (mut ix) dt
   apD     (Family ix dt) mut = Family ix (mut dt)
+  sidx _ = pure <<< idx
 
 instance dtImage :: DataTable Image {
   path :: String
@@ -152,6 +161,7 @@ instance dtImage :: DataTable Image {
   dat     (Image _ dt) = dt
   apI     (Image ix dt) mut = Image (mut ix) dt
   apD     (Image ix dt) mut = Image ix (mut dt)
+  sidx _ = pure <<< idx
 
 instance dtSection :: DataTable Section {
   lib :: Array String
@@ -161,6 +171,7 @@ instance dtSection :: DataTable Section {
   dat     (Section _ dt) = dt
   apI     (Section ix dt) mut = Section (mut ix) dt
   apD     (Section ix dt) mut = Section ix (mut dt)
+  sidx _ = pure <<< idx
 
 type Ref a = String
 type SCRef = Ref SystemConf
@@ -217,17 +228,24 @@ buildSearch flags exclude props =
 searchLib :: forall a ad eff h. (DataTable a ad) => Library h -> LibSearch -> EpiS eff h (Array a)
 searchLib lib search = do
   lib' <- liftEff $ freezeST (libProj lib)
-  pure $ sortBy (\a b -> compare (idx a).id (idx b).id) $
-    filter (matchSearch search) (toUnfoldable $ values lib')
+  res <- foldM handle [] (toUnfoldable $ values lib')
+  pure $ sortBy (\a b -> compare (idx a).id (idx b).id) res
+  where
+    handle :: (DataTable a ad) => Array a -> a -> EpiS eff h (Array a)
+    handle res elt = do
+      ix <- sidx lib elt
+      case (matchSearch search ix) of
+        false -> pure res
+        true -> pure $ cons elt res
 
-matchSearch :: forall a ad. (DataTable a ad) => LibSearch -> a -> Boolean
+matchSearch :: LibSearch -> Index -> Boolean
 matchSearch (LibSearch {flags, exclude, props}) elt =
   (S.subset flags eltFlags) &&
   (S.isEmpty $ S.intersection exclude eltFlags) &&
   (isSubmap props eltProps)
   where
-    eltProps = (idx elt).props
-    eltFlags = (idx elt).flags
+    eltProps = elt.props
+    eltFlags = elt.flags
 
 
 -- GLOBAL FINDERS
@@ -282,3 +300,14 @@ idM = id
 
 cD :: Component -> ComponentD
 cD = dat
+
+
+-- MODULE
+component :: forall eff h. Library h -> Module -> EpiS eff h Component
+component lib (Module _ modD) = do
+  getLib lib modD.component "get component"
+
+family :: forall eff h. Library h -> Module -> EpiS eff h Family
+family lib mod = do
+  (Component _ comp) <- component lib mod
+  getLib lib comp.family "get family"

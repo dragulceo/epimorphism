@@ -123,7 +123,7 @@ buildSection :: SHandle -> SLib (Tuple String Section)
 buildSection (SHandle sig body) = do
   let tokens = filter ((/=) "") $ split (S.Pattern " ") sig
   name <- getName tokens
-  let idx = {id: name, parent: "", flags: Set.empty, props: empty}
+  let idx = {id: name, orig: "", flags: Set.empty, props: empty}
   pure $ Tuple name (Section idx {lib: (map trim $ split (S.Pattern "\n") body)})
   where
     getName [x] = pure x

@@ -1,20 +1,19 @@
-
-
-
 TODO:
-	get rid of slib
-	images
-
+  fix family problem
+	remove var, dim from module
 	get rid of libName
-	importing = clone
-	flag modules/data as live somehow
-	remove ssRef from ScriptFn
-  rewrite clonePattern
-	remove includes from pattern
 	remove compPattern
 	mainC, dispC, etc
-	refactor module -> component, family, etc
+	cleanup library data files/org?
+	remove includes from pattern
+
+	remove ssRef from ScriptFn
+	importing = clone
+  rewrite clonePattern
+
 	references?
+	get rid of slib?
+	images
 
 
 

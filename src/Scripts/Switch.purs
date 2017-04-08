@@ -6,13 +6,13 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, readSTRef)
 import Data.Array (index, length, updateAt) as A
-import Data.Library (Library, apD, buildSearch, dat, getLib, getPatternD, idM, mD, modLibD, searchLib)
+import Data.Library (Library, apD, buildSearch, component, dat, family, getLib, getPatternD, idM, mD, modLibD, searchLib)
 import Data.Library (idx) as L
 import Data.Maybe (Maybe(Nothing), fromMaybe)
 import Data.Set (singleton)
 import Data.StrMap (insert, fromFoldable, union)
 import Data.Tuple (Tuple(..))
-import Data.Types (EpiS, Module(..), ModuleD, Section(..))
+import Data.Types (Component(..), EpiS, Module(..), ModuleD, Section(..))
 import Pattern (CloneRes(CloneRes), purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
 import ScriptUtil (getClone, addScript, purgeScript)
 import System (loadLib)
@@ -50,7 +50,11 @@ switch ssRef lib t midPre idx dt = do
       typ <- loadLib "typ" dt "switch typ" -- either mod or idx
       lib' <- case typ of
         "mod" -> do
-          let search = buildSearch [query] ["live"] [Tuple "family" childN]
+          mod <- idM <$> getLib lib rootId "switch mod"
+          (Component _ comp) <- component lib mod
+          childT <- loadLib childN comp.children "switch child type"
+          let search = buildSearch [query] ["live"] [Tuple "family" childT]
+
           res <- searchLib lib search
           pure $ map (\x -> (L.idx x).id) (res :: Array Module)
         "idx" -> do
@@ -58,7 +62,6 @@ switch ssRef lib t midPre idx dt = do
           pure $ index.lib
         x -> throwError $ "invalid 'typ' for switch, must be mod | idx : " <> x
 
-      --dbg lib'
       when (lib' == []) do
         throwError "your index is empty!"
 

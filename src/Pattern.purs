@@ -4,7 +4,7 @@ import Prelude
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Data.Array (cons, head, tail, foldM, uncons, reverse)
-import Data.Library (Library, apD, dat, delLib, getLib, getLibM, getPattern, idx, mD, modLibD, setLib)
+import Data.Library (Library, apD, dat, delLib, family, getLib, getLibM, getPattern, idx, mD, modLibD, setLib)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Set (insert) as Set
 import Data.StrMap (insert, values, toUnfoldable)
@@ -12,7 +12,7 @@ import Data.String (Pattern(..)) as S
 import Data.String (split, joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Data.Types (EpiS, Module(..), PatternD, ModuleD(..))
+import Data.Types (EpiS, Module(..), PatternD)
 import System (loadLib)
 import Util (dbg, uuid, fromJustE)
 
@@ -43,10 +43,11 @@ findModule' lib mid addr followSwitch = do
     handle mid' = do
       modD    <- mD <$> getLib lib mid "findModule'"
       childId <- loadLib mid' modD.modules "findModule' find child"
-      childD  <- mD <$> getLib lib childId "findModule' child"
+      child@(Module _ childD) <- getLib lib childId "findModule' child"
       addr'   <- fromJustE (tail addr) "shouldn be safe1"
 
-      case (childD.family == "switch" && followSwitch) of
+      fm <- family lib child
+      case ((idx fm).id == "switch" && followSwitch) of
         true  -> findModule' lib childId (cons "m1" addr') followSwitch
         false -> findModule' lib childId addr' followSwitch
 

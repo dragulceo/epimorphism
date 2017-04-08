@@ -2,7 +2,7 @@ module Main where
 
 import Prelude
 import Compiler (compileShaders)
-import Config (PMut(PMutNone, PMut), SystemST, UIST, EngineST, CompOp(..))
+import Config (CompOp(..), EngineST, PMut(PMutNone, PMut), SystemST, UIST, defaultSystemST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
@@ -22,7 +22,7 @@ import Layout (updateLayout)
 import Paths (runPath)
 import Pattern (importPattern)
 import Script (runScripts)
-import System (initLibrary, initSystemST)
+import System (initLibrary)
 import Texture (loadImages)
 import UI (initUIST)
 import Util (Now, dbg, fromJustE, getProfileCookie, handleError, imag, inj, isDev, isHalted, now, real, requestAnimationFrame, rndstr, seedRandom, urlArgs, zipI)
@@ -53,8 +53,6 @@ initState systemST lib'@(Library libVar) = do
   systemName <- lift $ getSysConfName
   let lib = Library libVar{system = Just systemName}
   dbg lib
-  --ser <- serializeModules
-  --dbg ser
 
   systemConf <- getSystemConf lib "init system"
   let systemConfD = dat systemConf
@@ -229,7 +227,7 @@ main :: Eff (canvas :: CANVAS, dom :: DOM, now :: Now) Unit
 main = do
   runST do
     handleError do
-      systemST <- initSystemST host
+      let systemST = defaultSystemST
       lib      <- initLibrary host
       state    <- initState systemST lib
       lift $ animate state

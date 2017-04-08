@@ -5,22 +5,24 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
-import Data.Array (cons, filter, length, replicate, uncons, zip)
+import Data.Array (cons, filter, length, replicate, reverse, uncons, zip, foldM)
 import Data.Array (foldM) as A
+import Data.Complex (Complex)
 import Data.Either (Either(..))
 import Data.Library (Library(..))
 import Data.Maybe (Maybe(..), maybe)
-import Data.Set (Set, empty) as Set
-import Data.StrMap (StrMap, empty, insert, lookup, thawST)
+import Data.Set (Set, empty, fromFoldable) as Set
+import Data.StrMap (StrMap, empty, fromFoldable, insert, lookup, thawST)
 import Data.StrMap (foldM) as S
 import Data.StrMap.ST (new)
 import Data.String (Replacement(..), joinWith, replace, split, trim)
 import Data.String (Pattern(..)) as S
+import Data.String.Regex (match)
+import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Data.Types (Component(Component), EngineConf(EngineConf), Epi, EpiS, Family(..), Image(..), Index, Module(..), Pattern(..), Schema, SchemaEntry(SchemaEntry), SchemaEntryType(SE_A_Cx, SE_A_St, SE_M_N, SE_M_St, SE_S, SE_B, SE_I, SE_N, SE_St), Section(..), SystemConf(SystemConf), UIConf(UIConf), componentSchema, engineConfSchema, familySchema, imageSchema, indexSchema, moduleSchema, patternSchema, systemConfSchema, uiConfSchema)
-import Library (parseCLst, parseLst, parseMp, parseNMp, parseSet)
 import SLibrary (SHandle(..), SLibError(..), SLib, parseSLib)
-import Util (dbg, boolFromStringE, fromJustE, inj, intFromStringE, numFromStringE, zipI)
+import Util (boolFromStringE, cxFromStringE, dbg, fromJustE, inj, intFromStringE, numFromStringE, tryRegex, zipI)
 
 foreign import unsafeSetDataTableAttr :: forall a b eff. a -> String -> String -> b -> Eff eff a
 foreign import unsafeGenericDataTableImpl :: forall a r. Schema -> Schema -> (Index -> (Record r) -> a) -> (Set.Set String) -> a
@@ -64,7 +66,59 @@ instance iSerializable :: Serializable Image where
   schema a = imageSchema
   generic = unsafeGenericDataTable indexSchema imageSchema Image
 
+-- ELEMENT PARSERS
+parseMString :: forall eff. String -> Epi eff (Maybe String)
+parseMString s = do
+  pure $ if (s == "Nothing") then Nothing else Just s
 
+
+parseSet :: forall eff. String -> Epi eff (Set.Set String)
+parseSet st = do
+  rgx <- tryRegex "^\\{([^\\{\\}]*)\\}$"
+
+  case (match rgx st) of
+    (Just [(Just _), (Just "")]) -> do
+      pure Set.empty
+    (Just [(Just _), (Just l)]) -> pure $ Set.fromFoldable $ map trim $ split (S.Pattern ",") l
+    _ -> throwError $ "Expected " <> st <> " to be a set"
+
+parseMp :: forall eff. String -> Epi eff (StrMap String)
+parseMp st = do
+  rgx <- tryRegex "^\\{([^\\{\\}]*)\\}$"
+  case (match rgx st) of
+    (Just [(Just _), (Just "")]) -> do
+      pure empty
+    (Just [(Just _), (Just l)]) -> do
+      dt <- traverse (exp <<< split (S.Pattern ":")) $ split (S.Pattern ",") l
+      pure $ fromFoldable dt
+    _ -> throwError $ "Expected " <> st <> " to be a map1"
+  where
+    exp [a, b] = pure $ Tuple (trim a) (trim b)
+    exp _ = throwError $ "Expected " <> st <> " to be a map2"
+
+parseNMp :: forall eff. StrMap String -> Epi eff (StrMap Number)
+parseNMp sm = S.foldM handle empty sm
+  where
+    handle dt k v = do
+      nv <- numFromStringE v
+      pure $ insert k nv dt
+
+parseLst :: forall eff. String -> Epi eff (Array String)
+parseLst st = do
+  rgx <- tryRegex "^\\[([^\\[\\]]*)\\]$"
+  case (match rgx st) of
+    (Just [(Just _), (Just "")]) -> pure []
+    (Just [(Just _), (Just l)]) -> pure $ map trim $ split (S.Pattern ",") l
+    _ -> throwError $ "Expected " <> st <> " to be a list"
+
+parseCLst :: forall eff. Array String -> Epi eff (Array Complex)
+parseCLst st = reverse <$> foldM handle [] st
+  where
+    handle dt v = do
+      cv <- cxFromStringE v
+      pure $ cons cv dt
+
+-- CHUNK PARSERS
 buildSection :: SHandle -> SLib (Tuple String Section)
 buildSection (SHandle sig body) = do
   let tokens = filter ((/=) "") $ split (S.Pattern " ") sig
@@ -120,30 +174,6 @@ mapRefById res dataType vals = do
     insertObj res' obj = do
       i <- fromJustE (lookup "id" obj) "Library object missing id :("
       pure $ insert i obj res'
-
---emptyLibrary :: forall h. Library h
---emptyLibrary = do
---  sc <- lift $ new
---  ec <- lift $ new
---  uc <- lift $ new
---  pl <- lift $ new
---  fl <- lift $ new
---  cl <- lift $ new
---  ml <- lift $ new
---  il <- lift $ new
---  sl <- lift $ new
---  Library {
---      systemConfLib: sc
---    , engineConfLib: ec
---    , uiConfLib:     uc
---    , patternLib:    pl
---    , familyLib:     fl
---    , componentLib:  cl
---    , moduleLib:     ml
---    , imageLib:      il
---    , sectionLib:    sl
---    }
-
 
 parseLibData :: forall eff h. String -> EpiS eff h (Library h)
 parseLibData allData = do

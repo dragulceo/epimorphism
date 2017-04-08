@@ -1,85 +1,30 @@
 module System where
 
 import Prelude
-import Config (SystemST, defaultSystemST)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Data.Array (concat, foldM)
 import Data.Either (Either(..))
-import Data.Foldable (foldl)
 import Data.Library (Library, dat, getLibM)
 import Data.List (toUnfoldable)
 import Data.Maybe (Maybe(..))
 import Data.Serialize (parseLibData)
-import Data.Set (Set)
-import Data.Set (member) as S
-import Data.StrMap (StrMap, empty, fold, insert, lookup, values)
-import Data.StrMap (foldM) as SM
-import Data.String (joinWith)
+import Data.StrMap (StrMap, lookup, values)
 import Data.Traversable (traverse)
-import Data.Tuple (Tuple)
-import Data.Types (Epi, EpiS, Module, Schema, ModuleD, moduleSchema)
-import Library (parseLib)
-import SLibrary (SHandle, SLib, SLibError(..), buildComponent, parseSLib)
-import Serialize (unsafeSerialize)
-import Util (dbg, urlGet)
-
-data DataSource = LocalHTTP | LocalStorage | RemoteDB
-
---serializeModules :: forall eff h. EpiS eff h String
---serializeModules = do
---  modules <- buildLib moduleSchema "/lib/modules.lib"
---
---  serialized <- SM.foldM serialize empty (modules :: StrMap ModuleD)
---
---  let all = (toUnfoldable $ values serialized) :: Array String
---  pure $ joinWith "\n\n" all
---  where
---    serialize :: StrMap String -> String -> ModuleD -> EpiS eff h (StrMap String)
---    serialize res k modD = do
---      ser <- unsafeSerialize moduleSchema Nothing modD
---      let ser' = "###Module\nid " <> k <> ser
---      pure $ insert k ser' res
-
-initSystemST :: forall eff h. String -> EpiS eff h (SystemST h)
-initSystemST host = do
-  -- gather system data here?  currently doing this in engine
-
-  -- initialize libraries
-  componentLib  <- buildSLib buildComponent $ host <> "/lib/components.slib"
-
-  pure $ defaultSystemST {
-      componentLib  = componentLib
-  }
+import Data.Types (Epi, EpiS, Module)
+import Util (dbg, inj, urlGet)
 
 initLibrary :: forall eff h. String -> EpiS eff h (Library h)
 initLibrary host = do
   dt <- lift $ urlGet (host <> "/lib/new/core.lib")
   mod <- lift $ urlGet (host <> "/lib/new/all_modules.lib")
+  comp <- lift $ urlGet (host <> "/lib/new/all_components.lib")
 
   let sep = Right "\n@@@ Sections\n"  -- dont hard code this
   sections <- lift $ urlGet (host <> "/lib/sections.slib")
-  case (dt <> mod <> sep <> sections) of
+  case (dt <> mod <> comp <> sep <> sections) of
     (Left er) -> throwError $ "Error loading library : " <> er
     (Right res) -> parseLibData res
-
-buildLib :: forall eff a. Schema -> String -> Epi eff (StrMap a)
-buildLib schema loc = do
-  dt <- lift $ urlGet loc
-  case dt of
-    (Left er) -> throwError $ "Error loading lib : " <> er
-    (Right res) -> parseLib schema res
-
--- build a shader library from a location with a builder
-buildSLib :: forall eff a.  (SHandle -> SLib (Tuple String a)) -> String -> Epi eff (StrMap a)
-buildSLib f loc = do
-  dt <- lift $ urlGet loc
-  case dt of
-    (Left er) -> throwError $ "Error loading slib : " <> er
-    (Right res) -> case (parseSLib f res) of
-      (Right res') -> pure res'
-      (Left (SLibError s)) -> throwError $ "Error building slib at : " <> loc <> " : " <> s
-
 
 -- load from a map, throw error if not found. passed context for debugging purposes
 loadLib :: forall eff a. String -> (StrMap a) -> String -> Epi eff a

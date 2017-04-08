@@ -20,7 +20,6 @@ type SystemST h = {
   , t :: Number
   , paused :: Boolean
   , pauseAfterSwitch :: Boolean
-  , componentLib :: StrMap Component
   , compPattern :: Maybe PatternD
 }
 
@@ -33,7 +32,6 @@ defaultSystemST = {
   , t: 0.0
   , paused: false
   , pauseAfterSwitch: false
-  , componentLib: empty
   , compPattern: Nothing
 }
 
@@ -101,11 +99,3 @@ type ScriptFn eff h = STRef h (SystemST h) -> Library h -> Number -> String -> I
 data ScriptConfig = ScriptConfig String
 data ScriptRes = ScriptRes PMut (Maybe (StrMap String)) -- possible new root, possibly updated state
 data Script = Script String Number (StrMap String)
-
-
---SLib
-type Component = {
-    name   :: String
-  , family :: String
-  , body   :: String
-}

@@ -9,8 +9,6 @@ import Data.String (Pattern(..), split, trim, joinWith, stripSuffix)
 import Data.StrMap (StrMap (), fromFoldable)
 import Data.Traversable (traverse)
 
-import Config (Component)
-
 data SLibError = SLibError String
 type SLib = Either SLibError
 data SHandle = SHandle String String
@@ -39,6 +37,11 @@ parseSLib builder lib = do
   let groups = filter ((/=) "") $ map trim (split (Pattern "}}\n") lib)
   fromFoldable <$> traverse (parseSGroup builder) groups
 
+type Component = {
+    name   :: String
+  , family :: String
+  , body   :: String
+}
 
 -- BUILDERS - maybe move somewhere else?
 buildComponent :: SHandle -> SLib (Tuple String Component)

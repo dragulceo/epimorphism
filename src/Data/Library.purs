@@ -11,7 +11,7 @@ import Data.Set (Set, subset, isEmpty, intersection, fromFoldable) as S
 import Data.StrMap (StrMap, freezeST, insert, isSubmap, values, fromFoldable)
 import Data.StrMap.ST (STStrMap, delete, peek, poke)
 import Data.Tuple (Tuple)
-import Data.Types (CodeBlock, Component(Component), ComponentRef, EngineConf(EngineConf), EngineConfD, EpiS, Family(Family), FamilyRef, Image(Image), ImageRef, Include, Index, Module(..), ModuleD, ModuleRef, Path, Pattern(Pattern), PatternD, Script, Section(Section), SystemConf(SystemConf), SystemConfD, UIConf(UIConf), UIConfD)
+import Data.Types (CodeBlock, Component(Component), ComponentRef, EngineConf(EngineConf), EngineConfD, EpiS, Family(Family), FamilyRef, Image(Image), ImageRef, Include, Index, Module(..), ModuleD, ModuleRef, Path, Pattern(Pattern), PatternD, Script, Section(Section), SystemConf(SystemConf), SystemConfD, UIConf(UIConf), UIConfD, ComponentD)
 import Util (dbg, fromJustE)
 
 data Library h = Library {
@@ -121,11 +121,11 @@ instance dtModule :: DataTable Module {
   apD     (Module ix dt) mut = Module ix (mut dt)
 
 instance dtComponent :: DataTable Component {
-    family_ref  :: FamilyRef
-  , def_mod_ref :: ModuleRef
-  , children    :: StrMap FamilyRef
-  , code        :: CodeBlock
-  , includes    :: Array Include
+    family      :: String -- FamilyRef
+  , default_mod :: String -- ModuleRef
+  , children    :: StrMap String -- FamilyRef
+  , code        :: String --CodeBlock
+  , includes    :: Array String -- Include
 } where
   libProj (Library {componentLib}) = componentLib
   idx     (Component ix _) = ix
@@ -136,7 +136,7 @@ instance dtComponent :: DataTable Component {
 instance dtFamily :: DataTable Family {
     var          :: String
   , dim          :: Int
-  , def_comp_ref :: ComponentRef
+  , default_comp :: ComponentRef
 } where
   libProj (Library {familyLib}) = familyLib
   idx     (Family ix _) = ix
@@ -279,3 +279,6 @@ mD = dat
 
 idM :: Module -> Module
 idM = id
+
+cD :: Component -> ComponentD
+cD = dat

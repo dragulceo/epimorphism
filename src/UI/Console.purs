@@ -17,10 +17,9 @@ import Data.String.Regex.Flags (noFlags)
 import Data.String.Regex.Unsafe (unsafeRegex)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
-import Data.Types (EpiS, Module(..), ModuleD, moduleSchema)
+import Data.Types (Component(..), EpiS, Module, ModuleD, moduleSchema)
 import Paths (isConstantPath, runPath)
 import Serialize (showCX, unsafeSerialize)
-import System (loadLib)
 import Text.Format (format, precision)
 import UIUtil (findElt)
 import Util (dbg, indentLines, inj, real, zipI)
@@ -101,8 +100,8 @@ renderModule systemST lib modLib mid title pid = do
         (Just [(Just _), (Just m0), (Just m1)]) -> do
           case m0 of
             "component" -> do
-              comp <- loadLib m1 systemST.componentLib "load component console"
-              let ui = inj "<span class='consoleUI' style='display:none'>component </span><span class='componentUI consoleUI' style='display:none;' data-mid='%1'>%0</span><div id='%1' class='hidden' style='display:none'><div>%2</div></div>" [m1, m1, comp.body]
+              (Component _ comp) <- getLib lib m1 "load component console"
+              let ui = inj "<span class='consoleUI' style='display:none'>component </span><span class='componentUI consoleUI' style='display:none;' data-mid='%1'>%0</span><div id='%1' class='hidden' style='display:none'><div>%2</div></div>" [m1, m1, comp.code]
               pure $ "\n<span class='consoleUI'>" <> line <> "</span>" <> ui
             "sub" -> do
               let rgx' = unsafeRegex "^\\{(.*)\\}$" noFlags

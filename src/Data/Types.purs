@@ -139,30 +139,30 @@ data Family = Family Index FamilyD
 type FamilyD = {
     var          :: String
   , dim          :: Int
-  , def_comp_ref :: ComponentRef
+  , default_comp :: ComponentRef
 }
 
 familySchema :: Schema
 familySchema = [
     SchemaEntry SE_St "var"
   , SchemaEntry SE_N "dim"
-  , SchemaEntry SE_St "def_mcomp_ref"
+  , SchemaEntry SE_St "default_comp"
 ]
 
 
 data Component = Component Index ComponentD
 type ComponentD = {
-    family_ref  :: FamilyRef
-  , def_mod_ref :: ModuleRef
-  , children    :: StrMap FamilyRef
-  , code        :: CodeBlock
-  , includes    :: Array Include
+    family      :: String --FamilyRef
+  , default_mod :: String --ModuleRef
+  , children    :: StrMap String --StrMap FamilyRef
+  , code        :: String --CodeBlock
+  , includes    :: Array String --Array Include
 }
 
 componentSchema :: Schema
 componentSchema = [
-    SchemaEntry SE_St "family_ref"
-  , SchemaEntry SE_St "def_mod_ref"
+    SchemaEntry SE_St "family"
+  , SchemaEntry SE_St "default_mod"
   , SchemaEntry SE_M_St "children"
   , SchemaEntry SE_St "code"
   , SchemaEntry SE_A_St "includes"

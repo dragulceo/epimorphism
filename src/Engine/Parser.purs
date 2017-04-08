@@ -1,18 +1,16 @@
 module Parser where
 
 import Prelude
-import Config (SystemST)
 import Data.Array (length)
 import Data.Array (sort, length, (..)) as A
 import Data.Foldable (foldl)
-import Data.Library (Library, getLib, mD)
+import Data.Library (Library, cD, getLib, mD)
 import Data.Maybe (Maybe(Nothing, Just))
 import Data.StrMap (lookup, StrMap, fold, empty, keys, size, foldM, insert)
 import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
-import Data.Types (Epi, EpiS, ModuleD)
-import System (loadLib)
+import Data.Types (Component(..), Epi, EpiS, ModuleD)
 import Util (dbg, forceInt, indentLines, replaceAll)
 
 type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}
@@ -20,14 +18,14 @@ type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array
 
 foreign import parseT :: String -> String
 
-parseShader :: forall eff h. SystemST h -> Library h -> String -> Array String -> EpiS eff h (Tuple String (Array String))
-parseShader systemST lib mid includes = do
+parseShader :: forall eff h. Library h -> String -> Array String -> EpiS eff h (Tuple String (Array String))
+parseShader lib mid includes = do
   modD <- mD <$> getLib lib mid "parseShader mid"
-  modRes <- parseModule modD systemST lib 0 0 []
+  modRes <- parseModule modD lib 0 0 []
 
   let modRes' = spliceUniformSizes modRes
-  allIncludes' <- traverse (\x -> loadLib x systemST.componentLib "includes") includes
-  let allIncludes = "//INCLUDES\n" <> (joinWith "\n\n" (map (\x -> x.body) allIncludes')) <> "\n//END INCLUDES\n"
+  allIncludes' <- traverse (\x -> cD <$> getLib lib x "includes") includes
+  let allIncludes = "//INCLUDES\n" <> (joinWith "\n\n" (map _.code allIncludes')) <> "\n//END INCLUDES\n"
 
   pure $ Tuple (allIncludes <> modRes'.component) (modRes'.images)
 
@@ -40,12 +38,12 @@ spliceUniformSizes cmp@{ component, zOfs, parOfs, images } =
     component''' = replaceAll "#aux#" (show $ length images + 1) component''
 
 -- parse a shader.  substitutions, submodules, par & zn
-parseModule :: forall eff h. ModuleD -> SystemST h -> Library h -> Int -> Int -> (Array String) -> EpiS eff h CompRes
-parseModule mod systemST lib zOfs parOfs images = do
+parseModule :: forall eff h. ModuleD -> Library h -> Int -> Int -> (Array String) -> EpiS eff h CompRes
+parseModule mod lib zOfs parOfs images = do
   -- substitutions (make sure this is always first)
-  comp <- loadLib mod.component systemST.componentLib "parse component"
+  Component _ comp <- getLib lib mod.component "parse component"
   sub' <- preProcessSub mod.sub
-  let component' = fold handleSub comp.body sub'
+  let component' = fold handleSub comp.code sub'
 
   -- pars
   let k = (A.sort $ keys mod.par)
@@ -62,15 +60,15 @@ parseModule mod systemST lib zOfs parOfs images = do
 
   -- submodules
   mod' <- loadModules mod.modules lib
-  foldM (handleChild systemST) { component: component'''', zOfs: zOfs', parOfs: parOfs', images: images' } mod'
+  foldM handleChild { component: component'''', zOfs: zOfs', parOfs: parOfs', images: images' } mod'
   where
     handleSub dt k v = replaceAll ("\\$" <> k <> "\\$") v dt
     handlePar (Tuple n dt) v = Tuple (n + 1) (replaceAll ("@" <> v <> "@") ("par[" <> show n <> "]") dt)
     handleZn dt v = replaceAll ("zn\\[#" <> show v <> "\\]") ("zn[" <> (show $ (v + zOfs)) <> "]") dt
     handleImg dt v = replaceAll ("aux\\[#" <> show v <> "\\]") ("aux[" <> (show $ (v + (A.length images))) <> "]") dt
-    handleChild :: SystemST h -> CompRes -> String -> ModuleD -> EpiS eff h CompRes
-    handleChild systemST' {component, zOfs: zOfs', parOfs: parOfs', images: images'} k v = do
-      res <- parseModule v systemST' lib zOfs' parOfs' images'
+    handleChild :: CompRes -> String -> ModuleD -> EpiS eff h CompRes
+    handleChild {component, zOfs: zOfs', parOfs: parOfs', images: images'} k v = do
+      res <- parseModule v lib zOfs' parOfs' images'
       let iC = "//" <> k <> "\n  {\n" <> (indentLines 2 res.component) <> "\n  }"
       let child = replaceAll ("%" <> k <> "%") iC component
       pure $ res { component = child }

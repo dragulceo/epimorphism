@@ -6,7 +6,8 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, readSTRef)
 import Data.Array (index, length, updateAt) as A
-import Data.Library (Library, apD, dat, getLib, getPatternD, mD, modLibD)
+import Data.Library (Library, apD, buildSearch, dat, getLib, getPatternD, mD, modLibD, searchLib)
+import Data.Library (idx) as L
 import Data.Maybe (Maybe(Nothing), fromMaybe)
 import Data.Set (singleton)
 import Data.StrMap (insert, fromFoldable, union)
@@ -49,9 +50,11 @@ switch ssRef lib t midPre idx dt = do
       typ <- loadLib "typ" dt "switch typ" -- either mod or idx
       lib' <- case typ of
         "mod" -> do
-          dbg "blorp"
+          let search = buildSearch [query] [] [Tuple "family" childN]
+          res <- searchLib lib search
+          let res' = map (\x -> (L.idx x).id) (res :: Array Module)
           -- pure $ family systemST.moduleLib childN [query] [] -- using childN here is wrong - seed1, etc
-          pure $ []
+          pure res'
         "idx" -> loadLib query systemST.indexLib "switch index" >>= \x -> pure x.lib
         x -> throwError $ "invalid 'typ' for switch, must be mod | idx : " <> x
 

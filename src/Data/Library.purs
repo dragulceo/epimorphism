@@ -4,11 +4,15 @@ import Prelude
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
+import Data.Array (filter)
+import Data.List (toUnfoldable)
 import Data.Maybe (Maybe(..))
-import Data.Set (Set, empty) as S
-import Data.StrMap (StrMap, empty)
+import Data.Set (Set, empty, subset, isEmpty, intersection, fromFoldable) as S
+import Data.StrMap (StrMap, empty, freezeST, insert, isSubmap, values, fromFoldable)
 import Data.StrMap.ST (STStrMap, delete, peek, poke)
+import Data.Tuple (Tuple(..))
 import Data.Types (CodeBlock, Component(Component), ComponentRef, EngineConf(EngineConf), EngineConfD, EpiS, Family(Family), FamilyRef, Image(Image), ImageRef, Include, Index, Module(..), ModuleD, ModuleRef, Path, Pattern(Pattern), PatternD, Script, Section(Section), SystemConf(SystemConf), SystemConfD, UIConf(UIConf), UIConfD)
+import Util (dbg)
 
 data Library h = Library {
     systemConfLib :: STStrMap h SystemConf
@@ -111,7 +115,7 @@ instance dtModule :: DataTable Module {
   , family    :: String
 } where
   libProj (Library {moduleLib}) = moduleLib
-  idx     (Module ix _) = ix
+  idx     (Module ix dt) = ix {props = insert "family" dt.family ix.props} -- hrm
   dat     (Module _ dt) = dt
   apI     (Module ix dt) mut = Module (mut ix) dt
   apD     (Module ix dt) mut = Module ix (mut dt)
@@ -201,14 +205,26 @@ delLib lib obj = do
   lift $ delete (libProj lib :: STStrMap h a) (idx obj).id # void
 
 
-
 data LibSearch = LibSearch {flags::S.Set String, exclude::S.Set String, props::StrMap String}
-emptySearch :: LibSearch
-emptySearch = LibSearch {flags: S.empty, exclude: S.empty, props: empty}
+buildSearch :: Array String -> Array String -> Array (Tuple String String) -> LibSearch
+buildSearch flags exclude props =
+  LibSearch {flags: S.fromFoldable flags, exclude: S.fromFoldable exclude,
+             props: fromFoldable props}
 
 searchLib :: forall a ad eff h. (DataTable a ad) => Library h -> LibSearch -> EpiS eff h (Array a)
 searchLib lib search = do
-  pure []
+  lib' <- liftEff $ freezeST (libProj lib)
+  pure $ filter (matchSearch search) (toUnfoldable $ values lib')
+
+matchSearch :: forall a ad. (DataTable a ad) => LibSearch -> a -> Boolean
+matchSearch (LibSearch {flags, exclude, props}) elt =
+  (S.subset flags eltFlags) &&
+  (S.isEmpty $ S.intersection exclude eltFlags) &&
+  (isSubmap props eltProps)
+  where
+    eltProps = (idx elt).props
+    eltFlags = (idx elt).flags
+
 
 -- specific finders
 getSystemConf :: forall eff h.  Library h -> String -> EpiS eff h SystemConf

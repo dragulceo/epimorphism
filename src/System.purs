@@ -26,20 +26,20 @@ import Util (dbg, urlGet)
 
 data DataSource = LocalHTTP | LocalStorage | RemoteDB
 
-serializeModules :: forall eff h. EpiS eff h String
-serializeModules = do
-  modules <- buildLib moduleSchema "/lib/modules.lib"
-
-  serialized <- SM.foldM serialize empty (modules :: StrMap ModuleD)
-
-  let all = (toUnfoldable $ values serialized) :: Array String
-  pure $ joinWith "\n\n" all
-  where
-    serialize :: StrMap String -> String -> ModuleD -> EpiS eff h (StrMap String)
-    serialize res k modD = do
-      ser <- unsafeSerialize moduleSchema Nothing modD
-      let ser' = "###Module\nid " <> k <> ser
-      pure $ insert k ser' res
+--serializeModules :: forall eff h. EpiS eff h String
+--serializeModules = do
+--  modules <- buildLib moduleSchema "/lib/modules.lib"
+--
+--  serialized <- SM.foldM serialize empty (modules :: StrMap ModuleD)
+--
+--  let all = (toUnfoldable $ values serialized) :: Array String
+--  pure $ joinWith "\n\n" all
+--  where
+--    serialize :: StrMap String -> String -> ModuleD -> EpiS eff h (StrMap String)
+--    serialize res k modD = do
+--      ser <- unsafeSerialize moduleSchema Nothing modD
+--      let ser' = "###Module\nid " <> k <> ser
+--      pure $ insert k ser' res
 
 initSystemST :: forall eff h. String -> EpiS eff h (SystemST h)
 initSystemST host = do
@@ -87,29 +87,6 @@ loadLib name lib ctx = do
   case (lookup name lib) of
     (Just d) -> pure d
     Nothing  -> throwError ("Load from lib - can't find: " <> name <> ": context :" <> ctx)
-
-
--- FLAG FAMILYS & SO FORTH
-checkFlags :: forall r. {flags :: Set String | r} -> Array String -> Array String -> Boolean
-checkFlags obj inc exc = (foldl (\dt f -> dt && S.member f obj.flags) true inc) &&
-                         (foldl (\dt f -> dt && (not $ S.member f obj.flags)) true exc)
-
--- filter a family by specific include & exclude flags, return the keys sorted alphabetically
-flagFamily :: forall r. StrMap {flags :: Set String | r} -> Array String -> Array String -> Array String
-flagFamily col inc exc = sort $ fold handle [] col
-  where
-    handle res k v = case (checkFlags v inc exc) of
-      true -> snoc res k
-      false -> res
-
--- filter a family by family, include & exclude flags, return the keys sorted alphabetically
-family :: forall r. StrMap {family :: String, flags :: Set String | r} -> String -> Array String -> Array String -> Array String
-family col fam inc exc = flagFamily (fold handle empty col) inc exc
-  where
-    handle res k v = case (v.family == fam) of
-      true -> insert k v res
-      false -> res
-
 
 -- implement a breadth first fold over the modules rooted at mid
 mFold :: forall eff h a. Library h -> a -> String -> (a -> String -> EpiS eff h a) -> EpiS eff h a

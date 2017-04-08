@@ -7,7 +7,8 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
 import Data.Array ((:), filter, partition)
 import Data.DOM.Simple.Element (setInnerHTML)
-import Data.Library (Library, getLib, getPatternD, getUIConfD, mD)
+import Data.Library (Library, buildSearch, getLib, getPatternD, getUIConfD, mD, searchLib)
+import Data.Library (idx) as L
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.String (Replacement(..), joinWith, trim, split, replace)
 import Data.String (Pattern(..)) as S
@@ -16,10 +17,10 @@ import Data.String.Regex.Flags (noFlags)
 import Data.String.Regex.Unsafe (unsafeRegex)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
-import Data.Types (EpiS, ModuleD, moduleSchema)
+import Data.Types (EpiS, Module(..), ModuleD, moduleSchema)
 import Paths (isConstantPath, runPath)
 import Serialize (showCX, unsafeSerialize)
-import System (family, loadLib)
+import System (loadLib)
 import Text.Format (format, precision)
 import UIUtil (findElt)
 import Util (dbg, indentLines, inj, real, zipI)
@@ -213,7 +214,9 @@ renderModule systemST lib modLib mid title pid = do
 
 renderSelect :: forall eff h. String -> Library h -> ModuleD -> String -> String -> EpiS eff h String
 renderSelect modLib lib modD pid cname = do
-  let fam = [] --family lib modD.family [modLib] []
+  let search = buildSearch [modLib] [] [Tuple "family" modD.family]
+  res <- searchLib lib search
+  let fam = map (\x -> (L.idx x).id) (res :: Array Module)
   let fam' = map (\x -> inj "<option value='%0'>%0</option>" [x]) fam
   let options = joinWith "\n" fam'
   let options' = (inj "<option selected disabled>%0</option>" [modD.libName]) <> options

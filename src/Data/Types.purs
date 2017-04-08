@@ -218,8 +218,12 @@ type ImageD = {
   path :: String
 }
 
+imageSchema :: Schema
+imageSchema = [
+  SchemaEntry SE_St "path"
+]
 
 data Section = Section Index SectionD
 type SectionD = {
-  values :: Array String
+  lib :: Array String
 }

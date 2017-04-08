@@ -7,7 +7,7 @@
 /html/javascript/index.js
 lib/modules.lib
 lib/components.slib
-lib/indexes.slib
+lib/sections.slib
 
 *~
 *.cache

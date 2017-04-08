@@ -6,11 +6,10 @@ import Config (UIST, SystemST, EngineST, defaultUIST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, readSTRef, newSTRef)
-import Data.Library (Library, getPatternD, getUIConfD)
-import Data.Types (EpiS)
+import Data.Library (Library, getLib, getPatternD, getUIConfD)
+import Data.Types (EpiS, Section(..))
 import KeyHandlers (keyHandler)
 import Layout (initLayout)
-import System (loadLib)
 import Util (Now)
 
 foreign import registerEventHandler :: forall eff. (String -> Eff eff Unit) -> Eff eff Unit
@@ -37,7 +36,7 @@ initUIST esRef ssRef lib = do
 
   systemST <- lift $ readSTRef ssRef
 
-  imgLib <- loadLib patternD.imageLib systemST.indexLib "all_images registerAux"
+  (Section _ imgLib) <- getLib lib patternD.imageLib "all_images registerAux"
 
   lift $ registerAuxImages imgLib.lib
 

@@ -4,7 +4,7 @@ import Prelude
 import Config (SystemST, defaultSystemST)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
-import Data.Array (concat, foldM, sort, snoc)
+import Data.Array (concat, foldM)
 import Data.Either (Either(..))
 import Data.Foldable (foldl)
 import Data.Library (Library, dat, getLibM)
@@ -20,7 +20,7 @@ import Data.Traversable (traverse)
 import Data.Tuple (Tuple)
 import Data.Types (Epi, EpiS, Module, Schema, ModuleD, moduleSchema)
 import Library (parseLib)
-import SLibrary (SHandle, SLib, SLibError(..), buildComponent, buildIndex, parseSLib)
+import SLibrary (SHandle, SLib, SLibError(..), buildComponent, parseSLib)
 import Serialize (unsafeSerialize)
 import Util (dbg, urlGet)
 
@@ -46,12 +46,10 @@ initSystemST host = do
   -- gather system data here?  currently doing this in engine
 
   -- initialize libraries
-  componentLib  <- buildSLib buildComponent  $ host <> "/lib/components.slib"
-  indexLib      <- buildSLib buildIndex      $ host <> "/lib/indexes.slib"
+  componentLib  <- buildSLib buildComponent $ host <> "/lib/components.slib"
 
   pure $ defaultSystemST {
       componentLib  = componentLib
-    , indexLib      = indexLib
   }
 
 initLibrary :: forall eff h. String -> EpiS eff h (Library h)
@@ -59,7 +57,9 @@ initLibrary host = do
   dt <- lift $ urlGet (host <> "/lib/new/core.lib")
   mod <- lift $ urlGet (host <> "/lib/new/all_modules.lib")
 
-  case (dt <> mod) of
+  let sep = Right "\n@@@ Sections\n"  -- dont hard code this
+  sections <- lift $ urlGet (host <> "/lib/sections.slib")
+  case (dt <> mod <> sep <> sections) of
     (Left er) -> throwError $ "Error loading library : " <> er
     (Right res) -> parseLibData res
 

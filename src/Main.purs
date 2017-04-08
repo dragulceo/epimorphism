@@ -15,7 +15,7 @@ import Data.Set (member)
 import Data.StrMap (insert, values, keys, lookup)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
-import Data.Types (EngineConf, EpiS, Module(..))
+import Data.Types (EngineConf, EpiS, Module(..), Section(..))
 import Engine (postprocessFrame, initEngineST, renderFrame)
 import Graphics.Canvas (CANVAS)
 import Layout (updateLayout)
@@ -88,8 +88,9 @@ initState systemST lib'@(Library libVar) = do
   ssRef <- lift $ newSTRef systemST
 
   -- load image libraries
-  index' <- fromJustE (lookup patternD.defaultImageLib systemST.indexLib) "can't find default image lib!"
-  index <- fromJustE (lookup patternD.imageLib systemST.indexLib) "can't find image lib!"
+  (Section _ index') <- getLib lib patternD.defaultImageLib "can't find default image lib!"
+  (Section _ index)  <- getLib lib patternD.imageLib "can't find image lib!"
+
   lift $ loadImages index'.lib index.lib
 
   -- import pattern

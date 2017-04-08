@@ -9,7 +9,7 @@ import Data.String (Pattern(..), split, trim, joinWith, stripSuffix)
 import Data.StrMap (StrMap (), fromFoldable)
 import Data.Traversable (traverse)
 
-import Config (Index, Component)
+import Config (Component)
 
 data SLibError = SLibError String
 type SLib = Either SLibError
@@ -52,13 +52,3 @@ buildComponent (SHandle sig body) = do
     getName _ = Left $ SLibError $ "expecting a name in: " <> sig
     getFamily [x, _] = pure x
     getFamily _ = Left $ SLibError $ "expecting a family in: " <> sig
-
-
-buildIndex :: SHandle -> SLib (Tuple String Index)
-buildIndex (SHandle sig body) = do
-  let tokens = filter ((/=) "") $ split (Pattern " ") sig
-  name <- getName tokens
-  pure $ Tuple name {name, lib: (map trim $ split (Pattern "\n") body)}
-  where
-    getName [x] = pure x
-    getName _ = Left $ SLibError $ "expecting only a name in: " <> sig

@@ -8,7 +8,7 @@ import Data.Maybe (Maybe(..))
 import Data.Set (union, Set)
 import Data.StrMap (StrMap, empty)
 import Data.Tuple (Tuple)
-import Data.Types (EpiS, Pattern, Schema, SchemaEntry(..), SchemaEntryType(..), PatternD)
+import Data.Types (EpiS, PatternD)
 import Graphics.WebGL.Types (WebGLProgram, WebGLTexture, WebGLFramebuffer, WebGLContext)
 
 -- System
@@ -21,7 +21,6 @@ type SystemST h = {
   , paused :: Boolean
   , pauseAfterSwitch :: Boolean
   , componentLib :: StrMap Component
-  , indexLib :: StrMap Index
   , compPattern :: Maybe PatternD
 }
 
@@ -35,7 +34,6 @@ defaultSystemST = {
   , paused: false
   , pauseAfterSwitch: false
   , componentLib: empty
-  , indexLib: empty
   , compPattern: Nothing
 }
 
@@ -110,9 +108,4 @@ type Component = {
     name   :: String
   , family :: String
   , body   :: String
-}
-
-type Index = {
-    name :: String
-  , lib  :: Array String
 }

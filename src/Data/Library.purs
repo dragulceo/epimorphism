@@ -154,7 +154,7 @@ instance dtImage :: DataTable Image {
   apD     (Image ix dt) mut = Image ix (mut dt)
 
 instance dtSection :: DataTable Section {
-  values :: Array String
+  lib :: Array String
 } where
   libProj (Library {sectionLib}) = sectionLib
   idx     (Section ix _) = ix

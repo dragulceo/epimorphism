@@ -7,6 +7,7 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (cons, filter, length, replicate, uncons, zip)
 import Data.Array (foldM) as A
+import Data.Either (Either(..))
 import Data.Library (Library(..))
 import Data.Maybe (Maybe(..), maybe)
 import Data.Set (Set, empty) as Set
@@ -16,8 +17,9 @@ import Data.StrMap.ST (new)
 import Data.String (Replacement(..), joinWith, replace, split, trim)
 import Data.String (Pattern(..)) as S
 import Data.Tuple (Tuple(..))
-import Data.Types (Component(Component), EngineConf(EngineConf), Epi, EpiS, Index, Module(..), Pattern(..), Schema, SchemaEntry(SchemaEntry), SchemaEntryType(SE_A_Cx, SE_A_St, SE_M_N, SE_M_St, SE_S, SE_B, SE_I, SE_N, SE_St), SystemConf(SystemConf), UIConf(UIConf), componentSchema, engineConfSchema, indexSchema, moduleSchema, patternSchema, systemConfSchema, uiConfSchema)
+import Data.Types (Component(Component), EngineConf(EngineConf), Epi, EpiS, Family(..), Image(..), Index, Module(..), Pattern(..), Schema, SchemaEntry(SchemaEntry), SchemaEntryType(SE_A_Cx, SE_A_St, SE_M_N, SE_M_St, SE_S, SE_B, SE_I, SE_N, SE_St), Section(..), SystemConf(SystemConf), UIConf(UIConf), componentSchema, engineConfSchema, familySchema, imageSchema, indexSchema, moduleSchema, patternSchema, systemConfSchema, uiConfSchema)
 import Library (parseCLst, parseLst, parseMp, parseNMp, parseSet)
+import SLibrary (SHandle(..), SLibError(..), SLib, parseSLib)
 import Util (dbg, boolFromStringE, fromJustE, inj, intFromStringE, numFromStringE, zipI)
 
 foreign import unsafeSetDataTableAttr :: forall a b eff. a -> String -> String -> b -> Eff eff a
@@ -53,6 +55,25 @@ instance mSerializable :: Serializable Module where
 instance cSerializable :: Serializable Component where
   schema a = componentSchema
   generic = unsafeGenericDataTable indexSchema componentSchema Component
+
+instance fSerializable :: Serializable Family where
+  schema a = familySchema
+  generic = unsafeGenericDataTable indexSchema familySchema Family
+
+instance iSerializable :: Serializable Image where
+  schema a = imageSchema
+  generic = unsafeGenericDataTable indexSchema imageSchema Image
+
+
+buildSection :: SHandle -> SLib (Tuple String Section)
+buildSection (SHandle sig body) = do
+  let tokens = filter ((/=) "") $ split (S.Pattern " ") sig
+  name <- getName tokens
+  let idx = {id: name, parent: "", flags: Set.empty, props: empty}
+  pure $ Tuple name (Section idx {lib: (map trim $ split (S.Pattern "\n") body)})
+  where
+    getName [x] = pure x
+    getName _ = Left $ SLibError $ "expecting only a name in: " <> sig
 
 
 type StrObj = StrMap String
@@ -125,7 +146,19 @@ mapRefById res dataType vals = do
 
 
 parseLibData :: forall eff h. String -> EpiS eff h (Library h)
-parseLibData libData = do
+parseLibData allData = do
+  -- split data
+  (Tuple libData sectionData) <-
+    case split (S.Pattern "@@@ Sections") allData of
+      [a, b] -> pure (Tuple a b)
+      _ -> throwError "Can't separate sections"
+
+  -- sections
+  sectionLib <- case (parseSLib buildSection sectionData) of
+      (Right res') -> pure res'
+      (Left (SLibError s)) -> throwError $ "Error parsing sections: " <> s
+  sl <- liftEff $ thawST sectionLib
+
   let chunks = filter ((/=) "") $ map trim $ split (S.Pattern "###") libData
   let res = empty
   strobjs <- A.foldM parseChunk empty (zipI chunks)
@@ -137,7 +170,6 @@ parseLibData libData = do
   cl <- lift $ new
   ml <- lift $ new
   il <- lift $ new
-  sl <- lift $ new
   lib <- pure $ Library {
       systemConfLib: sc
     , engineConfLib: ec
@@ -151,6 +183,7 @@ parseLibData libData = do
     , system:        Nothing
   }
 
+  -- parse chunks
   objs <- S.foldM mapRefById empty strobjs
   S.foldM instantiateChunk lib objs
   where
@@ -177,6 +210,12 @@ parseLibData libData = do
       "Component" -> do
         obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
         pure $ Library val {componentLib = obj}
+      "Family" -> do
+        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+        pure $ Library val {familyLib = obj}
+      "Image" -> do
+        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+        pure $ Library val {imageLib = obj}
       _ -> pure lib
     fields :: forall a. (Serializable a) => a -> String -> String -> EpiS eff h a
     fields obj fieldName fieldVal = do

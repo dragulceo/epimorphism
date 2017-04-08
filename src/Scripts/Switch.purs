@@ -12,7 +12,7 @@ import Data.Maybe (Maybe(Nothing), fromMaybe)
 import Data.Set (singleton)
 import Data.StrMap (insert, fromFoldable, union)
 import Data.Tuple (Tuple(..))
-import Data.Types (EpiS, Module(..), ModuleD)
+import Data.Types (EpiS, Module(..), ModuleD, Section(..))
 import Pattern (CloneRes(CloneRes), purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
 import ScriptUtil (getClone, addScript, purgeScript)
 import System (loadLib)
@@ -53,7 +53,9 @@ switch ssRef lib t midPre idx dt = do
           let search = buildSearch [query] ["live"] [Tuple "family" childN]
           res <- searchLib lib search
           pure $ map (\x -> (L.idx x).id) (res :: Array Module)
-        "idx" -> loadLib query systemST.indexLib "switch index" >>= \x -> pure x.lib
+        "idx" -> do
+          (Section _ index) <- getLib lib query "switch index"
+          pure $ index.lib
         x -> throwError $ "invalid 'typ' for switch, must be mod | idx : " <> x
 
       --dbg lib'

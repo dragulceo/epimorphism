@@ -11,41 +11,6 @@ flags {lib, wca}
 modules {t:t_wrap, w:w_lines_border, wt:wt_id, a:alpha_id, seed_color:tex_color}
 
 
-###Module
-id seed_wca_anim
-component seed_wca
-flags {lib, wca}
-modules {t:t_wrap, w:w_lines_border, wt:wt_anim, a:alpha_id, seed_color:simple_color}
-
-###Module
-id seed_wca_anim1
-component seed_wca
-flags {lib, wca}
-modules {t:t_seed_anim1, w:w_lines_border_anim, wt:wt_anim1, a:alpha_anim1, seed_color:simple_color_anim1}
-scripts [randomize dly:55 spd:0.3 lib:anim dim:vec4 sub:w typ:mod, randomize dly:65 spd:0.3 lib:anim1 dim:vec4 sub:seed_color typ:mod]
-
-###Module
-id seed_wca_anim2
-component seed_wca
-flags {lib, wca}
-modules {t:t_seed_anim2, w:w_lines_border_anim, wt:wt_anim2, a:alpha_anim2, seed_color:tex_color_anim2}
-scripts [randomize dly:63 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
-
-###Module
-id seed_wca_anim3
-component seed_wca
-flags {lib, wca}
-modules {t:t_seed_anim1, w:w_lines_border_anim, wt:wt_id, a:alpha_anim1, seed_color:simple_color_anim1}
-scripts [randomize dly:27 spd:0.3 lib:anim dim:vec4 sub:w typ:mod, randomize dly:30 spd:0.3 lib:anim3 dim:vec4 sub:seed_color typ:mod]
-
-###Module
-id seed_wca_anim4
-component seed_wca
-flags {lib, wca}
-modules {t:t_seed_anim2, w:w_lines_border_anim, wt:wt_anim2, a:alpha_anim1, seed_color:tex_color_anim5}
-scripts [randomize dly:40 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
-
-
 ### Component
 id seed_wca
 family seed

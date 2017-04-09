@@ -248,3 +248,23 @@ images2 {{
   textures/geometry/geom_21.png
   textures/geometry/geom_22.png
 }}
+
+
+shitty_images {{
+		textures/shitty/logo_1.png
+		textures/shitty/logo_2.png
+		textures/shitty/logo_3.png
+		textures/shitty/logo_4.png
+		textures/shitty/logo_5.png
+		textures/shitty/logo_6.png
+		textures/shitty/logo_7.png
+		textures/shitty/misc_1.png
+		textures/shitty/misc_2.png
+		textures/shitty/misc_3.png
+		textures/shitty/trans_1.png
+		textures/shitty/trans_2.png
+		textures/shitty/trans_3.png
+		textures/shitty/trans_4.png
+		textures/shitty/trans_5.png
+		textures/shitty/trans_6.png
+}}

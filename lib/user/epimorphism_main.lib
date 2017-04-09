@@ -248,6 +248,15 @@ scripts [randomize dly:45 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
 zn [rose 0.0025 0.4 6.0 0.9, rose 0.001 0.8 5.0 -0.8, rose 0.002 0.3 7.0 0.9, rose 0.003 1.2 4.0 0.0]
 
 ###Module
+id t_seed_anim3
+component t_wrap
+flags {wrap}
+modules {t_inner:t_id}
+scripts [randomize dly:50 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
+zn [rose 0.002 0.4 6.0 0.9, rose 0.002 0.8 5.0 -0.8, rose 0.001 0.3 7.0 0.9, rose 0.003 1.2 4.0 0.0]
+
+
+###Module
 id ts_wrap_linx3'
 component t_wrap
 modules {t_inner:t_z}
@@ -260,6 +269,20 @@ flags {lib, wrap}
 modules {t_inner:t_sinh}
 scripts [randomize dly:50 spd:0.04 lib:new dim:vec2 sub:t_inner typ:mod]
 zn [0.95 + 0.0i, 0.0 + 0.0i, 0.0 + 1.1i, 1.0 + 0.0i]
+
+###Module
+id seed_multi_anim
+component seed_multi
+flags {multi}
+modules {t:t_wrap, seed0:seed_wca_anim1, seed1:seed_wca_anim2, seed2:seed_nothing}
+
+
+###Module
+id seed_multi_anim2
+component seed_multi
+flags {multi}
+modules {t:t_wrap, seed0:seed_wca_anim3, seed1:seed_wca_anim4, seed2:seed_nothing}
+
 
 
 ###Module

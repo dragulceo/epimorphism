@@ -248,6 +248,15 @@ scripts [randomize dly:45 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
 zn [rose 0.0025 0.4 6.0 0.9, rose 0.001 0.8 5.0 -0.8, rose 0.002 0.3 7.0 0.9, rose 0.003 1.2 4.0 0.0]
 
 ###Module
+id t_seed_anim3
+component t_wrap
+flags {wrap}
+modules {t_inner:t_id}
+scripts [randomize dly:50 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
+zn [rose 0.002 0.4 6.0 0.9, rose 0.002 0.8 5.0 -0.8, rose 0.001 0.3 7.0 0.9, rose 0.003 1.2 4.0 0.0]
+
+
+###Module
 id ts_wrap_linx3'
 component t_wrap
 modules {t_inner:t_z}
@@ -260,6 +269,20 @@ flags {lib, wrap}
 modules {t_inner:t_sinh}
 scripts [randomize dly:50 spd:0.04 lib:new dim:vec2 sub:t_inner typ:mod]
 zn [0.95 + 0.0i, 0.0 + 0.0i, 0.0 + 1.1i, 1.0 + 0.0i]
+
+###Module
+id seed_multi_anim
+component seed_multi
+flags {multi}
+modules {t:t_wrap, seed0:seed_wca_anim1, seed1:seed_wca_anim2, seed2:seed_nothing}
+
+
+###Module
+id seed_multi_anim2
+component seed_multi
+flags {multi}
+modules {t:t_wrap, seed0:seed_wca_anim3, seed1:seed_wca_anim4, seed2:seed_nothing}
+
 
 
 ###Module
@@ -363,6 +386,88 @@ component tex_color_scroll
 images [textures/ponies/ponies_9.png]
 par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:1.0}
 scripts [randomize dly:45 spd:0.05 lib:ponies dim:vec4 sub:0 typ:image]
+
+
+
+### SystemConf
+id shitty
+engineConf default
+uiConf prod
+pattern shitty
+
+### Pattern
+id shitty
+vert   vert
+main   shitty_main
+disp   disp_id
+includes [header, additional_funcs, colorspace, math]
+defaultImageLib shitty_images
+imageLib shitty_images
+
+###Module
+id shitty_main
+component main
+flags {shitty, root}
+modules {application:epimorphism_shitty}
+
+###Module
+id epimorphism_shitty
+component epimorphism
+flags {shitty, lib}
+modules {seed:seed_multi_shitty, t:t_main2, color:color_id, reduce:torus_reduce}
+
+###Module
+id seed_multi_shitty
+component seed_multi
+flags {shitty, multi, lib}
+modules {t:t_wrap, seed0:seed_wca_shitty1, seed1:seed_wca_shitty2, seed2:seed_wca_shitty3}
+
+###Module
+id seed_wca_shitty1
+component seed_wca
+flags {shitty, wca}
+modules {t:t_seed_anim1, w:w_lines_border_anim, wt:wt_id, a:alpha_id, seed_color:shitty_color1}
+scripts [randomize dly:75 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
+
+###Module
+id shitty_color1
+component tex_color_scroll
+flags {shitty}
+images [textures/shitty/logo_7.png]
+par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:0.0, pal:0.0}
+scripts [randomize dly:65 spd:0.05 lib:shitty_images dim:vec4 sub:0 typ:image]
+
+
+###Module
+id seed_wca_shitty2
+component seed_wca
+flags {shitty, wca}
+modules {t:t_seed_anim2, w:w_lines_inner_anim, wt:wt_id, a:alpha_id, seed_color:shitty_color2}
+scripts [randomize dly:70 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
+
+###Module
+id shitty_color2
+component tex_color_scroll
+flags {shitty}
+images [textures/shitty/logo_7.png]
+par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:0.0, pal:0.0}
+scripts [randomize dly:53 spd:0.05 lib:shitty_images dim:vec4 sub:0 typ:image]
+
+
+###Module
+id seed_wca_shitty3
+component seed_wca
+flags {shitty, wca}
+modules {t:t_seed_anim3, w:w_square_anim, wt:wt_id, a:alpha_id, seed_color:shitty_color3}
+scripts [randomize dly:80 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
+
+###Module
+id shitty_color3
+component tex_color_scroll
+flags {shitty}
+images [textures/shitty/logo_7.png]
+par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:0.0, pal:0.0}
+scripts [randomize dly:85 spd:0.05 lib:shitty_images dim:vec4 sub:0 typ:image]
 
 
 

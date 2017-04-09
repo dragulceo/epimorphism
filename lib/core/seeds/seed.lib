@@ -82,20 +82,6 @@ flags {lib, multi}
 modules {reduce:torus_reduce, t:t_wrap, seed0:seed_wca, seed1:seed_nothing, seed2:seed_nothing}
 
 
-###Module
-id seed_multi_anim
-component seed_multi
-flags {multi}
-modules {t:t_wrap, seed0:seed_wca_anim1, seed1:seed_wca_anim2, seed2:seed_nothing}
-
-
-###Module
-id seed_multi_anim2
-component seed_multi
-flags {multi}
-modules {t:t_wrap, seed0:seed_wca_anim3, seed1:seed_wca_anim4, seed2:seed_nothing}
-
-
 ### Component
 id seed_multi
 family seed

@@ -40,61 +40,61 @@ devKeyHandler usRef lib char = do
 
   case char of
     "1" -> do
-      incMod uiConfD uiST "main.t" "t_inner" "all" 1
+      incMod uiConfD uiST "main.application.t" "t_inner" "all" 1
     "q" -> do
-      incMod uiConfD uiST "main.t" "t_inner" "all" (-1)
+      incMod uiConfD uiST "main.application.t" "t_inner" "all" (-1)
     "!" -> do
-      incMod uiConfD uiST "main" "t" "all''" 1
+      incMod uiConfD uiST "main.application" "t" "all''" 1
     "Q" -> do
-      incMod uiConfD uiST "main" "t" "all''" (-1)
+      incMod uiConfD uiST "main.application" "t" "all''" (-1)
     "1" -> do
-      incMod uiConfD uiST "main.t" "t_inner" "all" 1
+      incMod uiConfD uiST "main.application.t" "t_inner" "all" 1
     "q" -> do
-      incMod uiConfD uiST "main.t" "t_inner" "all" (-1)
+      incMod uiConfD uiST "main.application.t" "t_inner" "all" (-1)
     "2" -> do
-      incMod uiConfD uiST "main" "seed" "t_test" 1
+      incMod uiConfD uiST "main.application" "seed" "t_test" 1
     "w" -> do
-      incMod uiConfD uiST "main" "seed" "t_test" (-1)
+      incMod uiConfD uiST "main.application" "seed" "t_test" (-1)
     "3" -> do
-      incMod uiConfD uiST "main" "color" "lib" 1
+      incMod uiConfD uiST "main.application" "color" "lib" 1
     "e" -> do
-      incMod uiConfD uiST "main" "color" "lib" (-1)
+      incMod uiConfD uiST "main.application" "color" "lib" (-1)
     "4" -> do
       incMod uiConfD uiST "disp" "post" "lib" 1
     "r" -> do
       incMod uiConfD uiST "disp" "post" "lib" (-1)
     "a" -> do
-      pure "scr main.t incZn idx:0 ofs:1"
+      pure "scr main.application.t incZn idx:0 ofs:1"
     "z" -> do
-      pure "scr main.t incZn idx:0 ofs:-1"
+      pure "scr main.application.t incZn idx:0 ofs:-1"
     "A" -> do
-      pure "scr main.t incZn idx:0 ofs:i"
+      pure "scr main.application.t incZn idx:0 ofs:i"
     "Z" -> do
-      pure "scr main.t incZn idx:0 ofs:-i"
+      pure "scr main.application.t incZn idx:0 ofs:-i"
     "s" -> do
-      pure "scr main.t incZn idx:1 ofs:1"
+      pure "scr main.application.t incZn idx:1 ofs:1"
     "x" -> do
-      pure "scr main.t incZn idx:1 ofs:-1"
+      pure "scr main.application.t incZn idx:1 ofs:-1"
     "S" -> do
-      pure "scr main.t incZn idx:1 ofs:i"
+      pure "scr main.application.t incZn idx:1 ofs:i"
     "X" -> do
-      pure "scr main.t incZn idx:1 ofs:-i"
+      pure "scr main.application.t incZn idx:1 ofs:-i"
     "d" -> do
-      pure "scr main.t incZn idx:2 ofs:1"
+      pure "scr main.application.t incZn idx:2 ofs:1"
     "c" -> do
-      pure "scr main.t incZn idx:2 ofs:-1"
+      pure "scr main.application.t incZn idx:2 ofs:-1"
     "D" -> do
-      pure "scr main.t incZn idx:2 ofs:i"
+      pure "scr main.application.t incZn idx:2 ofs:i"
     "C" -> do
-      pure "scr main.t incZn idx:2 ofs:-i"
+      pure "scr main.application.t incZn idx:2 ofs:-i"
     "f" -> do
-      pure "scr main.t incZn idx:3 ofs:1"
+      pure "scr main.application.t incZn idx:3 ofs:1"
     "v" -> do
-      pure "scr main.t incZn idx:3 ofs:-1"
+      pure "scr main.application.t incZn idx:3 ofs:-1"
     "F" -> do
-      pure "scr main.t incZn idx:3 ofs:i"
+      pure "scr main.application.t incZn idx:3 ofs:i"
     "V" -> do
-      pure "scr main.t incZn idx:3 ofs:-i"
+      pure "scr main.application.t incZn idx:3 ofs:-i"
     _   -> commonKeyHandler usRef lib char
   where
     incMod uiConfD uiST adr childN lib' ofs = do

@@ -31,11 +31,11 @@ renderConsole uiST systemST lib = do
   uiConfD  <- getUIConfD lib "renderConsole uiConf"
   patternD <- getPatternD lib "renderConsole pattern"
   dsmDiv <- findElt "debugMain"
-  str0 <- renderModule systemST lib uiConfD.uiCompLib patternD.main "APPLICATION" (Just patternD.main)
+  str0 <- renderModule systemST lib uiConfD.uiCompLib patternD.main "MAIN" Nothing
   lift $ setInnerHTML str0 dsmDiv
 
   dsdDiv <- findElt "debugDisp"
-  str1 <- renderModule systemST lib uiConfD.uiCompLib patternD.disp "POST" (Just patternD.disp)
+  str1 <- renderModule systemST lib uiConfD.uiCompLib patternD.disp "DISP" Nothing
   lift $ setInnerHTML str1 dsdDiv
 
   lift $ addEventListeners

@@ -1,5 +1,6 @@
 ### Component
 id main
+family main
 code &&&
 
 uniform sampler2D fb;
@@ -20,7 +21,7 @@ void main() {
   z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(kernel_dim, kernel_dim) - vec2(1.0, 1.0);
   z_in = z;
 
-  %body%
+  %application%
 
   gl_FragColor = color;
 }
@@ -28,6 +29,7 @@ void main() {
 
 ### Component
 id disp
+family disp
 code &&&
 
 precision mediump float;
@@ -43,7 +45,7 @@ void main() {
   vec2 z = vec2(2.0, 2.0) * clipSpace - vec2(1.0, 1.0);
   frame = texture2D(fb, clipSpace);
 
-  %body%
+  %post%
 
 	frame.a = 1.0; // this value is used by webgl
   gl_FragColor = frame;
@@ -52,10 +54,10 @@ void main() {
 
 ### Component
 id vert
+family vert
 code &&&
 attribute vec2 a_position;
 
 void main() {
-  %body%
   gl_Position = vec4(a_position, 0, 1);
 }

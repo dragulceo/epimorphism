@@ -127,7 +127,7 @@ compileShaders esRef lib full = do
 
 parseMain :: forall eff h. Library h -> PatternD -> Maybe Int -> EpiS eff h (Tuple String (Array String))
 parseMain lib patternD fract = do
-  Tuple main'' aux <- parseShader lib patternD.mainC patternD.main patternD.includes
+  Tuple main'' aux <- parseShader lib patternD.main patternD.includes
 
   -- kind of ghetto
   main <- case fract of
@@ -142,10 +142,10 @@ parseMain lib patternD fract = do
   pure $ Tuple main aux
 
 parseDisp :: forall eff h. Library h -> PatternD -> EpiS eff h String
-parseDisp lib patternD = fst <$> parseShader lib patternD.dispC patternD.disp patternD.includes
+parseDisp lib patternD = fst <$> parseShader lib patternD.disp patternD.includes
 
 parseVert :: forall eff h. Library h -> PatternD -> EpiS eff h String
-parseVert lib patternD = fst <$> parseShader lib patternD.vertC patternD.vert []
+parseVert lib patternD = fst <$> parseShader lib patternD.vert []
 
 linkShader :: forall eff h. EngineST -> WebGLProgram -> EpiS eff h UniformBindings
 linkShader es prog = execGL es.ctx do

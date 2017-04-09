@@ -1,3 +1,9 @@
+### Module
+id test_pattern_main
+component main
+modules {application: test_pattern}
+flags {root}
+
 ###Module
 id test_pattern
 component test_pattern

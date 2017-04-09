@@ -1,35 +1,26 @@
 ### Pattern
 id dev
-vert   id
-main   epimorphism_dev
-disp   post_id
-vertC  vert
-dispC  disp
-mainC  main
+vert   vert
+main   epimorphism_dev_main
+disp   disp_id
 includes [header, additional_funcs, colorspace, math]
 defaultImageLib default_images
 imageLib all_images
 
 ### Pattern
 id analysis
-vert   id
-main   analysis
-disp   post_id
-vertC  vert
-dispC  disp
-mainC  main
+vert   vert
+main   analysis_main
+disp   disp_id
 includes [header, additional_funcs, colorspace, math]
 defaultImageLib default_images
 imageLib all_images
 
 ### Pattern
 id prod
-vert   id
-main   epimorphism_auto2
-disp   post_main4
-vertC  vert
-dispC  disp
-mainC  main
+vert   vert
+main   epimorphism_main4
+disp   disp_main4
 includes [header, additional_funcs, colorspace, math]
 defaultImageLib default_images
 imageLib all_images

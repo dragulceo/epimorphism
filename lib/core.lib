@@ -279,6 +279,22 @@ code &&&
 id library
 
 ### Family
+id main
+var color
+dim 4
+default_comp test_pattern_main
+
+### Family
+id disp
+var frame
+dim 4
+default_comp
+
+### Family
+id vert
+dim 0
+
+### Family
 id application
 var color
 dim 4
@@ -765,6 +781,7 @@ code &&&
 
 ### Component
 id main
+family main
 code &&&
 
 uniform sampler2D fb;
@@ -785,7 +802,7 @@ void main() {
   z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(kernel_dim, kernel_dim) - vec2(1.0, 1.0);
   z_in = z;
 
-  %body%
+  %application%
 
   gl_FragColor = color;
 }
@@ -793,6 +810,7 @@ void main() {
 
 ### Component
 id disp
+family disp
 code &&&
 
 precision mediump float;
@@ -808,7 +826,7 @@ void main() {
   vec2 z = vec2(2.0, 2.0) * clipSpace - vec2(1.0, 1.0);
   frame = texture2D(fb, clipSpace);
 
-  %body%
+  %post%
 
 	frame.a = 1.0; // this value is used by webgl
   gl_FragColor = frame;
@@ -817,11 +835,11 @@ void main() {
 
 ### Component
 id vert
+family vert
 code &&&
 attribute vec2 a_position;
 
 void main() {
-  %body%
   gl_Position = vec4(a_position, 0, 1);
 }
 
@@ -829,41 +847,38 @@ void main() {
 
 ### Pattern
 id dev
-vert   id
-main   epimorphism_dev
-disp   post_id
-vertC  vert
-dispC  disp
-mainC  main
+vert   vert
+main   epimorphism_dev_main
+disp   disp_id
 includes [header, additional_funcs, colorspace, math]
 defaultImageLib default_images
 imageLib all_images
 
 ### Pattern
 id analysis
-vert   id
-main   analysis
-disp   post_id
-vertC  vert
-dispC  disp
-mainC  main
+vert   vert
+main   analysis_main
+disp   disp_id
 includes [header, additional_funcs, colorspace, math]
 defaultImageLib default_images
 imageLib all_images
 
 ### Pattern
 id prod
-vert   id
-main   epimorphism_auto2
-disp   post_main4
-vertC  vert
-dispC  disp
-mainC  main
+vert   vert
+main   epimorphism_main4
+disp   disp_main4
 includes [header, additional_funcs, colorspace, math]
 defaultImageLib default_images
 imageLib all_images
 
 
+
+###Module
+id disp_id
+component disp
+modules {post: post_id}
+flags {root}
 
 ###Module
 id post_id
@@ -980,6 +995,12 @@ code &&&
 	frame = hsv2rgb(frame);
 
 
+
+### Module
+id test_pattern_main
+component main
+modules {application: test_pattern}
+flags {root}
 
 ###Module
 id test_pattern
@@ -1132,6 +1153,13 @@ code &&&
 ### Component
 id id
 family nul
+
+
+###Module
+id vert
+component vert
+flags {root}
+
 
 
 ###Module

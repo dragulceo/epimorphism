@@ -1,4 +1,43 @@
 ###Module
+id epimorphism_dev_main
+component main
+flags {dev, epimorphism, root}
+modules {application:epimorphism_dev}
+
+
+###Module
+id epimorphism_main
+component main
+flags {epimorphism, root}
+modules {application:epimorphism}
+
+
+###Module
+id epimorphism_main4
+component main
+flags {epimorphism, root}
+modules {application:epimorphism_auto2}
+
+###Module
+id epimorphism1_main
+component main
+flags {epimorphism, root}
+modules {application:epimorphism_auto1}
+
+###Module
+id epimorphism2_main
+component main
+flags {epimorphism, root}
+modules {application:epimorphism_auto2}
+
+###Module
+id epimorphism3_main
+component main
+flags {epimorphism, root}
+modules {application:epimorphism_auto3}
+
+
+###Module
 id epimorphism_auto1
 component epimorphism
 flags {lib}
@@ -221,3 +260,33 @@ flags {lib, wrap}
 modules {t_inner:t_sinh}
 scripts [randomize dly:50 spd:0.04 lib:new dim:vec2 sub:t_inner typ:mod]
 zn [0.95 + 0.0i, 0.0 + 0.0i, 0.0 + 1.1i, 1.0 + 0.0i]
+
+
+###Module
+id disp_id2
+component disp
+flags {root}
+modules {post:post_id}
+scripts [randomize dly:75 spd:0.4 lib:post_main dim:vec4 sub:post typ:mod]
+
+###Module
+id disp_main3
+component disp
+flags {root}
+modules {post:post_hlim_anim2}
+
+###Module
+id disp_main4
+component disp
+flags {root}
+modules {post:post_main4}
+
+###Module
+id disp_main1
+component disp
+modules {post:post_hlim_anim}
+
+###Module
+id disp_main2
+component disp
+modules {post:post_hlim_anim2}

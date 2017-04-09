@@ -2,6 +2,22 @@
 id library
 
 ### Family
+id main
+var color
+dim 4
+default_comp test_pattern_main
+
+### Family
+id disp
+var frame
+dim 4
+default_comp
+
+### Family
+id vert
+dim 0
+
+### Family
 id application
 var color
 dim 4

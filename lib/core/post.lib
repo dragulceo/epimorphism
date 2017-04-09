@@ -1,4 +1,10 @@
 ###Module
+id disp_id
+component disp
+modules {post: post_id}
+flags {root}
+
+###Module
 id post_id
 component post_id
 flags {lib}

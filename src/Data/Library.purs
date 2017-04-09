@@ -84,9 +84,6 @@ instance dtPattern :: DataTable Pattern {
     vert            :: String -- ModuleRef
   , main            :: String -- ModuleRef
   , disp            :: String -- ModuleRef
-  , vertC           :: String -- ComponentRef
-  , mainC           :: String -- ComponentRef
-  , dispC           :: String -- ComponentRef
   , defaultImageLib :: String
   , imageLib        :: String
   , includes        :: Array String -- REMOVE ME

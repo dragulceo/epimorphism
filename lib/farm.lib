@@ -1,4 +1,10 @@
 ###Module
+id farm_main
+component main
+flags {epimorphism, root}
+modules {application:farm_epimorphism}
+
+###Module
 id farm_epimorphism
 component epimorphism
 flags {farm1}

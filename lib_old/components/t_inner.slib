@@ -1,3 +1,0 @@
-t_inner t_sub {{
-	z = $t_expr$;
-}}

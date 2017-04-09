@@ -1,9 +1,0 @@
---switch
-family switch
-component switch
-sub {var: v0, dim: float}
-par {intrp: 0.0}
-modules {m0: id, m1: id}
-
---smooth_switch < switch
-component smooth_switch

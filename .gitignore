@@ -5,8 +5,8 @@
 /.psci*
 
 /html/javascript/index.js
-lib/modules.lib
-lib/components.slib
+lib/core.lib
+lib/user.lib
 lib/sections.slib
 
 *~

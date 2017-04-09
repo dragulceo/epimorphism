@@ -1697,6 +1697,102 @@ code &&&
 
 
 ###Module
+id t_id
+component t_id
+
+###Module
+id t_wrap
+component t_wrap
+flags {lib, wrap}
+modules {t_inner:t_z}
+zn [1.0+0.0i, 0.0+0.0i, 1.0+0.0i, 0.0+0.0i]
+
+###Module
+id t_affine
+component t_affine
+flags {farm1, lib, wrap}
+modules {t_inner:t_z}
+zn [1.0+0.0i, 0.0+0.0i]
+
+###Module
+id t_wrap_zo
+component t_wrap
+flags {all, lib, wrap}
+modules {t_inner:t_z}
+zn [1.1+0.0i, 0.0+0.0i, 1.0+0.0i, 0.0+0.0i]
+
+###Module
+id t_wrap_z1
+component t_wrap
+flags {all, lib, wrap}
+modules {t_inner:t_z}
+zn [4.0+0.0i, 0.0+0.0i, 1.0+0.0i, 0.0+0.0i]
+
+###Module
+id t_wrap_zo'
+component t_wrap
+flags {all, lib, wrap}
+modules {t_inner:t_z}
+zn [1.1+0.0i, 0.0+0.0i, 0.0+1.0i, 1.0+0.0i]
+
+###Module
+id t_wrap_zo'1
+component t_wrap
+flags {all', wrap}
+modules {t_inner:t_z}
+zn [circle 0.005 1.0, 0.0+0.0i, 0.0+1.0i, 1.0+0.0i]
+
+###Module
+id t_wrap_zo'2
+component t_wrap
+flags {all', wrap}
+modules {t_inner:t_z}
+zn [1.1+0.0i, rose 0.004 0.8 5.0 -0.8, 0.0+1.0i, 1.0+0.0i]
+
+###Module
+id t_wrap_zo'3
+component t_wrap
+flags {all', wrap}
+modules {t_inner:t_z}
+zn [1.1+0.0i, 0.0+0.0i, 0.0+1.0i, rose 0.002 1.1 4.0 0.0]
+
+###Module
+id t_wrap_zo'4
+component t_wrap
+flags {all', wrap}
+modules {t_inner:t_z}
+zn [circle 0.005 1.0, 0.0+0.0i, 0.0+1.0i, rose 0.0025 1.1 4.0 0.0]
+
+
+### Component
+id t_id
+family t
+default_mod t_id
+code &&&
+// Nothing
+
+### Component
+id t_wrap
+family t
+default_mod t_wrap
+children {t_inner:t_inner}
+code &&&
+  z = M(zn[#0], z) + zn[#1];
+  %t_inner%
+  z = M(zn[#2], z) + zn[#3];
+
+### Component
+id t_affine
+family t
+default_mod t_affine
+children {t_inner:t_inner}
+code &&&
+  z = M(zn[#0], z) + zn[#1];
+  %t_inner%
+
+
+
+###Module
 id t_z
 component t_sub
 flags {all, all_seed, lib}

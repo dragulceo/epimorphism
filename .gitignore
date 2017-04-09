@@ -8,6 +8,10 @@
 lib/core.lib
 lib/user.lib
 lib/sections.slib
+lib/modules.lib
+lib/components.slib
+lib/sections.slib
+
 
 *~
 *.cache

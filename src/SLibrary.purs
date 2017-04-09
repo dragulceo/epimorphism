@@ -4,7 +4,7 @@ import Prelude
 import Data.Array (filter, uncons)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import Data.Tuple (Tuple(..))
+import Data.Tuple (Tuple)
 import Data.String (Pattern(..), split, trim, joinWith, stripSuffix)
 import Data.StrMap (StrMap (), fromFoldable)
 import Data.Traversable (traverse)
@@ -36,22 +36,3 @@ parseSLib :: forall a. (SHandle -> SLib (Tuple String a)) -> String -> SLib (Str
 parseSLib builder lib = do
   let groups = filter ((/=) "") $ map trim (split (Pattern "}}\n") lib)
   fromFoldable <$> traverse (parseSGroup builder) groups
-
-type Component = {
-    name   :: String
-  , family :: String
-  , body   :: String
-}
-
--- BUILDERS - maybe move somewhere else?
-buildComponent :: SHandle -> SLib (Tuple String Component)
-buildComponent (SHandle sig body) = do
-  let tokens = filter ((/=) "") $ split (Pattern " ") sig
-  name <- getName tokens
-  family <- getFamily tokens
-  pure $ Tuple name {name, family, body}
-  where
-    getName [_, x] = pure x
-    getName _ = Left $ SLibError $ "expecting a name in: " <> sig
-    getFamily [x, _] = pure x
-    getFamily _ = Left $ SLibError $ "expecting a family in: " <> sig

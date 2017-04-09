@@ -16,13 +16,12 @@ import Util (dbg, inj, urlGet)
 
 initLibrary :: forall eff h. String -> EpiS eff h (Library h)
 initLibrary host = do
-  dt <- lift $ urlGet (host <> "/lib/core.lib")
-  mod <- lift $ urlGet (host <> "/lib/all_modules.lib")
-  comp <- lift $ urlGet (host <> "/lib/all_components.lib")
+  core <- lift $ urlGet (host <> "/lib/core.lib")
+  user <- lift $ urlGet (host <> "/lib/user.lib")
 
   let sep = Right "\n@@@ Sections\n"  -- dont hard code this
   sections <- lift $ urlGet (host <> "/lib/sections.slib")
-  case (dt <> mod <> comp <> sep <> sections) of
+  case (core <> user <> sep <> sections) of
     (Left er) -> throwError $ "Error loading library : " <> er
     (Right res) -> parseLibData res
 

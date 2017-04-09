@@ -1,13 +1,12 @@
 TODO:
 	cleanup library data files/org?
+	switch application broken :/ might need to put main back
 
 	clean up/remove Config & slib
 	remove ssRef from ScriptFn, figure out phases
 	importing = clone, rewrite clonePattern
 	component indentation :/
 	change sub vars to something that gives better compiler errors
-	clean up compiler
-	clean up family, component helpers?
 	saving
 
 	pattern scripts

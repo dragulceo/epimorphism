@@ -1,0 +1,65 @@
+###Module
+id farm_epimorphism
+component epimorphism
+flags {farm1}
+modules {seed:seed_simple, t:t_affine, color:color_id, reduce:torus_reduce}
+
+###Module
+id seed_farm1
+component seed_wca
+flags {farm1}
+modules {t:t_affine, w:w_lines_border, wt:wt_inv, a:alpha_id, seed_color:tex_color1}
+
+###Module
+id seed_farm2
+component seed_wca
+flags {farm1}
+modules {t:t_affine, w:w_lines_inner, wt:wt_id, a:alpha_solid1, seed_color:simple_color}
+
+###Module
+id seed_farm3
+component seed_wca
+flags {farm1}
+modules {t:t_affine, w:w_lines_lr, wt:wt_inv, a:alpha_id, seed_color:tex_color}
+
+###Module
+id seed_farm4
+component seed_wca
+flags {farm1}
+modules {t:t_affine, w:w_square, wt:wt_id, a:alpha_id, seed_color:tex_color3}
+
+###Module
+id seed_farm5
+component seed_wca
+flags {farm1}
+modules {t:t_affine1, w:w_lines_inner, wt:wt_id, a:alpha_linear, seed_color:simple_color}
+
+###Module
+id seed_farm6
+component seed_wca
+flags {farm1}
+modules {t:t_affine2, w:w_circle, wt:wt_id, a:alpha_id, seed_color:tex_color2}
+
+###Module
+id seed_farm_multi
+component seed_multi
+flags {farm1}
+modules {t:t_wrap, seed0:seed_farm1, seed1:seed_farm4, seed2:seed_farm6}
+
+###Module
+id alpha_solid1
+component alpha
+par {alpha:0.7}
+sub {a_exp:a * @alpha@}
+
+###Module
+id t_affine1
+component t_affine
+modules {t_inner:t_exp}
+zn [1.3 + 0.0i, 0.0 + 0.0i]
+
+###Module
+id t_affine2
+component t_affine
+modules {t_inner:t_tp5}
+zn [1.0+0.0i, 0.0+0.0i]

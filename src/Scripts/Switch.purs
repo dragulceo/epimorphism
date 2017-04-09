@@ -130,6 +130,7 @@ getMutator mut idx name  = do
 switchModules :: forall eff h. Library h -> Number -> String -> String -> String -> Number -> EpiS eff h Unit
 switchModules lib t rootId childN m1 spd = do
   modD  <- mD <$> getLib lib rootId "switch module"
+  dbg modD
   m0    <- loadLib childN modD.modules "switch find child"
   mod0@(Module _ mod0D) <- getLib lib m0 "switch m0"
   mod1D <- mD <$> getLib lib m1 "switch m0"

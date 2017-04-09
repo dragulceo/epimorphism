@@ -1,0 +1,61 @@
+### Component
+id main
+code &&&
+
+uniform sampler2D fb;
+uniform float time;
+uniform float kernel_dim;
+uniform sampler2D audioData;
+#par#
+#zn#
+#aux#
+
+$NO_FRACT$
+
+void main() {
+  vec4 color;
+  vec2 z, z_in;
+
+  // into z coordinates
+  z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(kernel_dim, kernel_dim) - vec2(1.0, 1.0);
+  z_in = z;
+
+  %body%
+
+  gl_FragColor = color;
+}
+
+
+### Component
+id disp
+code &&&
+
+precision mediump float;
+uniform sampler2D fb;
+uniform float kernel_dim;
+
+#par#
+#zn#
+
+void main() {
+  vec4 frame;
+  vec2 clipSpace = gl_FragCoord.xy / vec2(kernel_dim, kernel_dim);
+  vec2 z = vec2(2.0, 2.0) * clipSpace - vec2(1.0, 1.0);
+  frame = texture2D(fb, clipSpace);
+
+  %body%
+
+	frame.a = 1.0; // this value is used by webgl
+  gl_FragColor = frame;
+}
+
+
+### Component
+id vert
+code &&&
+attribute vec2 a_position;
+
+void main() {
+  %body%
+  gl_Position = vec4(a_position, 0, 1);
+}

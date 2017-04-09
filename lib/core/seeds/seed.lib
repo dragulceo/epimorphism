@@ -1,0 +1,129 @@
+###Module
+id seed_nothing
+component seed_nothing
+flags {lib}
+
+###Module
+id seed_simple
+component seed_simple
+modules {reduce:torus_reduce}
+flags {lib}
+par {w:0.2, alpha:1.0}
+
+###Module
+id seed_img1
+component seed_simple_img
+modules {t:t_id, reduce:torus_reduce}
+flags {img}
+images [textures/simplegeom/tile_grid1.png]
+par {w:0.2, alpha:1.0}
+
+### Component
+id seed_nothing
+family seed
+default_mod seed_nothing
+code &&&
+	seed = vec4(0.0, 0.0, 0.0, 0.0);
+
+### Component
+id seed_simple
+family seed
+default_mod seed_simple
+children {reduce:reduce}
+includes []
+code &&&
+	vec2 z_i = z;
+	%reduce%
+
+	float wx = (abs(z.x) + @w@ - 1.0) / @w@;
+	float wy = (abs(z.y) + @w@ - 1.0) / @w@;
+
+  float w = max(0.0, max(wx, wy));
+	float mask = ceil(w);
+
+	seed = hsv2rgb(vec4(0.0, 1.0, w, mask * @alpha@));
+	z = z_i;
+
+### Component
+id seed_simple_img
+family seed
+default_mod seed_simple_img
+children {t:t, reduce:reduce}
+code &&&
+	vec2 z_i = z;
+  %t%
+	%reduce%
+
+	float wx = (abs(z.x) + @w@ - 1.0) / @w@;
+	float wy = (abs(z.y) + @w@ - 1.0) / @w@;
+
+  float w = max(0.0, max(wx, wy));
+	float mask = ceil(w);
+
+	float sc = 0.25;
+	vec2 ofs = mod(sc * vec2(wx, wy), 1.0);
+  seed = texture2D(aux[#0], ofs);
+
+	// mask w
+	seed.w *= mask * @alpha@;
+
+	// preserve val
+	seed = rgb2hsv(seed);
+	seed.z *= w;
+	seed = hsv2rgb(seed);
+
+	z = z_i;
+
+
+###Module
+id seed_multi
+component seed_multi
+flags {lib, multi}
+modules {reduce:torus_reduce, t:t_wrap, seed0:seed_wca, seed1:seed_nothing, seed2:seed_nothing}
+
+
+###Module
+id seed_multi_anim
+component seed_multi
+flags {multi}
+modules {t:t_wrap, seed0:seed_wca_anim1, seed1:seed_wca_anim2, seed2:seed_nothing}
+
+
+###Module
+id seed_multi_anim2
+component seed_multi
+flags {multi}
+modules {t:t_wrap, seed0:seed_wca_anim3, seed1:seed_wca_anim4, seed2:seed_nothing}
+
+
+### Component
+id seed_multi
+family seed
+default_mod seed_multi
+children {t:t, reduce:reduce, seed0:seed, seed1:seed, seed2:seed}
+code &&&
+	vec4 seed0, seed1, seed2;
+	vec2 z_i = z;
+  %t%
+	%reduce%
+
+	%seed0%
+	seed0 = seed;
+
+	%seed1%
+	seed1 = seed;
+
+	%seed2%
+	seed2 = seed;
+
+	float a = 1.0 - (1.0 - seed0.a) * (1.0 - seed1.a) * (1.0 - seed2.a);
+
+	if(a == 0.0)
+		seed = vec4(0.0, 0.0, 0.0, 0.0);
+	else {
+		vec4 m1 = mix(seed0.a * seed0, seed1, seed1.a);
+		vec4 m2 = mix(m1, seed2, seed2.a);
+		seed = 1.0 / a * m2;
+	}
+	seed.a = a;
+	z = z_i;

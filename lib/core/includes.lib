@@ -1,0 +1,289 @@
+### Component
+id header
+family library
+code &&&
+
+precision mediump float;
+#define PI 3.1415926535
+#define DEPTH_INC (32.0 / 255.0)
+
+### Component
+id additional_funcs
+family library
+code &&&
+
+/*
+float freqData(float x){
+	return texture2D(audioData, vec2(mod(x, 1.0), 0.0)).a;
+}
+
+float timeData(float x){
+	return texture2D(audioData, vec2(mod(x, 1.0), 2.0)).a;
+}
+*/
+
+float plane_wave(vec2 k, vec2 z, float w, float time){
+
+  float th = (k.x * z.x + k.y * z.y) - w * time;
+	th = mod(th, 1.0);
+  float v = sin(2.0 * PI * th);
+
+  return v;
+}
+
+### Component
+id colorspace
+family library
+code &&&
+
+/* colorspace library */
+vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d ){
+	return a + b * cos(2.0 * PI * (c * t + d));
+}
+
+vec4 rgb2hsv(vec4 c){
+  vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+  vec4 p = c.g < c.b ? vec4(c.bg, K.wz) : vec4(c.gb, K.xy);
+  vec4 q = c.r < p.x ? vec4(p.xyw, c.r) : vec4(c.r, p.yzx);
+
+  float d = q.x - min(q.w, q.y);
+  float e = 1.0e-10;
+  return vec4(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x, c.w);
+}
+
+vec4 hsv2rgb(vec4 c){
+  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+  return vec4(c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y), c.w);
+}
+
+### Component
+id colorspace_extra
+family library
+code &&&
+
+// can probably optimize all hsl functions
+vec4 hsl2rgb(vec4 c){
+  float h = c.x;
+	float s = c.y;
+  float l = c.z;
+
+  if(s == 0.0)
+    return vec4((l + 1.0) / 2.0, (l + 1.0) / 2.0, (l + 1.0) /  2.0, c.w);
+
+  float delta = s / sqrt(1.0 - l * l);
+
+  if(l > 0.0)
+    delta *= (2.0 - l - 1.0);
+  else
+    delta *= (l + 1.0);
+
+  float v = (l + 1.0 + delta) / 2.0;
+  float min = v - delta;
+  s = 1.0 - min / v;
+
+  return hsv2rgb(vec4(h, s, v, c.w));
+}
+
+vec4 hsls2rgb(vec4 c){
+
+  float s = sqrt(c.x * c.x + c.y * c.y);
+  float h;
+
+  if(s == 0.0){
+    h = 0.0;
+  }else{
+    h = atan(c.y, c.x);
+  }
+
+  if(h <= 0.0)
+    h += 2.0 * PI;
+  h /= (2.0 * PI);
+
+	c.x = h;
+	c.y = s;
+
+	return hsl2rgb(c);
+}
+
+
+vec4 rgb2hsls(vec4 c){
+  float h, s, l;
+  float vmin = min(min(c.x, c.y), c.z);
+  float vmax = max(max(c.x, c.y), c.z);
+
+  float delta = vmax - vmin;
+
+  l = (vmax + vmin) - 1.0;
+
+  s = delta * sqrt(1.0 - l * l);
+
+  if(l == -1.0 || l == 1.0)
+    s = 0.0;
+  else if(l > 0.0)
+    s = s / (2.0 - l - 1.0);
+  else if(l <= 0.0)
+    s = s / (l + 1.0);
+
+  if(s == 0.0){
+    h = 0.0;
+  }else {
+    if(c.x == vmax)
+      h = (c.y - c.z) / delta;            // between yellow & magenta
+    else if(c.y == vmax)
+      h = 2.0 + (c.z - c.x) / delta;     // between cyan & yellow
+    else
+      h = 4.0 + (c.x - c.y) / delta;
+    h *= PI / 3.0;
+  }
+
+	// l was *= 0.9999999 brfore import?
+  vec4 r = vec4(s * cos(h), s * sin(h), l, c.w);
+
+  return r;
+
+}
+
+### Component
+id math
+family library
+code &&&
+
+/* math utility library */
+
+float sinh(float x){
+  return (exp(x) - exp(-1.0 * x)) / 2.0;
+}
+
+float cosh(float x){
+  return (exp(x) + exp(-1.0 * x)) / 2.0;
+}
+
+vec2 CONJ(vec2 z0){
+  return vec2(z0.x, -1.0 * z0.y);
+}
+
+vec2 A(vec2 z0, vec2 z1){
+  return vec2(z0.x + z1.x, z0.y + z1.y);
+}
+
+vec2 S(vec2 z0, vec2 z1){
+  return vec2(z0.x - z1.x, z0.y - z1.y);
+}
+
+vec2 M(vec2 z0, vec2 z1){
+  return vec2(z0.x * z1.x - z0.y * z1.y, z0.x * z1.y + z0.y * z1.x);
+}
+
+vec2 D(vec2 z0, vec2 z1){
+  float r = dot(z1, z1);
+  return vec2((z0.x * z1.x + z0.y * z1.y) / r, (z0.y * z1.x - z0.x * z1.y) / r);
+}
+
+vec2 SQZ(vec2 z0){
+  return M(z0, z0);
+}
+
+vec2 EXPZ(vec2 z0){
+  float f = exp(z0.x);
+  float s, c;
+	s = sin(z0.y);
+	c = cos(z0.y);
+  return vec2(f * c, f * s);
+}
+
+vec2 SINZ(vec2 z0){
+  float s = sin(z0.x);
+  float c = cos(z0.x);
+  return vec2(s * cosh(z0.y), c * sinh(z0.y));
+}
+
+vec2 COSZ(vec2 z0){
+  float s = sin(z0.x);
+  float c = cos(z0.x);
+  return vec2(c * cosh(z0.y), -1.0 * s * sinh(z0.y));
+}
+
+vec2 TANZ(vec2 z0){
+  float s, c;
+  s = sin(2.0 * z0.x);
+	c = cos(2.0 * z0.x);
+  float r = c + cosh(2.0 * z0.y);
+  return vec2(s, sinh(2.0 * z0.y)) / r;
+}
+
+vec2 SINHZ(vec2 z0){
+  float s, c;
+	s = sin(z0.y);
+	c = cos(z0.y);
+  return vec2(sinh(z0.x) * c, cosh(z0.x) * s);
+}
+
+vec2 COSHZ(vec2 z0){
+  float s, c;
+	s = sin(z0.y);
+	c = cos(z0.y);
+  return vec2(cosh(z0.x) * c, sinh(z0.x) * s);
+}
+
+vec2 TANHZ(vec2 z0){
+  float s, c;
+  s = sin(2.0 * z0.y);
+	c = cos(2.0 * z0.y);
+  float r = cosh(2.0 * z0.x) + c;
+  return vec2(sinh(2.0 * z0.x), s) / r;
+}
+
+vec4 _gamma3(vec4 v, float gamma){
+  return vec4(pow(v.xyz, vec3(gamma, gamma, gamma)), v.w);
+}
+
+bool isNan(float val)
+{
+  return ( val < 0.0 || 0.0 < val || val == 0.0 ) ? false : true;
+}
+
+vec2 torus_reduce(vec2 z){
+	z = z + vec2(1.0, 1.0);
+
+	z = mod(z, 4.0);
+	z = vec2(1.0, 1.0) - abs(z - vec2(2.0, 2.0));
+
+  return z;
+}
+
+vec2 grid_reduce(vec2 z){
+	z = z + vec2(1.0, 1.0);
+
+	z = mod(z, 2.0);
+	z = z - vec2(1.0, 1.0);
+
+  return z;
+}
+
+### Component
+id math_extra
+family library
+code &&&
+
+vec3 rotate3D(vec3 v, vec3 axis, float th){
+  // compute constants
+  float c = cos(th);
+  float s = sin(th);
+
+  // compute rotation
+  vec3 res;
+  res.x = (1.0 + (1.0 - c) * (axis.x * axis.x - 1.0)) * v.x +
+          (axis.z * s + (1.0 - c) * axis.x * axis.y) * v.y +
+          (-1.0 * axis.y * s + (1.0 - c) * axis.x * axis.z) * v.z;
+
+  res.y = (-1.0 * axis.z * s + (1.0 - c) * axis.x * axis.y) * v.x +
+          (1.0 + (1.0 - c) * (axis.y * axis.y - 1.0)) * v.y +
+          (axis.x * s + (1.0 - c) * axis.y * axis.z) * v.z;
+
+  res.z = (axis.y * s + (1.0 - c) * axis.x * axis.z) * v.x +
+          (-1.0 * axis.x * s + (1.0 - c) * axis.y * axis.z) * v.y +
+          (1.0 + (1.0 - c) * (axis.z * axis.z - 1.0)) * v.z;
+
+  return res;
+}

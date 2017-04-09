@@ -1,0 +1,102 @@
+###Module
+id color_id
+component color_id
+flags {color_main, lib}
+
+###Module
+id color_bgr
+component color_bgr
+flags {lib}
+
+###Module
+id color_gbr
+component color_gbr
+flags {lib}
+
+###Module
+id rotate_hsv0
+component rotate_hsv
+flags {color_main, farm1, lib}
+par {sat_sc:1.05, rot:0.0, len_sc:0.0, len_sc_amt:0.0, th_spd:0.0}
+
+###Module
+id rotate_hsv1
+component rotate_hsv
+flags {color_main, farm1, lib}
+par {sat_sc:1.05, rot:0.01, len_sc:1.0, len_sc_amt:0.05, th_spd:0.00}
+
+### Component
+id color_id
+family color
+default_mod color_id
+code &&&
+// Nothing
+
+### Component
+id color_bgr
+family color
+default_mod color_bgr
+code &&&
+  color = color.bgra;
+
+### Component
+id color_gbr
+family color
+default_mod color_gbr
+code &&&
+  color = color.gbra;
+
+### Component
+id rotate_hsv
+family color
+default_mod rotate_hsv
+includes []
+code &&&
+  color = rgb2hsv(color);
+
+  float l = sqrt(z_in.x * z_in.x + z_in.y * z_in.y);
+	//float l = sqrt(t_z.x * t_z.x + t_z.y * t_z.y);
+  l = (4.0 * @len_sc@ + 1.0) * l / (l + 4.0 * @len_sc@);
+  l = @len_sc_amt@ * log(l + 1.0);
+
+  float th = (@rot@ + l + time * @th_spd@);
+  color.x += th;
+	color.y *= @sat_sc@;
+	//color.z /= (1.0 + 0.5 * l);
+
+  color = hsv2rgb(color);
+
+### Component
+id rotate_hsls
+family color
+default_mod rotate_hsls
+includes []
+code &&&
+  // complex hsls rotation
+  // FULL, LIVE, DEV
+  color = rgb2hsls(color);
+
+  // compute l
+  float l = sqrt(z_in.x * z_in.x + z_in.y * z_in.y);
+  l = (4.0 * @len_sc@ + 1.0) * l / (1.0 + 4.0 * @len_sc@ *l);
+  l = @len_sc_amt@ * log(l + 1.0);
+
+  // compute rotation axis
+  float phi = 2.0 * PI * @phi_1@;
+  float psi = 2.0 * PI * @psi_1@;
+  vec3 axis = vec3(cos(psi) * cos(phi), cos(psi) * sin(phi), sin(psi));
+
+  // compute rotation 1
+  float th = 2.0 * PI * (l + time * @th_spd@);
+
+  //th = remf(CX(th, 0.0), 2.0 * PI).x;
+  vec3 tmp = rotate3D(color.xyz, axis, th);
+
+  // compute rotation 2
+  th = 2.0 * PI * @rot@;
+  phi += 2.0 * PI * @phi_2@;
+  psi += 2.0 * PI * @psi_2@;
+  axis = vec3(cos(psi) * cos(phi), cos(psi) * sin(phi), sin(psi));
+  tmp = rotate3D(tmp, axis, th);
+
+  color = hsls2rgb(vec4(tmp, color.w));

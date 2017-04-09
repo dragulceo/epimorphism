@@ -1,0 +1,227 @@
+###Module
+id t_z
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:z}
+
+###Module
+id t_cos
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:cos(z)}
+
+###Module
+id t_sin
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:sin(z)}
+
+###Module
+id t_cosh
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:cosh(z)}
+
+###Module
+id t_sinh
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:sinh(z)}
+
+###Module
+id t_tan
+component t_sub
+flags {all, lib}
+sub {t_expr:tan(z)}
+
+###Module
+id t_tanh
+component t_sub
+flags {all, lib}
+sub {t_expr:tanh(z)}
+
+###Module
+id t_exp
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:exp(z)}
+
+###Module
+id t_p0
+component t_sub
+sub {t_expr:z / (z + 1) + z / (z - 1)}
+
+###Module
+id t_p1
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:0.5 * (1 - 5 * z * z * z / 3)}
+
+###Module
+id t_p2
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:0.9*(1 - z * z)}
+
+###Module
+id t_p3
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:z * (1 + z) / 2}
+
+###Module
+id t_p4
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:z * z}
+
+###Module
+id t_tp0
+component t_sub
+flags {all, lib}
+sub {t_expr:1.2 * (1 - (z * z + tanh(z)) / 2)}
+
+###Module
+id t_tp1
+component t_sub
+flags {all, lib}
+sub {t_expr:cos(z) - tanh(z)}
+
+###Module
+id t_tp2
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:(z + exp(z)) / 2}
+
+###Module
+id t_tp3
+component t_sub
+flags {all, lib}
+sub {t_expr:(sin(z) + tan(z)) / 2}
+
+###Module
+id t_tp4
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:cosh(z) + exp(z)}
+
+###Module
+id t_tp5
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:z * cos(z)}
+
+###Module
+id t_tp6
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:(cosh(z) + sinh(z)) / 2}
+
+###Module
+id t_inv
+component t_sub
+sub {t_expr:1.0 / z}
+
+###Module
+id t_zti
+component t_sub
+flags {all, lib}
+sub {t_expr:2.0 * z / tan (z * i)}
+
+###Module
+id t_f0
+component t_sub
+flags {all, lib, new}
+sub {t_expr:z * cosh(z)}
+
+###Module
+id t_f1
+component t_sub
+flags {lib}
+sub {t_expr:0.8 * (cosh(z) + z * z + i)}
+
+###Module
+id t_f2
+component t_sub
+flags {all, lib, new}
+sub {t_expr:sin(z) * cosh(z)}
+
+###Module
+id t_f3
+component t_sub
+flags {lib}
+sub {t_expr:sin(z*z) * sin(z * i)}
+
+###Module
+id t_f4
+component t_sub
+flags {all, lib, new}
+sub {t_expr:0.8 * (cos(z) + exp(i * z))}
+
+###Module
+id t_f5
+component t_sub
+flags {all, lib, new}
+sub {t_expr:1.3 * cos(sin(z))}
+
+###Module
+id t_f6
+component t_sub
+flags {all, lib, new}
+sub {t_expr:1.3 * cos(i * sin(z))}
+
+###Module
+id t_f7
+component t_sub
+flags {all, lib, new}
+sub {t_expr:sin(i * z)}
+
+###Module
+id t_f8
+component t_sub
+flags {all, lib, new}
+sub {t_expr:0.5 * (cos(i * z) + z * z)}
+
+###Module
+id t_f9
+component t_sub
+flags {all, lib, new}
+sub {t_expr:0.8 * z * tanh(z)}
+
+###Module
+id t_f10
+component t_sub
+flags {all, lib, new}
+sub {t_expr:0.9*(z*tanh(z)+cos(exp(z)))}
+
+###Module
+id t_f11
+component t_sub
+flags {all, lib, new}
+sub {t_expr:0.7*(cos(z)+tan(z))*z}
+
+###Module
+id t_f12
+component t_sub
+flags {lib}
+sub {t_expr:0.7 * (z-1)*(z+1)*(z-i)*(z+i)}
+
+###Module
+id t_f13
+component t_sub
+flags {all, lib, new}
+sub {t_expr:(0.8 * (cos(z)-1)*(sin(z)+1))}
+
+###Module
+id t_f14
+component t_sub
+flags {lib}
+sub {t_expr:z+i*cos(i*sin(i*z))}
+
+
+### Component
+id t_sub
+family t_inner
+default_mod t_sub
+code &&&
+	z = $t_expr$;

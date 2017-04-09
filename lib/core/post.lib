@@ -1,0 +1,113 @@
+###Module
+id post_id
+component post_id
+flags {lib}
+
+###Module
+id post_hlim1
+component post_hlim
+flags {lib, post_hlim}
+par {gamma:1.5, hue:0.0, spread:0.5, lgv:0.5, sat_sc:1.0, inc_sc:0.0}
+
+###Module
+id post_hlim2
+component post_hlim
+flags {lib, post_hlim}
+par {gamma:1.5, hue:0.33, spread:0.5, lgv:0.5, sat_sc:1.0, inc_sc:0.0}
+
+###Module
+id post_hlim3
+component post_hlim
+flags {lib, post_hlim}
+par {gamma:1.5, hue:0.66, spread:0.5, lgv:0.5, sat_sc:1.0, inc_sc:0.0}
+
+###Module
+id post_hlim_anim
+component post_hlim
+flags {lib}
+par {hue:loop 0.01, spread:wave 0.011 0.35 1.5, lgv:wave 0.07 0.125 0.5, sat_sc:1.0, inc_sc:0.0}
+
+###Module
+id post_hlim_anim2
+component post_hlim
+flags {lib, post_main}
+par {hue:loop 0.01, spread:wave 0.011 0.35 1.5, lgv:wave 0.07 0.125 0.5, gamma:wave 0.03 0.3 1.7, inc_sc:0.0, sat_sc: 1.0}
+
+###Module
+id post_main4
+component post_hlim
+flags {farm1, farm2, lib}
+par {hue:loop 0.01, spread:wave 0.011 0.35 1.3, lgv:wave 0.07 0.225 0.5, inc_sc:0.0, sat_sc:wave 0.006 0.3 1.4}
+
+
+### Component
+id post_id
+family post
+default_mod post_id
+code &&&
+// Nothing
+
+### Component
+id post_hlim
+family post
+default_mod post_hlim1
+includes []
+code &&&
+	// optimize me!
+	vec4 frame_i = frame;
+  //frame = _gamma3(frame, 1.2);//@gamma@);
+
+  frame = rgb2hsv(frame);
+
+	float inc = (frame.a - DEPTH_INC) / (1.0 - DEPTH_INC);
+	inc = @inc_sc@ * inc;
+
+  vec4 c0 = hsv2rgb(vec4(0.9 + inc + 0.3 * frame_i.x + @hue@, 1.0, 0.5, 1.0));
+  vec4 c1 = hsv2rgb(vec4(0.9 + 0.3 * frame_i.x + @hue@ + @spread@ / 2.0, 1.0, @lgv@, 1.0));
+  vec4 c2 = hsv2rgb(vec4(0.9 + inc + 0.2 * frame_i.x + @hue@ - @spread@ / 2.0, 1.0, -1.0 * @lgv@, 1.0));
+
+  vec4 res, r0, r1;
+  float f;
+
+  if(frame.x < 1.0 / 3.0){
+    f = 3.0 * frame.x;
+    r0 = c0;
+    r1 = c1;
+  }else if(frame.x < 2.0 / 3.0){
+    f = 3.0 * frame.x - 1.0;
+    r0 = c1;
+    r1 = c2;
+  }else{
+    f = 3.0 * frame.x - 2.0;
+    r0 = c2;
+    r1 = c0;
+  }
+  res = (1.0 - f) * r0 + f * r1;
+
+	// modulate hue
+  res = rgb2hsv(res);
+  frame.x = res.x;
+	frame.y *= @sat_sc@;
+  frame = hsv2rgb(frame);
+
+### Component
+id post_pallet1
+family post
+default_mod post_pallet1
+includes []
+code &&&
+	vec4 frame_i = frame;
+  //frame = _gamma3(frame, 1.2);//@gamma@);
+
+	float val = rgb2hsv(frame).z;
+
+	float inp = (frame.x + frame.y + frame.z);// / 6.0 + 0.5 * frame.a;
+
+	vec3 res = pal(inp, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(2.0,1.0,0.0),vec3(0.5,0.20,0.25));
+	//vec3(0.5,0.5,0.5), vec3(0.5,0.5,0.5), vec3(1.0,1.0,1.0), vec3(0.0,0.10,0.20)
+	frame = frame_i;//vec4(res, 1.0);
+
+	frame = rgb2hsv(frame);
+	// frame.y += 0.1 * frame.a * frame.a * frame.a;
+	frame.z *= (frame.a - DEPTH_INC);//val;
+	frame = hsv2rgb(frame);

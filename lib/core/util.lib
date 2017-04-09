@@ -1,0 +1,80 @@
+###Module
+id grid_reduce
+component reduce
+flags {lib}
+sub {reduce:grid_reduce(z)}
+
+###Module
+id torus_reduce
+component reduce
+flags {lib}
+sub {reduce:torus_reduce(z)}
+
+### Component
+id reduce
+family reduce
+default_mod torus_reduce
+children {}
+includes []
+code &&&
+	z = $reduce$;
+
+
+###Module
+id switch
+component switch
+modules {m0:id, m1:id}
+par {intrp:0.0}
+sub {var:v0, dim:float}
+
+###Module
+id smooth_switch
+component smooth_switch
+modules {m0:id, m1:id}
+par {intrp:0.0}
+sub {var:v0, dim:float}
+
+### Module
+id id
+component id
+
+### Component
+id switch
+family switch
+default_mod switch
+children {m0:*, m1:*}
+includes []
+code &&&
+	$dim$ v0, v1, init;
+	init = $var$;
+	%m0%
+	v0 = $var$;
+
+	$var$ = init;
+	%m1%
+	v1 = $var$;
+
+	$var$ = mix(v0, v1, clamp(0.0, 1.0, @intrp@));
+
+### Component
+id smooth_switch
+family switch
+default_mod smooth_switch
+children {m0:*, m1:*}
+includes []
+code &&&
+	$dim$ v0, v1, init;
+
+	init = $var$;
+	%m0%
+	v0 = $var$;
+
+	$var$ = init;
+	%m1%
+	v1 = $var$;
+
+	$var$ = mix(v0, v1, smoothstep(0.0, 1.0, @intrp@));
+
+### Component
+id id
+family nul

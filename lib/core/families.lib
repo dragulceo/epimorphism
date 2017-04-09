@@ -15,7 +15,7 @@ default_comp color_id
 
 ### Family
 id post
-var color
+var frame
 dim 4
 default_comp post_id
 

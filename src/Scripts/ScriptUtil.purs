@@ -1,16 +1,15 @@
 module ScriptUtil where
 
 import Prelude
-import Config (Script(Script))
 import Control.Monad.Except.Trans (throwError)
 import Data.Array (head, foldM, uncons, deleteAt, cons)
-import Data.Library (Library, dat, getLib, getLibM, idM, modLibD, setLib)
+import Data.Library (dat, getLib, getLibM, idM, modLibD, setLib)
 import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
 import Data.StrMap (StrMap, insert, empty, toUnfoldable)
 import Data.String (split, joinWith, trim)
 import Data.String (Pattern(..)) as S
 import Data.Tuple (Tuple(Tuple))
-import Data.Types (EpiS, Pattern)
+import Data.Types (EpiS, Pattern, Library, Script(Script))
 import Pattern (clonePattern, findModule, findAddr, CloneRes(CloneRes))
 import Text.Format (precision, format)
 import Util (dbg, inj, numFromStringE, fromJustE)

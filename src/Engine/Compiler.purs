@@ -2,18 +2,17 @@ module Compiler where
 
 import Prelude
 import Data.TypedArray as T
-import Config (newCompST, UniformBindings, SystemST, EngineST, CompOp(..))
 import Control.Alt ((<|>))
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (length, uncons)
-import Data.Library (Library, delLib, getEngineConfD, getLibM, getPattern, getPatternD, idx, modLibD)
+import Data.Library (delLib, getEngineConfD, getLibM, getPattern, getPatternD, idx, modLibD)
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.String (stripPrefix)
 import Data.String (Pattern(..)) as S
 import Data.Tuple (fst, Tuple(Tuple))
-import Data.Types (EpiS, Pattern(..), PatternD)
+import Data.Types (EpiS, Pattern(..), PatternD, Library, newCompST, UniformBindings, SystemST, EngineST, CompOp(..))
 import EngineUtil (execGL)
 import Graphics.WebGL.Methods (vertexAttribPointer, enableVertexAttribArray, bindBuffer, bufferData, createBuffer)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram, linkProgram)

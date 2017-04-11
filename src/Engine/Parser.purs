@@ -4,13 +4,13 @@ import Prelude
 import Data.Array (length)
 import Data.Array (sort, length, (..)) as A
 import Data.Foldable (foldl)
-import Data.Library (Library, cD, getLib, mD)
+import Data.Library (cD, getLib, mD)
 import Data.Maybe (Maybe(Nothing, Just))
 import Data.StrMap (lookup, StrMap, fold, empty, keys, size, foldM, insert)
 import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
-import Data.Types (Component(..), Epi, EpiS, ModuleD)
+import Data.Types (Component(..), Epi, EpiS, ModuleD, Library)
 import Util (dbg, forceInt, indentLines, inj, replaceAll)
 
 type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}

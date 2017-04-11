@@ -4,7 +4,7 @@ import Prelude
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Data.Array (cons, head, tail, foldM, uncons, reverse)
-import Data.Library (Library, apD, apI, dat, delLib, family, getLib, getLibM, getPattern, idx, mD, modLibD, setLib)
+import Data.Library (apD, apI, dat, delLib, family, getLib, getLibM, getPattern, idx, mD, modLibD, setLib)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Set (insert) as Set
 import Data.StrMap (insert, values, toUnfoldable)
@@ -12,7 +12,7 @@ import Data.String (Pattern(..)) as S
 import Data.String (split, joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Data.Types (EpiS, Module(..), Pattern(..), PatternD)
+import Data.Types (EpiS, Module(..), Pattern(..), PatternD, Library)
 import System (loadLib)
 import Util (dbg, uuid, fromJustE)
 

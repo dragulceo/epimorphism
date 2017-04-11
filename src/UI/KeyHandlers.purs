@@ -1,17 +1,16 @@
 module KeyHandlers where
 
 import Prelude
-import Config (UIST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Except.Trans (runExceptT)
 import Control.Monad.ST (ST, STRef, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Either (either)
-import Data.Library (Library, getUIConfD)
+import Data.Library (getUIConfD)
 import Data.Maybe (Maybe(..))
 import Data.StrMap (insert, lookup)
-import Data.Types (EpiS)
+import Data.Types (EpiS, Library, UIST)
 import Graphics.Canvas (CANVAS)
 import Util (inj)
 

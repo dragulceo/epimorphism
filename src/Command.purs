@@ -2,19 +2,18 @@ module Command where
 
 import Prelude
 import Compiler (compileShaders)
-import Config (SystemST, EngineST, UIST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Array (uncons, updateAt, length)
-import Data.Library (Library, getEngineConf, getLib, getLibM, getPatternD, getSystemConf, getUIConf, getUIConfD, idM, modLibD, modLibD')
+import Data.Library (getEngineConf, getLib, getLibM, getPatternD, getSystemConf, getUIConf, getUIConfD, idM, modLibD, modLibD')
 import Data.Maybe (Maybe(..))
 import Data.StrMap (insert)
 import Data.String (joinWith, split)
 import Data.String (Pattern(..)) as S
-import Data.Types (EngineConf, EpiS, Module(..), PatternD)
+import Data.Types (EngineConf, EpiS, Module(..), PatternD, SystemST, EngineST, UIST, Library)
 import Engine (initEngineST)
 import Graphics.Canvas (CANVAS)
 import Layout (updateLayout, initLayout)

@@ -1,15 +1,20 @@
 module Data.Types where
 
+import Prelude
+import Graphics.WebGL.Raw.Types as GLT
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (ExceptT)
-import Control.Monad.ST (ST)
+import Control.Monad.ST (ST, STRef)
 import DOM (DOM)
 import Data.DateTime (DateTime)
-import Data.Set (Set) as S
-import Data.StrMap (StrMap)
+import Data.Maybe (Maybe(..))
+import Data.Set (Set, union) as S
+import Data.StrMap (StrMap, empty)
+import Data.StrMap.ST (STStrMap)
+import Data.Tuple (Tuple)
 import Graphics.Canvas (CANVAS)
+import Graphics.WebGL.Types (WebGLFramebuffer, WebGLProgram, WebGLTexture, WebGLContext)
 
--- redundant
 type Epi eff a = ExceptT String (Eff (canvas :: CANVAS, dom :: DOM | eff)) a
 type EpiS eff h a = Epi (st :: ST h | eff) a
 
@@ -17,14 +22,14 @@ data SchemaEntryType = SE_St | SE_N | SE_I | SE_B | SE_S | SE_A_St | SE_A_Cx | S
 data SchemaEntry = SchemaEntry SchemaEntryType String
 type Schema = Array SchemaEntry
 
--- MAIN DATA TYPES
+-- LIBRARY DATA TYPES
 newtype FamilyRef    = FamilyRef String
 newtype ModuleRef    = ModuleRef String
 newtype ComponentRef = ComponentRef String
 newtype PatternRef   = PatternRef String
 newtype ImageRef     = ImageRef String
 
-newtype Script = Script String
+--newtype Script = Script String
 newtype Path = Path String
 newtype Include = Include String
 newtype CodeBlock = CodeBlock String
@@ -162,9 +167,7 @@ componentSchema = [
   , SchemaEntry SE_A_St "includes"
 ]
 
--- Pattern
 data Module = Module Index ModuleD
-
 type ModuleD = {
     component :: String
   , scripts   :: Array String
@@ -200,3 +203,106 @@ data Section = Section Index SectionD
 type SectionD = {
   lib :: Array String
 }
+
+data Library h = Library {
+    systemConfLib :: STStrMap h SystemConf
+  , engineConfLib :: STStrMap h EngineConf
+  , uiConfLib     :: STStrMap h UIConf
+  , patternLib    :: STStrMap h Pattern
+  , familyLib     :: STStrMap h Family
+  , componentLib  :: STStrMap h Component
+  , moduleLib     :: STStrMap h Module
+  , imageLib      :: STStrMap h Image
+  , sectionLib    :: STStrMap h Section
+  , system        :: Maybe String
+}
+
+-- SYSTEM STATE
+type SystemST h = {
+    lastTimeMS :: Maybe Number
+  , frameNum :: Int
+  , lastFpsTimeMS :: Maybe Number
+  , fps :: Maybe Int
+  , t :: Number
+  , paused :: Boolean
+  , pauseAfterSwitch :: Boolean
+}
+
+defaultSystemST :: forall h. SystemST h
+defaultSystemST = {
+    lastTimeMS: Nothing
+  , frameNum: 0
+  , lastFpsTimeMS: Nothing
+  , fps: Nothing
+  , t: 0.0
+  , paused: false
+  , pauseAfterSwitch: false
+}
+
+type EngineProfile = {
+    os                :: String
+  , browser           :: String
+  , is_mobile         :: Boolean
+  , angle             :: Boolean
+  , max_texture_units :: Int
+  , max_frag_uniforms :: Int
+  , max_texture_size  :: Int
+}
+
+type EngineST = {
+    dispProg :: Maybe WebGLProgram
+  , mainProg :: Maybe WebGLProgram
+  , tex :: Maybe (Tuple WebGLTexture WebGLTexture)
+  , fb :: Maybe (Tuple WebGLFramebuffer WebGLFramebuffer)
+  , auxTex :: Maybe (Array WebGLTexture)
+  , currentImages :: Maybe (Array String)
+  , audio :: Maybe (Tuple WebGLTexture AudioAnalyser)
+  , ctx :: WebGLContext
+  , empty :: GLT.TexImageSource
+  , compQueue :: Array CompOp
+  , compST :: CompST
+  , mainUnif :: Maybe UniformBindings
+  , dispUnif :: Maybe UniformBindings
+  , profile :: EngineProfile
+}
+
+type UIST = {
+    incIdx :: StrMap Int
+}
+
+defaultUIST :: UIST
+defaultUIST = {
+    incIdx: empty
+}
+
+
+-- MISC
+
+foreign import data AudioAnalyser :: *
+foreign import data UniformBindings :: *
+
+type CompST = { auxImages :: Maybe (Array String),
+                mainSrc :: Maybe String, dispSrc :: Maybe String, vertSrc :: Maybe String,
+                mainProg :: Maybe WebGLProgram, dispProg :: Maybe WebGLProgram,
+                mainUnif :: Maybe UniformBindings, dispUnif :: Maybe UniformBindings}
+newCompST :: CompST
+newCompST = {mainSrc: Nothing, dispSrc: Nothing, vertSrc: Nothing, auxImages: Nothing, mainProg: Nothing, dispProg: Nothing, mainUnif: Nothing, dispUnif: Nothing}
+
+data CompOp = CompMainShader | CompDispShader | CompVertShader | CompMainProg | CompDispProg | CompFinish | CompStall
+
+fullCompile :: Array CompOp
+fullCompile = [CompVertShader, CompMainShader, CompMainProg, CompDispShader, CompDispProg, CompFinish]
+
+data PMut = PMutNone | PMut PatternD (S.Set String)
+instance mutSemi :: Semigroup PMut where
+  append (PMut p0 s0) (PMut p1 s1) = PMut p0 (S.union s0 s1) -- sketchy if p0 != p1
+  append PMutNone x = x
+  append x PMutNone = x
+
+-- Script
+-- sys -> time -> mid -> idx -> args -> res
+type ScriptFn eff h = STRef h (SystemST h) -> Library h -> Number -> String -> Int -> StrMap String -> EpiS eff h ScriptRes
+
+data ScriptConfig = ScriptConfig String
+data ScriptRes = ScriptRes PMut (Maybe (StrMap String)) -- possible new root, possibly updated state
+data Script = Script String Number (StrMap String)

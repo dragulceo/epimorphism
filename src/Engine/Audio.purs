@@ -2,12 +2,11 @@ module Audio where
 
 import Prelude
 import Graphics.WebGL.Raw.Types as GLT
-import Config (AudioAnalyser)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Trans.Class (lift)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Tuple (Tuple(Tuple))
-import Data.Types (EngineConfD)
+import Data.Types (EngineConfD, AudioAnalyser)
 import Graphics.WebGL.Raw.Types (ArrayBufferView)
 import Graphics.WebGL.Types (WebGLTexture, WebGL, WebGLContext)
 import Texture (newTex)

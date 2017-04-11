@@ -4,8 +4,7 @@ import Prelude
 import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
 import Graphics.WebGL.Raw.Types as GLT
-import Config (EngineST)
-import Data.Types (EpiS, Epi, EngineConfD)
+import Data.Types (EpiS, Epi, EngineConfD, EngineST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Error.Class (throwError)
@@ -18,7 +17,7 @@ import Data.Tuple (Tuple(Tuple), snd, fst)
 import EngineUtil (execGL)
 import Graphics.WebGL.Methods (createFramebuffer, createTexture)
 import Graphics.WebGL.Types (WebGLTexture, WebGLContext, WebGL, WebGLFramebuffer)
-import Util (dbg, dbg2, elg, fromJustE, unsafeNull)
+import Util (dbg, fromJustE, unsafeNull)
 
 foreign import loadImages :: forall eff. Array String -> Array String -> Eff eff Unit
 foreign import registerImages :: forall eff. Array String -> Eff eff Unit

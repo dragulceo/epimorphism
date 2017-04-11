@@ -2,12 +2,11 @@ module UI where
 
 import Prelude
 import Command (command)
-import Config (UIST, SystemST, EngineST, defaultUIST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, readSTRef, newSTRef)
-import Data.Library (Library, getLib, getPatternD, getUIConfD)
-import Data.Types (EpiS, Section(..))
+import Data.Library (getLib, getPatternD, getUIConfD)
+import Data.Types (EpiS, Section(..), Library, UIST, SystemST, EngineST, defaultUIST)
 import KeyHandlers (keyHandler)
 import Layout (initLayout)
 import Util (Now)

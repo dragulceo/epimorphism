@@ -1,0 +1,90 @@
+###Module
+id epimorphism_main
+component main
+flags {epimorphism, root}
+modules {application:epimorphism}
+
+
+###Module
+id epimorphism1_main
+component main
+flags {epimorphism, root}
+modules {application:epimorphism_auto1}
+
+###Module
+id epimorphism2_main
+component main
+flags {epimorphism, root}
+modules {application:epimorphism_auto2}
+
+###Module
+id epimorphism3_main
+component main
+flags {epimorphism, root}
+modules {application:epimorphism_auto3}
+
+
+###Module
+id epimorphism_auto1
+component epimorphism
+flags {lib}
+modules {t:t_main1, seed:seed_borderM, color:rotate_hsv1, reduce:torus_reduce}
+
+
+###Module
+id epimorphism_auto3
+component epimorphism
+flags {lib}
+modules {seed:seed_multi_anim2, t:t_main2, color:rotate_hsv1, reduce:torus_reduce}
+scripts [randomize dly:35 spd:0.3 lib:color_main dim:vec4 sub:color typ:mod]
+
+
+###Module
+id seed_multi_anim2
+component seed_multi
+flags {multi}
+modules {t:t_wrap, seed0:seed_wca_anim3, seed1:seed_wca_anim4, seed2:seed_nothing}
+
+###Module
+id seed_wca_anim4
+component seed_wca
+flags {lib, wca}
+modules {t:t_seed_anim2, w:w_lines_border_anim, wt:wt_anim2, a:alpha_anim1, seed_color:tex_color_anim5}
+scripts [randomize dly:40 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
+
+
+
+###Module
+id t_main1
+component t_wrap
+flags {all'', lib, wrap}
+modules {t_inner:t_sinh}
+scripts [randomize dly:50 spd:0.04 lib:all dim:vec2 sub:t_inner typ:mod]
+zn [circle 0.005 1.0, rose 0.004 0.8 5.0 -0.8, 0.0+1.1i, rose 0.0025 1.1 4.0 0.0]
+
+
+
+
+###Module
+id disp_id2
+component disp
+flags {root}
+modules {post:post_id}
+scripts [randomize dly:75 spd:0.4 lib:post_main dim:vec4 sub:post typ:mod]
+
+###Module
+id disp_main3
+component disp
+flags {root}
+modules {post:post_hlim_anim2}
+
+
+###Module
+id disp_main1
+component disp
+modules {post:post_hlim_anim}
+
+###Module
+id disp_main2
+component disp
+modules {post:post_hlim_anim2}

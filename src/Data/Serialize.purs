@@ -9,19 +9,17 @@ import Data.Array (cons, filter, length, replicate, reverse, uncons, zip, foldM)
 import Data.Array (foldM) as A
 import Data.Complex (Complex)
 import Data.Either (Either(..))
-import Data.Library (Library(..))
 import Data.Maybe (Maybe(..), maybe)
 import Data.Set (Set, empty, fromFoldable) as Set
 import Data.StrMap (StrMap, empty, fromFoldable, insert, lookup, thawST)
 import Data.StrMap (foldM) as S
 import Data.StrMap.ST (new)
-import Data.String (Replacement(..), joinWith, replace, split, trim)
+import Data.String (Replacement(..), joinWith, replace, split, stripSuffix, trim)
 import Data.String (Pattern(..)) as S
 import Data.String.Regex (match)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Data.Types (Component(Component), EngineConf(EngineConf), Epi, EpiS, Family(..), Image(..), Index, Module(..), Pattern(..), Schema, SchemaEntry(SchemaEntry), SchemaEntryType(SE_A_Cx, SE_A_St, SE_M_N, SE_M_St, SE_S, SE_B, SE_I, SE_N, SE_St), Section(..), SystemConf(SystemConf), UIConf(UIConf), componentSchema, engineConfSchema, familySchema, imageSchema, indexSchema, moduleSchema, patternSchema, systemConfSchema, uiConfSchema)
-import SLibrary (SHandle(..), SLibError(..), SLib, parseSLib)
+import Data.Types (Component(Component), EngineConf(EngineConf), Epi, EpiS, Family(..), Image(..), Index, Module(..), Pattern(..), Schema, SchemaEntry(SchemaEntry), SchemaEntryType(SE_A_Cx, SE_A_St, SE_M_N, SE_M_St, SE_S, SE_B, SE_I, SE_N, SE_St), Section(..), SystemConf(SystemConf), UIConf(UIConf), componentSchema, engineConfSchema, familySchema, imageSchema, indexSchema, moduleSchema, patternSchema, systemConfSchema, uiConfSchema, Library(..))
 import Util (boolFromStringE, cxFromStringE, dbg, fromJustE, inj, intFromStringE, numFromStringE, tryRegex, zipI)
 
 foreign import unsafeSetDataTableAttr :: forall a b eff. a -> String -> String -> b -> Eff eff a
@@ -117,6 +115,35 @@ parseCLst st = reverse <$> foldM handle [] st
     handle dt v = do
       cv <- cxFromStringE v
       pure $ cons cv dt
+
+
+-- SLIB PARSERS
+
+data SLibError = SLibError String
+type SLib = Either SLibError
+data SHandle = SHandle String String
+
+parseHandle :: String -> SLib SHandle
+parseHandle group = do
+  let lines = split (S.Pattern "\n") group
+  {head: sig, tail: body} <- handleUn $ uncons lines
+  ssig <- handleS $ stripSuffix (S.Pattern "{{") sig
+  pure $ SHandle (trim ssig) (joinWith "\n" body)
+  where
+    handleUn (Just x) = pure x
+    handleUn _ = Left $ SLibError $ "Your component is too small: " <> group
+    handleS (Just x) = pure x
+    handleS _ = Left $ SLibError $ "Invalid component format: " <> group
+
+parseSGroup :: forall a. (SHandle -> SLib (Tuple String a)) -> String -> SLib (Tuple String a)
+parseSGroup builder group = do
+  handle <- parseHandle group
+  builder handle
+
+parseSLib :: forall a. (SHandle -> SLib (Tuple String a)) -> String -> SLib (StrMap a)
+parseSLib builder lib = do
+  let groups = filter ((/=) "") $ map trim (split (S.Pattern "}}\n") lib)
+  fromFoldable <$> traverse (parseSGroup builder) groups
 
 -- CHUNK PARSERS
 buildSection :: SHandle -> SLib (Tuple String Section)

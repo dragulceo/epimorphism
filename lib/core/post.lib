@@ -17,7 +17,7 @@ par {gamma:1.5, hue:0.0, spread:0.5, lgv:0.5, sat_sc:1.0, inc_sc:0.0}
 
 ### Component
 id post_id
-family post_hlim
+family post
 default_mod post_id
 code &&&
 // Nothing
@@ -25,7 +25,7 @@ code &&&
 ### Component
 id post_hlim
 family post
-default_mod post_
+default_mod post_hlim
 includes []
 code &&&
 	// optimize me!

@@ -4,28 +4,15 @@ import Prelude
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
-import Data.Array (cons, foldM, head, modifyAt, sortBy)
+import Data.Array (cons, foldM, head, sortBy)
 import Data.List (toUnfoldable)
 import Data.Maybe (Maybe(..))
 import Data.Set (Set, subset, isEmpty, intersection, fromFoldable) as S
 import Data.StrMap (StrMap, freezeST, fromFoldable, insert, isSubmap, values)
 import Data.StrMap.ST (STStrMap, delete, peek, poke)
 import Data.Tuple (Tuple)
-import Data.Types (CodeBlock, Component(Component), ComponentRef, EngineConf(EngineConf), EngineConfD, EpiS, Family(Family), FamilyRef, Image(Image), ImageRef, Include, Index, Module(..), ModuleD, ModuleRef, Path, Pattern(Pattern), PatternD, Script, Section(Section), SystemConf(SystemConf), SystemConfD, UIConf(UIConf), UIConfD, ComponentD)
+import Data.Types (CodeBlock, Component(Component), ComponentRef, EngineConf(EngineConf), EngineConfD, EpiS, Family(Family), FamilyRef, Image(Image), ImageRef, Include, Index, Module(..), ModuleD, ModuleRef, Path, Pattern(Pattern), PatternD, Script, Section(Section), SystemConf(SystemConf), SystemConfD, UIConf(UIConf), UIConfD, ComponentD, Library(..))
 import Util (dbg, fromJustE)
-
-data Library h = Library {
-    systemConfLib :: STStrMap h SystemConf
-  , engineConfLib :: STStrMap h EngineConf
-  , uiConfLib     :: STStrMap h UIConf
-  , patternLib    :: STStrMap h Pattern
-  , familyLib     :: STStrMap h Family
-  , componentLib  :: STStrMap h Component
-  , moduleLib     :: STStrMap h Module
-  , imageLib      :: STStrMap h Image
-  , sectionLib    :: STStrMap h Section
-  , system        :: Maybe String
-}
 
 class DataTable a ad | a -> ad where
   libProj :: forall h. Library h -> STStrMap h a

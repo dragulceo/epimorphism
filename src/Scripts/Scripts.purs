@@ -1,7 +1,6 @@
 module Scripts where
 
 import Prelude
-import Config (PMut(PMutNone), ScriptRes(ScriptRes), ScriptFn)
 import Control.Monad.Except.Trans (throwError, lift)
 import Control.Monad.ST (readSTRef)
 import Data.Array (updateAt, index)
@@ -10,7 +9,7 @@ import Data.Library (dat, getLib, modLibD)
 import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
 import Data.StrMap (insert, member)
 import Data.Tuple (Tuple(..))
-import Data.Types (Module)
+import Data.Types (Module, PMut(PMutNone), ScriptRes(ScriptRes), ScriptFn)
 import Math (max, round) as M
 import ScriptUtil (addScript, purgeScript)
 import System (loadLib)

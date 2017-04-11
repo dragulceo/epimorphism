@@ -1,14 +1,13 @@
 module Layout where
 
 import Prelude
-import Config (SystemST, UIST)
 import Console (renderConsole)
 import Control.Monad.Trans.Class (lift)
 import Data.DOM.Simple.Element (classRemove, classAdd, setInnerHTML, setStyleAttr)
 import Data.DOM.Simple.Window (innerHeight, innerWidth, document, globalWindow)
-import Data.Library (Library, getUIConfD)
+import Data.Library (getUIConfD)
 import Data.Maybe (Maybe(Just, Nothing))
-import Data.Types (EpiS)
+import Data.Types (EpiS, Library, SystemST, UIST)
 import UIUtil (findElt)
 import Util (lg)
 

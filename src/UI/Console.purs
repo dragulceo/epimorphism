@@ -1,13 +1,12 @@
 module Console where
 
 import Prelude
-import Config (SystemST, UIST)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
 import Data.Array ((:), filter, partition)
 import Data.DOM.Simple.Element (setInnerHTML)
-import Data.Library (Library, buildSearch, family, getLib, getPatternD, getUIConfD, idM, idx, mD, searchLib)
+import Data.Library (buildSearch, family, getLib, getPatternD, getUIConfD, idM, idx, mD, searchLib)
 import Data.Library (idx) as L
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.String (Replacement(..), joinWith, trim, split, replace)
@@ -17,7 +16,7 @@ import Data.String.Regex.Flags (noFlags)
 import Data.String.Regex.Unsafe (unsafeRegex)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
-import Data.Types (Component(..), EpiS, Module(..), ModuleD, moduleSchema)
+import Data.Types (Component(..), EpiS, Module(..), ModuleD, moduleSchema, Library, SystemST, UIST)
 import Paths (isConstantPath, runPath)
 import Serialize (showCX, unsafeSerialize)
 import Text.Format (format, precision)

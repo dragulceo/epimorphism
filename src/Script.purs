@@ -1,15 +1,14 @@
 module Script where
 
 import Prelude
-import Config (PMut(PMut, PMutNone), Script(Script), ScriptRes(ScriptRes), SystemST, ScriptFn)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (foldM, elemIndex, updateAt)
-import Data.Library (Library, dat, getLib, getPatternD, mD, modLibD)
+import Data.Library (dat, getLib, getPatternD, mD, modLibD)
 import Data.Maybe (Maybe(Just))
 import Data.Set (union)
-import Data.Types (EpiS, Module(..))
+import Data.Types (EpiS, Module(..), Library, PMut(PMut, PMutNone), Script(Script), ScriptRes(ScriptRes), SystemST, ScriptFn)
 import ScriptUtil (serializeScript, parseScript)
 import Scripts (null, randomize, pause, incZn)
 import Switch (finishSwitch, switch)

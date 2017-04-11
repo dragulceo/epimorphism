@@ -1,6 +1,14 @@
+NOTES:
+ geom_2 -
+ flashing :/
+ make sure t's are all good/scaled correctly
+ some pallets are still ugly.  also, the bleeding stuff, I'm not sure I like it
+
+
 PROJECTS:
 	- complex number library show hack
 	- turn of dbg compiler warnings?
+	- better resolution images? make sure all load
 
 	- async (AFF?)
 	  - lib requests
@@ -79,7 +87,6 @@ PROJECTS:
 		- burningman?
 		- museums?
 		- twitter
-		- dore
 		- Scenario? (https://itunes.apple.com/us/app/scenario/id423444193?mt=12)
 		- Chrome Experiments
 		- Chrome Web store (https://developer.chrome.com/webstore/get_started_simple)
@@ -159,7 +166,7 @@ FUTURE:
 NO CLUE:
   - saving images loses bit depth??
   - weird divide by zero issue - glitch in content
-p  - maybe pixel alignment issues with images?
+  - maybe pixel alignment issues with images?
 	- change resolution during switching error?
 
 

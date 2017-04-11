@@ -1,14 +1,18 @@
 TODO:
+  *
   clean up main
-
 	clean up/remove Config & slib
 	remove ssRef from ScriptFn, figure out phases
-	importing = clone, rewrite clonePattern
+
+	*
 	component indentation :/
 	change sub vars to something that gives better compiler errors
-	saving
-	think about inilinie components as functions
+	think about inlining components as functions
 
+  *
+	saving
+
+	importing = clone, rewrite clonePattern
 	pattern scripts
 	remove includes from pattern
 	remove variables from components

@@ -103,7 +103,7 @@ sub {t_expr:(sin(z) + tan(z)) / 2}
 id t_tp4
 component t_sub
 flags {all, all_seed, lib}
-sub {t_expr:cosh(z) + exp(z)}
+sub {t_expr:0.8*(cosh(z) + exp(z))}
 
 ###Module
 id t_tp5

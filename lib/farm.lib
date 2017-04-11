@@ -69,3 +69,25 @@ id t_affine2
 component t_affine
 modules {t_inner:t_tp5}
 zn [1.0+0.0i, 0.0+0.0i]
+
+
+###Module
+id tex_color1
+component tex_color_scroll
+flags {farm1, farm2, lib}
+images [textures/simplegeom/tile_hexagons1.png]
+par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:1.0}
+
+###Module
+id tex_color2
+component tex_color_scroll
+flags {farm1, farm2, lib}
+images [textures/simplegeom/tile_grid3.png]
+par {scale:0.5, spd:0.0, rot:0.0, sat:0.4, val:1.0}
+
+###Module
+id tex_color3
+component tex_color_scroll
+flags {farm1, farm2, lib}
+images [textures/Vasarely/tile_vasarely8.png]
+par {scale:0.25, spd:0.0, rot:0.0, sat:1.0, val:1.0}

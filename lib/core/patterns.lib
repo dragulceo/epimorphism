@@ -19,8 +19,8 @@ imageLib all_images
 ### Pattern
 id prod
 vert   vert
-main   epimorphism_main4
-disp   disp_main4
+main   epimorphism_main
+disp   disp_main
 includes [header, additional_funcs, colorspace, math]
 defaultImageLib default_images
 imageLib all_images

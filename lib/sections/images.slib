@@ -85,7 +85,6 @@ all_images {{
   textures/psych/psych_5.png
   textures/psych/psych_6.png
   textures/psych/psych_7.png
-	textures/corp/mcd.png
 }}
 
 extra_images {{

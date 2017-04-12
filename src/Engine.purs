@@ -117,7 +117,6 @@ initEngineST lib canvasId esRef' = do
       , auxTex = Just auxTex
       , audio = audio
     }
-
   -- set shaders
   lift $ writeSTRef esRef res
 

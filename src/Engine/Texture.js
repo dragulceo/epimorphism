@@ -109,5 +109,5 @@ exports.emptyImage = function(dim){
 		window.epiBlank[dim] = new Image();
 		window.epiBlank[dim].src = canvas.toDataURL("image/png");
 		return window.epiBlank[dim];
-	};
+1	};
 };

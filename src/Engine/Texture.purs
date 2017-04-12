@@ -60,6 +60,7 @@ initAuxTex engineConfD ctx empty = do
     doInit i = do
       aux <- newTex
       liftEff $ GL.bindTexture ctx GLE.texture2d aux
+      -- TODO, IN CHROME, THIS IS HAVING ISSUES, AS EMPTY ISNT LOADED YET
       liftEff $ GL.texImage2D ctx GLE.texture2d 0 GLE.rgba GLE.rgba GLE.unsignedByte empty
       pure aux
 

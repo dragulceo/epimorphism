@@ -63,8 +63,7 @@ incZn ssRef lib t mid scrIdx dt = do
             pure $ (Polar new fromR)
           _ -> throwError "offset should be +-1 or +-i"
 
-        let tPhase = systemST.t - t -- recover phase
-        let path = inj "intrp@%0 4.0 %1 %2 %3 %4" [(show $ t + tPhase), (show fromR), (show fromTh), (show toR), (show toTh)]
+        let path = inj "intrp@%0 4.0 %1 %2 %3 %4" [(show $ systemST.t), (show fromR), (show fromTh), (show toR), (show toTh)]
 
         let zn' = fromMaybe modD.zn (updateAt idx path modD.zn)
         modLibD lib mod _ {zn = zn'}
@@ -97,7 +96,7 @@ randomize ssRef lib t mid scrIdx dt = do
         "mod" -> inj "childN:%0 op:load by:query typ:mod query:%1 accs:rand spd:%2" [sub, lib', spd]
         _     -> inj "mut:%0 idx:%1 op:clone by:query typ:idx query:%2 accs:rand spd:%3" [typ, sub, lib', spd]
 
-      addScript lib t mid "switch" args
+      addScript lib systemST.t mid "switch" args
 
       let nxt' = (format (precision 2) (t + dly))
       let dt' = insert "nxt" nxt' dt

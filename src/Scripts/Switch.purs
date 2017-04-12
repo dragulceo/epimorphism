@@ -19,6 +19,7 @@ import Text.Format (precision, format)
 import Util (dbg, intFromStringE, inj, randInt, numFromStringE, gmod, fromJustE)
 
 
+-- CLEAN THIS UP
 switch :: forall eff h. ScriptFn eff h
 switch ssRef lib t midPre idx dt = do
   pattern' <- getPattern lib "switch pattern"
@@ -94,11 +95,7 @@ switch ssRef lib t midPre idx dt = do
 
   -- switch! (should we inline this?)
 
-  switchModules lib (systemST.t) rootId childN nxtId spd
-
-  -- WE WERE DOING SOMETHING WEIRD W/ PHASE?
-  -- let tPhase = systemST'.t - t -- recover phase
-  -- switchModules lib (t + tPhase) rootId childN nxtId spd
+  switchModules lib systemST.t rootId childN nxtId spd
 
   pure $ ScriptRes (PMut (dat pattern) (singleton newRootN)) Nothing
 
@@ -127,7 +124,7 @@ getMutator mut idx name  = do
 -- should check if dim & var are  the same across m0 & m1
 -- m1 is a reference id(we assume also that it was previously imported & floating)
 switchModules :: forall eff h. Library h -> Number -> String -> String -> String -> Number -> EpiS eff h Unit
-switchModules lib t rootId childN m1 spd = do
+switchModules lib sysT rootId childN m1 spd = do
   modD  <- mD <$> getLib lib rootId "switch module"
   m0    <- loadLib childN modD.modules "switch find child"
   mod0@(Module _ mod0D) <- getLib lib m0 "switch m0"
@@ -146,7 +143,7 @@ switchModules lib t rootId childN m1 spd = do
 
   let modules = fromFoldable [(Tuple "m0" m0), (Tuple "m1" m1)]
   let sub'    = union (fromFoldable [(Tuple "dim" dim), (Tuple "var" fm.var)]) switchModD.sub
-  let path    = inj "linear@%0 %1" [(format (precision 2) t), (format (precision 2) spd)]
+  let path    = inj "linear@%0 %1" [(format (precision 2) sysT), (format (precision 2) spd)]
   let par     = fromFoldable [(Tuple "intrp" path)]
   let switch' = apD switchMod _ {par=par, sub = sub', modules = modules}
 
@@ -154,7 +151,7 @@ switchModules lib t rootId childN m1 spd = do
   purgeModule lib m1 -- we assume this was imported previously, so it was imported again by replace
 
   -- create & import blending script
-  addScript lib t swid "finishSwitch" (inj "delay:%0" [show spd])
+  addScript lib sysT swid "finishSwitch" (inj "delay:%0" [show spd])
 
   pure unit
 

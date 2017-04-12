@@ -15,8 +15,8 @@ import Text.Format (precision, format)
 import Util (dbg, inj, numFromStringE, fromJustE)
 
 addScript :: forall eff h. Library h -> Number -> String -> String -> String -> EpiS eff h Unit
-addScript lib t mid name args = do
-  let scr = inj "%0@%1 %2" [name, (format (precision 2) t), args]
+addScript lib sysT mid name args = do
+  let scr = inj "%0@%1 %2" [name, (format (precision 2) sysT), args]
   mod <- idM <$> getLib lib mid "addScript"
   modLibD lib mod \m ->
     m {scripts = cons scr m.scripts}

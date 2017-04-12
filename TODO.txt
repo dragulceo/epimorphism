@@ -4,35 +4,37 @@ NOTES:
  make sure t's are all good/scaled correctly
  some pallets are still ugly.  also, the bleeding stuff, I'm not sure I like it
 
-
 PROJECTS:
 	- complex number library show hack
 	- turn of dbg compiler warnings?
 	- better resolution images? make sure all load
 
+  - components
+	  - think about inlining components as functions
+		- component indentation :/
+	  - change sub vars to something that gives better compiler errors
+    - remove child variables from components ?
+
 	- async (AFF?)
 	  - lib requests
 		- image requests
 		- db requests
+		- empty?
 
 	- restructure data
-		- modules are instances of components - with specific values for variables & scripts
-		- components are instances of families.
-		  - contain code
-			- variable specifications ie how many par, how many images, & default values
-		- families are variable names & dimensions.  basically where this object fits.
+	  - saving
+		- cleanup
+		  - importing = clone, rewrite clonePattern.  references?
+		  - remove includes from pattern, into component
+			- get rid of slib?
 		- scripts could use some more thought.
+		  - pattern level scripts
 		  - which module do they belong to?
 			- how to syncronize multiple scripts? i.e, color & disp?
     - better data organization
 	    - merge configs & states?
 		  - what goes in config, what goes into states?
-		- be better about reloading objects after refs might change
-	  - pattern:
-		  - patternRefPool?
-      - make patterns modules/pattern level scripts?
-	    - put pattern into systemST, patternRefPool.  stop passing pattern around
-	    - interpolating between patterns?
+		- be better about reloading objects after refs might change?
 
 	- database support
 	  - which database?
@@ -112,10 +114,10 @@ PERF:
   - choppy in safari
 
 SYSTEM:
+  - remove ssRef from ScriptFn, replace with sysT.  Need to remove pauseAfterSwitch
   - do something smart if not enough resources (uniforms, tex, etc)
   - need to define funcs in main - planewave, etc
   - better deploy scripts
-	- consolidate remote lib requests
 
   - scripts
     - way of switching modules while keeping phase/scripts.

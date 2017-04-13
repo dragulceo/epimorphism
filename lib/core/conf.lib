@@ -10,7 +10,6 @@ id prod
 engineConf default
 uiConf prod
 pattern prod
-seed 8563
 
 ### SystemConf
 id analysis

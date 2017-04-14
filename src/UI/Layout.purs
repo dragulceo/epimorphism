@@ -7,7 +7,7 @@ import Data.DOM.Simple.Element (classRemove, classAdd, setInnerHTML, setStyleAtt
 import Data.DOM.Simple.Window (innerHeight, innerWidth, document, globalWindow)
 import Data.Library (getUIConfD)
 import Data.Maybe (Maybe(Just, Nothing))
-import Data.Types (EpiS, Library, SystemST, UIST)
+import Data.Types (EpiS, Library, SystemST, UIST, EngineST)
 import UIUtil (findElt)
 import Util (lg)
 
@@ -55,8 +55,8 @@ initLayout uiST lib = do
 
 
 -- hides malformed html issues
-updateLayout :: forall eff h. UIST -> SystemST h -> Library h -> Boolean -> EpiS eff h Unit
-updateLayout uiST systemST lib force = do
+updateLayout :: forall eff h. UIST -> SystemST h -> EngineST -> Library h -> Boolean -> EpiS eff h Unit
+updateLayout uiST systemST engineST lib force = do
   uiConfD <- getUIConfD lib "updateLayout"
   when (force ||
         (systemST.frameNum `mod` uiConfD.uiUpdateFreq == 0 && not systemST.paused)) do
@@ -69,6 +69,6 @@ updateLayout uiST systemST lib force = do
         Nothing -> pure unit
 
     when (uiConfD.windowState == "dev") do
-      renderConsole uiST systemST lib
+      renderConsole uiST systemST engineST lib
 
     pure unit

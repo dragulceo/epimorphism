@@ -16,7 +16,7 @@ import Data.Maybe (Maybe(..))
 import Data.StrMap (StrMap)
 import Data.String (Pattern(..), split, joinWith)
 import Data.String.Regex (Regex, regex)
-import Data.String.Regex.Flags (RegexFlags(..), noFlags)
+import Data.String.Regex.Flags (RegexFlags, noFlags)
 import Data.Tuple (fst, Tuple(..))
 import Graphics.Canvas (CANVAS)
 

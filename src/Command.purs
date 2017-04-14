@@ -122,7 +122,7 @@ command usRef esRef ssRef lib msg = handleError do
             initLayout uiST lib
             pure unit
           "updateLayout" -> do
-            updateLayout uiST systemST lib true
+            updateLayout uiST systemST engineST lib true
           "showFps" -> do
             uiConf <- getUIConf lib "showFps"
             modLibD lib uiConf $ \x -> x {showFps = not x.showFps}

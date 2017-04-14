@@ -17,7 +17,7 @@
   ],
   "dependencies": {
     "purescript-webgl-monad": "git@github.com:geneshuman/purescript-webgl-monad.git#2.0.1",
-    "purescript-complex": "git@github.com:geneshuman/purescript-complex.git#2.0.0",
+    "purescript-complex": "git@github.com:geneshuman/purescript-complex.git#2.0.1",
     "purescript-simple-dom": "git@github.com:geneshuman/purescript-simple-dom.git#2.0.0",
     "purescript-extensions": "1.2.2",
     "purescript-console": "2.0.0",

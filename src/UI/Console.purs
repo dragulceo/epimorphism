@@ -16,7 +16,7 @@ import Data.String.Regex.Flags (noFlags)
 import Data.String.Regex.Unsafe (unsafeRegex)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
-import Data.Types (Component(..), EpiS, Module(..), ModuleD, moduleSchema, Library, SystemST, UIST)
+import Data.Types (Component(..), EpiS, Library, Module(..), ModuleD, SystemST, UIST, EngineST, moduleSchema)
 import Paths (isConstantPath, runPath)
 import Serialize (showCX, unsafeSerialize)
 import Text.Format (format, precision)
@@ -25,17 +25,27 @@ import Util (dbg, indentLines, inj, real, zipI)
 
 foreign import addEventListeners :: forall eff. Eff eff Unit
 
-renderConsole :: forall eff h. UIST -> SystemST h -> Library h -> EpiS eff h Unit
-renderConsole uiST systemST lib = do
+renderConsole :: forall eff h. UIST -> SystemST h -> EngineST -> Library h -> EpiS eff h Unit
+renderConsole uiST systemST engineST lib = do
   uiConfD  <- getUIConfD lib "renderConsole uiConf"
   patternD <- getPatternD lib "renderConsole pattern"
   dsmDiv <- findElt "debugMain"
   str0 <- renderModule systemST lib uiConfD.uiCompLib patternD.main "MAIN" Nothing
   lift $ setInnerHTML str0 dsmDiv
 
+  dsmSDiv <- findElt "debugMainSrc"
+  case (engineST.compST.mainSrc) of
+    Just src -> lift $ setInnerHTML src dsmSDiv
+    Nothing -> pure unit
+
   dsdDiv <- findElt "debugDisp"
   str1 <- renderModule systemST lib uiConfD.uiCompLib patternD.disp "DISP" Nothing
   lift $ setInnerHTML str1 dsdDiv
+
+  dsdSDiv <- findElt "debugDispSrc"
+  case (engineST.compST.dispSrc) of
+    Just src -> lift $ setInnerHTML src dsdSDiv
+    Nothing -> pure unit
 
   lift $ addEventListeners
 

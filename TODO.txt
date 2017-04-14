@@ -5,27 +5,30 @@ NOTES:
  some pallets are still ugly.  also, the bleeding stuff, I'm not sure I like it
 
 PROJECTS:
-	- complex number library show hack
 	- turn of dbg compiler warnings?
 	- better resolution images? make sure all load
+	- EXT_disjoint_timer_query to scale performance?
 
   - components
-	  - think about inlining components as functions
 		- component indentation :/
 	  - change sub vars to something that gives better compiler errors
-    - remove child variables from components ?
+		- remove includes from pattern, into component
+
+  - seed library
+	  - minimze compiles & complexity
+		  - draw seeds on the client???
+			- use a second shader?
+
 
 	- async (AFF?)
-	  - lib requests
+	  - lib/db requests
 		- image requests
 		- db requests
-		- empty?
 
 	- restructure data
 	  - saving
 		- cleanup
 		  - importing = clone, rewrite clonePattern.  references?
-		  - remove includes from pattern, into component
 			- get rid of slib?
 		- scripts could use some more thought.
 		  - pattern level scripts

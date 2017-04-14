@@ -9,12 +9,12 @@ import DOM (DOM)
 import Data.Array (null, updateAt, foldM, sort, concatMap, fromFoldable)
 import Data.Int (round, toNumber)
 import Data.Library (dat, getLib, getLibM, getPatternD, getSystemConf, getSystemConfD, getUIConfD, modLibD)
-import Data.Maybe (isNothing, fromMaybe, Maybe(Nothing, Just))
+import Data.Maybe (Maybe(Nothing, Just), fromMaybe, isNothing)
 import Data.Set (member)
 import Data.StrMap (insert, values, keys, lookup)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
-import Data.Types (EngineConf, EpiS, Module(..), Section(..), Library(..), CompOp(..), EngineST, PMut(PMutNone, PMut), SystemST, UIST, defaultSystemST)
+import Data.Types (CompOp(..), EngineConf, EngineST, EpiS, Library(..), Module(..), PMut(PMutNone, PMut), Section(..), SystemST, UIST, defaultSystemST, fullCompile)
 import Engine (postprocessFrame, initEngineST, renderFrame)
 import Graphics.Canvas (CANVAS)
 import Layout (updateLayout)
@@ -152,6 +152,7 @@ animate state = handleError do
   -- execute compile queue
   when (not $ null engineST'.compQueue) do
     --t' <- lift $ now
+    --lift $ modifySTRef esRef _ {compQueue = fullCompile}
     compileShaders esRef lib (isNothing engineST.mainProg)
     --t'' <- lift $ now
     --dbg $ inj "COMPILE :%0ms" [show (t'' - t')]
@@ -175,7 +176,7 @@ animate state = handleError do
   t4 <- lift $ now
 
   -- update ui
-  updateLayout uiST systemST'' lib false
+  updateLayout uiST systemST'' engineST'' lib false
   t5 <- lift $ now
 
   -- request next frame

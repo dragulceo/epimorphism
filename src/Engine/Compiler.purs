@@ -7,7 +7,7 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (length, uncons)
-import Data.Library (delLib, getEngineConfD, getLibM, getPattern, getPatternD, idx, modLibD)
+import Data.Library (delLib, getEngineConfD, getLibM, getPattern, idx, modLibD)
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.String (stripPrefix)
 import Data.String (Pattern(..)) as S
@@ -26,15 +26,10 @@ import Util (Now, dbg, lg, now, now2, replaceAll, unsafeCast)
 compileShaders :: forall eff h. STRef h EngineST -> Library h -> Boolean -> EpiS (now :: Now | eff) h Boolean
 compileShaders esRef lib full = do
   es <- lift $ readSTRef esRef
+  engineConfD <- getEngineConfD lib "compileShaders"
 
   currentP@(Pattern _ currentD') <- getPattern lib "patternD compileShaders"
-
-  mCompP <- getLibM lib "$$Comp"
-  compP@(Pattern _ compD) <- case (mCompP :: Maybe Pattern) of
-    Nothing -> pure currentP
-    Just p -> pure p
-
-  engineConfD <- getEngineConfD lib "compileShaders"
+  compP@(Pattern _ compD) <- fromMaybe currentP <$> getLibM lib "$$Comp"
 
   case (uncons es.compQueue) of
     Just {head: op, tail: rst} -> do
@@ -80,11 +75,13 @@ compileShaders esRef lib full = do
           -- unif
           mainUnif <- case es.compST.mainProg of
             Just prog -> do
+              dbg "mainU"
               Just <$> linkShader es prog
             Nothing -> pure Nothing
 
           dispUnif <- case es.compST.dispProg of
             Just prog -> do
+              dbg "dispU"
               Just <$> linkShader es prog
             Nothing -> pure Nothing
 
@@ -109,7 +106,7 @@ compileShaders esRef lib full = do
           when ((idx compP).id == "$$Comp") do
             delLib lib compP
 
-          lift $ modifySTRef esRef (\es' -> es' {compST = newCompST {vertSrc = es.compST.vertSrc}})
+          lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainProg=Nothing, dispProg=Nothing}})
 
           pure true
         CompStall -> do

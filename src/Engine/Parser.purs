@@ -1,6 +1,7 @@
 module Parser where
 
 import Prelude
+import Control.Monad.Trans.Class (lift)
 import Data.Array (length)
 import Data.Array (sort, length, (..)) as A
 import Data.Foldable (foldl)
@@ -11,7 +12,7 @@ import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
 import Data.Types (Component(..), Epi, EpiS, ModuleD, Library)
-import Util (dbg, forceInt, indentLines, inj, replaceAll)
+import Util (dbg, forceInt, indentLines, inj, offsetOf, replaceAll)
 
 type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}
 type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array String}
@@ -78,8 +79,11 @@ parseModule mod lib zOfs parOfs images = do
     handleChild :: CompRes -> String -> ModuleD -> EpiS eff h CompRes
     handleChild {component, zOfs: zOfs', parOfs: parOfs', images: images'} k v = do
       res <- parseModule v lib zOfs' parOfs' images'
-      let iC = "//" <> k <> "\n  {\n" <> (indentLines 2 res.component) <> "\n  }"
-      let child = replaceAll ("%" <> k <> "%") iC component
+      let tok = "%" <> k <> "%"
+      ofs <- lift $ offsetOf tok component
+      --let iC = "//" <> k <> "\n  {\n" <> (indentLines 2 res.component) <> "\n  }"
+      let iC = "//" <> k <> (indentLines ofs ("\n{\n" <> res.component <> "\n}"))
+      let child = replaceAll tok iC component
       pure $ res { component = child }
 
 -- preprocess substitutions.  just parses t expressions

@@ -86,6 +86,12 @@ exports.winLog = function (x) {
   };
 }
 
+exports.winAppend = function (x) {
+  return function() {
+    $('body').append("<pre>" + x.replace(new RegExp("\n", 'g'), "<br/>") + "</pre>");
+  };
+}
+
 exports.urlArgs = function() {
 	var get = {};
 
@@ -136,9 +142,9 @@ exports.urlGetImpl = function (left) {
 				var request = new XMLHttpRequest();
 				request.open('GET', url, false);
 				request.addEventListener('load', function() {
-					if (request.status == 200 || request.status == 304 )
+					if (request.status == 200 || request.status == 304 ){
 						result = right(request.responseText);
-					else
+					}else
 						result = left(url + " : " + request.statusText);
 				});
 
@@ -260,5 +266,20 @@ exports.clickPause = function() {
 exports.elg = function elg(x) {
 	return function (){
 		console.log(x);
+	}
+}
+
+
+exports.offsetOf = function(tok) {
+	return function(str){
+		return function(){
+			var lines = str.split("\n")
+			for(i = 0; i<lines.length; i++){
+				var line = lines[i];
+				if(line.includes(tok))
+					return line.indexOf(tok);
+			}
+			return 0;
+		}
 	}
 }

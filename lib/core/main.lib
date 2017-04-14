@@ -48,7 +48,7 @@ void main() {
 
   %post%
 
-	frame.a = 1.0; // this value is used by webgl
+  frame.a = 1.0; // this value is used by webgl
   gl_FragColor = frame;
 }
 

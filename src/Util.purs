@@ -30,6 +30,7 @@ foreign import stick :: forall a b. a -> b
 foreign import tLg :: forall a b. a -> b
 foreign import unsafeEval :: forall eff. String -> Eff eff Unit
 foreign import winLog :: forall a eff. a -> Eff eff Unit
+foreign import winAppend :: forall a eff. a -> Eff eff Unit
 foreign import requestAnimationFrame :: forall eff a. (a -> Eff eff Unit) -> a -> Eff eff Unit
 foreign import now :: forall eff. Eff (now :: Now | eff) Number
 foreign import now2 :: forall eff. Eff eff Number
@@ -54,6 +55,8 @@ foreign import hasAttr :: forall a. a -> String -> Boolean
 foreign import unsafeCast :: forall a b. a -> b
 
 foreign import getProfileCookie :: forall eff. Eff eff String
+
+foreign import offsetOf :: forall eff. String -> String -> Eff eff Int
 
 -- ghetto
 foreign import clickPause :: forall eff. Eff eff Unit
@@ -145,7 +148,7 @@ spc 0 = ""
 spc m = " " <> spc (m - 1)
 
 indentLines :: Int -> String -> String
-indentLines n s = joinWith "\n" $ map (\x -> (spc n) <> x) $ split (Pattern "\n") s
+indentLines n s = joinWith "\n" $ map ((<>) (spc n)) $ split (Pattern "\n") s
 
 
 inj :: String -> Array String -> String

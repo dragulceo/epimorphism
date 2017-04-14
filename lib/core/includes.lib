@@ -14,18 +14,18 @@ code &&&
 
 /*
 float freqData(float x){
-	return texture2D(audioData, vec2(mod(x, 1.0), 0.0)).a;
+  return texture2D(audioData, vec2(mod(x, 1.0), 0.0)).a;
 }
 
 float timeData(float x){
-	return texture2D(audioData, vec2(mod(x, 1.0), 2.0)).a;
+  return texture2D(audioData, vec2(mod(x, 1.0), 2.0)).a;
 }
 */
 
 float plane_wave(vec2 k, vec2 z, float w, float time){
 
   float th = (k.x * z.x + k.y * z.y) - w * time;
-	th = mod(th, 1.0);
+  th = mod(th, 1.0);
   float v = sin(2.0 * PI * th);
 
   return v;
@@ -38,7 +38,7 @@ code &&&
 
 /* colorspace library */
 vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d ){
-	return a + b * cos(2.0 * PI * (c * t + d));
+  return a + b * cos(2.0 * PI * (c * t + d));
 }
 
 vec4 rgb2hsv(vec4 c){
@@ -65,7 +65,7 @@ code &&&
 // can probably optimize all hsl functions
 vec4 hsl2rgb(vec4 c){
   float h = c.x;
-	float s = c.y;
+  float s = c.y;
   float l = c.z;
 
   if(s == 0.0)
@@ -100,10 +100,10 @@ vec4 hsls2rgb(vec4 c){
     h += 2.0 * PI;
   h /= (2.0 * PI);
 
-	c.x = h;
-	c.y = s;
+  c.x = h;
+  c.y = s;
 
-	return hsl2rgb(c);
+  return hsl2rgb(c);
 }
 
 
@@ -137,7 +137,7 @@ vec4 rgb2hsls(vec4 c){
     h *= PI / 3.0;
   }
 
-	// l was *= 0.9999999 brfore import?
+  // l was *= 0.9999999 brfore import?
   vec4 r = vec4(s * cos(h), s * sin(h), l, c.w);
 
   return r;
@@ -187,8 +187,8 @@ vec2 SQZ(vec2 z0){
 vec2 EXPZ(vec2 z0){
   float f = exp(z0.x);
   float s, c;
-	s = sin(z0.y);
-	c = cos(z0.y);
+  s = sin(z0.y);
+  c = cos(z0.y);
   return vec2(f * c, f * s);
 }
 
@@ -207,29 +207,29 @@ vec2 COSZ(vec2 z0){
 vec2 TANZ(vec2 z0){
   float s, c;
   s = sin(2.0 * z0.x);
-	c = cos(2.0 * z0.x);
+  c = cos(2.0 * z0.x);
   float r = c + cosh(2.0 * z0.y);
   return vec2(s, sinh(2.0 * z0.y)) / r;
 }
 
 vec2 SINHZ(vec2 z0){
   float s, c;
-	s = sin(z0.y);
-	c = cos(z0.y);
+  s = sin(z0.y);
+  c = cos(z0.y);
   return vec2(sinh(z0.x) * c, cosh(z0.x) * s);
 }
 
 vec2 COSHZ(vec2 z0){
   float s, c;
-	s = sin(z0.y);
-	c = cos(z0.y);
+  s = sin(z0.y);
+  c = cos(z0.y);
   return vec2(cosh(z0.x) * c, sinh(z0.x) * s);
 }
 
 vec2 TANHZ(vec2 z0){
   float s, c;
   s = sin(2.0 * z0.y);
-	c = cos(2.0 * z0.y);
+  c = cos(2.0 * z0.y);
   float r = cosh(2.0 * z0.x) + c;
   return vec2(sinh(2.0 * z0.x), s) / r;
 }
@@ -238,26 +238,21 @@ vec4 _gamma3(vec4 v, float gamma){
   return vec4(pow(v.xyz, vec3(gamma, gamma, gamma)), v.w);
 }
 
-bool isNan(float val)
-{
+bool isNan(float val){
   return ( val < 0.0 || 0.0 < val || val == 0.0 ) ? false : true;
 }
 
 vec2 torus_reduce(vec2 z){
-	z = z + vec2(1.0, 1.0);
-
-	z = mod(z, 4.0);
-	z = vec2(1.0, 1.0) - abs(z - vec2(2.0, 2.0));
-
+  z = z + vec2(1.0, 1.0);
+  z = mod(z, 4.0);
+  z = vec2(1.0, 1.0) - abs(z - vec2(2.0, 2.0));
   return z;
 }
 
 vec2 grid_reduce(vec2 z){
-	z = z + vec2(1.0, 1.0);
-
-	z = mod(z, 2.0);
-	z = z - vec2(1.0, 1.0);
-
+  z = z + vec2(1.0, 1.0);
+  z = mod(z, 2.0);
+  z = z - vec2(1.0, 1.0);
   return z;
 }
 

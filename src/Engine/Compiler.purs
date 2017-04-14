@@ -7,12 +7,12 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (length, uncons)
-import Data.Library (delLib, getEngineConfD, getLibM, getPattern, idx, modLibD)
+import Data.Library (delLib, getEngineConfD, getLib, getLibM, getPattern, idx, modLibD)
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.String (stripPrefix)
 import Data.String (Pattern(..)) as S
 import Data.Tuple (fst, Tuple(Tuple))
-import Data.Types (EpiS, Pattern(..), PatternD, Library, newCompST, UniformBindings, SystemST, EngineST, CompOp(..))
+import Data.Types (CompOp(..), Component(..), EngineST, EpiS, Library, Pattern(..), PatternD, SystemST, UniformBindings, newCompST)
 import EngineUtil (execGL)
 import Graphics.WebGL.Methods (vertexAttribPointer, enableVertexAttribArray, bindBuffer, bufferData, createBuffer)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram, linkProgram)
@@ -20,7 +20,7 @@ import Graphics.WebGL.Types (WebGLProgram, DataType(Float), BufferData(DataSourc
 import Parser (parseShader)
 import Pattern (purgeModule)
 import Texture (uploadAux)
-import Util (Now, dbg, lg, now, now2, replaceAll, unsafeCast)
+import Util (Now, dbg, lg, now, now2, replaceAll, unsafeCast, winLog)
 
 -- compile shaders and load into systemST
 compileShaders :: forall eff h. STRef h EngineST -> Library h -> Boolean -> EpiS (now :: Now | eff) h Boolean
@@ -43,6 +43,9 @@ compileShaders esRef lib full = do
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainSrc = Just main, auxImages = Just aux}})
           pure false
         CompDispShader -> do
+          (Component _ comp) <- getLib lib "disp" "asdfasdf"
+          --dbg comp
+          --lift $ winLog comp.code
           disp <- parseDisp lib compD
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {dispSrc = Just disp}})
           pure false

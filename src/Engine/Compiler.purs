@@ -128,12 +128,12 @@ parseMain lib patternD fract = do
   -- kind of ghetto
   main <- case fract of
     Just i -> do
-      let main' = replaceAll "\\$fract\\$" (show i) main''
-      pure $ replaceAll "\\$NO_FRACT\\$" "" main'
+      let main' = replaceAll "~fract~" (show i) main''
+      pure $ replaceAll "~NO_FRACT~" "" main'
     Nothing -> do
       dbg "NO FRACT"
-      let main' = replaceAll "\\$fract\\$" "1" main''
-      pure $ replaceAll "\\$NO_FRACT\\$" "#define _NO_FRACT_" main'
+      let main' = replaceAll "~fract~" "1" main''
+      pure $ replaceAll "~NO_FRACT~" "#define _NO_FRACT_" main'
 
   pure $ Tuple main aux
 

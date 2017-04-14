@@ -5,20 +5,18 @@ NOTES:
  some pallets are still ugly.  also, the bleeding stuff, I'm not sure I like it
 
 PROJECTS:
-	- turn of dbg compiler warnings?
+	- dbg -> log
 	- better resolution images? make sure all load
 	- EXT_disjoint_timer_query to scale performance?
 
   - components
 		- component indentation :/
-	  - change sub vars to something that gives better compiler errors
-		- remove includes from pattern, into component
+		- remove includes from pattern into component
 
   - seed library
 	  - minimze compiles & complexity
 		  - draw seeds on the client???
 			- use a second shader?
-
 
 	- async (AFF?)
 	  - lib/db requests
@@ -32,24 +30,12 @@ PROJECTS:
 			- get rid of slib?
 		- scripts could use some more thought.
 		  - pattern level scripts
-		  - which module do they belong to?
 			- how to syncronize multiple scripts? i.e, color & disp?
+		  - which module do they belong to?
     - better data organization
-	    - merge configs & states?
 		  - what goes in config, what goes into states?
 		- be better about reloading objects after refs might change?
-
-	- database support
-	  - which database?
-		- how are things stored/serialized?
-		- search by family, component, flags, props, id
-		- what about things like libName?
-		- sync local & remote dbs
-		- put textures in db
-		- misc:
-		  - update flags on save (default != true)
-  	  - check for duplicates when saving (id = hash of contents?)
-      - namespace collisions detection
+		- construct lib refs such that reading from lib is pure?
 
 	- UI
 	  - basic idea is that all db & data modifications happen through UI
@@ -65,12 +51,23 @@ PROJECTS:
 	- more importing/compiling
 		- WINDOWS SUCKS - OSX Nvidia 640M?
 		- batch compilation?
-		- cleanup
 		- MISC
 		  - could maybe clean up switch a bit more (remove imports/purges, combine methods)
 		  - maybe module.modules should be [SubModule = SubLib String | SubPool String] or something
       - module/submodule cycles??
 			- only way to modify tree is via switch?
+
+	- database support
+	  - which database?
+		- how are things stored/serialized?
+		- search by family, component, flags, props, id
+		- sync local & remote dbs
+		- put textures in db
+		- misc:
+		  - update flags on save (default != true)
+  	  - check for duplicates when saving (id = hash of contents?)
+      - namespace collisions detection
+
 
   - main pattern
     - T

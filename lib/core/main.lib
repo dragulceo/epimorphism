@@ -7,12 +7,12 @@ uniform sampler2D fb;
 uniform float time;
 uniform float kernel_dim;
 uniform sampler2D audioData;
-~blorp~
+
 #par#
 #zn#
 #aux#
 
-$NO_FRACT$
+~NO_FRACT~
 
 void main() {
   vec4 color;

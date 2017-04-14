@@ -57,8 +57,8 @@ code &&&
   %t%
 	%reduce%
 
-	float wx = (abs(z.x) + @w@ - 1.0) / @w@;
-	float wy = (abs(z.y) + @w@ - 1.0) / @w@;
+	float wx = (abs(z.x) + |w| - 1.0) / |w|;
+	float wy = (abs(z.y) + |w| - 1.0) / |w|;
 
   float w = max(0.0, max(wx, wy));
 	float mask = ceil(w);

@@ -1,6 +1,6 @@
 seed_a_main {{
-	a * @alpha@
-	sqrt(1.0 - (1.0 - w) * (1.0 - w)) * a * @alpha@
+	a * |alpha|
+	sqrt(1.0 - (1.0 - w) * (1.0 - w)) * a * |alpha|
 }}
 
 seed_wt_main_old {{

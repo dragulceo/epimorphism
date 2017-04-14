@@ -30,16 +30,16 @@ includes []
 code &&&
 	// optimize me!
 	vec4 frame_i = frame;
-  //frame = _gamma3(frame, 1.2);//@gamma@);
+  //frame = _gamma3(frame, 1.2);//|gamma|);
 
   frame = rgb2hsv(frame);
 
 	float inc = (frame.a - DEPTH_INC) / (1.0 - DEPTH_INC);
-	inc = @inc_sc@ * inc;
+	inc = |inc_sc| * inc;
 
-  vec4 c0 = hsv2rgb(vec4(0.9 + inc + 0.3 * frame_i.x + @hue@, 1.0, 0.5, 1.0));
-  vec4 c1 = hsv2rgb(vec4(0.9 + 0.3 * frame_i.x + @hue@ + @spread@ / 2.0, 1.0, @lgv@, 1.0));
-  vec4 c2 = hsv2rgb(vec4(0.9 + inc + 0.2 * frame_i.x + @hue@ - @spread@ / 2.0, 1.0, -1.0 * @lgv@, 1.0));
+  vec4 c0 = hsv2rgb(vec4(0.9 + inc + 0.3 * frame_i.x + |hue|, 1.0, 0.5, 1.0));
+  vec4 c1 = hsv2rgb(vec4(0.9 + 0.3 * frame_i.x + |hue| + |spread| / 2.0, 1.0, |lgv|, 1.0));
+  vec4 c2 = hsv2rgb(vec4(0.9 + inc + 0.2 * frame_i.x + |hue| - |spread| / 2.0, 1.0, -1.0 * |lgv|, 1.0));
 
   vec4 res, r0, r1;
   float f;
@@ -62,7 +62,7 @@ code &&&
 	// modulate hue
   res = rgb2hsv(res);
   frame.x = res.x;
-	frame.y *= @sat_sc@;
+	frame.y *= |sat_sc|;
   frame = hsv2rgb(frame);
 
 ### Component
@@ -72,7 +72,7 @@ default_mod post_pallet1
 includes []
 code &&&
 	vec4 frame_i = frame;
-  //frame = _gamma3(frame, 1.2);//@gamma@);
+  //frame = _gamma3(frame, 1.2);//|gamma|);
 
 	float val = rgb2hsv(frame).z;
 

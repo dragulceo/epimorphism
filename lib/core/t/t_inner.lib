@@ -224,4 +224,4 @@ id t_sub
 family t_inner
 default_mod t_sub
 code &&&
-	z = $t_expr$;
+	z = ~t_expr~;

@@ -21,12 +21,12 @@ code &&&
   // compute val
 	float sum = 0.0;
   for(int i = 0; i <= max_waves; i++){
-		float th = float(i) * PI / @waves@;
-		th += (float(i) - @waves@ / 2.0) * time * @spd@;
+		float th = float(i) * PI / |waves|;
+		th += (float(i) - |waves| / 2.0) * time * |spd|;
 
 		vec2 k = vec2(cos(th), sin(th));
-		waves[i] = plane_wave(@N@ * k, z, @N@, time * @spd@);
-		if(float(i) <= @waves@)
+		waves[i] = plane_wave(|N| * k, z, |N|, time * |spd|);
+		if(float(i) <= |waves|)
 			sum += waves[i];
   }
 
@@ -37,12 +37,12 @@ code &&&
   // compute hue
 	sum = 0.0;
   for(int i = 0; i <= max_waves; i++){
-		float th = float(i) * PI / @waves@;
-		th += (float(i) - @waves@ / 2.0) * time * @spd@;
+		float th = float(i) * PI / |waves|;
+		th += (float(i) - |waves| / 2.0) * time * |spd|;
 
 		vec2 k = vec2(cos(th), sin(th));
-		waves[i] = plane_wave(@N@ * k, z, @N@, 2.0 * time * @spd@) / 6.0;
-		if(float(i) <= @waves@)
+		waves[i] = plane_wave(|N| * k, z, |N|, 2.0 * time * |spd|) / 6.0;
+		if(float(i) <= |waves|)
 			sum += waves[i];
   }
 

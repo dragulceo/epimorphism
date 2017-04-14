@@ -123,7 +123,7 @@ component alpha
 flags {farm1, lib}
 par {alpha:wave 0.048 0.2 0.8}
 scripts [randomize dly:40 spd:0.5 lib:seed_a_main dim:float sub:a_exp typ:sub]
-sub {a_exp:a * @alpha@}
+sub {a_exp:a * |alpha|}
 
 ###Module
 id alpha_anim2
@@ -131,7 +131,7 @@ component alpha
 flags {farm1, lib}
 par {alpha:wave 0.038 0.2 0.77}
 scripts [randomize dly:55 spd:0.5 lib:seed_a_main dim:float sub:a_exp typ:sub]
-sub {a_exp:a * @alpha@}
+sub {a_exp:a * |alpha|}
 
 
 ###Module

@@ -12,12 +12,12 @@ import Data.Serialize (parseLibData)
 import Data.StrMap (StrMap, lookup, values)
 import Data.Traversable (traverse)
 import Data.Types (Epi, EpiS, Module, Library)
-import Util (inj, urlGet)
+import Util (urlGet)
 
-initLibrary :: forall eff h. String -> EpiS eff h (Library h)
-initLibrary host = do
-  core <- lift $ urlGet (host <> "/lib/core.lib")
-  user <- lift $ urlGet (host <> "/lib/user.lib")
+initLibrary :: forall eff h. String -> String -> EpiS eff h (Library h)
+initLibrary host version = do
+  core <- lift $ urlGet (host <> "/lib/core.lib?v=" <> version)
+  user <- lift $ urlGet (host <> "/lib/user.lib?v=" <> version)
 
   let sep = Right "\n@@@ Sections\n"  -- dont hard code this
   sections <- lift $ urlGet (host <> "/lib/sections.slib")

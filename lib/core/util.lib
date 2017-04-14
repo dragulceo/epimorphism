@@ -1,4 +1,10 @@
 ###Module
+id no_reduce
+component reduce
+flags {lib}
+sub {reduce:z}
+
+###Module
 id grid_reduce
 component reduce
 flags {lib}

@@ -13,7 +13,7 @@ flags {lib}
 id post_hlim
 component post_hlim
 flags {lib, post_hlim}
-par {gamma:1.5, hue:0.0, spread:0.5, lgv:0.5, sat_sc:1.0, inc_sc:0.0}
+par {gamma:1.5, hue:0.0, spread:0.5, lgv:0.5, sat_sc:1.0, inc_sc:0.1, gofs: 0.3}
 
 ### Component
 id post_id
@@ -36,10 +36,11 @@ frame = rgb2hsv(frame);
 
 float inc = (frame.a - DEPTH_INC) / (1.0 - DEPTH_INC);
 inc = |inc_sc| * inc;
+float gofs = |gofs| * frame_i.x;
 
-vec4 c0 = hsv2rgb(vec4(0.9 + inc + 0.3 * frame_i.x + |hue|, 1.0, 0.5, 1.0));
-vec4 c1 = hsv2rgb(vec4(0.9 + 0.3 * frame_i.x + |hue| + |spread| / 2.0, 1.0, |lgv|, 1.0));
-vec4 c2 = hsv2rgb(vec4(0.9 + inc + 0.2 * frame_i.x + |hue| - |spread| / 2.0, 1.0, -1.0 * |lgv|, 1.0));
+vec4 c0 = hsv2rgb(vec4(0.9 + 1.0 * gofs + 1.0 * inc + |hue|, 1.0, 0.5, 1.0));
+vec4 c1 = hsv2rgb(vec4(0.9 + 1.0 * gofs + 0.0 * inc + |hue| + |spread| / 2.0, 1.0, |lgv|, 1.0));
+vec4 c2 = hsv2rgb(vec4(0.9 + 0.8 * gofs + 1.0 * inc + |hue| - |spread| / 2.0, 1.0, -1.0 * |lgv|, 1.0));
 
 vec4 res, r0, r1;
 float f;

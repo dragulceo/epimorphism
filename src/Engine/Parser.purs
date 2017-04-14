@@ -12,26 +12,33 @@ import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
 import Data.Types (Component(..), Epi, EpiS, ModuleD, Library)
-import Util (forceInt, indentLines, inj, offsetOf, replaceAll)
+import Util (forceInt, indentLines, inj, log, offsetOf, replaceAll)
 
 type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}
-type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array String}
+type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array String, includes :: Array String}
 
 foreign import parseT :: String -> String
 
-parseShader :: forall eff h. Library h -> String -> Array String -> EpiS eff h (Tuple String (Array String))
-parseShader lib mid includes = do
+parseShader :: forall eff h. Library h -> String -> StrMap String -> EpiS eff h (Tuple String (Array String))
+parseShader lib mid globalSubs = do
   modD <- mD <$> getLib lib mid "parseShader mid"
-  modRes <- parseModule modD lib 0 0 []
+  modRes <- parseModule modD lib 0 0 [] []
 
-  let modRes' = spliceUniformSizes $ modRes
-  allIncludes' <- traverse (\x -> cD <$> getLib lib x "includes") includes
-  let allIncludes = "//INCLUDES\n" <> (joinWith "\n\n" (map _.code allIncludes')) <> "\n//END INCLUDES\n"
+  allIncludes' <- traverse (\x -> cD <$> getLib lib x "includes") modRes.includes
+  let allIncludes = "//INCLUDES" <> (joinWith "\n" (map _.code allIncludes')) <> "\n//END INCLUDES\n"
 
-  pure $ Tuple (allIncludes <> modRes'.component) (modRes'.images)
+  let modRes' = spliceUniformSizes $ modRes {component = fixComma $ allIncludes <> modRes.component}
+  let component' = fold handleSub modRes'.component globalSubs
+
+  pure $ Tuple component' (modRes'.images)
+  where
+    handleSub dt k v = replaceAll ("~" <> k <> "~") v dt
+
+fixComma :: String -> String
+fixComma str = replaceAll "&&&" "," str
 
 spliceUniformSizes :: CompRes -> CompRes
-spliceUniformSizes cmp@{ component, zOfs, parOfs, images } =
+spliceUniformSizes cmp@{ component, zOfs, parOfs, images, includes } =
   cmp{component = component'''}
   where
     component'   = case parOfs of
@@ -48,8 +55,8 @@ spliceUniformSizes cmp@{ component, zOfs, parOfs, images } =
                              (inj "uniform sampler2D aux[%0];" [show $ length images]) component''
 
 -- parse a shader.  substitutions, submodules, par & zn
-parseModule :: forall eff h. ModuleD -> Library h -> Int -> Int -> (Array String) -> EpiS eff h CompRes
-parseModule mod lib zOfs parOfs images = do
+parseModule :: forall eff h. ModuleD -> Library h -> Int -> Int -> (Array String) -> (Array String) -> EpiS eff h CompRes
+parseModule mod lib zOfs parOfs images includes = do
   -- substitutions (make sure this is always first)
   Component _ comp <- getLib lib mod.component "parse component"
   sub' <- preProcessSub mod.sub
@@ -68,17 +75,20 @@ parseModule mod lib zOfs parOfs images = do
   let component'''' = foldl handleImg component''' (A.(..) 0 ((A.length mod.images) - 1))
   let images' = images <> mod.images
 
+  -- includes
+  let includes' = includes <> comp.includes
+
   -- submodules
   mod' <- loadModules mod.modules lib
-  foldM handleChild { component: component'''', zOfs: zOfs', parOfs: parOfs', images: images' } mod'
+  foldM handleChild { component: component'''', zOfs: zOfs', parOfs: parOfs', images: images', includes: includes'} mod'
   where
     handleSub dt k v = replaceAll ("~" <> k <> "~") v dt
     handlePar (Tuple n dt) v = Tuple (n + 1) (replaceAll ("\\|" <> v <> "\\|") ("par[" <> show n <> "]") dt)
     handleZn dt v = replaceAll ("zn\\[#" <> show v <> "\\]") ("zn[" <> (show $ (v + zOfs)) <> "]") dt
     handleImg dt v = replaceAll ("aux\\[#" <> show v <> "\\]") ("aux[" <> (show $ (v + (A.length images))) <> "]") dt
     handleChild :: CompRes -> String -> ModuleD -> EpiS eff h CompRes
-    handleChild {component, zOfs: zOfs', parOfs: parOfs', images: images'} k v = do
-      res <- parseModule v lib zOfs' parOfs' images'
+    handleChild {component, zOfs: zOfs', parOfs: parOfs', images: images', includes: includes'} k v = do
+      res <- parseModule v lib zOfs' parOfs' images' includes'
       let tok = "%" <> k <> "%"
       ofs <- lift $ offsetOf tok component
       let iC = "//" <> k <> "\n" <>

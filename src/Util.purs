@@ -164,6 +164,7 @@ imag cx = case (inCartesian cx) of
   Cartesian x y -> y
 
 -- LOGGING
+foreign import flog :: forall a b eff. a -> Eff eff b
 foreign import log :: forall a b eff. a -> Eff eff b
 foreign import tLg :: forall a b. a -> b
 foreign import winLog :: forall a eff. a -> Eff eff Unit

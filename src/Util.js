@@ -23,15 +23,25 @@ exports.enableDebug = function () {
   window.epiDbg = true;
 }
 
-exports.log = function elg(x) {
+exports.log = function (x) {
   return function (){
     if(window.epiDbg){
+      if(typeof(x) == 'object') // clone object for console
+        x = jQuery.extend(true, {}, x);
+
       console.log(x);
       var timestamp = "<span class='timestamp'>[" + getFormattedDate() + "]</span>"
       $("#debugLog").append("<span class='log-line'>" + timestamp + " - " + x + "</span><br/>");
     }
   }
 }
+
+exports.flog = function(x) {
+  return function(){
+    console.log(x);
+  }
+}
+
 
 exports.tLg = function tLg(x) {
   if(typeof window.lgCnt == 'undefined')

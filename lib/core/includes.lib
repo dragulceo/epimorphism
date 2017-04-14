@@ -3,15 +3,24 @@ id header
 family library
 code &&&
 
-precision mediump float;
+precision highp float;
 #define PI 3.1415926535
 #define DEPTH_INC (32.0 / 255.0)
+
+uniform sampler2D fb;
+uniform sampler2D seedBuf;
+uniform float time;
+uniform float kernel_dim;
+uniform sampler2D audioData;
+~NO_FRACT~
+#par#
+#zn#
+#aux#
 
 ### Component
 id additional_funcs
 family library
 code &&&
-
 /*
 float freqData(float x){
   return texture2D(audioData, vec2(mod(x, 1.0), 0.0)).a;
@@ -35,7 +44,6 @@ float plane_wave(vec2 k, vec2 z, float w, float time){
 id colorspace
 family library
 code &&&
-
 /* colorspace library */
 vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d ){
   return a + b * cos(2.0 * PI * (c * t + d));
@@ -148,7 +156,6 @@ vec4 rgb2hsls(vec4 c){
 id math
 family library
 code &&&
-
 /* math utility library */
 
 float sinh(float x){
@@ -167,12 +174,12 @@ vec2 A(vec2 z0, vec2 z1){
   return vec2(z0.x + z1.x, z0.y + z1.y);
 }
 
-vec2 S(vec2 z0, vec2 z1){
-  return vec2(z0.x - z1.x, z0.y - z1.y);
-}
-
 vec2 M(vec2 z0, vec2 z1){
   return vec2(z0.x * z1.x - z0.y * z1.y, z0.x * z1.y + z0.y * z1.x);
+}
+
+vec2 S(vec2 z0, vec2 z1){
+  return vec2(z0.x - z1.x, z0.y - z1.y);
 }
 
 vec2 D(vec2 z0, vec2 z1){

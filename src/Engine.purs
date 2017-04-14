@@ -4,26 +4,31 @@ import Prelude
 import Data.TypedArray as T
 import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
-import Audio (audioData, initAudio)
+import Audio (initAudio)
+import Compiler (compileShaders)
 import Control.Monad.Eff (Eff, foreachE)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Reader.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, newSTRef, modifySTRef, readSTRef)
-import Data.Array (length, (..))
+import Data.Array (concatMap, elemIndex, foldM, length, sort, updateAt)
+import Data.Array (fromFoldable) as A
 import Data.Int (toNumber)
-import Data.Library (getEngineConfD)
-import Data.Maybe (maybe, Maybe(Nothing, Just))
-import Data.Tuple (Tuple(Tuple), snd, fst)
-import Data.Types (EpiS, Epi, Library, EngineProfile, EngineST, SystemST, UniformBindings, fullCompile, newCompST)
+import Data.Library (getEngineConfD, getLib, modLibD)
+import Data.Maybe (Maybe(Nothing, Just), fromMaybe)
+import Data.StrMap (StrMap, empty, fromFoldable, insert, keys, lookup, toUnfoldable, values)
+import Data.Traversable (for, traverse)
+import Data.Tuple (Tuple(Tuple), fst, snd)
+import Data.Types (EngineProfile, EngineST, Epi, EpiS, Kernel(..), Library, Module(..), PatternD, SystemST, UniformBindings, fullCompile, kGet, newCompST)
 import EngineUtil (execGL)
 import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
 import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
 import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor)
 import Graphics.WebGL.Raw (getParameter)
-import Graphics.WebGL.Types (WebGLContext, WebGLTexture, DrawMode(Triangles), Uniform(Uniform), WebGLError(ShaderError))
+import Graphics.WebGL.Types (DrawMode(Triangles), Uniform(Uniform), WebGLContext, WebGLError(ShaderError), WebGLFramebuffer, WebGLTexture)
+import Paths (runPath)
 import Texture (initAuxTex, initTexFb, emptyImage)
-import Util (Now, log, fromJustE, hasAttr, unsafeGetAttr, unsafeNull, zipI)
+import Util (Now, fromJustE, hasAttr, imag, log, real, unsafeGetAttr, unsafeNull, zipI)
 
 --  PUBLIC
 
@@ -60,21 +65,20 @@ initEngineST lib canvasId esRef' = do
 
   -- find canvas & create context
   canvasM <- liftEff $ getCanvasElementById canvasId
-  canvas <-
-    case canvasM of
-      Just c -> pure c
-      Nothing -> throwError $ "init engine - canvas not found: " <> canvasId
+  canvas <- fromJustE canvasM $ "init engine - canvas not found: " <> canvasId
+
+  let dim = engineConfD.kernelDim
+  lift $ setCanvasWidth (toNumber dim) canvas
+  lift $ setCanvasHeight (toNumber dim) canvas
 
   let attrs = defaultWebglContextAttrs {
-        alpha =                 false
+          alpha =                 false
         , depth =                 false
         , antialias =             false
         , preserveDrawingBuffer = true}
 
   ctxM <- liftEff $ getWebglContextWithAttrs canvas attrs
-  ctx <- case ctxM of
-    Just c -> pure c
-    Nothing -> throwError "Unable to get a webgl context!!!"
+  ctx <- fromJustE ctxM "Unable to get a webgl context!!!"
 
   profile <- getEngineProfile ctx
   lift $ log profile
@@ -86,26 +90,26 @@ initEngineST lib canvasId esRef' = do
   -- get reference
   esRef <- case esRef' of
     Just ref -> do
-      lift $ modifySTRef ref (\r -> r {empty = empty, currentImages = Nothing})
+      let compST = newCompST
+      let curST  = newCompST
+      lift $ modifySTRef ref _ {empty = empty, currentImages = [], curST = curST, compST=compST, compQueue = fullCompile}
       pure ref
     Nothing -> do
       let compST = newCompST
-      let tmp = {dispProg: Nothing, mainProg: Nothing, tex: Nothing, fb: Nothing, auxTex: Nothing, audio: Nothing, currentImages: Nothing, compQueue: fullCompile, mainUnif: Nothing, dispUnif: Nothing, ctx, empty, compST, profile}
-      lift $ newSTRef tmp
+      let curST  = newCompST
+      let new = {tex: Nothing, fb: Nothing, auxTex: Nothing, audio: Nothing, currentImages: [], compQueue: fullCompile, seed: Nothing, ctx, empty, compST, curST, profile}
+      lift $ newSTRef new
 
   es <- lift $ readSTRef esRef
 
-  -- if we change kernel_dim we need to redo this
-  let dim = engineConfD.kernelDim
-  lift $ setCanvasWidth (toNumber dim) canvas
-  lift $ setCanvasHeight (toNumber dim) canvas
-
   -- webgl initialization
-  res <- execGL ctx do
+  ref <- execGL ctx do
     Tuple tex0 fb0 <- initTexFb dim
     Tuple tex1 fb1 <- initTexFb dim
     auxTex <- initAuxTex engineConfD es.ctx empty
     audio <- initAudio engineConfD es.ctx empty
+
+    seed <- initTexFb dim
 
     clearColor 0.0 0.0 0.0 1.0
     liftEff $ GL.clear ctx GLE.colorBufferBit
@@ -114,112 +118,145 @@ initEngineST lib canvasId esRef' = do
     pure $ es {
         fb  = Just (Tuple fb0 fb1)
       , tex = Just (Tuple tex0 tex1)
+      , seed = Just seed
       , auxTex = Just auxTex
       , audio = audio
     }
-  -- set shaders
-  lift $ writeSTRef esRef res
+
+  -- update state
+  lift $ writeSTRef esRef ref
+
+  lift $ log "COMPILE INITIAL SHADERS"
+  compileShaders esRef lib true
+  lift $ log "FINISH COMPILE INITIAL SHADERS"
 
   pure esRef
 
--- do the thing!
-renderFrame :: forall eff h. SystemST h -> EngineST -> Library h -> Array Number -> Array Number -> Int -> EpiS eff h WebGLTexture
-renderFrame systemST engineST lib par zn frameNum = do
-  let ctx = engineST.ctx
-  engineConfD <- getEngineConfD lib "postprocessFrams"
 
-  -- unpack
-  tex <- case engineST.tex of
-    Just x -> pure x
-    Nothing -> throwError "RenderFrame: missing textures"
-  fbs <- case engineST.fb of
-    Just x -> pure x
-    Nothing -> throwError "RenderFrame: missing framebuffers"
-  auxTex <- case engineST.auxTex of
-    Just x -> pure x
-    Nothing -> throwError "RenderFrame: missing auxTex"
-  main <- case engineST.mainProg of
-    Just x -> pure x
-    Nothing -> throwError "RenderFrame: missing main program"
-  mainUnif <- case engineST.mainUnif of
-    Just x -> pure x
-    Nothing -> throwError "RenderFrame: missing main program"
+executeKernels :: forall eff h. Library h -> SystemST h -> EngineST -> PatternD -> EpiS eff h Unit
+executeKernels lib systemST engineST patternD = do
+  tex       <- fromJustE engineST.tex      "executeKernels: missing textures"
+  fbs       <- fromJustE engineST.fb       "executeKernels: missing framebuffers"
+  seedTexFb <- fromJustE engineST.seed     "executeKernels: missing seed tex & fb"
+
+  -- execute seed
+  executeKernel lib systemST engineST Seed patternD.seed (snd seedTexFb) empty -- only every n frames
+
+  -- ping-pong buffers
+  let tm = if systemST.frameNum `mod` 2 == 0 then fst tex else snd tex
+  let td = if systemST.frameNum `mod` 2 == 1 then fst tex else snd tex
+  let fb = if systemST.frameNum `mod` 2 == 1 then fst fbs else snd fbs
+
+  -- execute main
+  let buffers = fromFoldable [Tuple "fb" tm, Tuple "seedBuf" (fst seedTexFb)]
+  executeKernel lib systemST engineST Main patternD.main fb buffers
+
+  -- execute disp
+  let buffers' = fromFoldable [Tuple "fb" td]
+  executeKernel lib systemST engineST Disp patternD.disp unsafeNull buffers'
+
+
+executeKernel :: forall eff h. Library h -> SystemST h -> EngineST -> Kernel -> String ->
+                 WebGLFramebuffer -> (StrMap WebGLTexture) -> EpiS eff h Unit
+executeKernel lib systemST engineST kernel mid out buffers = do
+  engineConfD <- getEngineConfD lib "kernel ec"
+  prog <- fromJustE (kGet engineST.curST.prog kernel) $ "missing program: " <> (show kernel)
+  unif <- fromJustE (kGet engineST.curST.unif kernel) $ "missing uniforms: " <> (show kernel)
+
+  -- aux data
+  auxTex      <- fromJustE engineST.auxTex   "executeKernel: missing auxTex"
+  let auxImages = fromMaybe [] (kGet engineST.curST.aux kernel)
+  auxIndexes <- getAuxIndexes auxImages engineST.currentImages
+
+  -- use prog
+  let ctx = engineST.ctx
+  execGL ctx (liftEff $ GL.useProgram ctx prog)
 
   -- bind par & zn
-  execGL ctx (liftEff $ GL.useProgram ctx main)
-  bindParZn ctx mainUnif par zn
+  (Tuple par zn) <- getParZn lib systemST.t (Tuple [] []) mid
+  bindParZn ctx unif par zn
 
   execGL ctx do
-    -- bind main uniforms
-    uniform1f (unsafeGetAttr mainUnif "time") systemST.t -- - pattern.tPhase
-    uniform1f (unsafeGetAttr mainUnif "kernel_dim") (toNumber engineConfD.kernelDim)
+    -- bind uniforms
+    uniform1f (unsafeGetAttr unif "time") systemST.t
+    uniform1f (unsafeGetAttr unif "kernel_dim") (toNumber engineConfD.kernelDim) -- variable dims
 
-    -- BUG!!! audio has to be before aux???
-    --audio info
-
-    let numAux = maybe 0 length engineST.currentImages
-    case engineST.audio of
-      Just (Tuple audioTex analyser) -> do
-        case (hasAttr mainUnif "audioData") of
-          true -> do
-            liftEff $ GL.bindTexture ctx GLE.texture2d audioTex
-            dta <- lift $ lift $ audioData analyser
-            liftEff $ GL.texImage2D_ ctx GLE.texture2d 0 GLE.alpha engineConfD.audioBufferSize 1 0 GLE.alpha GLE.unsignedByte dta
-
-            let ofs = numAux + 1
-            liftEff $ GL.uniform1i ctx (unsafeGetAttr mainUnif "audioData") ofs
-            liftEff $ GL.activeTexture ctx (GLE.texture0 + ofs)
-            liftEff $ GL.bindTexture ctx GLE.texture2d audioTex
-          false -> pure unit
-      Nothing -> pure unit
-
-    -- aux
+    -- bind aux
+    let numAux = length auxImages
     when (numAux > 0) do
-      when (not $ hasAttr mainUnif "aux[0]") do
+      when (not $ hasAttr unif "aux[0]") do
         throwError $ ShaderError "missing aux uniform!"
-      liftEff $ GL.uniform1iv ctx (unsafeGetAttr mainUnif "aux[0]") (1..numAux)
+      liftEff $ GL.uniform1iv ctx (unsafeGetAttr unif "aux[0]") auxIndexes
       liftEff $ foreachE (zipI auxTex) \(Tuple i t) -> do
-        GL.activeTexture ctx (GLE.texture1 + i)
+        GL.activeTexture ctx (GLE.texture0 + i)
         GL.bindTexture ctx GLE.texture2d t
 
+    -- bind input buffers
+    let indexed = map (\(Tuple i (Tuple var tex)) -> {i, var, tex}) $ zipI (toUnfoldable buffers)
+    for indexed \{i, var, tex} -> do
+      liftEff $ GL.activeTexture ctx (GLE.texture0 + numAux + i)
+      liftEff $ GL.bindTexture ctx GLE.texture2d tex
+      liftEff $ GL.uniform1i ctx (unsafeGetAttr unif var) i
 
-    -- ping pong buffers
-    let tm = if frameNum `mod` 2 == 0 then fst tex else snd tex
-    let td = if frameNum `mod` 2 == 1 then fst tex else snd tex
-    let fb = if frameNum `mod` 2 == 1 then fst fbs else snd fbs
-
-    -- draw
-    liftEff $ GL.activeTexture ctx GLE.texture0
-    liftEff $ GL.bindTexture ctx GLE.texture2d tm
-    liftEff $ GL.bindFramebuffer ctx GLE.framebuffer fb
+    -- draw to fb
+    liftEff $ GL.bindFramebuffer ctx GLE.framebuffer out
     drawArrays Triangles 0 6
 
-    pure td
+
+    -- bind audio textures
+--    case engineST.audio of
+--      Just (Tuple audioTex analyser) -> do
+--        case (hasAttr mainUnif "audioData") of
+--          true -> do
+--            liftEff $ GL.bindTexture ctx GLE.texture2d audioTex
+--            dta <- lift $ lift $ audioData analyser
+--            liftEff $ GL.texImage2D_ ctx GLE.texture2d 0 GLE.alpha engineConfD.audioBufferSize 1 0 GLE.alpha GLE.unsignedByte dta
+--
+--            let ofs = numAux + 1
+--            liftEff $ GL.uniform1i ctx (unsafeGetAttr mainUnif "audioData") ofs
+--            liftEff $ GL.activeTexture ctx (GLE.texture0 + ofs)
+--            liftEff $ GL.bindTexture ctx GLE.texture2d audioTex
+--          false -> pure unit
+--      Nothing -> pure unit
 
 
-postprocessFrame :: forall eff h. SystemST h -> EngineST -> Library h -> WebGLTexture -> Array Number -> Array Number -> EpiS eff h Unit
-postprocessFrame systemST engineST lib tex par zn = do
-  let ctx = engineST.ctx
-  engineConfD <- getEngineConfD lib "postprocessFrams"
+getAuxIndexes :: forall eff h. Array String -> Array String -> EpiS eff h (Array Int)
+getAuxIndexes images allImages = do
+  for images \img -> do
+    case (elemIndex img allImages) of
+      Just i -> pure i
+      Nothing -> throwError $ img <> " not found in currentImages"
 
-  disp <- case engineST.dispProg of
-    Just x -> pure x
-    Nothing -> throwError "RenderFrame: missing disp program"
-  dispUnif <- case engineST.dispUnif of
-    Just x -> pure x
-    Nothing -> throwError "RenderFrame: missing disp program"
+-- recursively flatten par & zn lists in compilation order
+getParZn :: forall eff h. Library h -> Number -> (Tuple (Array Number) (Array Number)) -> String -> EpiS eff h (Tuple (Array Number) (Array Number))
+getParZn lib t (Tuple par zn) mid = do
+  mod@(Module _ modD) <- getLib lib mid "mid getParZn"
 
-  execGL ctx (liftEff $ GL.useProgram ctx disp)
-  bindParZn ctx dispUnif par zn
+  znV <- traverse (runZnPath mid t) (zipI modD.zn)
+  let znV' = concatMap (\x -> [real x, imag x]) znV
 
-  execGL ctx do
-    -- bind disp uniforms
-    uniform1f (unsafeGetAttr dispUnif "kernel_dim") (toNumber engineConfD.kernelDim)
+  parV <- traverse (runParPath mid t) (sort $ keys modD.par)
 
-    -- draw
-    liftEff $ GL.bindTexture ctx GLE.texture2d tex
-    liftEff $ GL.bindFramebuffer ctx GLE.framebuffer unsafeNull
-    drawArrays Triangles 0 6
+  foldM (getParZn lib t) (Tuple (par <> parV) (zn <> znV')) (A.fromFoldable $ values modD.modules)
+  where
+    runZnPath mid' t' (Tuple idx val) = do
+      (Tuple res remove) <- runPath t' val
+      when remove do -- replace with constant
+        mod@(Module _ modD) <- getLib lib mid' "mid runZnPath"
+
+        zn' <- fromJustE (updateAt idx (show res) modD.zn) "should be safe getParZn"
+        modLibD lib mod _ {zn = zn'}
+      pure res
+    runParPath mid' t' key = do
+      mod@(Module _ modD) <- getLib lib mid' "mid runParPath"
+
+      val <- fromJustE (lookup key modD.par) "cant find val getParZn"
+      (Tuple res remove) <- runPath t' val
+      let res' = real res
+      when remove do -- replace with constant
+        let par' = insert key (show res') modD.par
+        modLibD lib mod _ {par = par'}
+      pure res'
 
 
 -- bind parameters & zn values from pattern into program

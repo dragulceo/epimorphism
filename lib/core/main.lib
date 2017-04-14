@@ -1,18 +1,25 @@
 ### Component
-id main
+id seed_main
 family main
+includes [header, colorspace, math]
 code &&&
 
-uniform sampler2D fb;
-uniform float time;
-uniform float kernel_dim;
-uniform sampler2D audioData;
+void main() {
+  // into z coordinates
+  vec2 z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(kernel_dim, kernel_dim) - vec2(1.0, 1.0);
 
-#par#
-#zn#
-#aux#
+  vec4 seed;
+  %seed%
 
-~NO_FRACT~
+  gl_FragColor = seed;
+}
+
+
+### Component
+id main
+family main
+includes [header, colorspace, math]
+code &&&
 
 void main() {
   vec4 color;
@@ -27,18 +34,11 @@ void main() {
   gl_FragColor = color;
 }
 
-
 ### Component
 id disp
 family disp
+includes [header, colorspace]
 code &&&
-
-precision mediump float;
-uniform sampler2D fb;
-uniform float kernel_dim;
-
-#par#
-#zn#
 
 void main() {
   vec4 frame;

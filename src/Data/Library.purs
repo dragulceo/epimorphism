@@ -71,11 +71,10 @@ instance dtUIConf :: DataTable UIConf {
 instance dtPattern :: DataTable Pattern {
     vert            :: String -- ModuleRef
   , main            :: String -- ModuleRef
+  , seed            :: String -- ModuleRef
   , disp            :: String -- ModuleRef
   , defaultImageLib :: String
   , imageLib        :: String
-  , includes        :: Array String -- REMOVE ME
-  -- , 3d shit(everything between Engine & Modules)
 } where
   libProj (Library {patternLib}) = patternLib
   idx     (Pattern ix _) = ix

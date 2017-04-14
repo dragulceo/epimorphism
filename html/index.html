@@ -5,16 +5,17 @@
     <script type="text/javascript" src="javascript/jquery-2.2.0.min.js"></script>
     <script type="text/javascript" src="javascript/math.min.js"></script>
     <script type="text/javascript" src="javascript/seedrandom.min.js"></script>
-    <script type="text/javascript" src="javascript/global.js"></script>
-    <script type="text/javascript" src="javascript/platform.min.js"></script>
     <script type="text/javascript" src="javascript/cookies.js"></script>
-    <script type="text/javascript" src="javascript/index.js"></script>
+    <script type="text/javascript" src="javascript/platform.min.js"></script>
+    <!-- MAKE SURE TO KEEP VERSION UP TO DATE -->
+    <script type="text/javascript" src="javascript/global.js?v=1.1.8"></script>
+    <script type="text/javascript" src="javascript/index.js?v=1.1.8"></script>
     <link rel="stylesheet" type="text/css" href="stylesheets/index.css" />
     <link rel="shortcut icon" href="images/favicon.ico" />
     <meta name="wot-verification" content="825ac91dd4d02f82c3d1"/>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   </head>
-  <body>
+  <body data-version="1.1.8">
     <div id="container">
       <div id="showFps" class="hide"></div>
       <div id="menu">
@@ -31,7 +32,10 @@
               <option value="default" selected>medium</option>
               <option value="high">high</option>
               <option value="ultra">ultra</option>
+              <!--
               <option value="insane">insane</option>
+              <option value="insane2">insane2</option>
+              -->
             </select>
           </span>
           <a style="font-size:12px;" target="_blank" href="/privacy.html"> Privacy </a>
@@ -56,16 +60,20 @@
       </div>
       <div id="debugTabs">
         <span class="tab main selected" onclick="showTab('main')">Main</span>
+        <span class="tab seed" onclick="showTab('seed')">Seed</span>
         <span class="tab disp" onclick="showTab('disp')">Disp</span>
         <span class="tab main_src" onclick="showTab('main_src')">MainSrc</span>
+        <span class="tab seed_src" onclick="showTab('seed_src')">SeedSrc</span>
         <span class="tab disp_src" onclick="showTab('disp_src')">DispSrc</span>
         <span class="tab log" onclick="showTab('log')">Log</span>
       </div>
       <span style="float:right;color:pink;font-size:20px;" onclick="$('.extraData').toggle()">*</span>
       <div id="consoleContents">
         <pre id="debugMain" class="debugTab main"></pre>
+        <pre id="debugSeed" class="debugTab seed" style="display:none"></pre>
         <pre id="debugDisp" class="debugTab disp" style="display:none"></pre>
         <pre id="debugMainSrc" class="debugTab main_src" style="display:none"></pre>
+        <pre id="debugSeedSrc" class="debugTab seed_src" style="display:none"></pre>
         <pre id="debugDispSrc" class="debugTab disp_src" style="display:none"></pre>
         <pre id="debugLog" class="debugTab log" style="display:none"></pre>
         <pre id="consoleComponent" class="debugTab component" style="display:none"></pre>

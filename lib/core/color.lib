@@ -17,13 +17,13 @@ flags {lib}
 id rotate_hsv0
 component rotate_hsv
 flags {color_main, farm1, lib}
-par {sat_sc:1.05, rot:0.0, len_sc:0.0, len_sc_amt:0.0, th_spd:0.0}
+par {sat_sc:1.05, rot:0.1, len_sc:0.0, len_sc_amt:0.0, th_spd:0.0}
 
 ###Module
 id rotate_hsv1
 component rotate_hsv
 flags {color_main, farm1, lib}
-par {sat_sc:1.05, rot:0.01, len_sc:1.0, len_sc_amt:0.05, th_spd:0.00}
+par {sat_sc:1.05, rot:0.0, len_sc:0.0, len_sc_amt:0.00, th_spd:0.00}
 
 ### Component
 id color_id

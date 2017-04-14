@@ -14,22 +14,22 @@ import Math (max, round) as M
 import ScriptUtil (addScript, purgeScript)
 import System (loadLib)
 import Text.Format (format, precision)
-import Util (cxFromString, intFromStringE, inj, numFromStringE, clickPause)
+import Util (clickPause, cxFromString, inj, intFromStringE, log, numFromStringE)
 
 null :: forall eff h. ScriptFn eff h
-null ssRef lib t mid idx dt = do
+null ssRef lib t mid self dt = do
   pure $ ScriptRes PMutNone Nothing
 
 -- get rid of this abomination
 pause :: forall eff h. ScriptFn eff h
-pause ssRef lib t mid idx dt = do
+pause ssRef lib t mid self dt = do
   lift $ clickPause
-  purgeScript lib mid idx
+  purgeScript lib mid self
   pure $ ScriptRes PMutNone Nothing
 
 -- increment Zn
 incZn :: forall eff h. ScriptFn eff h
-incZn ssRef lib t mid scrIdx dt = do
+incZn ssRef lib t mid self dt = do
   systemST <- lift $ readSTRef ssRef
 
   mod <- getLib lib mid "incZn module"
@@ -63,19 +63,19 @@ incZn ssRef lib t mid scrIdx dt = do
             pure $ (Polar new fromR)
           _ -> throwError "offset should be +-1 or +-i"
 
-        let path = inj "intrp@%0 4.0 %1 %2 %3 %4" [(show $ systemST.t), (show fromR), (show fromTh), (show toR), (show toTh)]
+        let path = inj "intrp@%0 4.0 %1 %2 %3 %4" [(format (precision 3) systemST.t), (format (precision 3) fromR), (format (precision 3) fromTh), (format (precision 3) toR), (format (precision 3) toTh)]
 
         let zn' = fromMaybe modD.zn (updateAt idx path modD.zn)
         modLibD lib mod _ {zn = zn'}
 
   -- remove self
-  purgeScript lib mid scrIdx
+  purgeScript lib mid self
 
   pure $ ScriptRes PMutNone Nothing
 
 
 randomize :: forall eff h. ScriptFn eff h
-randomize ssRef lib t mid scrIdx dt = do
+randomize ssRef lib t mid self dt = do
   systemST <- lift $ readSTRef ssRef
 
   dly  <- (loadLib "dly" dt "randomComponent") >>= numFromStringE
@@ -86,12 +86,12 @@ randomize ssRef lib t mid scrIdx dt = do
 
   nxt <- case (member "nxt" dt) of
     false -> pure t
-    true  -> (loadLib "nxt" dt "randomMain1 nxt") >>= numFromStringE
+    true  -> (loadLib "nxt" dt "randomize nxt") >>= numFromStringE
 
   -- next iteration
   update <- case t of
     t' | t' >= nxt -> do
-      --let a = lg "ITERATE COMPONENT"
+      lift $ log "ITERATE COMPONENT"
       args <- pure $ case typ of
         "mod" -> inj "childN:%0 op:load by:query typ:mod query:%1 accs:rand spd:%2" [sub, lib', spd]
         _     -> inj "mut:%0 idx:%1 op:clone by:query typ:idx query:%2 accs:rand spd:%3" [typ, sub, lib', spd]

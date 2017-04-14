@@ -9,7 +9,6 @@ id shitty
 vert   vert
 main   shitty_main
 disp   disp_id
-includes [header, additional_funcs, colorspace, math]
 defaultImageLib shitty_images
 imageLib shitty_images
 

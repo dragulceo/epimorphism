@@ -3,32 +3,30 @@ module Main where
 import Prelude
 import Compiler (compileShaders)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import Control.Monad.Trans.Class (lift)
 import DOM (DOM)
-import Data.Array (null, updateAt, foldM, sort, concatMap, fromFoldable)
+import Data.Array (null)
 import Data.Int (round, toNumber)
-import Data.Library (dat, getLib, getLibM, getPatternD, getSystemConf, getSystemConfD, getUIConfD, modLibD)
+import Data.Library (dat, getLib, getLibM, getPatternD, getSystemConf, getSystemConfD, getUIConfD, modLibD, setLib)
 import Data.Maybe (Maybe(Nothing, Just), fromMaybe, isNothing)
 import Data.Set (member)
-import Data.StrMap (insert, values, keys, lookup)
-import Data.Traversable (traverse)
-import Data.Tuple (Tuple(Tuple))
-import Data.Types (CompOp(..), Component(..), EngineConf, EngineST, EpiS, Library(..), Module(..), PMut(PMutNone, PMut), Section(..), SystemST, UIST, defaultSystemST, fullCompile)
-import Engine (postprocessFrame, initEngineST, renderFrame)
+import Data.StrMap (lookup)
+import Data.Types (CompOp(..), EngineConf, EngineST, EpiS, Kernel(..), Library(..), PMut(PMutNone, PMut), Section(..), SystemST, UIST, defaultSystemST, kGet)
+import Engine (initEngineST, executeKernels)
 import Graphics.Canvas (CANVAS)
 import Layout (updateLayout)
-import Paths (runPath)
 import Pattern (importPattern)
 import Script (runScripts)
 import System (initLibrary)
 import Texture (loadImages)
 import UI (initUIST)
-import Util (Now, log, enableDebug, fromJustE, getProfileCookie, handleError, imag, inj, isDev, isHalted, now, real, requestAnimationFrame, rndstr, seedRandom, urlArgs, zipI)
+import Util (Now, enableDebug, getProfileCookie, halt, handleError, isDev, isHalted, log, now, requestAnimationFrame, rndstr, seedRandom, urlArgs)
 
 host :: String
 host = ""
+
+foreign import getVersion :: forall eff. Eff eff String
 
 type State h = {
     usRef :: STRef h UIST
@@ -42,7 +40,7 @@ getSysConfName :: forall eff. Eff eff String
 getSysConfName = do
   args <- urlArgs
   dev <- isDev
-  let def = if dev then "dev" else "prod"
+  let def = if dev then "test" else "prod"
   let conf = fromMaybe def (lookup "system" args)
   pure conf
 
@@ -90,11 +88,13 @@ initState systemST lib'@(Library libVar) = do
   -- load image libraries
   (Section _ index') <- getLib lib patternD.defaultImageLib "can't find default image lib!"
   (Section _ index)  <- getLib lib patternD.imageLib "can't find image lib!"
-
   lift $ loadImages index'.lib index.lib
 
   -- import pattern
   importPattern lib
+
+  lift $ log "AFTER IMPORT"
+  lift $ log lib
 
   -- init engine & ui states
   esRef <- initEngineST lib uiConfD.canvasId Nothing
@@ -118,12 +118,17 @@ animate state = handleError do
   systemST   <- lift $ readSTRef ssRef
   engineST   <- lift $ readSTRef esRef
 
+  --lift $ log $ "EXECUTING FRAME: " <> (show systemST.frameNum)
+  --lift $ log lib
+
+  --when (systemST.frameNum == 3) do
+  --  lift $ halt
+
   -- update time
   currentTimeMS <- lift $ now
   let lastTimeMS = fromMaybe currentTimeMS systemST.lastTimeMS
 
-  let delta = 0.02 -- a fixed increment of time looks better (also maybe stick this # in system?
-  --let delta = (currentTimeMS - lastTimeMS) * pattern.tSpd / 1000.0
+  let delta = 0.01 -- a fixed increment of time looks better (also maybe stick this # in system?)
   let pauseF = if systemST.paused then 0.0 else 1.0
   let t' = systemST.t + pauseF * delta
   lift $ modifySTRef ssRef (\s -> s {t = t', lastTimeMS = Just currentTimeMS})
@@ -132,55 +137,56 @@ animate state = handleError do
   when (systemST.frameNum `mod` uiConfD.uiUpdateFreq == 0) do
     let lastFpsTimeMS = fromMaybe currentTimeMS systemST.lastFpsTimeMS
     let fps = round $ (toNumber uiConfD.uiUpdateFreq) * 1000.0 / (currentTimeMS - lastFpsTimeMS)
-    lift $ modifySTRef ssRef (\s -> s {lastFpsTimeMS = Just currentTimeMS, fps = Just fps})
+    lift $ modifySTRef ssRef _ {lastFpsTimeMS = Just currentTimeMS, fps = Just fps}
     pure unit
 
   t1 <- lift $ now
   -- run scripts if not compiling
   when (null engineST.compQueue) do
     sRes <- runScripts ssRef lib
-    case sRes of
+    case sRes of -- put this logic somewhere else
       PMutNone -> pure unit
       PMut _ new -> do
-        let queue = (if (member "main" new) then [CompMainShader, CompMainProg] else []) <>
-                    (if (member "disp" new) then [CompDispShader, CompDispProg] else []) <>
+        let queue = (if (member "main" new) then [CompShader Main, CompProg Main] else []) <>
+                    (if (member "seed" new) then [CompShader Seed, CompProg Seed] else []) <>
+                    (if (member "disp" new) then [CompShader Disp, CompProg Disp] else []) <>
                     [CompFinish]
 
-        lift $ modifySTRef esRef (\es -> es {compQueue = queue})
-        pure unit
+        lift $ modifySTRef esRef _ {compQueue = queue} # void
 
   systemST' <- lift $ readSTRef ssRef
   engineST' <- lift $ readSTRef esRef
+
+  t2 <- lift $ now
 
   -- execute compile queue
   when (not $ null engineST'.compQueue) do
     --t' <- lift $ now
     --lift $ modifySTRef esRef _ {compQueue = fullCompile}
-    compileShaders esRef lib (isNothing engineST.mainProg)
+    compileShaders esRef lib false # void
     --t'' <- lift $ now
     --lift $ log $ inj "COMPILE :%0ms" [show (t'' - t')]
-    --currentTimeMS2 <- lift $ now
-    --lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS2})
-    pure unit
 
-  t2 <- lift $ now
+
+  t3 <- lift $ now
 
   engineST'' <- lift $ readSTRef esRef
   systemST'' <- lift $ readSTRef ssRef
-  patternD' <- getPatternD lib "animate pattern'"
+  patternD'  <- getPatternD lib "animate pattern'"
 
-  -- render!
-  t3 <- lift $ now
-  (Tuple parM znM) <- getParZn lib t' (Tuple [] []) patternD'.main
-  tex <- renderFrame systemST'' engineST'' lib parM znM systemST''.frameNum
+  unless systemST''.paused do
+    executeKernels lib systemST'' engineST'' patternD'
 
-  (Tuple parD znD) <- getParZn lib t' (Tuple [] []) patternD'.disp
-  postprocessFrame systemST'' engineST'' lib tex parD znD
   t4 <- lift $ now
 
   -- update ui
   updateLayout uiST systemST'' engineST'' lib false
   t5 <- lift $ now
+
+
+  -- re-pause if just getting a frame
+  when systemST''.next do
+    lift $ modifySTRef ssRef _ {paused = true, next = false} # void
 
   -- request next frame
   halted <- lift $ isHalted
@@ -189,48 +195,17 @@ animate state = handleError do
     lift $ requestAnimationFrame animate state
   t6 <- lift $ now
 
-  --lift $ log $ inj "BREAKDOWN: init:%0ms scripts:%1ms recompile:%2ms render:%3ms ui:%4ms next:%5ms" [show (t1 - t0), show (t2 - t1), show (t3 - t2), show (t4 - t3), show (t5 - t4), show (t6 - t5)]
+  --lift $ log $ inj "BREAKDOWN: init:%0ms scripts:%1ms compile:%2ms render:%3ms ui:%4ms next:%5ms" [show (t1 - t0), show (t2 - t1), show (t3 - t2), show (t4 - t3), show (t5 - t4), show (t6 - t5)]
 
   pure unit
-
--- recursively flatten par & zn lists in compilation order
-getParZn :: forall eff h. Library h -> Number -> (Tuple (Array Number) (Array Number)) -> String -> EpiS eff h (Tuple (Array Number) (Array Number))
-getParZn lib t (Tuple par zn) mid = do
-  mod@(Module _ modD) <- getLib lib mid "mid getParZn"
-
-  znV <- traverse (runZnPath mid t) (zipI modD.zn)
-  let znV' = concatMap (\x -> [real x, imag x]) znV
-  let zn' = zn <> znV'
-
-  parV <- traverse (runParPath mid t) (sort $ keys modD.par)
-  let par' = par <> parV
-
-  foldM (getParZn lib t) (Tuple par' zn') (fromFoldable $ values modD.modules)
-  where
-    runZnPath mid' t' (Tuple idx val) = do
-      (Tuple res remove) <- runPath t' val
-      when remove do -- replace with constant
-        mod@(Module _ modD) <- getLib lib mid' "mid runZnPath"
-
-        zn' <- fromJustE (updateAt idx (show res) modD.zn) "should be safe getParZn"
-        modLibD lib mod _ {zn = zn'}
-      pure res
-    runParPath mid' t' key = do
-      mod@(Module _ modD) <- getLib lib mid' "mid runParPath"
-
-      val <- fromJustE (lookup key modD.par) "cant find val getParZn"
-      (Tuple res remove) <- runPath t' val
-      let res' = real res
-      when remove do -- replace with constant
-        let par' = insert key (show res') modD.par
-        modLibD lib mod _ {par = par'}
-      pure res'
 
 main :: Eff (canvas :: CANVAS, dom :: DOM, now :: Now) Unit
 main = do
   runST do
     handleError do
-      let systemST = defaultSystemST
-      lib      <- initLibrary host
+      version <- lift getVersion
+      let systemST = defaultSystemST {version = version}
+      lift $ log version
+      lib      <- initLibrary host version
       state    <- initState systemST lib
       lift $ animate state

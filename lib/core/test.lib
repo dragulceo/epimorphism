@@ -30,8 +30,8 @@ family application
 default_mod test_image
 code &&&
   z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
-  color = 0.5 * texture2D(aux[#0], z);
-  color += 0.5 * texture2D(aux[#1], z);
+  color = texture2D(aux[#0], z);
+  //color += 0.5 * texture2D(aux[#1], z);
 
 
 ###Module
@@ -53,22 +53,22 @@ default_mod seed_analysis
 children {t:t, reduce:reduce}
 includes []
 code &&&
-	vec2 z_i = z;
+  vec2 z_i = z;
   %t%
-	%reduce%
+  %reduce%
 
-	float wx = (abs(z.x) + |w| - 1.0) / |w|;
-	float wy = (abs(z.y) + |w| - 1.0) / |w|;
+  float wx = (abs(z.x) + |w| - 1.0) / |w|;
+  float wy = (abs(z.y) + |w| - 1.0) / |w|;
 
   float w = max(0.0, max(wx, wy));
-	float mask = ceil(w);
+  float mask = ceil(w);
 
-	// could fix this if cared
-	if(w < 0.00001){
-		vec2 fr = fract((z + vec2(1,1)) / vec2(2,2));
-		seed = vec4(0, fr.x, fr.y, 1.0);
-	}else{
-	  seed = vec4(w, 0, 0, 1.0);
-	}
+  // could fix this if cared
+  if(w < 0.00001){
+    vec2 fr = fract((z + vec2(1,1)) / vec2(2,2));
+    seed = vec4(0, fr.x, fr.y, 1.0);
+  }else{
+    seed = vec4(w, 0, 0, 1.0);
+  }
 
-	z = z_i;
+  z = z_i;

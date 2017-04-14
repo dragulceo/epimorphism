@@ -1,0 +1,11 @@
+###Module
+id epimorphism_test_main
+component main
+flags {dev, epimorphism, root}
+modules {application:epimorphism_test}
+
+###Module
+id epimorphism_test
+component epimorphism
+flags {lib}
+modules {t:t_wrap_zo, color:color_id, reduce:torus_reduce}

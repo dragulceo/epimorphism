@@ -121,5 +121,6 @@ commonKeyHandler usRef lib char = do
     "\\" -> pure "clear"
     " "  -> pure "save"
     "`"  -> pure "pause"
+    "+"  -> pure "next"
     "?"  -> pure "halt"
     _    -> pure "null"

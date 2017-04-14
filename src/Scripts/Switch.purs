@@ -22,7 +22,8 @@ import Util (log, intFromStringE, inj, randInt, numFromStringE, gmod, fromJustE)
 
 -- CLEAN THIS UP
 switch :: forall eff h. ScriptFn eff h
-switch ssRef lib t midPre idx dt = do
+switch ssRef lib t midPre self dt = do
+  lift $ log $ "BEGININNG SWITCH FOR: " <> midPre
   pattern' <- getPattern lib "switch pattern"
   CloneRes newRootN pattern mid <- getClone lib pattern' midPre
 
@@ -78,7 +79,8 @@ switch ssRef lib t midPre idx dt = do
     x -> throwError $ "invalid 'by' for switch, must be query | val : " <> x
 
   -- import new module
-  purgeScript lib mid idx
+  lift $ log $ "SWITCH REMOVING SELF SCRIPT @" <> self
+  purgeScript lib mid self
   let nxtN = if (op == "load") then name else mid
   nxtId <- importModule lib (ImportRef nxtN)
 
@@ -95,7 +97,6 @@ switch ssRef lib t midPre idx dt = do
     pure unit
 
   -- switch! (should we inline this?)
-
   switchModules lib systemST.t rootId childN nxtId spd
 
   pure $ ScriptRes (PMut (dat pattern) (singleton newRootN)) Nothing
@@ -119,7 +120,6 @@ getMutator mut idx name  = do
         let sub' = insert idx name mod.sub in
         mod {sub = sub'}
     _ -> throwError $ "unknown mutator: " <> name
-
 
 
 -- should check if dim & var are  the same across m0 & m1
@@ -158,7 +158,7 @@ switchModules lib sysT rootId childN m1 spd = do
 
 
 finishSwitch :: forall eff h. ScriptFn eff h
-finishSwitch ssRef lib t rootIdPre idx dt = do
+finishSwitch ssRef lib t rootIdPre self dt = do
   pattern' <- getPattern lib "switch pattern"
 
   -- get data
@@ -188,7 +188,7 @@ finishSwitch ssRef lib t rootIdPre idx dt = do
         addScript lib t parent "pause" ""
         pure unit
 
-      lift $ log "finish switch!!!!"
+      lift $ log "Finish Switch"
       pure $ ScriptRes (PMut (dat pattern) (singleton newRootN)) Nothing
     _ -> do
       pure $ ScriptRes PMutNone Nothing

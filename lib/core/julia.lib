@@ -1,4 +1,10 @@
 ###Module
+id julia_main
+component main
+flags {lib, root}
+modules {application: julia}
+
+###Module
 id julia
 component julia
 flags {lib}
@@ -22,31 +28,31 @@ code &&&
   const int max_iter = 700;
   float escape_rad = 4.0;
 
-	z = z_in;
+  z = z_in;
 
-	for(int i = 0; i < max_iter; i++){
-		if(dot(z,z) > escape_rad)
-			break;
+  for(int i = 0; i < max_iter; i++){
+    if(dot(z,z) > escape_rad)
+      break;
 
     %t%
 
-		j += 1;
+    j += 1;
   }
 
-	  %t%
+    %t%
     %t%
     %t%
 
   float mu = float(j) - log(log(length(z)) / log(2.0) ) / log(2.0);
 
   if(j != max_iter){
-		//color = hsv2rgb(vec4(float(j) / 256.0, 1.0, 1.0, 1.0));
-		float f1 = 1.0 - 1.0 / (mu / 6.0 + 1.0);
-		float f2 = 1.0 - 1.0 / (mu / 3.0 + 1.0);
-		color = vec4(f1, f2, 1.0, 1.0);
+    //color = hsv2rgb(vec4(float(j) / 256.0, 1.0, 1.0, 1.0));
+    float f1 = 1.0 - 1.0 / (mu / 6.0 + 1.0);
+    float f2 = 1.0 - 1.0 / (mu / 3.0 + 1.0);
+    color = vec4(f1, f2, 1.0, 1.0);
 
-			//hsv2rgb(vec4(mu / 20.0, 1.0, 1.0, 1.0));
-	}else
-		color = vec4(0.0,0.0,0.0,1.0);
+      //hsv2rgb(vec4(mu / 20.0, 1.0, 1.0, 1.0));
+  }else
+    color = vec4(0.0,0.0,0.0,1.0);
 
-	z = z_in;
+  z = z_in;

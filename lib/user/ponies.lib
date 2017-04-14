@@ -27,6 +27,7 @@ scripts [randomize dly:35 spd:0.3 lib:color_main dim:vec4 sub:color typ:mod]
 ###Module
 id seed_wca_tex_ponies
 component seed_wca
+par {smooth_mask: 50.0}
 flags {lib, wca}
 modules {t:t_wrap, w:w_lines_border, wt:wt_id, a:alpha_id, seed_color:tex_color_ponies}
 

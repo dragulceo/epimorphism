@@ -2,26 +2,25 @@
 id seed_wca
 component seed_wca
 flags {lib, wca}
-modules {t:t_wrap, w:w_lines_border, wt:wt_id, a:alpha_id, seed_color:simple_color}
+par {smooth_mask: 50.0}
+modules {w:w_lines_border_anim, wt:wt_id, a:alpha_sqrt, seed_color:simple_color}
 
 ###Module
 id seed_wca_tex
 component seed_wca
 flags {lib, wca}
-modules {t:t_wrap, w:w_lines_border, wt:wt_id, a:alpha_id, seed_color:tex_color}
+par {smooth_mask: 50.0}
+modules {w:w_lines_border, wt:wt_id, a:alpha_sqrt, seed_color:tex_color}
 
 
 ### Component
 id seed_wca
 family seed
 default_mod seed_wca
-children {t:t, reduce:reduce, w:w, wt:wt, a:a, seed_color:seed_color}
+children {w:w, wt:wt, a:a, seed_color:seed_color}
 code &&&
 vec4 wdt;
-vec2 z_i = z;
 float w, a, wx, wy, mask;
-%t%
-%reduce%
 
 // w = (w, alpha, wx, wy)
 %w%
@@ -31,7 +30,7 @@ w = wdt.x;
 
 a = wdt.y;
 %a%
+if(|smooth_mask| > 0.0)
+  a = a * smoothstep(0.0, 1.0, |smooth_mask|*w); // apply SMOOTH_MASK, makes a vary better to 0
 
 %seed_color%
-
-z = z_i;

@@ -20,6 +20,13 @@ par {alpha:1.0}
 sub {a_exp:a * |alpha|}
 
 ###Module
+id alpha_sqrt
+component alpha
+flags {lib}
+par {alpha:1.0}
+sub {a_exp:a * |alpha|}
+
+###Module
 id alpha_linear
 component alpha
 flags {lib}

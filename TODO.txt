@@ -1,40 +1,41 @@
-NOTES:
- geom_2 -
- flashing :/
- make sure t's are all good/scaled correctly
- some pallets are still ugly.  also, the bleeding stuff, I'm not sure I like it
-
 PROJECTS:
-  - better resolution images? make sure all load
-  - EXT_disjoint_timer_query to scale performance?
-  - types & library not dry
+  - too much darkness/desaturation
 
-  - components
-    - remove includes from pattern into component
+  - Main Misc
+    - smooth mask has artifacts
+    - play with pallets a bit more. inc_sc, lgv, spread wave size, etc
+    - geom_2, geom_7 ugly
+    - make sure t's are all good/scaled correctly
+    - keep (val)contrast around better
+    - w * w in seed val?
+    - there are some line artifacts in some images(geom3, islamic)
+    - better resolution images? make sure all load
+    - non t-based seed animation
+    - rewrite seed.w, seed.a to not require recompile
 
-  - seed library
-    - minimze compiles & complexity
-      - draw seeds on the client???
-      - use a second shader?
+  - System Misc
+    - mobile/browser detection in main
+    - clean up src/Data
+    - import/clone etc folds of KMaps
+    - auto scale performance for framerate or something
+      - EXT_disjoint_timer_query to measure/scale performance?
+    - Types & Library not dry
+    - some kind of error/bug reporting
+    - menu available in dev
+    - switching modules show up in ui?
+    - kill paths btn
+
+  - saving
+    - periodicly take snapshots, at a frequeny.  useful for debugging or replay
+    - take snapshot of flattened shader code?
+    - load whole patterns
+    - remove serialize.rb
 
   - async (AFF?)
     - lib/db requests
     - image requests
+      - could start whole application in global image loading callbacks
     - db requests
-
-  - restructure data
-    - saving
-    - cleanup
-      - importing = clone, rewrite clonePattern.  references?
-      - get rid of slib?
-    - scripts could use some more thought.
-      - pattern level scripts
-      - how to syncronize multiple scripts? i.e, color & disp?
-      - which module do they belong to?
-    - better data organization
-      - what goes in config, what goes into states?
-    - be better about reloading objects after refs might change?
-    - construct lib refs such that reading from lib is pure?
 
   - UI
     - basic idea is that all db & data modifications happen through UI
@@ -47,27 +48,6 @@ PROJECTS:
       - https://ace.c9.io/#nav=about
       - show shader source in tab
 
-  - more importing/compiling
-    - WINDOWS SUCKS - OSX Nvidia 640M?
-    - batch compilation?
-    - MISC
-      - could maybe clean up switch a bit more (remove imports/purges, combine methods)
-      - maybe module.modules should be [SubModule = SubLib String | SubPool String] or something
-      - module/submodule cycles??
-      - only way to modify tree is via switch?
-
-  - database support
-    - which database?
-    - how are things stored/serialized?
-    - search by family, component, flags, props, id
-    - sync local & remote dbs
-    - put textures in db
-    - misc:
-      - update flags on save (default != true)
-      - check for duplicates when saving (id = hash of contents?)
-      - namespace collisions detection
-
-
   - main pattern
     - T
     - SEED
@@ -75,12 +55,6 @@ PROJECTS:
     - integrate fb color into main
     - framed images
     - different w's
-
-  - misc
-    - auto scale performance for framerate or something
-    - could start whole application in global image loading callbacks
-    - some kind of error reporting
-    - menu available in dev
 
   - exposure
     - codame
@@ -95,8 +69,9 @@ PROJECTS:
 -------------------------------- BACKLOG --------------------------------
 
 BUGS:
+  - throw error of sub, par/zn or module not found
   - component indentation still isn't perfect
-  - value should be main, vert, or disp when changing vals sometimes
+  - value should be main, vert, or disp when changing vals sometimes?
   - black blobs in ios
   - freezing spinner (i think its the synchronous get requests for lib)
   - firefox WebGL: texImage2D: conversion requires pixel reformatting (maybe non-issue)
@@ -114,31 +89,60 @@ PERF:
   - choppy in safari
 
 SYSTEM:
+  - nosleep
+  - stick button in some modes to enable dev(for mobile)
+  - put key handlers into a text file -  a - scr main.application.t incZn idx:0 ofs:1
+  - more granular function library(math, colorspace, etc)
+  - get rid of global.js
+  - better caching/versioning
+  - log vs flog bs
+  - modify system/engine/ui conf via ui
+  - put t's into buffers so we dont have to recompile(or just make a really complex highly parameterized t)
+  - image loading optional
   - remove ssRef from ScriptFn, replace with sysT.  Need to remove pauseAfterSwitch
   - do something smart if not enough resources (uniforms, tex, etc)
-  - need to define funcs in main - planewave, etc
-  - better deploy scripts
-
+  - better deploy scripts / use git for deploy
   - scripts
     - way of switching modules while keeping phase/scripts.
     - keep scripts when switching modules?
-  - javascript files are all over the place
+  - javascript files are all over the place (global, ui.js, etc)
   - fract a sub on main body set in engine before compiling?
-  - use git for deploy
   - addGlobalEventListeners is a bit ghetto
   - more work on fract.  more specific fracts.  like for seed vs T.  can possibly also increase quality
-  - too many debug statements going on (in engine?)  Better logging
+  - better logging
   - prevent default in ui.js
-  - make serializable a class
   - remote control (webui, websockets, etc)
   - compiler substitutions %XXXX%, etc can still cause errors?  dont remember what kind
   - investigate dsl for scripts
   - engine stability/lost context - https://www.khronos.org/registry/webgl/extensions/WEBGL_lose_context/
-  - main & disp share includes
-  - preprocesser malfunctions give weird errors
   - chrome/ff shader debugger/editor
   - better engine error checking/handling
   - get rid of if statements ins seed_w & clean all of that up
+  - could maybe clean up switch a bit more (remove imports/purges, combine methods)
+  - module/submodule cycles??
+  - only way to modify tree is via switch?
+  - optional kernels
+  - DATA MODEL
+    - families should also have args, to differentiate var transformers from generators, etc
+    - refactor includes - pattern -> component
+    - importing = clone, rewrite clonePattern.  references?
+    - get rid of slib?
+    - scripts could use some more thought.
+      - pattern level scripts
+      - how to syncronize multiple scripts? i.e, color & disp?
+      - which module do they belong to?
+    - be better about reloading objects after refs might change?
+    - construct lib refs such that reading from lib is pure?
+  - DATABASE
+    - which database?
+    - how are things stored/serialized?
+    - search by family, component, flags, props, id
+    - sync local & remote dbs
+    - put textures in db
+    - misc:
+      - update flags on save (default != true)
+      - check for duplicates when saving (id = hash of contents?)
+      - namespace collisions detection
 
 FEATURE IDEAS:
   - optional increase of bit depth - half float, etc (works?  not obvious is better; half_float = 36193)

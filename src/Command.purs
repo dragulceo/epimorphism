@@ -8,19 +8,20 @@ import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Array (uncons, updateAt, length)
-import Data.Library (getEngineConf, getLib, getLibM, getPatternD, getSystemConf, getUIConf, getUIConfD, idM, modLibD, modLibD')
+import Data.Library (buildSearch, getEngineConf, getLib, getLibM, getPatternD, getSystemConf, getUIConf, getUIConfD, idM, modLibD, modLibD', searchLib)
 import Data.Maybe (Maybe(..))
 import Data.StrMap (insert)
 import Data.String (joinWith, split)
 import Data.String (Pattern(..)) as S
-import Data.Types (EngineConf, EpiS, Module(..), PatternD, SystemST, EngineST, UIST, Library)
+import Data.Traversable (for)
+import Data.Types (EngineConf, EngineST, EpiS, Library, Module(..), PatternD, SystemST, UIST)
 import Engine (initEngineST)
 import Graphics.Canvas (CANVAS)
 import Layout (updateLayout, initLayout)
 import Pattern (findModule)
 import ScriptUtil (addScript)
 import Texture (clearFB)
-import Util (Now, cxFromStringE, log, enableDebug, halt, handleError, intFromStringE, numFromStringE)
+import Util (Now, cxFromStringE, enableDebug, halt, handleError, intFromStringE, log, numFromStringE, replaceAll)
 
 foreign import saveCanvas :: forall eff. Eff eff Unit
 
@@ -33,7 +34,8 @@ command usRef esRef ssRef lib msg = handleError do
   uiST       <- lift $ readSTRef usRef
   engineST   <- lift $ readSTRef esRef
 
-  --let x = lg $ "EXECUTE: " <> (show msg)
+  --winLog $ "EXECUTE: " <> (show msg)
+  lift $ log $ "EXECUTE: " <> (show msg)
 
   let dt = split (S.Pattern " ") msg
 
@@ -45,18 +47,23 @@ command usRef esRef ssRef lib msg = handleError do
           "null" -> pure unit
           "pause" -> do
             lift $ log "pause"
-            lift $ modifySTRef ssRef (\s -> s {paused = not s.paused})
+            lift $ modifySTRef ssRef _ {paused = not systemST.paused}
+            pure unit
+          "next" -> do
+            lift $ modifySTRef ssRef _ {paused = false, next = true}
             pure unit
           "halt" -> do
             lift $ halt
             pure unit
           "pauseAfterSwitch" -> do
-            lift $ modifySTRef ssRef (\s -> s {pauseAfterSwitch = true})
+            lift $ modifySTRef ssRef _ {pauseAfterSwitch = true}
             pure unit
           "killScripts" -> do
-            -- BROKEN:  need to find only the modules that are 'live'
-            --let upd = (\r -> lift $ modifySTRef r (\m -> m {scripts = []}))
-            --traverse upd (values systemST.moduleRefPool)
+            let sch = buildSearch ["live"] [] []
+            modules <- searchLib lib sch
+
+            for (modules :: Array Module) \m -> do
+              modLibD lib m _ {scripts = []}
 
             pure unit
           "scr" -> do
@@ -72,22 +79,22 @@ command usRef esRef ssRef lib msg = handleError do
           "setP" -> do
             case args of
               [addr, par, val] -> do
-                val' <- numFromStringE val
+                let val' = replaceAll "___" " " val
                 mid <- findModule lib patternD addr true
 
                 modLibD' lib idM mid "find module - setP" $ \m ->
-                  m {par = insert par (show val') m.par}
+                  m {par = insert par val' m.par}
 
               _ -> throwError "invalid format: setP addr par val"
           "setZn" -> do
             case args of
               [addr, idx, val] -> do
-                val' <- cxFromStringE val
+                let val' = replaceAll "___" " " val
                 idx' <- intFromStringE idx
                 mid  <- findModule lib patternD addr true
 
                 mod@(Module _ modD) <- getLib lib mid "find module - setZn"
-                zn' <- case (updateAt idx' (show val') modD.zn) of
+                zn' <- case (updateAt idx' val' modD.zn) of
                   Just x -> pure x
                   _ -> throwError "zn idx out of bounds setZn"
                 modLibD lib mod _ {zn = zn'}
@@ -117,7 +124,6 @@ command usRef esRef ssRef lib msg = handleError do
             modLibD lib uiConf _ {windowState = "dev", keySet = "dev", showFps = true}
             lift $ enableDebug
             initLayout uiST lib
-
             pure unit
           "initLayout" -> do
             initLayout uiST lib

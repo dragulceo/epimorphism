@@ -16,12 +16,12 @@ import Data.String.Regex.Flags (noFlags)
 import Data.String.Regex.Unsafe (unsafeRegex)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
-import Data.Types (Component(..), EpiS, Library, Module(..), ModuleD, SystemST, UIST, EngineST, moduleSchema)
+import Data.Types (Component(..), EngineST, EpiS, Kernel(..), Library, Module(..), ModuleD, SystemST, UIST, kGet, moduleSchema)
 import Paths (isConstantPath, runPath)
 import Serialize (showCX, unsafeSerialize)
 import Text.Format (format, precision)
 import UIUtil (findElt)
-import Util (indentLines, inj, real, zipI)
+import Util (indentLines, inj, log, real, zipI)
 
 foreign import addEventListeners :: forall eff. Eff eff Unit
 
@@ -34,8 +34,17 @@ renderConsole uiST systemST engineST lib = do
   lift $ setInnerHTML str0 dsmDiv
 
   dsmSDiv <- findElt "debugMainSrc"
-  case (engineST.compST.mainSrc) of
+  case (kGet engineST.curST.src Main) of
     Just src -> lift $ setInnerHTML src dsmSDiv
+    Nothing -> pure unit
+
+  dssDiv <- findElt "debugSeed"
+  str0 <- renderModule systemST lib uiConfD.uiCompLib patternD.seed "SEED" Nothing
+  lift $ setInnerHTML str0 dssDiv
+
+  dssSDiv <- findElt "debugSeedSrc"
+  case (kGet engineST.curST.src Seed) of
+    Just src -> lift $ setInnerHTML src dssSDiv
     Nothing -> pure unit
 
   dsdDiv <- findElt "debugDisp"
@@ -43,7 +52,7 @@ renderConsole uiST systemST engineST lib = do
   lift $ setInnerHTML str1 dsdDiv
 
   dsdSDiv <- findElt "debugDispSrc"
-  case (engineST.compST.dispSrc) of
+  case (kGet engineST.curST.src Disp) of
     Just src -> lift $ setInnerHTML src dsdSDiv
     Nothing -> pure unit
 
@@ -123,7 +132,7 @@ renderModule systemST lib modLib mid title pid = do
                       [var, val] -> do
                         let inp = inj "<input type='text' class='consoleSub' data-mid='%0' data-subN='%1' value='%2'>" [mid, var, val]
                         pure $ var <> ": " <> inp
-                      _ -> throwError "invalide sub fmt :"
+                      _ -> throwError "invalid sub fmt :"
                   pure $ joinWith ", " cmp'
                 _ -> throwError "invalid sub fmt {"
               let ui = inj "<span class='consoleUI' style='display:none;'>sub {%0}</span>" [uiCts]
@@ -152,7 +161,7 @@ renderModule systemST lib modLib mid title pid = do
                         (Tuple res _) <- runPath systemST.t val
                         let inp = inj "<span class='consolePar consoleVar' data-mid='%0' data-var='%1' data-val='%2' data-type='par'>%2</span>" [mid, var, val]
                         pure $ inj "%0: (%1)%2" [var, (format (precision 2) $ real res), inp]
-                      _ -> throwError "invalide par fmt :"
+                      _ -> throwError "invalid par fmt :"
                   pure $ joinWith ", " cmp'
                 _ -> throwError "invalid par fmt {"
               let ui = inj "<span class='consoleUI' style='display:none;'>par {%0}</span>" [uiCts]
@@ -169,7 +178,7 @@ renderModule systemST lib modLib mid title pid = do
                             (Tuple res _) <- runPath systemST.t val
                             let val' = (inj "<span class='consoleVal'>%0</span>" [(format (precision 2) $ real res)])
                             pure $ inj "%0: (%1)%2" [var, val', val]
-                      _ -> throwError "invalide par fmt :"
+                      _ -> throwError "invalid par fmt :"
                   pure $ joinWith ", " cmp'
                 _ -> throwError "invalid par fmt {"
               let line' = inj "par {%0}" [lineCts]

@@ -1,26 +1,53 @@
 ### Pattern
 id dev
-vert   vert
+seed   seed_dev
 main   epimorphism_dev_main
 disp   disp_id
-includes [header, additional_funcs, colorspace, math]
+vert   vert
+defaultImageLib default_images
+imageLib all_images
+
+### Pattern
+id test
+seed   seed_dev
+main   epimorphism_dev_main
+disp   disp_id
+vert   vert
 defaultImageLib default_images
 imageLib all_images
 
 ### Pattern
 id analysis
-vert   vert
+seed   seed_dev
 main   analysis_main
 disp   disp_id
-includes [header, additional_funcs, colorspace, math]
+vert   vert
 defaultImageLib default_images
 imageLib all_images
 
 ### Pattern
 id prod
-vert   vert
+seed   seed_main
 main   epimorphism_main
 disp   disp_main
-includes [header, additional_funcs, colorspace, math]
+vert   vert
+defaultImageLib default_images
+imageLib all_images
+
+### Pattern
+id interference
+seed   seed_na
+main   interference_main
+disp   disp_id
+vert   vert
+defaultImageLib default_images
+imageLib all_images
+
+### Pattern
+id julia
+seed   seed_na
+main   julia_main
+disp   disp_id
+vert   vert
 defaultImageLib default_images
 imageLib all_images

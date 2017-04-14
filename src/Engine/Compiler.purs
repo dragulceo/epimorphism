@@ -2,17 +2,18 @@ module Compiler where
 
 import Prelude
 import Data.TypedArray as T
-import Control.Alt ((<|>))
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
-import Data.Array (length, uncons)
+import Data.Array (foldl, length, nub, uncons)
 import Data.Library (delLib, getEngineConfD, getLib, getLibM, getPattern, idx, modLibD)
-import Data.Maybe (Maybe(..), fromMaybe, isJust)
+import Data.Maybe (Maybe(..), fromMaybe, isJust, maybe)
+import Data.StrMap (StrMap, empty, insert)
 import Data.String (stripPrefix)
 import Data.String (Pattern(..)) as S
+import Data.Traversable (for, traverse)
 import Data.Tuple (fst, Tuple(Tuple))
-import Data.Types (CompOp(..), Component(..), EngineST, EpiS, Library, Pattern(..), PatternD, SystemST, UniformBindings, newCompST)
+import Data.Types (CompOp(..), Component(..), EngineConf(..), EngineConfD, EngineProfile, EngineST, EpiS, KMap(..), Kernel(..), Library, Pattern(..), PatternD, SystemST, UniformBindings, kGet, kSet, newCompST, (<||>), (<|||>))
 import EngineUtil (execGL)
 import Graphics.WebGL.Methods (vertexAttribPointer, enableVertexAttribArray, bindBuffer, bufferData, createBuffer)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram, linkProgram)
@@ -31,115 +32,85 @@ compileShaders esRef lib full = do
   currentP@(Pattern _ currentD') <- getPattern lib "patternD compileShaders"
   compP@(Pattern _ compD) <- fromMaybe currentP <$> getLibM lib "$$Comp"
 
+  let acs = KMap (_.seed) (_.main) (_.disp) (_.vert)
+  let cST = es.compST
   case (uncons es.compQueue) of
     Just {head: op, tail: rst} -> do
-      lift $ log op
+      lift $ log (show op)
       done <- case op of
-        CompMainShader -> do
-          let no_fract = es.profile.angle ||
-                         (isJust $ stripPrefix (S.Pattern "Windows") es.profile.os)
-          let fract = if no_fract then Nothing else Just engineConfD.fract
-          Tuple main aux <- parseMain lib compD fract
-          lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainSrc = Just main, auxImages = Just aux}})
-          pure false
-        CompDispShader -> do
-          disp <- parseDisp lib compD
-          lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {dispSrc = Just disp}})
-          pure false
-        CompVertShader -> do
-          vert <- parseVert lib compD
-          lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {vertSrc = Just vert}})
+        CompShader kernel -> do
+          Tuple src aux <- parseShader lib (kGet acs kernel compD) (globalSubs engineConfD es.profile)
+          let cST' = cST { src = (kSet cST.src kernel (Just src)),
+                           aux = (kSet cST.aux kernel (Just aux))}
+          lift $ modifySTRef esRef _ {compST = cST'}
           pure false
         --CompUploadAux -> do
-        CompMainProg -> do
-          case (Tuple es.compST.mainSrc es.compST.vertSrc) of
-            Tuple (Just mainSrc) (Just vertSrc) -> do
-              mainProg <- execGL es.ctx (compileShadersIntoProgram vertSrc mainSrc)
-              lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainProg = Just mainProg}})
+        CompProg kernel -> do
+          case (Tuple (kGet cST.src kernel) (kGet cST.src Vert))  of
+            Tuple (Just kernelSrc) (Just vertSrc) -> do
+              prog <- execGL es.ctx (compileShadersIntoProgram vertSrc kernelSrc)
+              let cST' = cST { prog = (kSet cST.prog kernel (Just prog))}
+              lift $ modifySTRef esRef _ {compST = cST'}
               pure false
-            _ -> throwError "need to compute sources first!"
-        CompDispProg -> do
-          case (Tuple es.compST.dispSrc es.compST.vertSrc) of
-            Tuple (Just dispSrc) (Just vertSrc) -> do
-              dispProg <- execGL es.ctx (compileShadersIntoProgram vertSrc dispSrc)
-              lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {dispProg = Just dispProg}})
-              pure false
-            _ -> throwError "need to compute sources first!"
+            _ -> throwError $ "need to compute sources first for " <> (show kernel)
         CompFinish -> do
+          -- unif (can probably refactor
+          unif <- for cST.prog \prog ->
+            case prog of
+              Just p -> Just <$> linkShader es p
+              Nothing -> pure Nothing
+
+          let cST' = cST { unif = unif <||> cST.unif }
+
+          let newST = cST' <|||> es.curST
+
           -- aux
-          case es.compST.auxImages of
-            Just aux -> do
-              uploadAux es aux
-            Nothing -> pure unit
-
-          -- unif
-          mainUnif <- case es.compST.mainProg of
-            Just prog -> do
-              Just <$> linkShader es prog
-            Nothing -> pure Nothing
-
-          dispUnif <- case es.compST.dispProg of
-            Just prog -> do
-              Just <$> linkShader es prog
-            Nothing -> pure Nothing
+          let all_aux = nub $ fromMaybe [] (foldl (<>) Nothing newST.aux)
+          uploadAux es all_aux
 
           -- update engine state with new info
-          lift $ modifySTRef esRef (\es' ->
-                                     es' {mainProg = es'.compST.mainProg <|> es'.mainProg,
-                                          dispProg = es'.compST.dispProg <|> es'.dispProg,
-                                          mainUnif = mainUnif <|> es'.mainUnif,
-                                          dispUnif = dispUnif <|> es'.dispUnif,
-                                          currentImages = es.compST.auxImages <|> es'.currentImages})
+          lift $ modifySTRef esRef _ {curST = newST, currentImages = all_aux}
 
           -- clean old pattern
-          when (currentD'.main /= compD.main) do
-            purgeModule lib currentD'.main
-          when (currentD'.disp /= compD.disp) do
-            purgeModule lib currentD'.disp
-          when (currentD'.vert /= compD.vert) do
-            purgeModule lib currentD'.vert
+          for acs \accs ->
+            when (accs currentD' /= accs compD) do
+              purgeModule lib (accs currentD')
 
-          -- update pattern & reset comp info
+          -- update pattern & reset comp pattern
           modLibD lib currentP (\_ -> compD)
           when ((idx compP).id == "$$Comp") do
+            lift $ log "MERGING CLONED PATTERN"
             delLib lib compP
 
-          lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainProg=Nothing, dispProg=Nothing}})
+          -- save vertex info
+          let new = newCompST
+          let new' = new {src  = (kSet new.src  Vert (kGet cST'.src  Vert)),
+                          prog = (kSet new.prog Vert (kGet cST'.prog Vert)),
+                          unif = (kSet new.unif Vert (kGet cST'.unif Vert))}
+
+          lift $ modifySTRef esRef _ {compST = new'}
 
           pure true
         CompStall -> do
           pure false
 
-      lift $ modifySTRef esRef (\es' -> es' {compQueue = rst})
+      lift $ modifySTRef esRef _ {compQueue = rst}
       when (length rst /= 0 && full) do
-        compileShaders esRef lib full
-        pure unit
+        compileShaders esRef lib full # void
 
       pure $ done || full
     Nothing -> throwError "shouldn't call compile with an empty queue chump!"
 
 
-parseMain :: forall eff h. Library h -> PatternD -> Maybe Int -> EpiS eff h (Tuple String (Array String))
-parseMain lib patternD fract = do
-  Tuple main'' aux <- parseShader lib patternD.main patternD.includes
+globalSubs :: EngineConfD -> EngineProfile -> StrMap String
+globalSubs ec profile =
+  let no_fract = profile.angle ||
+                 (isJust $ stripPrefix (S.Pattern "Windows") profile.os)
+      res   = empty
+      res'  = insert "fract" (if no_fract then "1" else (show ec.fract)) res
+      res'' = insert "NO_FRACT" (if no_fract then "#define _NO_FRACT_" else "") res'
+  in res''
 
-  -- kind of ghetto
-  main <- case fract of
-    Just i -> do
-      let main' = replaceAll "~fract~" (show i) main''
-      pure $ replaceAll "~NO_FRACT~" "" main'
-    Nothing -> do
-      lift $ log "NO FRACT"
-      let main' = replaceAll "~fract~" "1" main''
-      pure $ replaceAll "~NO_FRACT~" "#define _NO_FRACT_" main'
-
-  pure $ Tuple main aux
-
-parseDisp :: forall eff h. Library h -> PatternD -> EpiS eff h String
-parseDisp lib patternD = fst <$> parseShader lib patternD.disp patternD.includes
-
-parseVert :: forall eff h. Library h -> PatternD -> EpiS eff h String
-parseVert lib patternD = fst <$> parseShader lib patternD.vert []
 
 linkShader :: forall eff h. EngineST -> WebGLProgram -> EpiS eff h UniformBindings
 linkShader es prog = execGL es.ctx do

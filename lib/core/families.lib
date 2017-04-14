@@ -39,7 +39,13 @@ default_comp post_id
 id seed
 var seed
 dim 4
-default_comp
+default_comp seed_simple
+
+### Family
+id seed_mod
+var seed
+dim 4
+default_comp mod_id
 
 ### Family
 id reduce

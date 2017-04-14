@@ -14,7 +14,7 @@ import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Data.Types (EpiS, Module(..), Pattern(..), PatternD, Library)
 import System (loadLib)
-import Util (uuid, fromJustE)
+import Util (fromJustE, log, uuid)
 
 
 ------------------------ FIND ------------------------
@@ -22,6 +22,7 @@ import Util (uuid, fromJustE)
 -- find a module given an address - ie main.application.t or a reference
 findModule :: forall eff h. Library h -> PatternD -> String -> Boolean -> EpiS eff h String
 findModule lib patternD mid followSwitch = do
+  --lift $ log $ "fm mid " <> mid
   elt <- getLibM lib mid
   case (elt :: Maybe Module) of
     Just _ -> pure mid
@@ -32,12 +33,15 @@ findModule lib patternD mid followSwitch = do
           case addr of
             "vert" -> findModule' lib patternD.vert rst followSwitch
             "disp" -> findModule' lib patternD.disp rst followSwitch
+            "seed" -> findModule' lib patternD.seed rst followSwitch
             "main" -> findModule' lib patternD.main rst followSwitch
             x      -> throwError $ "value should be main, vert, or disp : " <> x
 
 
 findModule' :: forall eff h. Library h -> String -> Array String -> Boolean -> EpiS eff h String
 findModule' lib mid addr followSwitch = do
+  --lift $ log $ "fm' mid " <> mid
+  --lift $ log $ "fm addr " <> (joinWith "." addr)
   maybe (pure $ mid) handle (head addr)
   where
     handle mid' = do
@@ -55,10 +59,11 @@ findModule' lib mid addr followSwitch = do
 findAddr :: forall eff h. Library h -> PatternD -> String -> EpiS eff h String
 findAddr lib patternD mid = do
   m0 <- find' "main" patternD.main
-  m1 <- find' "disp" patternD.disp
-  m2 <- find' "vert" patternD.vert
+  m1 <- find' "seed" patternD.seed
+  m2 <- find' "disp" patternD.disp
+  m3 <- find' "vert" patternD.vert
 
-  fromJustE (m0 <> m1 <> m2) ("orphan module? " <> mid)
+  fromJustE (m0 <> m1 <> m2 <> m3) ("orphan module? " <> mid)
   where
     find' :: String -> String -> EpiS eff h (Maybe String)
     find' addr cid = case (cid == mid) of
@@ -92,11 +97,13 @@ importPattern lib =  do
   let patternD = dat pattern
 
   -- import all modules
+  --lift $ log patternD
   main <- importModule lib (ImportRef patternD.main)
   disp <- importModule lib (ImportRef patternD.disp)
+  seed <- importModule lib (ImportRef patternD.seed)
   vert <- importModule lib (ImportRef patternD.vert)
 
-  modLibD lib pattern _ {main = main, disp = disp, vert = vert}
+  modLibD lib pattern _ {main = main, disp = disp, seed = seed, vert = vert}
 
   pure unit
 
@@ -110,9 +117,13 @@ importModule lib obj = do
     ImportModule m -> pure m
     ImportRef n -> do
       m@(Module _ modD) <- getLib lib n "importModule"
+      --lift $ log $ "importing n: " <> n
+      --lift $ log $ "orig = " <> (idx m).orig
       case (idx m).orig of
         "" -> pure $ apI m _ {orig = n}
         _ ->  pure $ apI m _ {orig = (idx m).orig}
+
+  --lift $ log mod
 
   -- update library
   let idx' = iD { id = id, flags = Set.insert "live" iD.flags }
@@ -170,6 +181,7 @@ clonePattern :: forall eff h. Library h -> Pattern -> EpiS eff h Pattern
 clonePattern lib pattern@(Pattern _ patternD) = do
   main' <- importModule lib (ImportRef patternD.main)
   disp' <- importModule lib (ImportRef patternD.disp)
+  seed' <- importModule lib (ImportRef patternD.seed)
   vert' <- importModule lib (ImportRef patternD.vert)
 
-  pure $ apD pattern _ {main = main', disp = disp', vert = vert'}
+  pure $ apD pattern _ {main = main', disp = disp', vert = vert', seed = seed'}

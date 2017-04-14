@@ -3,11 +3,11 @@ module ScriptUtil where
 import Prelude
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
-import Data.Array (head, foldM, uncons, deleteAt, cons)
-import Data.Library (dat, getLib, getLibM, idM, modLibD, setLib)
+import Data.Array (cons, delete, foldM, head, uncons)
+import Data.Library (dat, getLib, getLibM, getPattern, idM, modLibD, setLib)
 import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
 import Data.StrMap (StrMap, insert, empty, toUnfoldable)
-import Data.String (split, joinWith, trim)
+import Data.String (joinWith, split, trim)
 import Data.String (Pattern(..)) as S
 import Data.Tuple (Tuple(Tuple))
 import Data.Types (EpiS, Pattern, Library, Script(Script))
@@ -18,15 +18,17 @@ import Util (log, inj, numFromStringE, fromJustE)
 addScript :: forall eff h. Library h -> Number -> String -> String -> String -> EpiS eff h Unit
 addScript lib sysT mid name args = do
   let scr = inj "%0@%1 %2" [name, (format (precision 2) sysT), args]
+  lift $ log $ "ADD SCRIPT/" <> mid <> ": " <> scr
   mod <- idM <$> getLib lib mid "addScript"
   modLibD lib mod \m ->
     m {scripts = cons scr m.scripts}
 
-purgeScript :: forall eff h. Library h -> String -> Int -> EpiS eff h Unit
-purgeScript lib mid idx = do
+purgeScript :: forall eff h. Library h -> String -> String -> EpiS eff h Unit
+purgeScript lib mid scr = do
   mod <- idM <$> getLib lib mid "purgeScript"
+  lift $ log $ inj "PURGING SCRIPT %0 from [%1] in %2" [scr, (joinWith ", " (dat mod).scripts), mid]
   modLibD lib mod \m ->
-    m {scripts = fromMaybe m.scripts $ deleteAt idx m.scripts}
+    m {scripts = delete scr m.scripts}
 
 parseScript :: forall eff h. String -> EpiS eff h Script
 parseScript dta = do
@@ -70,9 +72,10 @@ getClone lib pattern mid = do
   pattern' <- case (compP :: Maybe Pattern) of
     Just pd -> pure pd
     Nothing -> do
-      lift $ log "cloning pattern"
+      lift $ log "CLONING PATTERN"
       pattern' <- clonePattern lib pattern
       setLib lib "$$Comp" pattern'
+      lift $ log lib
       pure pattern'
 
   addr <- findAddr lib (dat pattern) mid

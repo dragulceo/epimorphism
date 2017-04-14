@@ -81,8 +81,10 @@ parseModule mod lib zOfs parOfs images = do
       res <- parseModule v lib zOfs' parOfs' images'
       let tok = "%" <> k <> "%"
       ofs <- lift $ offsetOf tok component
-      --let iC = "//" <> k <> "\n  {\n" <> (indentLines 2 res.component) <> "\n  }"
-      let iC = "//" <> k <> (indentLines ofs ("\n{\n" <> res.component <> "\n}"))
+      let iC = "//" <> k <> "\n" <>
+               (indentLines ofs "{\n") <>
+               (indentLines (ofs + 2) res.component) <> "\n" <>
+               (indentLines ofs "}\n")
       let child = replaceAll tok iC component
       pure $ res { component = child }
 

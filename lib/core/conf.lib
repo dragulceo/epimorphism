@@ -12,6 +12,12 @@ uiConf prod
 pattern prod
 
 ### SystemConf
+id proddev
+engineConf default
+uiConf dev
+pattern prod
+
+### SystemConf
 id analysis
 engineConf default
 uiConf dev

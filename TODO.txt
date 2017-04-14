@@ -5,97 +5,97 @@ NOTES:
  some pallets are still ugly.  also, the bleeding stuff, I'm not sure I like it
 
 PROJECTS:
-	- dbg -> log
-	- better resolution images? make sure all load
-	- EXT_disjoint_timer_query to scale performance?
+  - dbg -> log
+  - better resolution images? make sure all load
+  - EXT_disjoint_timer_query to scale performance?
 
   - components
-		- component indentation :/
-		- remove includes from pattern into component
+    - remove includes from pattern into component
 
   - seed library
-	  - minimze compiles & complexity
-		  - draw seeds on the client???
-			- use a second shader?
+    - minimze compiles & complexity
+      - draw seeds on the client???
+      - use a second shader?
 
-	- async (AFF?)
-	  - lib/db requests
-		- image requests
-		- db requests
+  - async (AFF?)
+    - lib/db requests
+    - image requests
+    - db requests
 
-	- restructure data
-	  - saving
-		- cleanup
-		  - importing = clone, rewrite clonePattern.  references?
-			- get rid of slib?
-		- scripts could use some more thought.
-		  - pattern level scripts
-			- how to syncronize multiple scripts? i.e, color & disp?
-		  - which module do they belong to?
+  - restructure data
+    - saving
+    - cleanup
+      - importing = clone, rewrite clonePattern.  references?
+      - get rid of slib?
+    - scripts could use some more thought.
+      - pattern level scripts
+      - how to syncronize multiple scripts? i.e, color & disp?
+      - which module do they belong to?
     - better data organization
-		  - what goes in config, what goes into states?
-		- be better about reloading objects after refs might change?
-		- construct lib refs such that reading from lib is pure?
+      - what goes in config, what goes into states?
+    - be better about reloading objects after refs might change?
+    - construct lib refs such that reading from lib is pure?
 
-	- UI
-	  - basic idea is that all db & data modifications happen through UI
-		- but we need to completely rework how the ui happens.
-		  - dont want to have to pause to update tree, that's kind of ghetto
-			- individually pause paths/modules?
-			- reactive UI?
-		- ability to clone module tree & quickly make changes/save/load/etc
-		- misc
-		  - https://ace.c9.io/#nav=about
-			- show shader source in tab
+  - UI
+    - basic idea is that all db & data modifications happen through UI
+    - but we need to completely rework how the ui happens.
+      - dont want to have to pause to update tree, that's kind of ghetto
+      - individually pause paths/modules?
+      - reactive UI?
+    - ability to clone module tree & quickly make changes/save/load/etc
+    - misc
+      - https://ace.c9.io/#nav=about
+      - show shader source in tab
 
-	- more importing/compiling
-		- WINDOWS SUCKS - OSX Nvidia 640M?
-		- batch compilation?
-		- MISC
-		  - could maybe clean up switch a bit more (remove imports/purges, combine methods)
-		  - maybe module.modules should be [SubModule = SubLib String | SubPool String] or something
+  - more importing/compiling
+    - WINDOWS SUCKS - OSX Nvidia 640M?
+    - batch compilation?
+    - MISC
+      - could maybe clean up switch a bit more (remove imports/purges, combine methods)
+      - maybe module.modules should be [SubModule = SubLib String | SubPool String] or something
       - module/submodule cycles??
-			- only way to modify tree is via switch?
+      - only way to modify tree is via switch?
 
-	- database support
-	  - which database?
-		- how are things stored/serialized?
-		- search by family, component, flags, props, id
-		- sync local & remote dbs
-		- put textures in db
-		- misc:
-		  - update flags on save (default != true)
-  	  - check for duplicates when saving (id = hash of contents?)
+  - database support
+    - which database?
+    - how are things stored/serialized?
+    - search by family, component, flags, props, id
+    - sync local & remote dbs
+    - put textures in db
+    - misc:
+      - update flags on save (default != true)
+      - check for duplicates when saving (id = hash of contents?)
       - namespace collisions detection
 
 
   - main pattern
     - T
-	  - SEED
-	  - COLOR still needs work some times
-		- integrate fb color into main
-		- framed images
-		- different w's
+    - SEED
+    - COLOR still needs work some times
+    - integrate fb color into main
+    - framed images
+    - different w's
 
   - misc
-	  - auto scale performance for framerate or something
-	  - could start whole application in global image loading callbacks
-		- some kind of error reporting
-		- menu available in dev
+    - auto scale performance for framerate or something
+    - could start whole application in global image loading callbacks
+    - some kind of error reporting
+    - menu available in dev
 
   - exposure
-	  - codame
-		- priceless
-		- burningman?
-		- museums?
-		- twitter
-		- Scenario? (https://itunes.apple.com/us/app/scenario/id423444193?mt=12)
-		- Chrome Experiments
-		- Chrome Web store (https://developer.chrome.com/webstore/get_started_simple)
+    - codame
+    - priceless
+    - burningman?
+    - museums?
+    - twitter
+    - Scenario? (https://itunes.apple.com/us/app/scenario/id423444193?mt=12)
+    - Chrome Experiments
+    - Chrome Web store (https://developer.chrome.com/webstore/get_started_simple)
 
 -------------------------------- BACKLOG --------------------------------
 
 BUGS:
+  - component indentation still isn't perfect
   - value should be main, vert, or disp when changing vals sometimes
   - black blobs in ios
   - freezing spinner (i think its the synchronous get requests for lib)
@@ -121,13 +121,13 @@ SYSTEM:
 
   - scripts
     - way of switching modules while keeping phase/scripts.
-	  - keep scripts when switching modules?
+    - keep scripts when switching modules?
   - javascript files are all over the place
-	- fract a sub on main body set in engine before compiling?
+  - fract a sub on main body set in engine before compiling?
   - use git for deploy
   - addGlobalEventListeners is a bit ghetto
   - more work on fract.  more specific fracts.  like for seed vs T.  can possibly also increase quality
-	- too many debug statements going on (in engine?)  Better logging
+  - too many debug statements going on (in engine?)  Better logging
   - prevent default in ui.js
   - make serializable a class
   - remote control (webui, websockets, etc)
@@ -136,22 +136,22 @@ SYSTEM:
   - engine stability/lost context - https://www.khronos.org/registry/webgl/extensions/WEBGL_lose_context/
   - main & disp share includes
   - preprocesser malfunctions give weird errors
-	- chrome/ff shader debugger/editor
+  - chrome/ff shader debugger/editor
   - better engine error checking/handling
-	- get rid of if statements ins seed_w & clean all of that up
+  - get rid of if statements ins seed_w & clean all of that up
 
 FEATURE IDEAS:
-	- optional increase of bit depth - half float, etc (works?  not obvious is better; half_float = 36193)
-	- shader precision optimization? mediump, highp, etc
+  - optional increase of bit depth - half float, etc (works?  not obvious is better; half_float = 36193)
+  - shader precision optimization? mediump, highp, etc
   - blend maps!! variable interpolation
-	- catagorize transformations:
-  	- symmetries, is_inversion, scale, periodic?, rational?, accumulation points, empty regions?, elementary, custom?
-	- use images(self????) as transformations
-	- vector fields
+  - catagorize transformations:
+    - symmetries, is_inversion, scale, periodic?, rational?, accumulation points, empty regions?, elementary, custom?
+  - use images(self????) as transformations
+  - vector fields
   - seed impulses
-	- graphically outline seeds?
-	- animate seed textures somehow
-	- superformula - https://en.wikipedia.org/wiki/Superformula
+  - graphically outline seeds?
+  - animate seed textures somehow
+  - superformula - https://en.wikipedia.org/wiki/Superformula
   - for each pixel, define a normal vector, so we can do lighting & material effects
   - investigate dsl for scripts
   - webcam input
@@ -159,7 +159,7 @@ FEATURE IDEAS:
 FUTURE:
   - test on ipad
   - test on android
-	- unit tests
+  - unit tests
   - logging system
   - programming guidelines document - i.e make sure all tree modifications rebuild mod ref lib
   - benchmarking tools
@@ -169,11 +169,11 @@ NO CLUE:
   - saving images loses bit depth??
   - weird divide by zero issue - glitch in content
   - maybe pixel alignment issues with images?
-	- change resolution during switching error?
+  - change resolution during switching error?
 
 
 MATH:
   t_inner:z / (z + 1) + z / (z - 1)}
   zn [1.500 + 0.000i, 0.000 + 0.000i, 0.800 + 0.000i, 0.200 + 0.000i]
   creates a legitimate fractal
-	I saw something that might explain it
+  I saw something that might explain it

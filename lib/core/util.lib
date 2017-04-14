@@ -17,7 +17,7 @@ default_mod torus_reduce
 children {}
 includes []
 code &&&
-	z = ~reduce~;
+z = ~reduce~;
 
 
 ###Module
@@ -45,16 +45,16 @@ default_mod switch
 children {m0:*, m1:*}
 includes []
 code &&&
-	~dim~ v0, v1, init;
-	init = ~var~;
-	%m0%
-	v0 = ~var~;
+~dim~ v0, v1, init;
+init = ~var~;
+%m0%
+v0 = ~var~;
 
-	~var~ = init;
-	%m1%
-	v1 = ~var~;
+~var~ = init;
+%m1%
+v1 = ~var~;
 
-	~var~ = mix(v0, v1, clamp(0.0, 1.0, |intrp|));
+~var~ = mix(v0, v1, clamp(0.0, 1.0, |intrp|));
 
 ### Component
 id smooth_switch
@@ -63,17 +63,17 @@ default_mod smooth_switch
 children {m0:*, m1:*}
 includes []
 code &&&
-	~dim~ v0, v1, init;
+~dim~ v0, v1, init;
 
-	init = ~var~;
-	%m0%
-	v0 = ~var~;
+init = ~var~;
+%m0%
+v0 = ~var~;
 
-	~var~ = init;
-	%m1%
-	v1 = ~var~;
+~var~ = init;
+%m1%
+v1 = ~var~;
 
-	~var~ = mix(v0, v1, smoothstep(0.0, 1.0, |intrp|));
+~var~ = mix(v0, v1, smoothstep(0.0, 1.0, |intrp|));
 
 ### Component
 id id

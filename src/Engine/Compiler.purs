@@ -43,9 +43,6 @@ compileShaders esRef lib full = do
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {mainSrc = Just main, auxImages = Just aux}})
           pure false
         CompDispShader -> do
-          (Component _ comp) <- getLib lib "disp" "asdfasdf"
-          --dbg comp
-          --lift $ winLog comp.code
           disp <- parseDisp lib compD
           lift $ modifySTRef esRef (\es' -> es' {compST = es'.compST {dispSrc = Just disp}})
           pure false

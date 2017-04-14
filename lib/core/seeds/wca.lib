@@ -17,21 +17,21 @@ family seed
 default_mod seed_wca
 children {t:t, reduce:reduce, w:w, wt:wt, a:a, seed_color:seed_color}
 code &&&
-	vec4 wdt;
-	vec2 z_i = z;
-	float w, a, wx, wy, mask;
-  %t%
-	%reduce%
+vec4 wdt;
+vec2 z_i = z;
+float w, a, wx, wy, mask;
+%t%
+%reduce%
 
-	// w = (w, alpha, wx, wy)
-	%w%
+// w = (w, alpha, wx, wy)
+%w%
 
-	w = wdt.x;
-	%wt%
+w = wdt.x;
+%wt%
 
-	a = wdt.y;
-	%a%
+a = wdt.y;
+%a%
 
-	%seed_color%
+%seed_color%
 
-	z = z_i;
+z = z_i;

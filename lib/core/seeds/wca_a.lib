@@ -38,4 +38,4 @@ id alpha
 family alpha
 default_mod alpha_id
 code &&&
-	a = ~a_exp~;
+a = ~a_exp~;

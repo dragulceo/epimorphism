@@ -14,7 +14,7 @@ import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Data.Types (EpiS, Module(..), Pattern(..), PatternD, Library)
 import System (loadLib)
-import Util (dbg, uuid, fromJustE)
+import Util (uuid, fromJustE)
 
 
 ------------------------ FIND ------------------------

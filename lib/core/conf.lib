@@ -3,6 +3,7 @@ id dev
 engineConf default
 uiConf dev
 pattern dev
+debug true
 seed 8563
 
 ### SystemConf
@@ -16,12 +17,15 @@ id proddev
 engineConf default
 uiConf dev
 pattern prod
+debug true
+seed 8563
 
 ### SystemConf
 id analysis
 engineConf default
 uiConf dev
 pattern analysis
+debug true
 
 
 ### UIConf

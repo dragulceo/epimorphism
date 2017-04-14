@@ -5,6 +5,7 @@ import Compiler (compileShaders)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
+import Control.Monad.Trans.Class (lift)
 import DOM (DOM)
 import Data.Array (null, updateAt, foldM, sort, concatMap, fromFoldable)
 import Data.Int (round, toNumber)
@@ -24,7 +25,7 @@ import Script (runScripts)
 import System (initLibrary)
 import Texture (loadImages)
 import UI (initUIST)
-import Util (Now, dbg, fromJustE, getProfileCookie, handleError, imag, inj, isDev, isHalted, now, real, requestAnimationFrame, rndstr, seedRandom, urlArgs, zipI)
+import Util (Now, log, enableDebug, fromJustE, getProfileCookie, handleError, imag, inj, isDev, isHalted, now, real, requestAnimationFrame, rndstr, seedRandom, urlArgs, zipI)
 
 host :: String
 host = ""
@@ -51,19 +52,21 @@ initState systemST lib'@(Library libVar) = do
   --  init config & system
   systemName <- lift $ getSysConfName
   let lib = Library libVar{system = Just systemName}
-  dbg lib
+  lift $ log lib
 
   systemConf <- getSystemConf lib "init system"
   let systemConfD = dat systemConf
+  when systemConfD.debug do
+    lift $ enableDebug
 
   -- set random seed
   seed <- case systemConfD.seed of
     "" -> do
       newSeed <- lift rndstr
-      dbg $ "GENERATING SEED: " <> newSeed
+      lift $ log $ "GENERATING SEED: " <> newSeed
       pure newSeed
     _ -> do
-      dbg $ "USING SEED: " <> systemConfD.seed
+      lift $ log $ "USING SEED: " <> systemConfD.seed
       pure systemConfD.seed
 
   modLibD lib systemConf _ {seed = seed}
@@ -75,7 +78,7 @@ initState systemST lib'@(Library libVar) = do
   case (elt :: Maybe EngineConf) of
     (Just d) -> modLibD lib systemConf _ {engineConf = cookie_profile}
     Nothing -> do
-      dbg $ "Unknown EngineConf: " <> cookie_profile  <> " - using default instead"
+      lift $ log $ "Unknown EngineConf: " <> cookie_profile  <> " - using default instead"
       pure unit
 
   uiConfD <- getUIConfD lib "init system"
@@ -109,7 +112,7 @@ animate state = handleError do
   systemConfD <- getSystemConfD lib "animate systemConf"
   uiConfD     <- getUIConfD lib "animate uiConf"
   patternD    <- getPatternD lib "animate pattern"
-  --dbg patternD.main
+  --lift $ log patternD.main
 
   uiST       <- lift $ readSTRef usRef
   systemST   <- lift $ readSTRef ssRef
@@ -155,7 +158,7 @@ animate state = handleError do
     --lift $ modifySTRef esRef _ {compQueue = fullCompile}
     compileShaders esRef lib (isNothing engineST.mainProg)
     --t'' <- lift $ now
-    --dbg $ inj "COMPILE :%0ms" [show (t'' - t')]
+    --lift $ log $ inj "COMPILE :%0ms" [show (t'' - t')]
     --currentTimeMS2 <- lift $ now
     --lift $ modifySTRef ssRef (\s -> s {lastTimeMS = Just currentTimeMS2})
     pure unit
@@ -186,7 +189,7 @@ animate state = handleError do
     lift $ requestAnimationFrame animate state
   t6 <- lift $ now
 
-  --dbg $ inj "BREAKDOWN: init:%0ms scripts:%1ms recompile:%2ms render:%3ms ui:%4ms next:%5ms" [show (t1 - t0), show (t2 - t1), show (t3 - t2), show (t4 - t3), show (t5 - t4), show (t6 - t5)]
+  --lift $ log $ inj "BREAKDOWN: init:%0ms scripts:%1ms recompile:%2ms render:%3ms ui:%4ms next:%5ms" [show (t1 - t0), show (t2 - t1), show (t3 - t2), show (t4 - t3), show (t5 - t4), show (t6 - t5)]
 
   pure unit
 

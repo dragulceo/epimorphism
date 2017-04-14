@@ -13,7 +13,7 @@ import ScriptUtil (serializeScript, parseScript)
 import Scripts (null, randomize, pause, incZn)
 import Switch (finishSwitch, switch)
 import System (mFold)
-import Util (dbg, lg, fromJustE)
+import Util (fromJustE)
 
 -- find script fuction given name
 lookupScriptFN :: forall eff h. String -> EpiS eff h (ScriptFn eff h)
@@ -45,8 +45,8 @@ runModScripts ssRef lib mut mid = do
 
 runScript :: forall eff h. STRef h (SystemST h) -> Library h -> String -> PMut -> String -> EpiS eff h PMut
 runScript ssRef lib mid pmut scr = do
-  --dbg $ "running script : " <> scr <> " : for " <> mid
-  --dbg x
+  --lift $ log $ "running script : " <> scr <> " : for " <> mid
+  --lift $ log x
   (Script name phase args) <- parseScript scr
   systemST <- lift $ readSTRef ssRef
   fn <- lookupScriptFN name

@@ -5,9 +5,9 @@ NOTES:
  some pallets are still ugly.  also, the bleeding stuff, I'm not sure I like it
 
 PROJECTS:
-  - dbg -> log
   - better resolution images? make sure all load
   - EXT_disjoint_timer_query to scale performance?
+  - types & library not dry
 
   - components
     - remove includes from pattern into component

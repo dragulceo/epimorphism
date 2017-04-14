@@ -4,6 +4,7 @@ import Prelude
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, readSTRef)
+import Control.Monad.Trans.Class (lift)
 import Data.Array (index, length, updateAt) as A
 import Data.Library (apD, buildSearch, component, dat, family, getLib, getPattern, idM, mD, modLibD, searchLib)
 import Data.Library (idx) as L
@@ -16,7 +17,7 @@ import Pattern (CloneRes(CloneRes), purgeModule, ImportObj(ImportRef, ImportModu
 import ScriptUtil (getClone, addScript, purgeScript)
 import System (loadLib)
 import Text.Format (precision, format)
-import Util (dbg, intFromStringE, inj, randInt, numFromStringE, gmod, fromJustE)
+import Util (log, intFromStringE, inj, randInt, numFromStringE, gmod, fromJustE)
 
 
 -- CLEAN THIS UP
@@ -187,7 +188,7 @@ finishSwitch ssRef lib t rootIdPre idx dt = do
         addScript lib t parent "pause" ""
         pure unit
 
-      --dbg "finish switch!!!!"
+      lift $ log "finish switch!!!!"
       pure $ ScriptRes (PMut (dat pattern) (singleton newRootN)) Nothing
     _ -> do
       pure $ ScriptRes PMutNone Nothing

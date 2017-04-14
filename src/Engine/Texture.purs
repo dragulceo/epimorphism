@@ -17,7 +17,7 @@ import Data.Tuple (Tuple(Tuple), snd, fst)
 import EngineUtil (execGL)
 import Graphics.WebGL.Methods (createFramebuffer, createTexture)
 import Graphics.WebGL.Types (WebGLTexture, WebGLContext, WebGL, WebGLFramebuffer)
-import Util (dbg, fromJustE, unsafeNull)
+import Util (fromJustE, unsafeNull)
 
 foreign import loadImages :: forall eff. Array String -> Array String -> Eff eff Unit
 foreign import registerImages :: forall eff. Array String -> Eff eff Unit

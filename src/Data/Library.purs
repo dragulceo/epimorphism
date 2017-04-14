@@ -12,7 +12,7 @@ import Data.StrMap (StrMap, freezeST, fromFoldable, insert, isSubmap, values)
 import Data.StrMap.ST (STStrMap, delete, peek, poke)
 import Data.Tuple (Tuple)
 import Data.Types (CodeBlock, Component(Component), ComponentRef, EngineConf(EngineConf), EngineConfD, EpiS, Family(Family), FamilyRef, Image(Image), ImageRef, Include, Index, Module(..), ModuleD, ModuleRef, Path, Pattern(Pattern), PatternD, Script, Section(Section), SystemConf(SystemConf), SystemConfD, UIConf(UIConf), UIConfD, ComponentD, Library(..))
-import Util (dbg, fromJustE)
+import Util (fromJustE)
 
 class DataTable a ad | a -> ad where
   libProj :: forall h. Library h -> STStrMap h a
@@ -27,6 +27,7 @@ instance dtSystemConf :: DataTable SystemConf {
   , uiConf     :: String
   , pattern    :: String --PatternRef
   , seed       :: String
+  , debug      :: Boolean
 } where
   libProj (Library {systemConfLib}) = systemConfLib
   idx     (SystemConf ix _) = ix

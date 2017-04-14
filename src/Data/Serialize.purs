@@ -20,7 +20,7 @@ import Data.String.Regex (match)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Data.Types (Component(Component), EngineConf(EngineConf), Epi, EpiS, Family(..), Image(..), Index, Module(..), Pattern(..), Schema, SchemaEntry(SchemaEntry), SchemaEntryType(SE_A_Cx, SE_A_St, SE_M_N, SE_M_St, SE_S, SE_B, SE_I, SE_N, SE_St), Section(..), SystemConf(SystemConf), UIConf(UIConf), componentSchema, engineConfSchema, familySchema, imageSchema, indexSchema, moduleSchema, patternSchema, systemConfSchema, uiConfSchema, Library(..))
-import Util (boolFromStringE, cxFromStringE, dbg, dbg2, fromJustE, inj, intFromStringE, numFromStringE, tryRegex, winAppend, winLog, zipI)
+import Util (boolFromStringE, cxFromStringE, fromJustE, inj, intFromStringE, numFromStringE, tryRegex, winAppend, winLog, zipI)
 
 foreign import unsafeSetDataTableAttr :: forall a b eff. a -> String -> String -> b -> Eff eff a
 foreign import unsafeGenericDataTableImpl :: forall a r. Schema -> Schema -> (Index -> (Record r) -> a) -> (Set.Set String) -> a

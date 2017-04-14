@@ -58,6 +58,7 @@ type SystemConfD = {
   , uiConf     :: String
   , pattern    :: String --PatternRef
   , seed       :: String
+  , debug      :: Boolean
 }
 
 systemConfSchema :: Schema
@@ -66,6 +67,7 @@ systemConfSchema = [
   , SchemaEntry SE_St "uiConf"
   , SchemaEntry SE_St "pattern"
   , SchemaEntry SE_St "seed"
+  , SchemaEntry SE_B  "debug"
 ]
 
 data EngineConf = EngineConf Index EngineConfD

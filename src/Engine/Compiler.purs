@@ -20,7 +20,7 @@ import Graphics.WebGL.Types (WebGLProgram, DataType(Float), BufferData(DataSourc
 import Parser (parseShader)
 import Pattern (purgeModule)
 import Texture (uploadAux)
-import Util (Now, dbg, lg, now, now2, replaceAll, unsafeCast, winLog)
+import Util (Now, log, now, now2, replaceAll, unsafeCast, winLog)
 
 -- compile shaders and load into systemST
 compileShaders :: forall eff h. STRef h EngineST -> Library h -> Boolean -> EpiS (now :: Now | eff) h Boolean
@@ -33,7 +33,7 @@ compileShaders esRef lib full = do
 
   case (uncons es.compQueue) of
     Just {head: op, tail: rst} -> do
-      dbg op
+      lift $ log op
       done <- case op of
         CompMainShader -> do
           let no_fract = es.profile.angle ||
@@ -75,13 +75,11 @@ compileShaders esRef lib full = do
           -- unif
           mainUnif <- case es.compST.mainProg of
             Just prog -> do
-              dbg "mainU"
               Just <$> linkShader es prog
             Nothing -> pure Nothing
 
           dispUnif <- case es.compST.dispProg of
             Just prog -> do
-              dbg "dispU"
               Just <$> linkShader es prog
             Nothing -> pure Nothing
 
@@ -131,7 +129,7 @@ parseMain lib patternD fract = do
       let main' = replaceAll "~fract~" (show i) main''
       pure $ replaceAll "~NO_FRACT~" "" main'
     Nothing -> do
-      dbg "NO FRACT"
+      lift $ log "NO FRACT"
       let main' = replaceAll "~fract~" "1" main''
       pure $ replaceAll "~NO_FRACT~" "#define _NO_FRACT_" main'
 

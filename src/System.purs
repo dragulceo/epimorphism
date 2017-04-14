@@ -12,7 +12,7 @@ import Data.Serialize (parseLibData)
 import Data.StrMap (StrMap, lookup, values)
 import Data.Traversable (traverse)
 import Data.Types (Epi, EpiS, Module, Library)
-import Util (dbg, inj, urlGet)
+import Util (inj, urlGet)
 
 initLibrary :: forall eff h. String -> EpiS eff h (Library h)
 initLibrary host = do

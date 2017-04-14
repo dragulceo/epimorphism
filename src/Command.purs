@@ -20,7 +20,7 @@ import Layout (updateLayout, initLayout)
 import Pattern (findModule)
 import ScriptUtil (addScript)
 import Texture (clearFB)
-import Util (dbg, halt, Now, cxFromStringE, intFromStringE, numFromStringE, lg, handleError)
+import Util (Now, cxFromStringE, log, enableDebug, halt, handleError, intFromStringE, numFromStringE)
 
 foreign import saveCanvas :: forall eff. Eff eff Unit
 
@@ -44,7 +44,7 @@ command usRef esRef ssRef lib msg = handleError do
         case cmd of
           "null" -> pure unit
           "pause" -> do
-            dbg "pause"
+            lift $ log "pause"
             lift $ modifySTRef ssRef (\s -> s {paused = not s.paused})
             pure unit
           "halt" -> do
@@ -115,6 +115,7 @@ command usRef esRef ssRef lib msg = handleError do
           "dev" -> do
             uiConf <- getUIConf lib "dev"
             modLibD lib uiConf _ {windowState = "dev", keySet = "dev", showFps = true}
+            lift $ enableDebug
             initLayout uiST lib
 
             pure unit

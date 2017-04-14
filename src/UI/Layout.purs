@@ -9,7 +9,6 @@ import Data.Library (getUIConfD)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Types (EpiS, Library, SystemST, UIST, EngineST)
 import UIUtil (findElt)
-import Util (lg)
 
 initLayout :: forall eff h. UIST -> Library h -> EpiS eff h Unit
 initLayout uiST lib = do

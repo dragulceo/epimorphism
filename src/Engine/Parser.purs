@@ -12,7 +12,7 @@ import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
 import Data.Types (Component(..), Epi, EpiS, ModuleD, Library)
-import Util (dbg, forceInt, indentLines, inj, offsetOf, replaceAll)
+import Util (forceInt, indentLines, inj, offsetOf, replaceAll)
 
 type Shaders = {vert :: String, main :: String, disp :: String, aux :: Array String}
 type CompRes = {component :: String, zOfs :: Int, parOfs :: Int, images :: Array String}

@@ -1,4 +1,60 @@
 "use strict";
+function getFormattedDate() {
+    var date = new Date();
+
+    var month = date.getMonth() + 1;
+    var day = date.getDate();
+    var hour = date.getHours();
+    var min = date.getMinutes();
+    var sec = date.getSeconds();
+
+    month = (month < 10 ? "0" : "") + month;
+    day = (day < 10 ? "0" : "") + day;
+    hour = (hour < 10 ? "0" : "") + hour;
+    min = (min < 10 ? "0" : "") + min;
+    sec = (sec < 10 ? "0" : "") + sec;
+
+    var str = date.getFullYear() + "-" + month + "-" + day + " " +  hour + ":" + min + ":" + sec;
+
+    return str;
+}
+
+exports.enableDebug = function () {
+  window.epiDbg = true;
+}
+
+exports.log = function elg(x) {
+  return function (){
+    if(window.epiDbg){
+      console.log(x);
+      var timestamp = "<span class='timestamp'>[" + getFormattedDate() + "]</span>"
+      $("#debugLog").append("<span class='log-line'>" + timestamp + " - " + x + "</span><br/>");
+    }
+  }
+}
+
+exports.tLg = function tLg(x) {
+  if(typeof window.lgCnt == 'undefined')
+    window.lgCnt = 0;
+  if(window.lgCnt < 10)
+    console.log(x);
+  window.lgCnt = window.lgCnt + 1;
+}
+
+
+exports.winLog = function (x) {
+  return function() {
+    $('body')[0].innerHTML = "<pre>" + x.replace(new RegExp("\n", 'g'), "<br/>") + "</pre>";
+  };
+}
+
+exports.winAppend = function (x) {
+  return function() {
+    $('body').append("<pre>" + x.replace(new RegExp("\n", 'g'), "<br/>") + "</pre>");
+  };
+}
+
+
 
 exports.unsafeNull = null
 
@@ -52,19 +108,6 @@ exports.requestAnimationFrame = function(func){
   };
 };
 
-exports.tLg = function tLg(x) {
-  if(typeof window.lgCnt == 'undefined')
-    window.lgCnt = 0;
-  if(window.lgCnt < 10)
-    console.log(x);
-  window.lgCnt = window.lgCnt + 1;
-}
-
-
-exports.lg = function lg(x) {
-  console.log(x);
-}
-
 exports.stick = function stick(x) {
   $.stick = x;
 }
@@ -78,18 +121,6 @@ exports.now2 = exports.now;
 
 exports.unsafeEval = function (s) {
   return function () {eval(s);};
-}
-
-exports.winLog = function (x) {
-  return function() {
-    $('body')[0].innerHTML = "<pre>" + x.replace(new RegExp("\n", 'g'), "<br/>") + "</pre>";
-  };
-}
-
-exports.winAppend = function (x) {
-  return function() {
-    $('body').append("<pre>" + x.replace(new RegExp("\n", 'g'), "<br/>") + "</pre>");
-  };
 }
 
 exports.urlArgs = function() {
@@ -195,6 +226,7 @@ exports.cxFromStringImpl = function (tuple) {
 };
 
 exports.halt = function() {
+  $("#halt").hide();
   console.log("HALT");
   halt = true;
 };
@@ -263,18 +295,11 @@ exports.clickPause = function() {
 };
 
 
-exports.elg = function elg(x) {
-  return function (){
-    console.log(x);
-  }
-}
-
-
 exports.offsetOf = function(tok) {
   return function(str){
     return function(){
       var lines = str.split("\n")
-      for(i = 0; i<lines.length; i++){
+      for(var i = 0; i<lines.length; i++){
         var line = lines[i];
         if(line.includes(tok))
           return line.indexOf(tok);

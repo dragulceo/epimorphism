@@ -21,7 +21,7 @@ import Paths (isConstantPath, runPath)
 import Serialize (showCX, unsafeSerialize)
 import Text.Format (format, precision)
 import UIUtil (findElt)
-import Util (dbg, indentLines, inj, real, zipI)
+import Util (indentLines, inj, real, zipI)
 
 foreign import addEventListeners :: forall eff. Eff eff Unit
 

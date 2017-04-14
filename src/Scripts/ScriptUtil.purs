@@ -2,6 +2,7 @@ module ScriptUtil where
 
 import Prelude
 import Control.Monad.Except.Trans (throwError)
+import Control.Monad.Trans.Class (lift)
 import Data.Array (head, foldM, uncons, deleteAt, cons)
 import Data.Library (dat, getLib, getLibM, idM, modLibD, setLib)
 import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
@@ -12,7 +13,7 @@ import Data.Tuple (Tuple(Tuple))
 import Data.Types (EpiS, Pattern, Library, Script(Script))
 import Pattern (clonePattern, findModule, findAddr, CloneRes(CloneRes))
 import Text.Format (precision, format)
-import Util (dbg, inj, numFromStringE, fromJustE)
+import Util (log, inj, numFromStringE, fromJustE)
 
 addScript :: forall eff h. Library h -> Number -> String -> String -> String -> EpiS eff h Unit
 addScript lib sysT mid name args = do
@@ -69,7 +70,7 @@ getClone lib pattern mid = do
   pattern' <- case (compP :: Maybe Pattern) of
     Just pd -> pure pd
     Nothing -> do
-      -- dbg "cloning pattern"
+      lift $ log "cloning pattern"
       pattern' <- clonePattern lib pattern
       setLib lib "$$Comp" pattern'
       pure pattern'

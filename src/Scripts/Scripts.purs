@@ -14,7 +14,7 @@ import Math (max, round) as M
 import ScriptUtil (addScript, purgeScript)
 import System (loadLib)
 import Text.Format (format, precision)
-import Util (dbg, cxFromString, intFromStringE, inj, numFromStringE, clickPause)
+import Util (cxFromString, intFromStringE, inj, numFromStringE, clickPause)
 
 null :: forall eff h. ScriptFn eff h
 null ssRef lib t mid idx dt = do

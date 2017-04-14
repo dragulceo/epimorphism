@@ -23,14 +23,10 @@ import Graphics.Canvas (CANVAS)
 foreign import data Now :: !
 
 -- simple js functions
+foreign import enableDebug :: forall eff. Eff eff Unit
 foreign import unsafeNull :: forall a. a
-foreign import lg :: forall a b. a -> b
-foreign import elg :: forall a b eff. a -> Eff eff b
 foreign import stick :: forall a b. a -> b
-foreign import tLg :: forall a b. a -> b
 foreign import unsafeEval :: forall eff. String -> Eff eff Unit
-foreign import winLog :: forall a eff. a -> Eff eff Unit
-foreign import winAppend :: forall a eff. a -> Eff eff Unit
 foreign import requestAnimationFrame :: forall eff a. (a -> Eff eff Unit) -> a -> Eff eff Unit
 foreign import now :: forall eff. Eff (now :: Now | eff) Number
 foreign import now2 :: forall eff. Eff eff Number
@@ -167,9 +163,8 @@ imag :: Complex -> Number
 imag cx = case (inCartesian cx) of
   Cartesian x y -> y
 
-
-dbg :: forall eff h a b. a -> EpiS eff h b
-dbg a = lift $ elg a
-
-dbg2 :: forall eff a b. a -> Epi eff b
-dbg2 a = lift $ elg a
+-- LOGGING
+foreign import log :: forall a b eff. a -> Eff eff b
+foreign import tLg :: forall a b. a -> b
+foreign import winLog :: forall a eff. a -> Eff eff Unit
+foreign import winAppend :: forall a eff. a -> Eff eff Unit

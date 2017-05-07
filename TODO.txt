@@ -1,7 +1,26 @@
 PROJECTS:
-  - too much darkness/desaturation
+  - System Misc
+    - menu available in dev
+    - mobile/browser detection in main
+    - import/clone etc folds of KMaps
 
-  - Main Misc
+    - clean up src/Data
+    - Types & Library not dry
+
+    - switching modules show up in ui?
+    - kill paths btn
+
+    - some kind of error/bug reporting on website
+
+
+  - Saving
+    - periodicly take snapshots, at a frequeny.  useful for debugging or replay
+    - take snapshot of flattened shader code?
+    - load whole patterns
+    - remove serialize.rb
+
+  - Main Pattern Improvements
+    - too much darkness/desaturation
     - smooth mask has artifacts
     - play with pallets a bit more. inc_sc, lgv, spread wave size, etc
     - geom_2, geom_7 ugly
@@ -10,32 +29,7 @@ PROJECTS:
     - w * w in seed val?
     - there are some line artifacts in some images(geom3, islamic)
     - better resolution images? make sure all load
-    - non t-based seed animation
     - rewrite seed.w, seed.a to not require recompile
-
-  - System Misc
-    - mobile/browser detection in main
-    - clean up src/Data
-    - import/clone etc folds of KMaps
-    - auto scale performance for framerate or something
-      - EXT_disjoint_timer_query to measure/scale performance?
-    - Types & Library not dry
-    - some kind of error/bug reporting
-    - menu available in dev
-    - switching modules show up in ui?
-    - kill paths btn
-
-  - saving
-    - periodicly take snapshots, at a frequeny.  useful for debugging or replay
-    - take snapshot of flattened shader code?
-    - load whole patterns
-    - remove serialize.rb
-
-  - async (AFF?)
-    - lib/db requests
-    - image requests
-      - could start whole application in global image loading callbacks
-    - db requests
 
   - UI
     - basic idea is that all db & data modifications happen through UI
@@ -56,15 +50,22 @@ PROJECTS:
     - framed images
     - different w's
 
+  - async (AFF?)
+    - lib/db requests
+    - image requests
+      - could start whole application in global image loading callbacks
+    - db requests
+
   - exposure
-    - codame
-    - priceless
-    - burningman?
+    - codame?
+    - priceless?
+    - burningman? - probably not
     - museums?
-    - twitter
+    - twitter handle
     - Scenario? (https://itunes.apple.com/us/app/scenario/id423444193?mt=12)
     - Chrome Experiments
     - Chrome Web store (https://developer.chrome.com/webstore/get_started_simple)
+
 
 -------------------------------- BACKLOG --------------------------------
 
@@ -72,21 +73,19 @@ BUGS:
   - throw error of sub, par/zn or module not found
   - component indentation still isn't perfect
   - value should be main, vert, or disp when changing vals sometimes?
-  - black blobs in ios
   - freezing spinner (i think its the synchronous get requests for lib)
   - firefox WebGL: texImage2D: conversion requires pixel reformatting (maybe non-issue)
   - catch errors when parsing t_exp
   - no error message when image texture doesnt exist
-  - reduce is a substition in seeds, but comes from appliction.  the order of "modules {x: .., y: ..}" matters :/
-
   - weird when opening console in fullscreen
-  - shader indentation issues with switching & in general
   - error handling for failing to enter fullscreen mode
   - number parsing flakey? how so? floating point?
 
 PERF:
   - zoom out performance problem.  unclear what the deal is.  really bad with 1/z(cache something or other?)
   - choppy in safari
+  - auto scale performance for framerate or something
+    - EXT_disjoint_timer_query to measure/scale performance?
 
 SYSTEM:
   - nosleep
@@ -145,6 +144,7 @@ SYSTEM:
       - namespace collisions detection
 
 FEATURE IDEAS:
+  - non t-based seed animation
   - optional increase of bit depth - half float, etc (works?  not obvious is better; half_float = 36193)
   - shader precision optimization? mediump, highp, etc
   - blend maps!! variable interpolation

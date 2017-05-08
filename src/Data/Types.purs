@@ -294,6 +294,12 @@ instance showKernel :: Show Kernel where
 data KMap a = KMap a a a a
 derive instance kmapFunc :: Functor KMap
 
+instance kmapApply :: Apply KMap where
+  apply (KMap fx fy fz fw) (KMap x y z w) = KMap (fx x) (fy y) (fz z) (fw w)
+
+instance kmapApplicative :: Applicative KMap where
+  pure a = KMap a a a a
+
 instance kmapFold :: Foldable KMap where
   foldMap mp (KMap x y z w) = (mp x) <> (mp y) <> (mp z) <> (mp w)
   foldr f = foldrDefault f

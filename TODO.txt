@@ -1,4 +1,6 @@
 PROJECTS:
+  - sqrt(w), etc cause choppy edges of circles???
+
   - System Misc
     - import/clone etc folds of KMaps
 

@@ -4,18 +4,18 @@ import Prelude
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Data.Array (cons, head, tail, foldM, uncons, reverse)
-import Data.Library (apD, apI, dat, delLib, family, getLib, getLibM, getPattern, idx, mD, modLibD, setLib)
+import Data.Foldable (fold, foldMap)
+import Data.Library (apD, apI, delLib, family, getLib, getLibM, idx, mD, modLibD, setLib)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Set (insert) as Set
 import Data.StrMap (insert, values, toUnfoldable)
 import Data.String (Pattern(..)) as S
 import Data.String (split, joinWith)
-import Data.Traversable (for, traverse)
+import Data.Traversable (for, sequence, traverse)
 import Data.Tuple (Tuple(..))
-import Data.Types (EpiS, Library, Module(..), Pattern(..), PatternD, kAcs, kWrt)
+import Data.Types (EpiS, Library, Module(..), Pattern(..), PatternD, kAcs, kNam, kWrt)
 import System (loadLib)
 import Util (fromJustE, log, uuid)
-
 
 ------------------------ FIND ------------------------
 
@@ -47,7 +47,7 @@ findModule' lib mid addr followSwitch = do
     handle mid' = do
       modD    <- mD <$> getLib lib mid "findModule'"
       childId <- loadLib mid' modD.modules "findModule' find child"
-      child@(Module _ childD) <- getLib lib childId "findModule' child"
+      child   <- getLib lib childId "findModule' child"
       addr'   <- fromJustE (tail addr) "shouldn be safe1"
 
       fm <- family lib child
@@ -58,12 +58,9 @@ findModule' lib mid addr followSwitch = do
 
 findAddr :: forall eff h. Library h -> PatternD -> String -> EpiS eff h String
 findAddr lib patternD mid = do
-  m0 <- find' "main" patternD.main
-  m1 <- find' "seed" patternD.seed
-  m2 <- find' "disp" patternD.disp
-  m3 <- find' "vert" patternD.vert
+  r <- fold <$> (sequence $ (find' <$> kNam) <*> (kAcs <*> (pure patternD))) -- madness
 
-  fromJustE (m0 <> m1 <> m2 <> m3) ("orphan module? " <> mid)
+  fromJustE r ("orphan module? " <> mid)
   where
     find' :: String -> String -> EpiS eff h (Maybe String)
     find' addr cid = case (cid == mid) of
@@ -89,7 +86,7 @@ findParent lib patternD mid = do
 
 ------------------------ IMPORTING ------------------------
 
--- import the modules of a pattern into the ref pool
+-- import the modules of a pattern into the ref poolc
 data ImportObj = ImportModule Module | ImportRef String
 importPattern :: forall eff h. Library h -> Pattern -> EpiS eff h Pattern
 importPattern lib pattern@(Pattern _ patternD) = do

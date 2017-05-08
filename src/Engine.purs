@@ -13,13 +13,15 @@ import Control.Monad.Reader.Trans (lift)
 import Control.Monad.ST (writeSTRef, STRef, newSTRef, modifySTRef, readSTRef)
 import Data.Array (concatMap, elemIndex, foldM, length, sort, updateAt)
 import Data.Array (fromFoldable) as A
+import Data.Comp (UniformBindings, fullCompile, newCompST)
 import Data.Int (toNumber)
+import Data.Kernels (Kernel(..), kGet)
 import Data.Library (getEngineConfD, getLib, modLibD)
 import Data.Maybe (Maybe(Nothing, Just), fromMaybe)
 import Data.StrMap (StrMap, empty, fromFoldable, insert, keys, lookup, toUnfoldable, values)
 import Data.Traversable (for, traverse)
 import Data.Tuple (Tuple(Tuple), fst, snd)
-import Data.Types (EngineProfile, EngineST, Epi, EpiS, Kernel(..), Library, Module(..), PatternD, SystemST, UniformBindings, fullCompile, kGet, newCompST)
+import Data.Types (EngineProfile, EngineST, Epi, EpiS, Library, Module(..), PatternD, SystemST)
 import EngineUtil (execGL)
 import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
 import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
@@ -29,8 +31,6 @@ import Graphics.WebGL.Types (DrawMode(Triangles), Uniform(Uniform), WebGLContext
 import Paths (runPath)
 import Texture (initAuxTex, initTexFb, emptyImage)
 import Util (Now, fromJustE, hasAttr, imag, log, real, unsafeGetAttr, unsafeNull, zipI)
-
---  PUBLIC
 
 foreign import getOS :: forall eff. Eff eff String
 foreign import getBrowser :: forall eff. Eff eff String
@@ -140,7 +140,7 @@ executeKernels lib systemST engineST patternD = do
   seedTexFb <- fromJustE engineST.seed     "executeKernels: missing seed tex & fb"
 
   -- execute seed
-  executeKernel lib systemST engineST Seed patternD.seed (snd seedTexFb) empty -- only every n frames
+  executeKernel lib systemST engineST Seed patternD.seed (snd seedTexFb) empty
 
   -- ping-pong buffers
   let tm = if systemST.frameNum `mod` 2 == 0 then fst tex else snd tex

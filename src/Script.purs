@@ -5,16 +5,17 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.ST (readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (foldM, elemIndex, updateAt)
-import Data.Library (dat, getLib, getPatternD, mD, modLibD)
+import Data.Foldable (foldl)
+import Data.Kernels (kAcs)
+import Data.Library (getLib, getPatternD, mD, modLibD)
 import Data.Maybe (Maybe(Just))
 import Data.Set (union)
-import Data.String (joinWith)
-import Data.Types (EpiS, Module(..), Library, PMut(PMut, PMutNone), Script(Script), ScriptRes(ScriptRes), SystemST, ScriptFn)
+import Data.Types (EpiS, Library, Module(..), PMut(PMut, PMutNone), Script(Script), ScriptFn, ScriptRes(ScriptRes), SystemST)
 import ScriptUtil (parseScript, serializeScript)
 import Scripts (null, randomize, pause, incZn)
 import Switch (finishSwitch, switch)
 import System (mFold)
-import Util (fromJustE, inj, log)
+import Util (fromJustE, log)
 
 -- find script fuction given name
 lookupScriptFN :: forall eff h. String -> EpiS eff h (ScriptFn eff h)
@@ -32,16 +33,15 @@ lookupScriptFN n = case n of
 runScripts :: forall eff h. STRef h (SystemST h) -> Library h -> EpiS eff h PMut
 runScripts ssRef lib = do
   patternD <- getPatternD lib "runScripts pattern"
-  r0 <- mFold lib PMutNone patternD.main (runModScripts ssRef lib)
-  r1 <- mFold lib r0 patternD.seed (runModScripts ssRef lib)
-  r2 <- mFold lib r1 patternD.disp (runModScripts ssRef lib)
-  mFold lib r2 patternD.vert (runModScripts ssRef lib)
+  let kernels = kAcs <*> (pure patternD)
+  let sfunc = \x y -> mFold lib y x (runModScripts ssRef lib)
+  let mfolds = pure sfunc <*> kernels
+  foldl (>>=) (pure PMutNone) mfolds
 
 
 runModScripts :: forall eff h. STRef h (SystemST h) -> Library h -> PMut -> String -> EpiS eff h PMut
 runModScripts ssRef lib mut mid = do
   modD <- mD <$> getLib lib mid "mid runScripts"
-
   --lift $ log $ inj "Running scripts [%0]" [joinWith ", " modD.scripts]
   foldM (runScript ssRef lib mid) mut modD.scripts
 

@@ -2,8 +2,6 @@ PROJECTS:
   - sqrt(w), etc cause choppy edges of circles???
 
   - System Misc
-    - import/clone etc folds of KMaps
-
     - clean up src/Data
     - Types & Library not dry
 
@@ -87,6 +85,7 @@ BUGS:
   - number parsing flakey? how so? floating point?
 
 PERF:
+  - only run seed shader every n frames?
   - zoom out performance problem.  unclear what the deal is.  really bad with 1/z(cache something or other?)
   - choppy in safari
   - auto scale performance for framerate or something

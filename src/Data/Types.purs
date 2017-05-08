@@ -2,22 +2,19 @@ module Data.Types where
 
 import Prelude
 import Graphics.WebGL.Raw.Types as GLT
-import Control.Alt (class Alt, (<|>))
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (ExceptT)
 import Control.Monad.ST (ST, STRef)
 import DOM (DOM)
+import Data.Comp (CompOp, CompST)
 import Data.DateTime (DateTime)
-import Data.Foldable (class Foldable, foldlDefault, foldrDefault)
 import Data.Maybe (Maybe(..))
 import Data.Set (Set, union) as S
 import Data.StrMap (StrMap, empty)
 import Data.StrMap.ST (STStrMap)
-import Data.Traversable (class Traversable, sequence, traverseDefault)
 import Data.Tuple (Tuple)
 import Graphics.Canvas (CANVAS)
-import Graphics.WebGL.Types (WebGLFramebuffer, WebGLProgram, WebGLTexture, WebGLContext)
-import Partial.Unsafe (unsafePartial)
+import Graphics.WebGL.Types (WebGLFramebuffer, WebGLTexture, WebGLContext)
 
 type Epi eff a = ExceptT String (Eff (canvas :: CANVAS, dom :: DOM | eff)) a
 type EpiS eff h a = Epi (st :: ST h | eff) a
@@ -282,96 +279,6 @@ defaultUIST = {
     incIdx: empty
 }
 
-
--- KERNELS & COMPILING
-data Kernel = Seed | Main | Disp | Vert
-instance showKernel :: Show Kernel where
-  show Seed = "Seed"
-  show Main = "Main"
-  show Disp = "Disp"
-  show Vert = "Vert"
-
-data KMap a = KMap a a a a
-derive instance kmapFunc :: Functor KMap
-
-instance kmapApply :: Apply KMap where
-  apply (KMap fx fy fz fw) (KMap x y z w) = KMap (fx x) (fy y) (fz z) (fw w)
-
-instance kmapApplicative :: Applicative KMap where
-  pure a = KMap a a a a
-
-instance kmapFold :: Foldable KMap where
-  foldMap mp (KMap x y z w) = (mp x) <> (mp y) <> (mp z) <> (mp w)
-  foldr f = foldrDefault f
-  foldl f = foldlDefault f
-
-instance kmapTrav :: Traversable KMap where
-  sequence (KMap mx my mz mw) =
-    let sl = sequence [mx, my, mz, mw]
-    in (unsafePartial kmp) <$> sl
-    where
-      kmp :: forall a. Partial => Array a -> KMap a
-      kmp [x, y, z, w] = (KMap x y z w)
-  traverse f ta = traverseDefault f ta
-
---instance kmapAlt :: Alt a => Alt (KMap (a b)) where
---  alt (KMap x y z w) (KMap x' y' z' w') = (KMap (x <|> x') (y <|> y') (z <|> z') (w <|> w'))
-
---instance kmapAlt :: Alt a => Alt KMap where
-altK :: forall a x. Alt a => KMap (a x) -> KMap (a x) -> KMap (a x)
-altK (KMap x y z w) (KMap x' y' z' w') = (KMap (x <|> x') (y <|> y') (z <|> z') (w <|> w'))
-infixr 0 altK as <||>
-
-kGet :: forall a. KMap a -> Kernel -> a
-kGet (KMap x _ _ _) Seed = x
-kGet (KMap _ x _ _) Main = x
-kGet (KMap _ _ x _) Disp = x
-kGet (KMap _ _ _ x) Vert = x
-
-kSet :: forall a. KMap a -> Kernel -> a -> KMap a
-kSet (KMap x y z w) Seed x' = (KMap x' y z w)
-kSet (KMap x y z w) Main y' = (KMap x y' z w)
-kSet (KMap x y z w) Disp z' = (KMap x y z' w)
-kSet (KMap x y z w) Vert w' = (KMap x y z w')
-
-kAcs :: forall a r. KMap ({ seed :: a, main :: a, disp :: a, vert :: a | r } -> a)
-kAcs = KMap (_.seed) (_.main) (_.disp) (_.vert)
-
-kWrt :: forall a r. KMap a ->
-        { seed :: a, main :: a, disp :: a, vert :: a | r } ->
-        { seed :: a, main :: a, disp :: a, vert :: a | r }
-kWrt (KMap x y z w) obj = obj { seed = x, main = y, disp = z, vert = w }
-
-kNam :: KMap String
-kNam = KMap "seed" "main" "disp" "vert"
-
-type CompST = { src :: KMap (Maybe String), prog :: KMap (Maybe WebGLProgram),
-                unif :: KMap (Maybe UniformBindings), aux :: KMap (Maybe (Array String))}
-
-altCST :: CompST -> CompST -> CompST
-altCST {src: s0, prog: p0, unif: u0, aux: a0} {src: s1, prog: p1, unif: u1, aux: a1} =
-  {src: s0 <||> s1, prog: p0 <||> p1, unif: u0 <||> u1, aux: a0 <||> a1}
-infixr 0 altCST as <|||>
-
-newCompST :: CompST
-newCompST = { src: KMap Nothing Nothing Nothing Nothing,
-              prog: KMap Nothing Nothing Nothing Nothing,
-              unif: KMap Nothing Nothing Nothing Nothing,
-              aux: KMap Nothing Nothing Nothing Nothing  }
-
-data CompOp = CompShader Kernel | CompProg Kernel | CompFinish | CompStall
-instance showCompOp :: Show CompOp where
-  show (CompShader k) = "CompShader: " <> (show k)
-  show (CompProg k)   = "CompProg: "   <> (show k)
-  show (CompFinish)   = "CompFinish"
-  show (CompStall)    = "CompStall"
-
-fullCompile :: Array CompOp
-fullCompile = [CompShader Seed, CompShader Main, CompShader Disp, CompShader Vert,
-               CompProg Seed, CompProg Main, CompProg Disp, CompFinish]
-
-
-
 -- Script
 data PMut = PMutNone | PMut PatternD (S.Set String)
 instance mutSemi :: Semigroup PMut where
@@ -388,4 +295,3 @@ data Script = Script String Number (StrMap String)
 
 -- MISC
 foreign import data AudioAnalyser :: *
-foreign import data UniformBindings :: *

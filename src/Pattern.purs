@@ -4,7 +4,8 @@ import Prelude
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
 import Data.Array (cons, head, tail, foldM, uncons, reverse)
-import Data.Foldable (fold, foldMap)
+import Data.Foldable (fold)
+import Data.Kernels (kAcs, kNames, kWrt)
 import Data.Library (apD, apI, delLib, family, getLib, getLibM, idx, mD, modLibD, setLib)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Set (insert) as Set
@@ -13,9 +14,9 @@ import Data.String (Pattern(..)) as S
 import Data.String (split, joinWith)
 import Data.Traversable (for, sequence, traverse)
 import Data.Tuple (Tuple(..))
-import Data.Types (EpiS, Library, Module(..), Pattern(..), PatternD, kAcs, kNam, kWrt)
+import Data.Types (EpiS, Library, Module(..), Pattern(..), PatternD)
 import System (loadLib)
-import Util (fromJustE, log, uuid)
+import Util (flog, fromJustE, log, uuid)
 
 ------------------------ FIND ------------------------
 
@@ -30,12 +31,20 @@ findModule lib patternD mid followSwitch = do
       case (uncons $ split (S.Pattern ".") mid) of
         Nothing -> throwError $ "invalid address: " <> mid
         Just {head: addr, tail: rst} -> do
+          -- inefficient, checks all kernels
+          -- let kernels = kAcs <*> (pure patternD)
+          -- let findrs = pure (\x -> findModule' lib x rst followSwitch)
+          -- addrs <- sequence $ findrs <*> kernels
+          -- k <- lift $ readK addr
+          -- pure $ kGet addrs k
+
           case addr of
             "vert" -> findModule' lib patternD.vert rst followSwitch
             "disp" -> findModule' lib patternD.disp rst followSwitch
             "seed" -> findModule' lib patternD.seed rst followSwitch
             "main" -> findModule' lib patternD.main rst followSwitch
             x      -> throwError $ "value should be main, vert, or disp : " <> x
+
 
 
 findModule' :: forall eff h. Library h -> String -> Array String -> Boolean -> EpiS eff h String
@@ -58,9 +67,10 @@ findModule' lib mid addr followSwitch = do
 
 findAddr :: forall eff h. Library h -> PatternD -> String -> EpiS eff h String
 findAddr lib patternD mid = do
-  r <- fold <$> (sequence $ (find' <$> kNam) <*> (kAcs <*> (pure patternD))) -- madness
+  let kernels = kAcs <*> (pure patternD)
+  poss <- sequence $ (find' <$> kNames) <*> kernels
 
-  fromJustE r ("orphan module? " <> mid)
+  fromJustE (fold poss) ("orphan module? " <> mid)
   where
     find' :: String -> String -> EpiS eff h (Maybe String)
     find' addr cid = case (cid == mid) of

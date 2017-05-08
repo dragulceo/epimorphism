@@ -6,7 +6,8 @@ import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
 import Data.Array ((:), filter, partition)
 import Data.DOM.Simple.Element (setInnerHTML)
-import Data.Library (buildSearch, family, getLib, getPatternD, getUIConfD, idM, idx, mD, searchLib)
+import Data.Kernels (Kernel(..), kGet)
+import Data.Library (buildSearch, family, getLib, getPatternD, getUIConfD, idx, searchLib)
 import Data.Library (idx) as L
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.String (Replacement(..), joinWith, trim, split, replace)
@@ -16,7 +17,7 @@ import Data.String.Regex.Flags (noFlags)
 import Data.String.Regex.Unsafe (unsafeRegex)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(Tuple))
-import Data.Types (Component(..), EngineST, EpiS, Kernel(..), Library, Module(..), ModuleD, SystemST, UIST, kGet, moduleSchema)
+import Data.Types (Component(..), EngineST, EpiS, Library, Module(..), ModuleD, SystemST, UIST, moduleSchema)
 import Paths (isConstantPath, runPath)
 import Serialize (showCX, unsafeSerialize)
 import Text.Format (format, precision)
@@ -39,8 +40,8 @@ renderConsole uiST systemST engineST lib = do
     Nothing -> pure unit
 
   dssDiv <- findElt "debugSeed"
-  str0 <- renderModule systemST lib uiConfD.uiCompLib patternD.seed "SEED" Nothing
-  lift $ setInnerHTML str0 dssDiv
+  str1 <- renderModule systemST lib uiConfD.uiCompLib patternD.seed "SEED" Nothing
+  lift $ setInnerHTML str1 dssDiv
 
   dssSDiv <- findElt "debugSeedSrc"
   case (kGet engineST.curST.src Seed) of
@@ -48,8 +49,8 @@ renderConsole uiST systemST engineST lib = do
     Nothing -> pure unit
 
   dsdDiv <- findElt "debugDisp"
-  str1 <- renderModule systemST lib uiConfD.uiCompLib patternD.disp "DISP" Nothing
-  lift $ setInnerHTML str1 dsdDiv
+  str2 <- renderModule systemST lib uiConfD.uiCompLib patternD.disp "DISP" Nothing
+  lift $ setInnerHTML str2 dsdDiv
 
   dsdSDiv <- findElt "debugDispSrc"
   case (kGet engineST.curST.src Disp) of

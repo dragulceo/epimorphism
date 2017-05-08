@@ -2,7 +2,6 @@ module Switch where
 
 import Prelude
 import Control.Monad.Error.Class (throwError)
-import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (modifySTRef, readSTRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (index, length, updateAt) as A
@@ -13,8 +12,8 @@ import Data.Set (singleton)
 import Data.StrMap (insert, fromFoldable, union)
 import Data.Tuple (Tuple(..))
 import Data.Types (Component(..), EpiS, Family(..), Module(..), ModuleD, Section(..), Library, PMut(..), ScriptRes(ScriptRes), ScriptFn)
-import Pattern (CloneRes(CloneRes), purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
-import ScriptUtil (getClone, addScript, purgeScript)
+import Pattern (purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
+import ScriptUtil (CloneRes(CloneRes), getClone, addScript, purgeScript)
 import System (loadLib)
 import Text.Format (precision, format)
 import Util (log, intFromStringE, inj, randInt, numFromStringE, gmod, fromJustE)

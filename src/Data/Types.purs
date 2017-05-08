@@ -328,6 +328,17 @@ kSet (KMap x y z w) Main y' = (KMap x y' z w)
 kSet (KMap x y z w) Disp z' = (KMap x y z' w)
 kSet (KMap x y z w) Vert w' = (KMap x y z w')
 
+kAcs :: forall a r. KMap ({ seed :: a, main :: a, disp :: a, vert :: a | r } -> a)
+kAcs = KMap (_.seed) (_.main) (_.disp) (_.vert)
+
+kWrt :: forall a r. KMap a ->
+        { seed :: a, main :: a, disp :: a, vert :: a | r } ->
+        { seed :: a, main :: a, disp :: a, vert :: a | r }
+kWrt (KMap x y z w) obj = obj { seed = x, main = y, disp = z, vert = w }
+
+kNam :: KMap String
+kNam = KMap "seed" "main" "disp" "vert"
+
 type CompST = { src :: KMap (Maybe String), prog :: KMap (Maybe WebGLProgram),
                 unif :: KMap (Maybe UniformBindings), aux :: KMap (Maybe (Array String))}
 

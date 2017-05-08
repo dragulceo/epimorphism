@@ -11,7 +11,7 @@ import Data.String (joinWith, split, trim)
 import Data.String (Pattern(..)) as S
 import Data.Tuple (Tuple(Tuple))
 import Data.Types (EpiS, Pattern, Library, Script(Script))
-import Pattern (clonePattern, findModule, findAddr, CloneRes(CloneRes))
+import Pattern (importPattern, findModule, findAddr)
 import Text.Format (precision, format)
 import Util (log, inj, numFromStringE, fromJustE)
 
@@ -66,6 +66,7 @@ serializeScript (Script name phase args) =
 
 -- This method is called by scripts that modify the state tree.  we perform modifications in a cloned tree so we can compile asynchronously
 -- I don't like how this modifies ssRef
+data CloneRes = CloneRes String Pattern String
 getClone :: forall eff h. Library h -> Pattern -> String -> EpiS eff h CloneRes
 getClone lib pattern mid = do
   compP <- getLibM lib "$$Comp"
@@ -73,7 +74,7 @@ getClone lib pattern mid = do
     Just pd -> pure pd
     Nothing -> do
       lift $ log "CLONING PATTERN"
-      pattern' <- clonePattern lib pattern
+      pattern' <- importPattern lib pattern -- cloning current pattern
       setLib lib "$$Comp" pattern'
       lift $ log lib
       pure pattern'

@@ -8,11 +8,11 @@ import Control.Monad.Trans.Class (lift)
 import DOM (DOM)
 import Data.Array (null)
 import Data.Int (round, toNumber)
-import Data.Library (dat, getLib, getLibM, getPatternD, getSystemConf, getSystemConfD, getUIConfD, modLibD, setLib)
-import Data.Maybe (Maybe(Nothing, Just), fromMaybe, isNothing)
+import Data.Library (dat, getLib, getLibM, getPattern, getPatternD, getSystemConf, getSystemConfD, getUIConfD, modLibD, setLib)
+import Data.Maybe (Maybe(Nothing, Just), fromMaybe)
 import Data.Set (member)
 import Data.StrMap (lookup)
-import Data.Types (CompOp(..), EngineConf, EngineST, EpiS, Kernel(..), Library(..), PMut(PMutNone, PMut), Section(..), SystemST, UIST, defaultSystemST, kGet)
+import Data.Types (CompOp(..), EngineConf, EngineST, EpiS, Kernel(..), Library(..), PMut(PMutNone, PMut), Section(..), SystemST, UIST, defaultSystemST)
 import Engine (initEngineST, executeKernels)
 import Graphics.Canvas (CANVAS)
 import Layout (updateLayout)
@@ -21,7 +21,7 @@ import Script (runScripts)
 import System (initLibrary)
 import Texture (loadImages)
 import UI (initUIST)
-import Util (Now, enableDebug, getProfileCookie, halt, handleError, isDev, isHalted, log, now, requestAnimationFrame, rndstr, seedRandom, urlArgs)
+import Util (Now, enableDebug, getProfileCookie, handleError, isDev, isHalted, log, now, requestAnimationFrame, rndstr, seedRandom, urlArgs)
 
 host :: String
 host = ""
@@ -91,7 +91,9 @@ initState systemST lib'@(Library libVar) = do
   lift $ loadImages index'.lib index.lib
 
   -- import pattern
-  importPattern lib
+  pattern  <- getPattern lib "importPattern"
+  pattern' <- importPattern lib pattern
+  setLib lib systemConfD.pattern pattern'
 
   lift $ log "AFTER IMPORT"
   lift $ log lib

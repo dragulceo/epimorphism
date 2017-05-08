@@ -13,7 +13,7 @@ import Data.String (stripPrefix)
 import Data.String (Pattern(..)) as S
 import Data.Traversable (for, traverse)
 import Data.Tuple (fst, Tuple(Tuple))
-import Data.Types (CompOp(..), Component(..), EngineConf(..), EngineConfD, EngineProfile, EngineST, EpiS, KMap(..), Kernel(..), Library, Pattern(..), PatternD, SystemST, UniformBindings, kGet, kSet, newCompST, (<||>), (<|||>))
+import Data.Types (CompOp(..), Component(..), EngineConf(..), EngineConfD, EngineProfile, EngineST, EpiS, KMap(..), Kernel(..), Library, Pattern(..), PatternD, SystemST, UniformBindings, kAcs, kGet, kSet, newCompST, (<||>), (<|||>))
 import EngineUtil (execGL)
 import Graphics.WebGL.Methods (vertexAttribPointer, enableVertexAttribArray, bindBuffer, bufferData, createBuffer)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram, linkProgram)
@@ -32,14 +32,13 @@ compileShaders esRef lib full = do
   currentP@(Pattern _ currentD') <- getPattern lib "patternD compileShaders"
   compP@(Pattern _ compD) <- fromMaybe currentP <$> getLibM lib "$$Comp"
 
-  let acs = KMap (_.seed) (_.main) (_.disp) (_.vert)
   let cST = es.compST
   case (uncons es.compQueue) of
     Just {head: op, tail: rst} -> do
       lift $ log (show op)
       done <- case op of
         CompShader kernel -> do
-          Tuple src aux <- parseShader lib (kGet acs kernel compD) (globalSubs engineConfD es.profile)
+          Tuple src aux <- parseShader lib (kGet kAcs kernel compD) (globalSubs engineConfD es.profile)
           let cST' = cST { src = (kSet cST.src kernel (Just src)),
                            aux = (kSet cST.aux kernel (Just aux))}
           lift $ modifySTRef esRef _ {compST = cST'}
@@ -72,7 +71,7 @@ compileShaders esRef lib full = do
           lift $ modifySTRef esRef _ {curST = newST, currentImages = all_aux}
 
           -- clean old pattern
-          for acs \accs ->
+          for kAcs \accs ->
             when (accs currentD' /= accs compD) do
               purgeModule lib (accs currentD')
 

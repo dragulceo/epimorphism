@@ -10,9 +10,9 @@ import Data.Set (insert) as Set
 import Data.StrMap (insert, values, toUnfoldable)
 import Data.String (Pattern(..)) as S
 import Data.String (split, joinWith)
-import Data.Traversable (traverse)
+import Data.Traversable (for, traverse)
 import Data.Tuple (Tuple(..))
-import Data.Types (EpiS, Module(..), Pattern(..), PatternD, Library)
+import Data.Types (EpiS, Library, Module(..), Pattern(..), PatternD, kAcs, kWrt)
 import System (loadLib)
 import Util (fromJustE, log, uuid)
 
@@ -91,22 +91,12 @@ findParent lib patternD mid = do
 
 -- import the modules of a pattern into the ref pool
 data ImportObj = ImportModule Module | ImportRef String
-importPattern :: forall eff h. Library h -> EpiS eff h Unit
-importPattern lib =  do
-  pattern <- getPattern lib "importPattern"
-  let patternD = dat pattern
+importPattern :: forall eff h. Library h -> Pattern -> EpiS eff h Pattern
+importPattern lib pattern@(Pattern _ patternD) = do
+  mod <- for kAcs \accs ->
+    importModule lib (ImportRef (accs patternD))
 
-  -- import all modules
-  --lift $ log patternD
-  main <- importModule lib (ImportRef patternD.main)
-  disp <- importModule lib (ImportRef patternD.disp)
-  seed <- importModule lib (ImportRef patternD.seed)
-  vert <- importModule lib (ImportRef patternD.vert)
-
-  modLibD lib pattern _ {main = main, disp = disp, seed = seed, vert = vert}
-
-  pure unit
-
+  pure $ apD pattern (kWrt mod)
 
 -- import a module into the ref pool
 importModule :: forall eff h. Library h -> ImportObj -> EpiS eff h String
@@ -173,15 +163,3 @@ replaceModule lib mid subN cid obj = do
   modLibD lib mod _ {modules = insert subN n' modD.modules}
 
   pure n'
-
-
---  slightly janky
-data CloneRes = CloneRes String Pattern String
-clonePattern :: forall eff h. Library h -> Pattern -> EpiS eff h Pattern
-clonePattern lib pattern@(Pattern _ patternD) = do
-  main' <- importModule lib (ImportRef patternD.main)
-  disp' <- importModule lib (ImportRef patternD.disp)
-  seed' <- importModule lib (ImportRef patternD.seed)
-  vert' <- importModule lib (ImportRef patternD.vert)
-
-  pure $ apD pattern _ {main = main', disp = disp', vert = vert', seed = seed'}

@@ -1,7 +1,5 @@
 PROJECTS:
   - System Misc
-    - menu available in dev
-    - mobile/browser detection in main
     - import/clone etc folds of KMaps
 
     - clean up src/Data
@@ -20,18 +18,23 @@ PROJECTS:
     - remove serialize.rb
 
   - Main Pattern Improvements
+    - more randomized start (just set t_phase = ??)
     - too much darkness/desaturation
     - smooth mask has artifacts
     - play with pallets a bit more. inc_sc, lgv, spread wave size, etc
-    - geom_2, geom_7 ugly
     - make sure t's are all good/scaled correctly
     - keep (val)contrast around better
     - w * w in seed val?
-    - there are some line artifacts in some images(geom3, islamic)
-    - better resolution images? make sure all load
+    - images
+      - geom_2, geom_7 ugly
+      - there are some line artifacts in some images(geom3, islamic)
+      - better resolution images? make sure all load
+      - some just might not look good
     - rewrite seed.w, seed.a to not require recompile
 
   - UI
+    - refactor layout
+      - menu available in dev
     - basic idea is that all db & data modifications happen through UI
     - but we need to completely rework how the ui happens.
       - dont want to have to pause to update tree, that's kind of ghetto
@@ -88,6 +91,7 @@ PERF:
     - EXT_disjoint_timer_query to measure/scale performance?
 
 SYSTEM:
+  - mobile/browser detection in main?  use to determine enging conf?
   - nosleep
   - stick button in some modes to enable dev(for mobile)
   - put key handlers into a text file -  a - scr main.application.t incZn idx:0 ofs:1

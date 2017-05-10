@@ -11,7 +11,7 @@ import Data.Set (Set, subset, isEmpty, intersection, fromFoldable) as S
 import Data.StrMap (StrMap, freezeST, fromFoldable, insert, isSubmap, values)
 import Data.StrMap.ST (STStrMap, delete, peek, poke)
 import Data.Tuple (Tuple)
-import Data.Types (CodeBlock, Component(Component), ComponentRef, EngineConf(EngineConf), EngineConfD, EpiS, Family(Family), FamilyRef, Image(Image), ImageRef, Include, Index, Module(..), ModuleD, ModuleRef, Path, Pattern(Pattern), PatternD, Script, Section(Section), SystemConf(SystemConf), SystemConfD, UIConf(UIConf), UIConfD, ComponentD, Library(..))
+import Data.Types (Component(Component), ComponentD, ComponentRef, EngineConf(EngineConf), EngineConfD, EpiS, Family(Family), Image(Image), Index, Library(Library), Module(Module), ModuleD, Pattern(Pattern), PatternD, Section(Section), SystemConf(SystemConf), SystemConfD, UIConf(UIConf), UIConfD)
 import Util (fromJustE)
 
 class DataTable a ad | a -> ad where
@@ -146,18 +146,6 @@ instance dtSection :: DataTable Section {
   apI     (Section ix dt) mut = Section (mut ix) dt
   apD     (Section ix dt) mut = Section ix (mut dt)
   sidx _ = pure <<< idx
-
-type Ref a = String
-type SCRef = Ref SystemConf
-type ECRef = Ref EngineConf
-type UCRef = Ref UIConf
-type PRef = Ref Pattern
-type CRef = Ref Component
-type FRef = Ref Family
-type MRef = Ref Module
-type IRef = Ref Image
-type SRef = Ref Section
-
 
 -- LIBRARY CRUD
 getLibM :: forall a ad eff h. (DataTable a ad) => Library h -> String -> EpiS eff h (Maybe a)

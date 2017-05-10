@@ -1,21 +1,16 @@
 PROJECTS:
-  - sqrt(w), etc cause choppy edges of circles???
-
-  - System Misc
-    - clean up src/Data
-    - Types & Library not dry
-
+  - Misc
     - switching modules show up in ui?
     - kill paths btn
-
-    - some kind of error/bug reporting on website
-
+    - sqrt(w), etc cause choppy edges of circles???
 
   - Saving
     - periodicly take snapshots, at a frequeny.  useful for debugging or replay
     - take snapshot of flattened shader code?
     - load whole patterns
     - remove serialize.rb
+
+  - Sort backlog
 
   - Main Pattern Improvements
     - more randomized start (just set t_phase = ??)
@@ -31,6 +26,8 @@ PROJECTS:
       - better resolution images? make sure all load
       - some just might not look good
     - rewrite seed.w, seed.a to not require recompile
+
+  - Audio Responsiveness
 
   - UI
     - refactor layout
@@ -68,6 +65,7 @@ PROJECTS:
     - Scenario? (https://itunes.apple.com/us/app/scenario/id423444193?mt=12)
     - Chrome Experiments
     - Chrome Web store (https://developer.chrome.com/webstore/get_started_simple)
+    - Chrome themes
 
 
 -------------------------------- BACKLOG --------------------------------
@@ -92,6 +90,10 @@ PERF:
     - EXT_disjoint_timer_query to measure/scale performance?
 
 SYSTEM:
+  - some kind of error/bug reporting on website
+  - Types & Library not dry
+  - images & sections aren't quite LTypes yet
+  - Type Refs(PatternRef..) & other newtypes
   - mobile/browser detection in main?  use to determine enging conf?
   - nosleep
   - stick button in some modes to enable dev(for mobile)

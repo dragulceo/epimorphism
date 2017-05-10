@@ -8,10 +8,11 @@ import Data.Array (index, length, updateAt) as A
 import Data.Library (apD, buildSearch, component, dat, family, getLib, getPattern, idM, mD, modLibD, searchLib)
 import Data.Library (idx) as L
 import Data.Maybe (Maybe(Nothing), fromMaybe)
+import Data.Script (PMut(..), ScriptFn, ScriptRes(..))
 import Data.Set (singleton)
 import Data.StrMap (insert, fromFoldable, union)
 import Data.Tuple (Tuple(..))
-import Data.Types (Component(..), EpiS, Family(..), Module(..), ModuleD, Section(..), Library, PMut(..), ScriptRes(ScriptRes), ScriptFn)
+import Data.Types (Component(..), EpiS, Family(..), Module(..), ModuleD, Section(..), Library)
 import Pattern (purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
 import ScriptUtil (CloneRes(CloneRes), getClone, addScript, purgeScript)
 import System (loadLib)

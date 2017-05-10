@@ -7,7 +7,8 @@ import Data.DOM.Simple.Element (classRemove, classAdd, setInnerHTML, setStyleAtt
 import Data.DOM.Simple.Window (innerHeight, innerWidth, document, globalWindow)
 import Data.Library (getUIConfD)
 import Data.Maybe (Maybe(Just, Nothing))
-import Data.Types (EpiS, Library, SystemST, UIST, EngineST)
+import Data.System (SystemST, UIST, EngineST)
+import Data.Types (EpiS, Library)
 import UIUtil (findElt)
 
 initLayout :: forall eff h. UIST -> Library h -> EpiS eff h Unit

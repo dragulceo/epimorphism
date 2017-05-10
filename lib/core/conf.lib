@@ -22,7 +22,7 @@ pattern prod
 
 ### SystemConf
 id proddev
-engineConf dev
+engineConf default
 uiConf dev
 pattern prod
 debug true

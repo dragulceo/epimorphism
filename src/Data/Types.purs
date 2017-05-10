@@ -1,20 +1,15 @@
 module Data.Types where
 
-import Prelude
-import Graphics.WebGL.Raw.Types as GLT
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except.Trans (ExceptT)
-import Control.Monad.ST (ST, STRef)
+import Control.Monad.ST (ST)
 import DOM (DOM)
-import Data.Comp (CompOp, CompST)
 import Data.DateTime (DateTime)
-import Data.Maybe (Maybe(..))
-import Data.Set (Set, union) as S
-import Data.StrMap (StrMap, empty)
+import Data.Maybe (Maybe)
+import Data.Set (Set) as S
+import Data.StrMap (StrMap)
 import Data.StrMap.ST (STStrMap)
-import Data.Tuple (Tuple)
 import Graphics.Canvas (CANVAS)
-import Graphics.WebGL.Types (WebGLFramebuffer, WebGLTexture, WebGLContext)
 
 type Epi eff a = ExceptT String (Eff (canvas :: CANVAS, dom :: DOM | eff)) a
 type EpiS eff h a = Epi (st :: ST h | eff) a
@@ -23,19 +18,13 @@ data SchemaEntryType = SE_St | SE_N | SE_I | SE_B | SE_S | SE_A_St | SE_A_Cx | S
 data SchemaEntry = SchemaEntry SchemaEntryType String
 type Schema = Array SchemaEntry
 
--- LIBRARY DATA TYPES
-newtype FamilyRef    = FamilyRef String
-newtype ModuleRef    = ModuleRef String
-newtype ComponentRef = ComponentRef String
-newtype PatternRef   = PatternRef String
-newtype ImageRef     = ImageRef String
-
---newtype Script = Script String
-newtype Path = Path String
-newtype Include = Include String
-newtype CodeBlock = CodeBlock String
-
-data Snapshot = Snapshot DateTime String
+class DataTable a ad | a -> ad where
+  libProj :: forall h. Library h -> STStrMap h a
+  idx :: a -> Index
+  dat :: a -> ad
+  apI :: a -> (Index -> Index) -> a
+  apD :: a -> (ad -> ad) -> a
+  sidx :: forall eff h. Library h -> a -> EpiS eff h Index
 
 type Index = {
     id     :: String
@@ -219,79 +208,17 @@ data Library h = Library {
   , system        :: Maybe String
 }
 
--- SYSTEM STATE
-type SystemST h = {
-    lastTimeMS :: Maybe Number
-  , frameNum :: Int
-  , lastFpsTimeMS :: Maybe Number
-  , fps :: Maybe Int
-  , t :: Number
-  , paused :: Boolean
-  , next :: Boolean
-  , pauseAfterSwitch :: Boolean
-  , version :: String
-}
 
-defaultSystemST :: forall h. SystemST h
-defaultSystemST = {
-    lastTimeMS: Nothing
-  , frameNum: 0
-  , lastFpsTimeMS: Nothing
-  , fps: Nothing
-  , t: 0.0
-  , paused: false
-  , next: false
-  , pauseAfterSwitch: false
-  , version: "1.0.0"
-}
+-- LIBRARY DATA TYPES
+newtype FamilyRef    = FamilyRef String
+newtype ModuleRef    = ModuleRef String
+newtype ComponentRef = ComponentRef String
+newtype PatternRef   = PatternRef String
+newtype ImageRef     = ImageRef String
 
-type EngineProfile = {
-    os                :: String
-  , browser           :: String
-  , is_mobile         :: Boolean
-  , angle             :: Boolean
-  , max_texture_units :: Int
-  , max_frag_uniforms :: Int
-  , max_texture_size  :: Int
-}
+--newtype Script = Script String
+newtype Path = Path String
+newtype Include = Include String
+newtype CodeBlock = CodeBlock String
 
-type EngineST = {
-    tex :: Maybe (Tuple WebGLTexture WebGLTexture)
-  , fb :: Maybe (Tuple WebGLFramebuffer WebGLFramebuffer)
-  , seed :: Maybe (Tuple WebGLTexture WebGLFramebuffer)
-  , auxTex :: Maybe (Array WebGLTexture)
-  , currentImages :: Array String
-  , audio :: Maybe (Tuple WebGLTexture AudioAnalyser)
-  , ctx :: WebGLContext
-  , empty :: GLT.TexImageSource
-  , compQueue :: Array CompOp
-  , curST  :: CompST
-  , compST :: CompST
-  , profile :: EngineProfile
-}
-
-type UIST = {
-    incIdx :: StrMap Int
-}
-
-defaultUIST :: UIST
-defaultUIST = {
-    incIdx: empty
-}
-
--- Script
-data PMut = PMutNone | PMut PatternD (S.Set String)
-instance mutSemi :: Semigroup PMut where
-  append (PMut p0 s0) (PMut p1 s1) = PMut p0 (S.union s0 s1) -- sketchy if p0 != p1
-  append PMutNone x = x
-  append x PMutNone = x
-
--- sys -> time -> mid -> self -> args -> res
-type ScriptFn eff h = STRef h (SystemST h) -> Library h -> Number -> String -> String -> StrMap String -> EpiS eff h ScriptRes
-
-data ScriptConfig = ScriptConfig String
-data ScriptRes = ScriptRes PMut (Maybe (StrMap String)) -- possible new root, possibly updated state
-data Script = Script String Number (StrMap String)
-
--- MISC
-foreign import data AudioAnalyser :: *
+data Snapshot = Snapshot DateTime String

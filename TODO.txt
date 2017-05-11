@@ -1,13 +1,10 @@
 PROJECTS:
-  - live view of library in console(or js variable?)
-
   - Misc
-    - switching modules show up in ui?
-    - kill paths btn
     - sqrt(w), etc cause choppy edges of circles???
 
     - rethink how famaily/sidx is working (independent searchable typeclass?)
     - clean up library & serialize
+
 
   - Saving
     - periodicly take snapshots, at a frequeny.  useful for debugging or replay
@@ -95,6 +92,7 @@ PERF:
     - EXT_disjoint_timer_query to measure/scale performance?
 
 SYSTEM:
+  - separate live, reference libraries?
   - some kind of error/bug reporting on website
   - Types & Library not dry
   - images & sections aren't quite LTypes yet

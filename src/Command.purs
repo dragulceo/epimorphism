@@ -8,21 +8,23 @@ import Control.Monad.Except.Trans (lift)
 import Control.Monad.ST (STRef, ST, modifySTRef, readSTRef)
 import DOM (DOM)
 import Data.Array (uncons, updateAt, length)
-import Data.Library (buildSearch, getEngineConf, getLib, getLibM, getPatternD, getSystemConf, getUIConf, getUIConfD, idM, modLibD, modLibD', searchLib)
+import Data.Library (buildSearch, getEngineConf, getLib, getLibM, getPatternD, getSystemConf, getUIConf, getUIConfD, idM, modLibD, modLibD', searchLib, dat)
 import Data.Maybe (Maybe(..))
-import Data.StrMap (insert)
+import Data.StrMap (fromFoldable, insert, toUnfoldable)
 import Data.String (joinWith, split)
 import Data.String (Pattern(..)) as S
-import Data.Traversable (for)
 import Data.System (EngineST, SystemST, UIST)
+import Data.Traversable (for)
+import Data.Tuple (Tuple(..), fst)
 import Data.Types (EngineConf, EpiS, Library, Module(..), PatternD)
 import Engine (initEngineST)
 import Graphics.Canvas (CANVAS)
 import Layout (updateLayout, initLayout)
+import Paths (runPath)
 import Pattern (findModule)
 import ScriptUtil (addScript)
 import Texture (clearFB)
-import Util (Now, cxFromStringE, enableDebug, halt, handleError, intFromStringE, log, numFromStringE, replaceAll)
+import Util (Now, cxFromStringE, enableDebug, halt, handleError, intFromStringE, log, numFromStringE, real, replaceAll)
 
 foreign import saveCanvas :: forall eff. Eff eff Unit
 
@@ -65,6 +67,22 @@ command usRef esRef ssRef lib msg = handleError do
 
             for (modules :: Array Module) \m -> do
               modLibD lib m _ {scripts = []}
+
+            pure unit
+          "killPaths" -> do
+            let sch = buildSearch ["live"] [] []
+            modules <- searchLib lib sch
+
+            for (modules :: Array Module) \m -> do
+              zn <- for (dat m).zn \val -> do
+                show <$> fst <$> runPath systemST.t val
+
+              let unf = toUnfoldable (dat m).par :: Array (Tuple String String)
+              par' <- for unf \(Tuple n val) -> do
+                Tuple n <$> show <$> real <$> fst <$> runPath systemST.t val
+
+              let par = fromFoldable par'
+              modLibD lib m _ { zn = zn, par = par}
 
             pure unit
           "scr" -> do

@@ -25,7 +25,7 @@ foreign import data Now :: !
 -- simple js functions
 foreign import enableDebug :: forall eff. Eff eff Unit
 foreign import unsafeNull :: forall a. a
-foreign import stick :: forall a b. a -> b
+foreign import glob :: forall a eff. String -> a -> Eff eff Unit
 foreign import unsafeEval :: forall eff. String -> Eff eff Unit
 foreign import requestAnimationFrame :: forall eff a. (a -> Eff eff Unit) -> a -> Eff eff Unit
 foreign import now :: forall eff. Eff (now :: Now | eff) Number

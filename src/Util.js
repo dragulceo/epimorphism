@@ -118,10 +118,13 @@ exports.requestAnimationFrame = function(func){
   };
 };
 
-exports.stick = function stick(x) {
-  $.stick = x;
+exports.glob = function(name) {
+  return function(obj) {
+    return function() {
+      window[name] = obj;
+    }
+  }
 }
-
 
 exports.now = function () {
   return performance.now();

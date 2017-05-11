@@ -25,7 +25,7 @@ import Script (runScripts)
 import System (initLibrary)
 import Texture (loadImages)
 import UI (initUIST)
-import Util (Now, enableDebug, getProfileCookie, handleError, isDev, isHalted, log, now, requestAnimationFrame, rndstr, seedRandom, urlArgs)
+import Util (Now, enableDebug, getProfileCookie, glob, handleError, isDev, isHalted, log, now, requestAnimationFrame, rndstr, seedRandom, urlArgs)
 
 host :: String
 host = ""
@@ -181,6 +181,7 @@ animate state = handleError do
   patternD'  <- getPatternD lib "animate pattern'"
 
   unless systemST''.paused do
+    lift $ glob "library" lib
     executeKernels lib systemST'' engineST'' patternD'
 
   t4 <- lift $ now

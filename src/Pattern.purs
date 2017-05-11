@@ -111,7 +111,10 @@ importModule lib obj = do
   id <- lift $ uuid
   -- find module
   mod@(Module iD modD) <- case obj of
-    ImportModule m -> pure m
+    ImportModule m -> do
+      case (idx m).orig of
+        "" -> pure $ apI m _ {orig = (idx m).id}
+        _ -> pure $ m
     ImportRef n -> do
       m@(Module _ modD) <- getLib lib n "importModule"
       --lift $ log $ "importing n: " <> n

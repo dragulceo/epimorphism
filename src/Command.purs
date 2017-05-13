@@ -24,7 +24,7 @@ import Paths (runPath)
 import Pattern (findModule)
 import ScriptUtil (addScript)
 import Texture (clearFB)
-import Util (Now, cxFromStringE, enableDebug, halt, handleError, intFromStringE, log, numFromStringE, real, replaceAll)
+import Util (Now, enableDebug, halt, handleError, intFromStringE, log, real, replaceAll)
 
 foreign import saveCanvas :: forall eff. Eff eff Unit
 

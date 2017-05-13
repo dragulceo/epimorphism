@@ -1,7 +1,8 @@
 PROJECTS:
-  - Misc
-    - sqrt(w), etc cause choppy edges of circles???
+  - rebuild monad transformer stack
+  - KMap a monad?  sized-vector?
 
+  - Misc
     - rethink how famaily/sidx is working (independent searchable typeclass?)
     - clean up library & serialize
 
@@ -15,6 +16,7 @@ PROJECTS:
   - Sort backlog
 
   - Main Pattern Improvements
+    - redo wca?
     - more randomized start (just set t_phase = ??)
     - too much darkness/desaturation
     - smooth mask has artifacts
@@ -59,6 +61,7 @@ PROJECTS:
     - db requests
 
   - exposure
+    - PureScript Hack Session
     - codame?
     - priceless?
     - burningman? - probably not
@@ -92,6 +95,7 @@ PERF:
     - EXT_disjoint_timer_query to measure/scale performance?
 
 SYSTEM:
+  - switch to psc package
   - separate live, reference libraries?
   - some kind of error/bug reporting on website
   - Types & Library not dry

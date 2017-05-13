@@ -74,7 +74,7 @@ renderModule systemST lib modLib mid title pid = do
     _ -> pure ""
 
   -- parse other lines
-  let rst' = filter (\x -> x /= "") rst
+  let rst' = filter ((/=) "") rst
   let idLine = "id " <> mid
   lines' <- traverse (handleLine modD) (idLine : rst')
   let res = joinWith "" $ lines'

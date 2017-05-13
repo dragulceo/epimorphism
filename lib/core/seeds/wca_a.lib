@@ -24,7 +24,7 @@ id alpha_sqrt
 component alpha
 flags {lib}
 par {alpha:1.0}
-sub {a_exp:a * |alpha|}
+sub {a_exp:sqrt(a) * |alpha|}
 
 ###Module
 id alpha_linear

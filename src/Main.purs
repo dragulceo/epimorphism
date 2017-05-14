@@ -6,14 +6,13 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import Control.Monad.Trans.Class (lift)
 import DOM (DOM)
-import Data.Array (null)
+import Data.Array (concatMap, null)
 import Data.Comp (CompOp(..))
 import Data.Int (round, toNumber)
-import Data.Kernels (Kernel(..))
+import Data.Kernels (Kernel)
 import Data.Library (dat, getLib, getLibM, getPattern, getPatternD, getSystemConf, getSystemConfD, getUIConfD, modLibD, setLib)
 import Data.Maybe (Maybe(Nothing, Just), fromMaybe)
-import Data.Script (PMut(..))
-import Data.Set (member)
+import Data.Set (toUnfoldable)
 import Data.StrMap (lookup)
 import Data.System (EngineST, SystemST, UIST, defaultSystemST)
 import Data.Types (EngineConf, EpiS, Library(..), Section(..))
@@ -149,16 +148,11 @@ animate state = handleError do
   t1 <- lift $ now
   -- run scripts if not compiling
   when (null engineST.compQueue) do
-    sRes <- runScripts ssRef lib
-    case sRes of -- put this logic somewhere else
-      PMutNone -> pure unit
-      PMut _ new -> do
-        let queue = (if (member "main" new) then [CompShader Main, CompProg Main] else []) <>
-                    (if (member "seed" new) then [CompShader Seed, CompProg Seed] else []) <>
-                    (if (member "disp" new) then [CompShader Disp, CompProg Disp] else []) <>
-                    [CompFinish]
-
-        lift $ modifySTRef esRef _ {compQueue = queue} # void
+    kernels <- runScripts ssRef lib
+    let kernels' = toUnfoldable kernels :: Array Kernel
+    let queue = concatMap (\k -> [CompShader k, CompProg k]) kernels'
+    unless (null queue) do
+      lift $ modifySTRef esRef _ {compQueue = queue <> [CompFinish]} # void
 
   systemST' <- lift $ readSTRef ssRef
   engineST' <- lift $ readSTRef esRef

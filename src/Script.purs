@@ -6,11 +6,11 @@ import Control.Monad.ST (readSTRef, STRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (foldM, elemIndex, updateAt)
 import Data.Foldable (foldl)
-import Data.Kernels (kAcs)
+import Data.Kernels (Kernel, kAcs)
 import Data.Library (getLib, getPatternD, mD, modLibD)
 import Data.Maybe (Maybe(Just))
-import Data.Script (Script(..), PMut(PMut, PMutNone), ScriptFn, ScriptRes(ScriptRes))
-import Data.Set (union)
+import Data.Script (Script(..), ScriptFn, ScriptRes(ScriptRes))
+import Data.Set (Set, empty)
 import Data.System (SystemST)
 import Data.Types (EpiS, Library, Module(..))
 import ScriptUtil (parseScript, serializeScript)
@@ -32,24 +32,24 @@ lookupScriptFN n = case n of
 
 
 -- execute all scripts & script pool. abort as soon as something mutates the pattern
-runScripts :: forall eff h. STRef h (SystemST h) -> Library h -> EpiS eff h PMut
+runScripts :: forall eff h. STRef h (SystemST h) -> Library h -> EpiS eff h (Set Kernel)
 runScripts ssRef lib = do
   patternD <- getPatternD lib "runScripts pattern"
   let kernels = kAcs <*> (pure patternD)
   let sfunc = \x y -> mFold lib y x (runModScripts ssRef lib)
   let mfolds = pure sfunc <*> kernels
-  foldl (>>=) (pure PMutNone) mfolds
+  foldl (>>=) (pure empty) mfolds
 
 
-runModScripts :: forall eff h. STRef h (SystemST h) -> Library h -> PMut -> String -> EpiS eff h PMut
-runModScripts ssRef lib mut mid = do
+runModScripts :: forall eff h. STRef h (SystemST h) -> Library h -> (Set Kernel) -> String -> EpiS eff h (Set Kernel)
+runModScripts ssRef lib kernels mid = do
   modD <- mD <$> getLib lib mid "mid runScripts"
   --lift $ log $ inj "Running scripts [%0]" [joinWith ", " modD.scripts]
-  foldM (runScript ssRef lib mid) mut modD.scripts
+  foldM (runScript ssRef lib mid) kernels modD.scripts
 
 
-runScript :: forall eff h. STRef h (SystemST h) -> Library h -> String -> PMut -> String -> EpiS eff h PMut
-runScript ssRef lib mid pmut scr = do
+runScript :: forall eff h. STRef h (SystemST h) -> Library h -> String -> (Set Kernel) -> String -> EpiS eff h (Set Kernel)
+runScript ssRef lib mid kernels scr = do
   --lift $ log $ "Running Script : " <> scr <> " : for " <> mid
   --lift $ log x
   (Script name phase args) <- parseScript scr
@@ -58,9 +58,7 @@ runScript ssRef lib mid pmut scr = do
   let t' = systemST.t - phase
 
   mod@(Module _ modD) <- getLib lib mid "mid! runScript"
-  --lift $ log mod
   idx <- fromJustE (elemIndex scr modD.scripts) "script not found m"
-  --lift $ log $ inj "idx %0 in [%1]" [(show idx), (joinWith ", " modD.scripts)]
 
   (ScriptRes mut update) <- fn ssRef lib t' mid scr args -- run script
   case update of
@@ -73,11 +71,4 @@ runScript ssRef lib mid pmut scr = do
       modLibD lib mod _ {scripts = scripts'}
     _ -> pure unit
 
-  case pmut of
-    PMutNone -> pure mut
-    PMut pat res -> do
-      case mut of
-        PMutNone -> pure pmut
-        PMut mutP mutS -> pure $ PMut pat (union res mutS)
-
---runScript _ _ _ x _ = pure x
+  pure $ mut <> kernels

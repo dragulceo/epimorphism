@@ -7,8 +7,11 @@ import Data.Maybe (Maybe(..))
 import Data.Traversable (class Traversable, sequence, traverseDefault)
 import Partial.Unsafe (unsafePartial)
 
--- KERNELS & COMPILING
+-- KERNELS
 data Kernel = Seed | Main | Disp | Vert
+derive instance kEw  :: Eq Kernel
+derive instance kOrd :: Ord Kernel
+
 instance showKernel :: Show Kernel where
   show Seed = "Seed"
   show Main = "Main"
@@ -26,6 +29,7 @@ readK "Vert" = Just Vert
 readK "vert" = Just Vert
 readK _ = Nothing
 
+-- KMaps
 data KMap a = KMap a a a a
 derive instance kmapFunc :: Functor KMap
 

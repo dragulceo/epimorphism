@@ -5,11 +5,12 @@ import Control.Monad.Error.Class (throwError)
 import Control.Monad.ST (modifySTRef, readSTRef)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (index, length, updateAt) as A
+import Data.Kernels (readK)
 import Data.Library (apD, buildSearch, component, dat, family, getLib, getPattern, idM, mD, modLibD, searchLib)
 import Data.Library (idx) as L
 import Data.Maybe (Maybe(Nothing), fromMaybe)
-import Data.Script (PMut(..), ScriptFn, ScriptRes(..))
-import Data.Set (singleton)
+import Data.Script (ScriptFn, ScriptRes(..))
+import Data.Set (empty, singleton)
 import Data.StrMap (insert, fromFoldable, union)
 import Data.Tuple (Tuple(..))
 import Data.Types (Component(..), EpiS, Family(..), Module(..), ModuleD, Section(..), Library)
@@ -99,7 +100,8 @@ switch ssRef lib t midPre self dt = do
   -- switch! (should we inline this?)
   switchModules lib systemST.t rootId childN nxtId spd
 
-  pure $ ScriptRes (PMut (dat pattern) (singleton newRootN)) Nothing
+  kernel <- fromJustE (readK newRootN) "switch: unknown kernel name"
+  pure $ ScriptRes (singleton kernel) Nothing
 
 
 getMutator :: forall eff h. String -> String -> String -> EpiS eff h (ModuleD -> ModuleD)
@@ -189,6 +191,7 @@ finishSwitch ssRef lib t rootIdPre self dt = do
         pure unit
 
       lift $ log "Finish Switch"
-      pure $ ScriptRes (PMut (dat pattern) (singleton newRootN)) Nothing
+      kernel <- fromJustE (readK newRootN) "finishSwitch: unknown kernel name"
+      pure $ ScriptRes (singleton kernel) Nothing
     _ -> do
-      pure $ ScriptRes PMutNone Nothing
+      pure $ ScriptRes empty Nothing

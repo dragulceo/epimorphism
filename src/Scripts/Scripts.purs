@@ -7,7 +7,8 @@ import Data.Array (updateAt, index)
 import Data.Complex (Cartesian(..), outCartesian, inPolar, Polar(Polar))
 import Data.Library (dat, getLib, modLibD)
 import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
-import Data.Script (PMut(PMutNone), ScriptRes(ScriptRes), ScriptFn)
+import Data.Script (ScriptRes(ScriptRes), ScriptFn)
+import Data.Set (empty)
 import Data.StrMap (insert, member)
 import Data.Tuple (Tuple(..))
 import Data.Types (Module)
@@ -19,14 +20,14 @@ import Util (clickPause, cxFromString, inj, intFromStringE, log, numFromStringE)
 
 null :: forall eff h. ScriptFn eff h
 null ssRef lib t mid self dt = do
-  pure $ ScriptRes PMutNone Nothing
+  pure $ ScriptRes empty Nothing
 
 -- get rid of this abomination
 pause :: forall eff h. ScriptFn eff h
 pause ssRef lib t mid self dt = do
   lift $ clickPause
   purgeScript lib mid self
-  pure $ ScriptRes PMutNone Nothing
+  pure $ ScriptRes empty Nothing
 
 -- increment Zn
 incZn :: forall eff h. ScriptFn eff h
@@ -72,7 +73,7 @@ incZn ssRef lib t mid self dt = do
   -- remove self
   purgeScript lib mid self
 
-  pure $ ScriptRes PMutNone Nothing
+  pure $ ScriptRes empty Nothing
 
 
 randomize :: forall eff h. ScriptFn eff h
@@ -104,4 +105,4 @@ randomize ssRef lib t mid self dt = do
       pure $ Just dt'
     _ -> pure Nothing
 
-  pure $ ScriptRes PMutNone update
+  pure $ ScriptRes empty update

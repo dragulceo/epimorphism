@@ -321,3 +321,8 @@ exports.offsetOf = function(tok) {
     }
   }
 }
+
+
+exports.getVersion = function() {
+  return $('body').data('version');
+}

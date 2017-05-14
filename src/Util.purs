@@ -53,6 +53,8 @@ foreign import unsafeCast :: forall a b. a -> b
 foreign import getProfileCookie :: forall eff. Eff eff String
 
 foreign import offsetOf :: forall eff. String -> String -> Eff eff Int
+foreign import getVersion :: forall eff. Eff eff String
+
 
 -- ghetto
 foreign import clickPause :: forall eff. Eff eff Unit

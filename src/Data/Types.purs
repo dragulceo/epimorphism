@@ -18,14 +18,6 @@ data SchemaEntryType = SE_St | SE_N | SE_I | SE_B | SE_S | SE_A_St | SE_A_Cx | S
 data SchemaEntry = SchemaEntry SchemaEntryType String
 type Schema = Array SchemaEntry
 
-class DataTable a ad | a -> ad where
-  libProj :: forall h. Library h -> STStrMap h a
-  idx :: a -> Index
-  dat :: a -> ad
-  apI :: a -> (Index -> Index) -> a
-  apD :: a -> (ad -> ad) -> a
-  sidx :: forall eff h. Library h -> a -> EpiS eff h Index
-
 type Index = {
     id     :: String
   , flags  :: S.Set String

@@ -1,7 +1,6 @@
-module Data.Serialize where
+module Data.Serialize.Parse where
 
 import Prelude
-import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
@@ -10,65 +9,24 @@ import Data.Array (foldM) as A
 import Data.Complex (Complex)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), maybe)
+import Data.Serializable (class Serializable, generic, schema, unsafeSetDataTableAttr)
+import Data.Serialize.SLib (SLibError(..), buildSection, parseSLib)
 import Data.Set (Set, empty, fromFoldable) as Set
 import Data.StrMap (StrMap, empty, fromFoldable, insert, lookup, thawST)
 import Data.StrMap (foldM) as S
 import Data.StrMap.ST (new)
-import Data.String (Replacement(..), joinWith, replace, split, stripSuffix, trim)
+import Data.String (Replacement(Replacement), joinWith, replace, split, trim)
 import Data.String (Pattern(..)) as S
 import Data.String.Regex (match)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Data.Types (Component(Component), EngineConf(EngineConf), Epi, EpiS, Family(..), Image(..), Index, Module(..), Pattern(..), Schema, SchemaEntry(SchemaEntry), SchemaEntryType(SE_A_Cx, SE_A_St, SE_M_N, SE_M_St, SE_S, SE_B, SE_I, SE_N, SE_St), Section(..), SystemConf(SystemConf), UIConf(UIConf), componentSchema, engineConfSchema, familySchema, imageSchema, indexSchema, moduleSchema, patternSchema, systemConfSchema, uiConfSchema, Library(..))
-import Util (boolFromStringE, cxFromStringE, flog, fromJustE, inj, intFromStringE, log, numFromStringE, tryRegex, winAppend, winLog, zipI)
-
-foreign import unsafeSetDataTableAttr :: forall a b eff. a -> String -> String -> b -> Eff eff a
-foreign import unsafeGenericDataTableImpl :: forall a r. Schema -> Schema -> (Index -> (Record r) -> a) -> (Set.Set String) -> a
-
-unsafeGenericDataTable :: forall a r. Schema -> Schema -> (Index -> (Record r) -> a) -> a
-unsafeGenericDataTable idxSchema schema construct = unsafeGenericDataTableImpl idxSchema schema construct Set.empty
-
-class Serializable a where
-  schema :: a -> Schema
-  generic :: a
-
-instance scSerializable :: Serializable SystemConf where
-  schema a = systemConfSchema
-  generic = unsafeGenericDataTable indexSchema systemConfSchema SystemConf
-
-instance ecSerializable :: Serializable EngineConf where
-  schema a = engineConfSchema
-  generic = unsafeGenericDataTable indexSchema engineConfSchema EngineConf
-
-instance ucSerializable :: Serializable UIConf where
-  schema a = uiConfSchema
-  generic = unsafeGenericDataTable indexSchema uiConfSchema UIConf
-
-instance pSerializable :: Serializable Pattern where
-  schema a = patternSchema
-  generic = unsafeGenericDataTable indexSchema patternSchema Pattern
-
-instance mSerializable :: Serializable Module where
-  schema a = moduleSchema
-  generic = unsafeGenericDataTable indexSchema moduleSchema Module
-
-instance cSerializable :: Serializable Component where
-  schema a = componentSchema
-  generic = unsafeGenericDataTable indexSchema componentSchema Component
-
-instance fSerializable :: Serializable Family where
-  schema a = familySchema
-  generic = unsafeGenericDataTable indexSchema familySchema Family
-
-instance iSerializable :: Serializable Image where
-  schema a = imageSchema
-  generic = unsafeGenericDataTable indexSchema imageSchema Image
+import Data.Types (Epi, EpiS, Library(Library), SchemaEntry(SchemaEntry), SchemaEntryType(SE_A_Cx, SE_A_St, SE_M_N, SE_M_St, SE_S, SE_B, SE_I, SE_N, SE_St), indexSchema)
+import Util (boolFromStringE, cxFromStringE, fromJustE, inj, intFromStringE, numFromStringE, tryRegex, zipI)
 
 -- ELEMENT PARSERS
 parseMString :: forall eff. String -> Epi eff (Maybe String)
 parseMString s = do
   pure $ if (s == "Nothing") then Nothing else Just s
-
 
 parseSet :: forall eff. String -> Epi eff (Set.Set String)
 parseSet st = do
@@ -117,48 +75,8 @@ parseCLst st = reverse <$> foldM handle [] st
       pure $ cons cv dt
 
 
--- SLIB PARSERS
-
-data SLibError = SLibError String
-type SLib = Either SLibError
-data SHandle = SHandle String String
-
-parseHandle :: String -> SLib SHandle
-parseHandle group = do
-  let lines = split (S.Pattern "\n") group
-  {head: sig, tail: body} <- handleUn $ uncons lines
-  ssig <- handleS $ stripSuffix (S.Pattern "{{") sig
-  pure $ SHandle (trim ssig) (joinWith "\n" body)
-  where
-    handleUn (Just x) = pure x
-    handleUn _ = Left $ SLibError $ "Your component is too small: " <> group
-    handleS (Just x) = pure x
-    handleS _ = Left $ SLibError $ "Invalid component format: " <> group
-
-parseSGroup :: forall a. (SHandle -> SLib (Tuple String a)) -> String -> SLib (Tuple String a)
-parseSGroup builder group = do
-  handle <- parseHandle group
-  builder handle
-
-parseSLib :: forall a. (SHandle -> SLib (Tuple String a)) -> String -> SLib (StrMap a)
-parseSLib builder lib = do
-  let groups = filter ((/=) "") $ map trim (split (S.Pattern "}}\n") lib)
-  fromFoldable <$> traverse (parseSGroup builder) groups
-
--- CHUNK PARSERS
-buildSection :: SHandle -> SLib (Tuple String Section)
-buildSection (SHandle sig body) = do
-  let tokens = filter ((/=) "") $ split (S.Pattern " ") sig
-  name <- getName tokens
-  let idx = {id: name, orig: "", flags: Set.empty, props: empty}
-  pure $ Tuple name (Section idx {lib: (map trim $ split (S.Pattern "\n") body)})
-  where
-    getName [x] = pure x
-    getName _ = Left $ SLibError $ "expecting only a name in: " <> sig
-
-
+-- BLOCK PARSERS
 type StrObj = StrMap String
-
 parseChunk :: forall eff. (StrMap (Array StrObj)) -> (Tuple Int String) -> Epi eff (StrMap (Array StrObj))
 parseChunk res (Tuple i chunk) = do
   -- extract code block
@@ -194,6 +112,8 @@ parseLine chunk obj (Tuple i line) = do
 
   pure $ insert head (joinWith " " tail') obj
 
+
+-- LIB PARSERS
 mapRefById :: forall eff h. (StrMap (StrMap StrObj)) -> String -> (Array StrObj) ->
               EpiS eff h (StrMap (StrMap StrObj))
 mapRefById res dataType vals = do
@@ -314,11 +234,3 @@ parseLibData allData = do
               liftEff $ unsafeSetDataTableAttr obj accs fieldName cx
         _ -> throwError $ inj "Found %0 SchemaEntries for %1" [show $ length all_entries, fieldName]
     schemaSel n (SchemaEntry _ sen) = (n == sen)
-
-
-serializeLibData :: forall eff h. Library h -> EpiS eff h String
-serializeLibData lib = pure ""
-
-
---serializeLib :: forall a eff h. (Serializable a) => StStrMap h a -> EpiS eff h String
---serializeLib dta = do

@@ -1,4 +1,4 @@
-module Serialize where
+module Data.Serialize.Serialize where
 
 import Prelude
 import Data.Types (Epi, Schema, SchemaEntry(..), SchemaEntryType(..))

@@ -24,12 +24,10 @@ import Script (runScripts)
 import System (initLibrary)
 import Texture (loadImages)
 import UI (initUIST)
-import Util (Now, enableDebug, getProfileCookie, glob, handleError, isDev, isHalted, log, now, requestAnimationFrame, rndstr, seedRandom, urlArgs)
+import Util (Now, enableDebug, getProfileCookie, glob, handleError, isDev, isHalted, log, now, requestAnimationFrame, rndstr, seedRandom, urlArgs, getVersion)
 
 host :: String
 host = ""
-
-foreign import getVersion :: forall eff. Eff eff String
 
 type State h = {
     usRef :: STRef h UIST

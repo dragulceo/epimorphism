@@ -109,7 +109,8 @@ importPattern lib pattern@(Pattern _ patternD) = do
 importModule :: forall eff h. Library h -> ImportObj -> EpiS eff h String
 importModule lib obj = do
   id <- lift $ uuid
-  -- find module
+
+  -- find module & set orig
   mod@(Module iD modD) <- case obj of
     ImportModule m -> do
       case (idx m).orig of
@@ -123,35 +124,29 @@ importModule lib obj = do
         "" -> pure $ apI m _ {orig = n}
         _ ->  pure $ apI m _ {orig = (idx m).orig}
 
-  --lift $ log mod
-
-  -- update library
-  let idx' = iD { id = id, flags = Set.insert "live" iD.flags }
-  setLib lib id (Module idx' modD)
-
   -- import children
   let d = toUnfoldable modD.modules :: Array (Tuple String String)
-  children <- for d \(Tuple k v) -> do
-    child <- importModule lib (ImportRef v)
-    pure $ Tuple k child
+  childs <- fromFoldable <$> for d \(Tuple k v) -> do
+    Tuple k <$> importModule lib (ImportRef v)
 
-  modLibD lib mod _ {modules = fromFoldable children}
+  -- update library
+  let idx'  = iD   { id = id, flags = Set.insert "live" iD.flags }
+  let modD' = modD { modules = childs }
+  setLib lib id (Module idx' modD')
 
   pure id
 
 -- remove a module from the ref pool
 purgeModule :: forall eff h. Library h -> String -> EpiS eff h Unit
 purgeModule lib mid = do
-  when (mid /= "") do
+  -- delete self
+  mod@(Module _ modD) <- getLib lib mid "purge module"
+  delLib lib mod
 
-    -- delete self
-    mod@(Module _ modD) <- getLib lib mid "purge module"
-    delLib lib mod
+  -- purge children
+  traverse (purgeModule lib) (values modD.modules)
 
-    -- purge children
-    traverse (purgeModule lib) (values modD.modules)
-
-    pure unit
+  pure unit
 
 
 -- replace child subN:cid(in ref pool) with child subN:obj

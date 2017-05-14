@@ -1,4 +1,4 @@
-module Compiler where
+module Engine.Compiler where
 
 import Prelude
 import Data.TypedArray as T
@@ -17,13 +17,13 @@ import Data.System (EngineST, EngineProfile)
 import Data.Traversable (for)
 import Data.Tuple (Tuple(Tuple))
 import Data.Types (EngineConfD, EpiS, Library, Pattern(Pattern))
-import EngineUtil (execGL)
+import Engine.EngineUtil (execGL)
+import Engine.Parser (parseShader)
+import Engine.Texture (uploadAux)
 import Graphics.WebGL.Methods (vertexAttribPointer, enableVertexAttribArray, bindBuffer, bufferData, createBuffer)
 import Graphics.WebGL.Shader (getUniformBindings, getAttrBindings, compileShadersIntoProgram, linkProgram)
 import Graphics.WebGL.Types (WebGLProgram, DataType(Float), BufferData(DataSource), BufferUsage(StaticDraw), ArrayBufferType(ArrayBuffer))
-import Parser (parseShader)
 import Pattern (purgeModule)
-import Texture (uploadAux)
 import Util (Now, log, now, now2, replaceAll, unsafeCast, winLog)
 
 -- compile shaders and load into systemST

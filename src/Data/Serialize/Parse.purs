@@ -14,14 +14,14 @@ import Data.Serialize.SLib (SLibError(..), buildSection, parseSLib)
 import Data.Set (Set, empty, fromFoldable) as Set
 import Data.StrMap (StrMap, empty, fromFoldable, insert, lookup, thawST)
 import Data.StrMap (foldM) as S
-import Data.StrMap.ST (new)
+import Data.StrMap.ST (STStrMap, new)
 import Data.String (Replacement(Replacement), joinWith, replace, split, trim)
 import Data.String (Pattern(..)) as S
 import Data.String.Regex (match)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
-import Data.Types (Epi, EpiS, Library(Library), SchemaEntry(SchemaEntry), SchemaEntryType(SE_A_Cx, SE_A_St, SE_M_N, SE_M_St, SE_S, SE_B, SE_I, SE_N, SE_St), indexSchema)
-import Util (boolFromStringE, cxFromStringE, fromJustE, inj, intFromStringE, numFromStringE, tryRegex, zipI)
+import Data.Types (Epi, EpiS, Library(Library), SchemaEntry(SchemaEntry), SchemaEntryType(SE_A_Cx, SE_A_St, SE_M_N, SE_M_St, SE_S, SE_B, SE_I, SE_N, SE_St), Section, indexSchema)
+import Util (boolFromStringE, cxFromStringE, fromJustE, inj, intFromStringE, numFromStringE, tryRegex, unsafeCast, zipI)
 
 -- ELEMENT PARSERS
 parseMString :: forall eff. String -> Epi eff (Maybe String)
@@ -74,6 +74,35 @@ parseCLst st = reverse <$> foldM handle [] st
       cv <- cxFromStringE v
       pure $ cons cv dt
 
+unsafeParseType :: forall a eff h. SchemaEntryType -> String -> EpiS eff h a
+unsafeParseType entryType val = do
+  case entryType of
+    SE_St ->
+      pure $ unsafeCast val
+    SE_N -> do
+      a <- numFromStringE val
+      pure $ unsafeCast a
+    SE_I -> do
+      a <- intFromStringE val
+      pure $ unsafeCast a
+    SE_B -> do
+      a <- boolFromStringE val
+      pure $ unsafeCast a
+    SE_S -> do
+      a <- parseSet val
+      pure $ unsafeCast a
+    SE_M_St -> do
+      a <- parseMp val
+      pure $ unsafeCast a
+    SE_M_N -> do
+      a <- parseMp val >>= parseNMp
+      pure $ unsafeCast a
+    SE_A_St -> do
+      a <- parseLst val
+      pure $ unsafeCast a
+    SE_A_Cx -> do
+      a <- parseLst val >>= parseCLst
+      pure $ unsafeCast a
 
 -- BLOCK PARSERS
 type StrObj = StrMap String
@@ -124,23 +153,8 @@ mapRefById res dataType vals = do
       i <- fromJustE (lookup "id" obj) "Library object missing id :("
       pure $ insert i obj res'
 
-parseLibData :: forall eff h. String -> EpiS eff h (Library h)
-parseLibData allData = do
-  -- split data
-  (Tuple libData sectionData) <-
-    case split (S.Pattern "@@@ Sections") allData of
-      [a, b] -> pure (Tuple a b)
-      _ -> throwError "Can't separate sections"
-
-  -- sections
-  sectionLib <- case (parseSLib buildSection sectionData) of
-      (Right res') -> pure res'
-      (Left (SLibError s)) -> throwError $ "Error parsing sections: " <> s
-  sl <- liftEff $ thawST sectionLib
-
-  let chunks = filter ((/=) "") $ map trim $ split (S.Pattern "###") libData
-  let res = empty
-  strobjs <- A.foldM parseChunk empty (zipI chunks)
+emptyLib :: forall eff h.EpiS eff h (Library h)
+emptyLib = do
   sc <- lift $ new
   ec <- lift $ new
   uc <- lift $ new
@@ -149,7 +163,8 @@ parseLibData allData = do
   cl <- lift $ new
   ml <- lift $ new
   il <- lift $ new
-  lib <- pure $ Library {
+  sl <- lift $ new
+  pure $ Library {
       systemConfLib: sc
     , engineConfLib: ec
     , uiConfLib:     uc
@@ -162,40 +177,63 @@ parseLibData allData = do
     , system:        Nothing
   }
 
+parseLibData :: forall eff h. String -> EpiS eff h (Library h)
+parseLibData allData = do
+  -- split data
+  (Tuple libData sectionData) <-
+    case split (S.Pattern "@@@ Sections") allData of
+      [a, b] -> pure (Tuple a b)
+      _ -> throwError "Can't separate sections"
+
   -- parse chunks
+  let chunks = filter ((/=) "") $ map trim $ split (S.Pattern "###") libData
+  let res = empty
+  strobjs <- A.foldM parseChunk empty (zipI chunks)
+
+  -- instantiate chunks
+  lib <- emptyLib
   objs <- S.foldM mapRefById empty strobjs
-  S.foldM instantiateChunk lib objs
+  lib'@(Library ld) <- S.foldM instantiateChunk lib objs
+
+  -- sections
+  sectionLib <- case (parseSLib buildSection sectionData) of
+      (Right res') -> pure res'
+      (Left (SLibError s)) -> throwError $ "Error parsing sections: " <> s
+  sl <- liftEff $ thawST sectionLib
+
+  pure $ Library ld {sectionLib = sl}
   where
     instantiate :: forall a. (Serializable a) => (StrMap a) -> String -> StrObj -> EpiS eff h (StrMap a)
     instantiate res name obj = do
       insert name <$> S.foldM fields generic obj <*> (pure res)
     instantiateChunk :: Library h -> String -> (StrMap StrObj) -> EpiS eff h (Library h)
-    instantiateChunk lib@(Library val) dataType objs = case dataType of
-      "SystemConf" -> do
-        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
-        pure $ Library val {systemConfLib = obj}
-      "EngineConf" -> do
-        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
-        pure $ Library val {engineConfLib = obj}
-      "UIConf" -> do
-        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
-        pure $ Library val {uiConfLib = obj}
-      "Pattern" -> do
-        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
-        pure $ Library val {patternLib = obj}
-      "Module" -> do
-        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
-        pure $ Library val {moduleLib = obj}
-      "Component" -> do
-        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
-        pure $ Library val {componentLib = obj}
-      "Family" -> do
-        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
-        pure $ Library val {familyLib = obj}
-      "Image" -> do
-        obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
-        pure $ Library val {imageLib = obj}
-      _ -> pure lib
+    instantiateChunk lib@(Library val) dataType objs = do
+      case dataType of
+        "SystemConf" -> do
+          obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+          pure $ Library val {systemConfLib = obj}
+        "EngineConf" -> do
+          obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+          pure $ Library val {engineConfLib = obj}
+        "UIConf" -> do
+          obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+          pure $ Library val {uiConfLib = obj}
+        "Pattern" -> do
+          obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+          pure $ Library val {patternLib = obj}
+        "Module" -> do
+          obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+          pure $ Library val {moduleLib = obj}
+        "Component" -> do
+          obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+          pure $ Library val {componentLib = obj}
+        "Family" -> do
+          obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+          pure $ Library val {familyLib = obj}
+        "Image" -> do
+          obj <- (thawST <$> S.foldM instantiate empty objs) >>= liftEff
+          pure $ Library val {imageLib = obj}
+        _ -> pure lib
     fields :: forall a. (Serializable a) => a -> String -> String -> EpiS eff h a
     fields obj fieldName fieldVal = do
       let idx_entries  = filter (schemaSel fieldName) indexSchema
@@ -205,32 +243,7 @@ parseLibData allData = do
       let all_entries = idx_entries' <> entries'
       case all_entries of
         [Tuple (SchemaEntry entryType _) accs] -> do
-          case entryType of
-            SE_St -> do
-              liftEff $ unsafeSetDataTableAttr obj accs fieldName fieldVal
-            SE_N -> do
-              n <- numFromStringE fieldVal
-              liftEff $ unsafeSetDataTableAttr obj accs fieldName n
-            SE_I -> do
-              i <- intFromStringE fieldVal
-              liftEff $ unsafeSetDataTableAttr obj accs fieldName i
-            SE_B -> do
-              b <- boolFromStringE fieldVal
-              liftEff $ unsafeSetDataTableAttr obj accs fieldName b
-            SE_S -> do
-              s <- parseSet fieldVal
-              liftEff $ unsafeSetDataTableAttr obj accs fieldName s
-            SE_M_St -> do
-              m <- parseMp fieldVal
-              liftEff $ unsafeSetDataTableAttr obj accs fieldName m
-            SE_M_N -> do
-              mn <- parseMp fieldVal >>= parseNMp
-              liftEff $ unsafeSetDataTableAttr obj accs fieldName mn
-            SE_A_St -> do
-              l <- parseLst fieldVal
-              liftEff $ unsafeSetDataTableAttr obj accs fieldName l
-            SE_A_Cx -> do
-              cx <- parseLst fieldVal >>= parseCLst
-              liftEff $ unsafeSetDataTableAttr obj accs fieldName cx
+          val <- unsafeParseType entryType fieldVal
+          liftEff $ unsafeSetDataTableAttr obj accs fieldName val
         _ -> throwError $ inj "Found %0 SchemaEntries for %1" [show $ length all_entries, fieldName]
     schemaSel n (SchemaEntry _ sen) = (n == sen)

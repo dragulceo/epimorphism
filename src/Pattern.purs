@@ -96,16 +96,21 @@ findParent lib patternD mid = do
 
 ------------------------ IMPORTING ------------------------
 
--- import the modules of a pattern into the ref poolc
+-- import the modules of a pattern
 data ImportObj = ImportModule Module | ImportRef String
-importPattern :: forall eff h. Library h -> Pattern -> EpiS eff h Pattern
-importPattern lib pattern@(Pattern _ patternD) = do
+importPattern :: forall eff h. Library h -> Pattern -> (Maybe String) -> EpiS eff h String
+importPattern lib pattern@(Pattern _ patternD) maid = do
+  id <- case maid of
+    Nothing -> lift $ uuid
+    Just x -> pure x
+
   mod <- for kAcs \accs ->
     importModule lib (ImportRef (accs patternD))
 
-  pure $ apD pattern (kWrt mod)
+  setLib lib id (apD pattern (kWrt mod))
+  pure $ id
 
--- import a module into the ref pool
+-- import a module
 importModule :: forall eff h. Library h -> ImportObj -> EpiS eff h String
 importModule lib obj = do
   id <- lift $ uuid
@@ -136,7 +141,7 @@ importModule lib obj = do
 
   pure id
 
--- remove a module from the ref pool
+-- remove a module
 purgeModule :: forall eff h. Library h -> String -> EpiS eff h Unit
 purgeModule lib mid = do
   -- delete self
@@ -149,7 +154,7 @@ purgeModule lib mid = do
   pure unit
 
 
--- replace child subN:cid(in ref pool) with child subN:obj
+-- replace child subN:cid with child subN:obj
 replaceModule :: forall eff h. Library h -> String -> String -> String -> ImportObj -> EpiS eff h String
 replaceModule lib mid subN cid obj = do
   mod@(Module _ modD) <- getLib lib mid "replace module"

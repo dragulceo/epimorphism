@@ -16,6 +16,7 @@ import Util (fromJustE)
 
 class DataTable a ad | a -> ad where
   libProj :: forall h. Library h -> STStrMap h a
+--  libSet  :: forall h. Library h -> a -> Library
   idx :: a -> Index
   dat :: a -> ad
   apI :: a -> (Index -> Index) -> a
@@ -30,6 +31,7 @@ instance dtSystemConf :: DataTable SystemConf {
   , debug      :: Boolean
 } where
   libProj (Library {systemConfLib}) = systemConfLib
+--  libSet  (Library l@{systemConfLib}) a = Library l {systemConfLib = a}
   idx     (SystemConf ix _) = ix
   dat     (SystemConf _ dt) = dt
   apI     (SystemConf ix dt) mut = SystemConf (mut ix) dt

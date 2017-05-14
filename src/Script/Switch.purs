@@ -1,4 +1,4 @@
-module Switch where
+module Script.Switch where
 
 import Prelude
 import Control.Monad.Error.Class (throwError)
@@ -15,7 +15,7 @@ import Data.StrMap (insert, fromFoldable, union)
 import Data.Tuple (Tuple(..))
 import Data.Types (Component(..), EpiS, Family(..), Module(..), ModuleD, Section(..), Library)
 import Pattern (purgeModule, ImportObj(ImportRef, ImportModule), replaceModule, findParent, importModule)
-import ScriptUtil (CloneRes(CloneRes), getClone, addScript, purgeScript)
+import Script.ScriptUtil (CloneRes(CloneRes), getClone, addScript, purgeScript)
 import System (loadLib)
 import Text.Format (precision, format)
 import Util (log, intFromStringE, inj, randInt, numFromStringE, gmod, fromJustE)

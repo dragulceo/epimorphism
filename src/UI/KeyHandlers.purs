@@ -1,4 +1,4 @@
-module KeyHandlers where
+module UI.KeyHandlers where
 
 import Prelude
 import Control.Monad.Eff (Eff)

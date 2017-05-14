@@ -1,4 +1,4 @@
-module ScriptUtil where
+module Script.ScriptUtil where
 
 import Prelude
 import Control.Monad.Except.Trans (throwError)
@@ -75,10 +75,9 @@ getClone lib pattern mid = do
     Just pd -> pure pd
     Nothing -> do
       lift $ log "CLONING PATTERN"
-      pattern' <- importPattern lib pattern -- cloning current pattern
-      setLib lib "$$Comp" pattern'
+      importPattern lib pattern (Just "$$Comp") -- cloning current pattern
       lift $ log lib
-      pure pattern'
+      getLib lib "$$Comp" "shouldnt happen"
 
   addr <- findAddr lib (dat pattern) mid
   mid' <- findModule lib (dat pattern') addr false

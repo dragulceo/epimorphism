@@ -1,4 +1,4 @@
-module Scripts where
+module Script.Scripts where
 
 import Prelude
 import Control.Monad.Except.Trans (throwError, lift)
@@ -13,7 +13,7 @@ import Data.StrMap (insert, member)
 import Data.Tuple (Tuple(..))
 import Data.Types (Module)
 import Math (max, round) as M
-import ScriptUtil (addScript, purgeScript)
+import Script.ScriptUtil (addScript, purgeScript)
 import System (loadLib)
 import Text.Format (format, precision)
 import Util (clickPause, cxFromString, inj, intFromStringE, log, numFromStringE)

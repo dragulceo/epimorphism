@@ -1,0 +1,43 @@
+  - Saving
+    - USE:
+      - spacebar to save everything & screenshot (PERSISTED)
+      - clone pattern into new one (PERSISTED)
+      - save pattern node as (PERSISTED)
+      - other users commiting modifications?
+      - periodic pattern snapshots
+    - STEPS:
+      - PERSIST DATA
+        - what is persisted?
+        - how is it persisted?
+        - where is it persisted?
+      - ui
+      - periodic save system
+      - partial saving, loading?
+
+    - TWO POSSIBLE OPERATIONS
+      - append new user data
+      - modify something(core or existing data)
+
+    - ONLY APPENDS FOR NOW?
+      -
+
+    - serialize entire state
+      - make sure to set flags correctly (on a clone, or what?)
+    - post state to server
+      - local or remote?
+    - recieved state:
+      - backup current state
+      - unpack recieved state
+        - unpack into correct directories
+        - bundle
+      - swap
+
+
+
+- FIRST STEP:
+  - serialize live tree & store it on disk as user/*
+  - this is a whole pattern
+    - everything live & systemConfD.pattern
+    - need to change flags & ids.  data is named
+      - so we need to clone the data
+        - basically re-import pattern, but with some flags

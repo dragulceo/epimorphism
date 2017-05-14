@@ -1,4 +1,4 @@
-module Script where
+module Script.Script where
 
 import Prelude
 import Control.Monad.Except.Trans (throwError)
@@ -13,9 +13,9 @@ import Data.Script (Script(..), ScriptFn, ScriptRes(ScriptRes))
 import Data.Set (Set, empty)
 import Data.System (SystemST)
 import Data.Types (EpiS, Library, Module(..))
-import ScriptUtil (parseScript, serializeScript)
-import Scripts (null, randomize, pause, incZn)
-import Switch (finishSwitch, switch)
+import Script.ScriptUtil (parseScript, serializeScript)
+import Script.Scripts (null, randomize, pause, incZn)
+import Script.Switch (finishSwitch, switch)
 import System (mFold)
 import Util (fromJustE, log)
 

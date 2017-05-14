@@ -1,17 +1,4 @@
 PROJECTS:
-  - Data.Engine.Engine, etc?
-
-  - Parse is a mess
-  - Saving
-    - STEPS:
-      - cleanup code
-        - save, load, data, slib?
-      - serialize any objects to strings
-      - persist data
-      - ui
-      - periodic save system
-
-
   - Misc
     - rethink how famaily/sidx is working (independent searchable typeclass?)
     - clean up library & serialize

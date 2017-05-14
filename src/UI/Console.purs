@@ -1,4 +1,4 @@
-module Console where
+module UI.Console where
 
 import Prelude
 import Control.Monad.Eff (Eff)
@@ -22,8 +22,8 @@ import Data.Tuple (Tuple(Tuple))
 import Data.Types (Component(..), EpiS, Library, Module(..), ModuleD, moduleSchema)
 import Paths (isConstantPath, runPath)
 import Text.Format (format, precision)
-import UIUtil (findElt)
-import Util (indentLines, inj, log, real, zipI)
+import UI.UIUtil (findElt)
+import Util (indentLines, inj, real, zipI)
 
 foreign import addEventListeners :: forall eff. Eff eff Unit
 

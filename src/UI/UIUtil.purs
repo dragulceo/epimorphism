@@ -1,4 +1,4 @@
-module UIUtil where
+module UI.UIUtil where
 
 import Prelude
 import Control.Monad.Trans.Class (lift)

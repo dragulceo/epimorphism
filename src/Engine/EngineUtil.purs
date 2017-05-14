@@ -1,4 +1,4 @@
-module EngineUtil where
+module Engine.EngineUtil where
 
 import Prelude
 import Control.Monad.Except.Trans (throwError)

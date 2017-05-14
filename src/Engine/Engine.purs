@@ -1,11 +1,9 @@
-module Engine where
+module Engine.Engine where
 
 import Prelude
 import Data.TypedArray as T
 import Graphics.WebGL.Raw as GL
 import Graphics.WebGL.Raw.Enums as GLE
-import Audio (initAudio)
-import Compiler (compileShaders)
 import Control.Monad.Eff (Eff, foreachE)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Error.Class (throwError)
@@ -23,14 +21,16 @@ import Data.System (EngineProfile, EngineST, SystemST)
 import Data.Traversable (for, traverse)
 import Data.Tuple (Tuple(Tuple), fst, snd)
 import Data.Types (Epi, EpiS, Library, Module(..), PatternD)
-import EngineUtil (execGL)
+import Engine.Audio (initAudio)
+import Engine.Compiler (compileShaders)
+import Engine.EngineUtil (execGL)
+import Engine.Texture (initAuxTex, initTexFb, emptyImage)
 import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
 import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
 import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor)
 import Graphics.WebGL.Raw (getParameter)
 import Graphics.WebGL.Types (DrawMode(Triangles), Uniform(Uniform), WebGLContext, WebGLError(ShaderError), WebGLFramebuffer, WebGLTexture)
 import Paths (runPath)
-import Texture (initAuxTex, initTexFb, emptyImage)
 import Util (Now, fromJustE, hasAttr, imag, log, real, unsafeGetAttr, unsafeNull, zipI)
 
 foreign import getOS :: forall eff. Eff eff String

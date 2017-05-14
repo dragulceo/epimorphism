@@ -1,7 +1,7 @@
-module Layout where
+module UI.Layout where
 
 import Prelude
-import Console (renderConsole)
+import UI.Console (renderConsole)
 import Control.Monad.Trans.Class (lift)
 import Data.DOM.Simple.Element (classRemove, classAdd, setInnerHTML, setStyleAttr)
 import Data.DOM.Simple.Window (innerHeight, innerWidth, document, globalWindow)
@@ -9,7 +9,7 @@ import Data.Library (getUIConfD)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.System (SystemST, UIST, EngineST)
 import Data.Types (EpiS, Library)
-import UIUtil (findElt)
+import UI.UIUtil (findElt)
 
 initLayout :: forall eff h. UIST -> Library h -> EpiS eff h Unit
 initLayout uiST lib = do

@@ -1,4 +1,4 @@
-module UI where
+module UI.UI where
 
 import Prelude
 import Command (command)
@@ -8,8 +8,8 @@ import Control.Monad.ST (STRef, readSTRef, newSTRef)
 import Data.Library (getLib, getPatternD, getUIConfD)
 import Data.System (EngineST, SystemST, UIST, defaultUIST)
 import Data.Types (EpiS, Section(..), Library)
-import KeyHandlers (keyHandler)
-import Layout (initLayout)
+import UI.KeyHandlers (keyHandler)
+import UI.Layout (initLayout)
 import Util (Now)
 
 foreign import registerEventHandler :: forall eff. (String -> Eff eff Unit) -> Eff eff Unit

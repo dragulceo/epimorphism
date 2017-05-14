@@ -1,4 +1,4 @@
-module Texture where
+module Engine.Texture where
 
 import Prelude
 import Graphics.WebGL.Raw as GL
@@ -15,7 +15,7 @@ import Data.System (EngineST)
 import Data.Traversable (for, traverse)
 import Data.Tuple (Tuple(Tuple), snd, fst)
 import Data.Types (EpiS, Epi, EngineConfD)
-import EngineUtil (execGL)
+import Engine.EngineUtil (execGL)
 import Graphics.WebGL.Methods (createFramebuffer, createTexture)
 import Graphics.WebGL.Types (WebGLTexture, WebGLContext, WebGL, WebGLFramebuffer)
 import Util (fromJustE, log, unsafeNull)

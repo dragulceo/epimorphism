@@ -1,7 +1,6 @@
 module Command where
 
 import Prelude
-import Compiler (compileShaders)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except.Trans (lift)
@@ -17,13 +16,14 @@ import Data.System (EngineST, SystemST, UIST)
 import Data.Traversable (for)
 import Data.Tuple (Tuple(..), fst)
 import Data.Types (EngineConf, EpiS, Library, Module(..), PatternD)
-import Engine (initEngineST)
+import Engine.Compiler (compileShaders)
+import Engine.Engine (initEngineST)
+import Engine.Texture (clearFB)
 import Graphics.Canvas (CANVAS)
-import Layout (updateLayout, initLayout)
 import Paths (runPath)
 import Pattern (findModule)
-import ScriptUtil (addScript)
-import Texture (clearFB)
+import Script.ScriptUtil (addScript)
+import UI.Layout (updateLayout, initLayout)
 import Util (Now, enableDebug, halt, handleError, intFromStringE, log, real, replaceAll)
 
 foreign import saveCanvas :: forall eff. Eff eff Unit

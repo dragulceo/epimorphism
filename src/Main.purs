@@ -1,7 +1,6 @@
 module Main where
 
 import Prelude
-import Compiler (compileShaders)
 import Control.Monad.Eff (Eff)
 import Control.Monad.ST (ST, STRef, readSTRef, newSTRef, modifySTRef, runST)
 import Control.Monad.Trans.Class (lift)
@@ -16,14 +15,15 @@ import Data.Set (toUnfoldable)
 import Data.StrMap (lookup)
 import Data.System (EngineST, SystemST, UIST, defaultSystemST)
 import Data.Types (EngineConf, EpiS, Library(..), Section(..))
-import Engine (initEngineST, executeKernels)
+import Engine.Compiler (compileShaders)
+import Engine.Engine (initEngineST, executeKernels)
+import Engine.Texture (loadImages)
 import Graphics.Canvas (CANVAS)
-import Layout (updateLayout)
 import Pattern (importPattern)
-import Script (runScripts)
+import Script.Script (runScripts)
 import System (initLibrary)
-import Texture (loadImages)
-import UI (initUIST)
+import UI.Layout (updateLayout)
+import UI.UI (initUIST)
 import Util (Now, enableDebug, getProfileCookie, glob, handleError, isDev, isHalted, log, now, requestAnimationFrame, rndstr, seedRandom, urlArgs, getVersion)
 
 host :: String
@@ -67,8 +67,6 @@ initState systemST lib'@(Library libVar) = do
     _ -> do
       lift $ log $ "USING SEED: " <> systemConfD.seed
       pure systemConfD.seed
-
-  modLibD lib systemConf _ {seed = seed}
   lift $ seedRandom seed
 
   -- if the cookie_profile sets a valid profile, update the system
@@ -92,9 +90,11 @@ initState systemST lib'@(Library libVar) = do
   lift $ loadImages index'.lib index.lib
 
   -- import pattern
-  pattern  <- getPattern lib "importPattern"
-  pattern' <- importPattern lib pattern
-  setLib lib systemConfD.pattern pattern'
+  pattern <- getPattern lib "importPattern"
+  pId     <- importPattern lib pattern Nothing
+
+  -- update system
+  modLibD lib systemConf _ {seed = seed, pattern = pId}
 
   lift $ log "AFTER IMPORT"
   lift $ log lib

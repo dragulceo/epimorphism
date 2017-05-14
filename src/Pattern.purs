@@ -9,14 +9,14 @@ import Data.Kernels (kAcs, kNames, kWrt)
 import Data.Library (apD, apI, delLib, family, getLib, getLibM, idx, mD, modLibD, setLib)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Set (insert) as Set
-import Data.StrMap (insert, values, toUnfoldable)
+import Data.StrMap (fromFoldable, insert, toUnfoldable, values)
 import Data.String (Pattern(..)) as S
 import Data.String (split, joinWith)
 import Data.Traversable (for, sequence, traverse)
 import Data.Tuple (Tuple(..))
 import Data.Types (EpiS, Library, Module(..), Pattern(..), PatternD)
 import System (loadLib)
-import Util (flog, fromJustE, log, uuid)
+import Util (fromJustE, uuid)
 
 ------------------------ FIND ------------------------
 
@@ -131,19 +131,13 @@ importModule lib obj = do
 
   -- import children
   let d = toUnfoldable modD.modules :: Array (Tuple String String)
-  traverse (importChild id) d
+  children <- for d \(Tuple k v) -> do
+    child <- importModule lib (ImportRef v)
+    pure $ Tuple k child
+
+  modLibD lib mod _ {modules = fromFoldable children}
 
   pure id
-  where
-    importChild :: String -> (Tuple String String) -> EpiS eff h Unit
-    importChild mid (Tuple k v) = do
-      when (v /= "") do
-        -- import child
-        child <- importModule lib (ImportRef v)
-
-        -- update parent
-        mod@(Module _ modD) <- getLib lib mid "import module - update parent"
-        modLibD lib mod _ {modules = insert k child modD.modules}
 
 -- remove a module from the ref pool
 purgeModule :: forall eff h. Library h -> String -> EpiS eff h Unit

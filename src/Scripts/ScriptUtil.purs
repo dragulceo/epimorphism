@@ -4,8 +4,8 @@ import Prelude
 import Control.Monad.Except.Trans (throwError)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (cons, delete, foldM, head, uncons)
-import Data.Library (dat, getLib, getLibM, getPattern, idM, modLibD, setLib)
-import Data.Maybe (fromMaybe, Maybe(Nothing, Just))
+import Data.Library (dat, getLib, getLibM, idM, modLibD, setLib)
+import Data.Maybe (Maybe(Nothing, Just))
 import Data.StrMap (StrMap, insert, empty, toUnfoldable)
 import Data.String (joinWith, split, trim)
 import Data.String (Pattern(..)) as S

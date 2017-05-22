@@ -15,7 +15,7 @@ import Data.String (Pattern(..)) as S
 import Data.System (EngineST, SystemST, UIST)
 import Data.Traversable (for)
 import Data.Tuple (Tuple(..), fst)
-import Data.Types (EngineConf, EpiS, Library, Module(..), PatternD)
+import Data.Types (EngineConf, EpiS, Library, Module(..), PatternD, ModuleD)
 import Engine.Compiler (compileShaders)
 import Engine.Engine (initEngineST)
 import Engine.Texture (clearFB)
@@ -74,10 +74,10 @@ command usRef esRef ssRef lib msg = handleError do
             modules <- searchLib lib sch
 
             for (modules :: Array Module) \m -> do
-              zn <- for (dat m).zn \val -> do
+              zn <- for (dat m :: ModuleD).zn \val -> do
                 show <$> fst <$> runPath systemST.t val
 
-              let unf = toUnfoldable (dat m).par :: Array (Tuple String String)
+              let unf = toUnfoldable (dat m :: ModuleD).par :: Array (Tuple String String)
               par' <- for unf \(Tuple n val) -> do
                 Tuple n <$> show <$> real <$> fst <$> runPath systemST.t val
 
@@ -151,7 +151,7 @@ command usRef esRef ssRef lib msg = handleError do
             updateLayout uiST systemST engineST lib true
           "showFps" -> do
             uiConf <- getUIConf lib "showFps"
-            modLibD lib uiConf $ \x -> x {showFps = not x.showFps}
+            --modLibD lib uiConf $ \x -> x {showFps = not x.showFps}
             initLayout uiST lib
 
             pure unit

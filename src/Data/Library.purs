@@ -12,172 +12,147 @@ import Data.StrMap (StrMap, freezeST, fromFoldable, insert, isSubmap, values)
 import Data.StrMap.ST (STStrMap, delete, peek, poke)
 import Data.Tuple (Tuple)
 import Data.Types (Component(Component), ComponentD, ComponentRef, EngineConf(EngineConf), EngineConfD, EpiS, Family(Family), Image(Image), Index, Library(Library), Module(Module), ModuleD, Pattern(Pattern), PatternD, Section(Section), SystemConf(SystemConf), SystemConfD, UIConf(UIConf), UIConfD)
+import Unsafe.Coerce (unsafeCoerce)
 import Util (fromJustE)
 
-class DataTable a ad | a -> ad where
+data GenericIdx  = GenericIdx Index GenericIdxD
+type GenericIdxD = { }
+
+derive instance genericG :: Generic (GenericIdx)
+
+class Indexable a where
+  toG   :: a -> GenericIdx
+  fromG :: GenericIdx -> a
+
+gidx :: GenericIdx -> Index
+gidx (GenericIdx ix _) = ix
+
+gdat :: GenericIdx -> {}
+gdat (GenericIdx _ d) = d
+
+idx :: forall a. Indexable a => a -> Index
+idx = gidx <<< toG
+
+dat :: forall a b. Indexable a => a -> b
+dat x = unsafeCoerce (gdat $ toG x)
+
+apD :: forall a b. Indexable a => a -> (b -> b) -> a
+apD x f = let g = toG x in
+  fromG $ GenericIdx (gidx g) (unsafeCoerce $ f $ unsafeCoerce $ gdat g)
+
+apI :: forall a. Indexable a => a -> (Index -> Index) -> a
+apI x f = let g = toG x in
+  fromG $ GenericIdx (f $ gidx g) (gdat g)
+
+
+class Indexable a <= DataTable a where
   libProj :: forall h. Library h -> STStrMap h a
---  libSet  :: forall h. Library h -> a -> Library
-  idx :: a -> Index
-  dat :: a -> ad
-  apI :: a -> (Index -> Index) -> a
-  apD :: a -> (ad -> ad) -> a
   sidx :: forall eff h. Library h -> a -> EpiS eff h Index
 
-instance dtSystemConf :: DataTable SystemConf {
-    engineConf :: String
-  , uiConf     :: String
-  , pattern    :: String --PatternRef
-  , seed       :: String
-  , debug      :: Boolean
-} where
+instance dtSystemConf :: DataTable SystemConf where
   libProj (Library {systemConfLib}) = systemConfLib
 --  libSet  (Library l@{systemConfLib}) a = Library l {systemConfLib = a}
-  idx     (SystemConf ix _) = ix
-  dat     (SystemConf _ dt) = dt
-  apI     (SystemConf ix dt) mut = SystemConf (mut ix) dt
-  apD     (SystemConf ix dt) mut = SystemConf ix (mut dt)
   sidx _ = pure <<< idx
 
-instance dtEngineConf :: DataTable EngineConf {
-    kernelDim            :: Int
-  , fract                :: Int
-  , numAuxBuffers        :: Int
-  , audioAnalysisEnabled :: Boolean
-  , audioBufferSize      :: Int
-} where
+instance ixSystemConf :: Indexable SystemConf where
+  toG   = unsafeCoerce
+  fromG = unsafeCoerce
+
+instance dtEngineConf :: DataTable EngineConf where
   libProj (Library {engineConfLib}) = engineConfLib
-  idx     (EngineConf ix _) = ix
-  dat     (EngineConf _ dt) = dt
-  apI     (EngineConf ix dt) mut = EngineConf (mut ix) dt
-  apD     (EngineConf ix dt) mut = EngineConf ix (mut dt)
   sidx _ = pure <<< idx
 
-instance dtUIConf :: DataTable UIConf {
-    canvasId          :: String
-  , consoleId         :: String
-  , fpsId             :: String
-  , showFps           :: Boolean
-  , windowState       :: String
-  , uiUpdateFreq      :: Int
-  , keyboardSwitchSpd :: Number
-  , keySet            :: String
-  , uiCompLib         :: String
-} where
+instance ixEngineConf :: Indexable EngineConf where
+  toG   = unsafeCoerce
+  fromG = unsafeCoerce
+
+instance dtUIConf :: DataTable UIConf where
   libProj (Library {uiConfLib}) = uiConfLib
-  idx     (UIConf ix _) = ix
-  dat     (UIConf _ dt) = dt
-  apI     (UIConf ix dt) mut = UIConf (mut ix) dt
-  apD     (UIConf ix dt) mut = UIConf ix (mut dt)
   sidx _ = pure <<< idx
 
-instance dtPattern :: DataTable Pattern {
-    vert            :: String -- ModuleRef
-  , main            :: String -- ModuleRef
-  , seed            :: String -- ModuleRef
-  , disp            :: String -- ModuleRef
-  , defaultImageLib :: String
-  , imageLib        :: String
-} where
+instance ixUIConf :: Indexable UIConf where
+  toG   = unsafeCoerce
+  fromG = unsafeCoerce
+
+instance dtPattern :: DataTable Pattern where
   libProj (Library {patternLib}) = patternLib
-  idx     (Pattern ix _) = ix
-  dat     (Pattern _ dt) = dt
-  apI     (Pattern ix dt) mut = Pattern (mut ix) dt
-  apD     (Pattern ix dt) mut = Pattern ix (mut dt)
   sidx _ = pure <<< idx
 
-instance dtModule :: DataTable Module {
-    component :: String
-  , scripts   :: Array String
-  , modules   :: StrMap String
-  , par       :: StrMap String
-  , zn        :: Array String
-  , images    :: Array String
-  , sub       :: StrMap String
-} where
+instance ixPattern :: Indexable Pattern where
+  toG   = unsafeCoerce
+  fromG = unsafeCoerce
+
+instance dtModule :: DataTable Module where
   libProj (Library {moduleLib}) = moduleLib
-  idx     (Module ix dt) = ix
-  dat     (Module _ dt) = dt
-  apI     (Module ix dt) mut = Module (mut ix) dt
-  apD     (Module ix dt) mut = Module ix (mut dt)
   sidx    lib m@(Module ix dt) = do
     fm <- family lib m
     pure $ ix {props = insert "family" (idx fm).id ix.props}
 
-instance dtComponent :: DataTable Component {
-    family      :: String -- FamilyRef
-  , default_mod :: String -- ModuleRef
-  , children    :: StrMap String -- FamilyRef
-  , code        :: String --CodeBlock
-  , includes    :: Array String -- Include
-} where
+instance ixModule :: Indexable Module where
+  toG   = unsafeCoerce
+  fromG = unsafeCoerce
+
+instance dtComponent :: DataTable Component where
   libProj (Library {componentLib}) = componentLib
-  idx     (Component ix _) = ix
-  dat     (Component _ dt) = dt
-  apI     (Component ix dt) mut = Component (mut ix) dt
-  apD     (Component ix dt) mut = Component ix (mut dt)
   sidx _ = pure <<< idx
 
-instance dtFamily :: DataTable Family {
-    var          :: String
-  , dim          :: Int
-  , default_comp :: ComponentRef
-} where
+instance ixComponent :: Indexable Component where
+  toG   = unsafeCoerce
+  fromG = unsafeCoerce
+
+instance dtFamily :: DataTable Family where
   libProj (Library {familyLib}) = familyLib
-  idx     (Family ix _) = ix
-  dat     (Family _ dt) = dt
-  apI     (Family ix dt) mut = Family (mut ix) dt
-  apD     (Family ix dt) mut = Family ix (mut dt)
   sidx _ = pure <<< idx
 
-instance dtImage :: DataTable Image {
-  path :: String
-} where
+instance ixFamily :: Indexable Family where
+  toG   = unsafeCoerce
+  fromG = unsafeCoerce
+
+instance dtImage :: DataTable Image where
   libProj (Library {imageLib}) = imageLib
-  idx     (Image ix _) = ix
-  dat     (Image _ dt) = dt
-  apI     (Image ix dt) mut = Image (mut ix) dt
-  apD     (Image ix dt) mut = Image ix (mut dt)
   sidx _ = pure <<< idx
 
-instance dtSection :: DataTable Section {
-  lib :: Array String
-} where
+instance ixIage :: Indexable Image where
+  toG   = unsafeCoerce
+  fromG = unsafeCoerce
+
+instance dtSection :: DataTable Section where
   libProj (Library {sectionLib}) = sectionLib
-  idx     (Section ix _) = ix
-  dat     (Section _ dt) = dt
-  apI     (Section ix dt) mut = Section (mut ix) dt
-  apD     (Section ix dt) mut = Section ix (mut dt)
   sidx _ = pure <<< idx
+
+instance ixSection :: Indexable Section where
+  toG   = unsafeCoerce
+  fromG = unsafeCoerce
 
 -- LIBRARY CRUD
-getLibM :: forall a ad eff h. (DataTable a ad) => Library h -> String -> EpiS eff h (Maybe a)
+getLibM :: forall a eff h. (DataTable a) => Library h -> String -> EpiS eff h (Maybe a)
 getLibM lib name = do
   liftEff $ peek (libProj lib) name
 
-getLib :: forall a ad eff h. (DataTable a ad) => Library h -> String -> String -> EpiS eff h a
+getLib :: forall a eff h. (DataTable a) => Library h -> String -> String -> EpiS eff h a
 getLib lib name msg = do
   res <- getLibM lib name
   fromJustE res (msg <> " - Can't find in library: " <> name)
 
-setLib :: forall a ad eff h. (DataTable a ad) => Library h -> String -> a -> EpiS eff h Unit
+setLib :: forall a eff h. (DataTable a) => Library h -> String -> a -> EpiS eff h Unit
 setLib lib name new = do
   let new' = apI new _ {id = name} -- make sure index.id is set correctly
   lift $ poke (libProj lib) name new' # void
 
-modLib :: forall a ad eff h. (DataTable a ad) => Library h -> a -> (a -> a) -> EpiS eff h Unit
+modLib :: forall a eff h. (DataTable a) => Library h -> a -> (a -> a) -> EpiS eff h Unit
 modLib lib obj mut = do
   lift $ poke (libProj lib) (idx obj).id (mut obj) # void
 
-modLibD :: forall a ad eff h. (DataTable a ad) => Library h -> a -> (ad -> ad) -> EpiS eff h Unit
+modLibD :: forall a ad eff h. (DataTable a) => Library h -> a -> (ad -> ad) -> EpiS eff h Unit
 modLibD lib obj mut = do
   lift $ poke (libProj lib) (idx obj).id (apD obj mut) # void
 
-modLibD' :: forall a ad eff h. (DataTable a ad) => Library h -> (a -> a) -> String -> String -> (ad -> ad) -> EpiS eff h Unit
+modLibD' :: forall a ad eff h. (DataTable a) => Library h -> (a -> a) -> String -> String -> (ad -> ad) -> EpiS eff h Unit
 modLibD' lib idDT name msg mut = do
   obj <- idDT <$> getLib lib name msg
   lift $ poke (libProj lib) name (apD obj mut) # void
 
-delLib :: forall a ad eff h. (DataTable a ad) => Library h -> a -> EpiS eff h Unit
+delLib :: forall a eff h. (DataTable a) => Library h -> a -> EpiS eff h Unit
 delLib lib obj = do
   lift $ delete (libProj lib :: STStrMap h a) (idx obj).id # void
 
@@ -189,13 +164,13 @@ buildSearch flags exclude props =
   LibSearch {flags: S.fromFoldable flags, exclude: S.fromFoldable exclude,
              props: fromFoldable props}
 
-searchLib :: forall a ad eff h. (DataTable a ad) => Library h -> LibSearch -> EpiS eff h (Array a)
+searchLib :: forall a eff h. (DataTable a) => Library h -> LibSearch -> EpiS eff h (Array a)
 searchLib lib search = do
   lib' <- liftEff $ freezeST (libProj lib)
   res <- foldM handle [] (toUnfoldable $ values lib')
   pure $ sortBy (\a b -> compare (idx a).id (idx b).id) res
   where
-    handle :: (DataTable a ad) => Array a -> a -> EpiS eff h (Array a)
+    handle :: (DataTable a) => Array a -> a -> EpiS eff h (Array a)
     handle res elt = do
       ix <- sidx lib elt
       case (matchSearch search ix) of

@@ -34,7 +34,7 @@ indexSchema = [
 ]
 
 -- System
-data SystemConf = SystemConf Index SystemConfD
+data SystemConf  = SystemConf Index SystemConfD
 type SystemConfD = {
     engineConf :: String
   , uiConf     :: String

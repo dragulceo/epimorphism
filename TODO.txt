@@ -1,4 +1,19 @@
 PROJECTS:
+  PROCESSING:
+    - System.purs?
+    - disable command if compiling
+      - queue?
+
+    - easy ways to speed up ui?
+      - dont render invisible tabs?
+
+    - unify par & zn??
+
+    - search returns library
+
+    - Saving
+
+
   - Misc
     - rethink how famaily/sidx is working (independent searchable typeclass?)
     - clean up library & serialize
@@ -35,6 +50,17 @@ PROJECTS:
     - misc
       - https://ace.c9.io/#nav=about
       - show shader source in tab
+
+  - Absolute Reproducibility
+    - Phase 1
+      - schema versioning
+      - component versioning or immutabiity
+      - some type of core/lib immutability/versioning
+      - path & script immutability
+    - Phase 2
+      - random switching library versioning?
+      - consistient randomness?
+        - generate new seed before each random generation?
 
   - main pattern
     - T

@@ -31,6 +31,7 @@ renderConsole :: forall eff h. UIST -> SystemST h -> EngineST -> Library h -> Ep
 renderConsole uiST systemST engineST lib = do
   uiConfD  <- getUIConfD lib "renderConsole uiConf"
   patternD <- getPatternD lib "renderConsole pattern"
+
   dsmDiv <- findElt "debugMain"
   str0 <- renderModule systemST lib uiConfD.uiCompLib patternD.main "MAIN" Nothing
   lift $ setInnerHTML str0 dsmDiv

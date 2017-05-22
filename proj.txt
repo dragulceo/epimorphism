@@ -1,43 +1,145 @@
-  - Saving
-    - USE:
-      - spacebar to save everything & screenshot (PERSISTED)
-      - clone pattern into new one (PERSISTED)
-      - save pattern node as (PERSISTED)
-      - other users commiting modifications?
-      - periodic pattern snapshots
-    - STEPS:
-      - PERSIST DATA
-        - what is persisted?
-        - how is it persisted?
-        - where is it persisted?
-      - ui
-      - periodic save system
-      - partial saving, loading?
+---- PLAN ----
 
-    - TWO POSSIBLE OPERATIONS
-      - append new user data
-      - modify something(core or existing data)
+- PHASE 1 - ME SAVE:
+  - SCREENSHOT
+    - clone current pattern into new place, with appropriate flags & maybe ids.  save t_phase
+    - send to disk/User
+  - NEW PATTERN
+    - same as above, but t=0?
+  - NEW NODE
+    - reimport a node, setting flags, etc
+    - send to disk/User
+  - PERIODIC SAVES
+    - regular saves, but sent to disk instead
+  - Ability to switch whole patterns
 
-    - ONLY APPENDS FOR NOW?
-      -
+  - TODO:
+    - reimport patterns w/correct flags & phases
+    - ability to non-destructively save to User folder
+    - some flag to make sure all online users arent getting all of my saves
+    - some way to manage save/delete stuff I dont want
+    - pattern switching
+    - periodic saving
+    - some kind of permissioning system
+    - some thought into a migration system/keeping data up to date
+    - some kind of db backup system
 
-    - serialize entire state
-      - make sure to set flags correctly (on a clone, or what?)
-    - post state to server
-      - local or remote?
-    - recieved state:
-      - backup current state
-      - unpack recieved state
-        - unpack into correct directories
-        - bundle
-      - swap
+- PHASE 1a -
+  - USERS VOTING ON PATTERNS
+
+  - TODO:
+    - serialize & save to new db
+
+- PHASE 2 - ME MODIFICATION
+  - DELETE DATA FROM DISK
+  - MODIFY CORE
+    - no changing of flags, just serialize & send to disk, as an overwrite
+
+  - TODO:
+    - Some kind of backend k/v store
+    - even better permissions
+
+- PHASE 3 - USER LOCAL MODIFICATION
+  - USERS CAN MODIFY EVERYTHING(non-core?) & SAVE AT WILL LOCALLY
+
+  - TODO:
+    - Some kind of local storage
+
+- PHASE 4 - USER LOCAL MODIFICATION SHARING
+  - Either share with other users, or central db
+
+
+- PHASE ? - ALL MODIFICATIONS TO DATA VIA UI?
+  - is this practical?
+  - could use actual db backend at that point
+  - would let us do queries over not just the index
+  - pretty far in the future
+
+---- SECTIONS ----
+
+- MIGRATION
+  - basically we want all saves to work forever, & theoretically not change at all
+  - DATA CHANGES
+    - saves are self contained wrt modules & patterns.  what about components?
+    - component code either immutable or versioned
+  - SCHEMA CHANGES
+    - schema's need versions & migrations
+      - we should start versioning now & deal with migrations when necessary
+      - should versioining be on a pattern, or a module level?
+  - BACKEND CHANGES
+    - Contract:  1-1 mapping between data & output.
+      - backend paths & scripts should be immutable
+    - backend is irrelevant, asside from feature availablility & fidelity/performance
+  - INDEX/LIBRARY CHANGES
+    - like the library for randomly switching.
+    - is there anything we can do about that?  this will change random evolution
+  - RANDOM SEED
+    - if we want total reproducability, we need to replicate all the randomness
+    - could generate & store a new random seed before each random call.
+      - ridiculous, but plausible
+- DATA
+  - shouldn't modify core libaray, live
+  - should just say, import system & be done with it
+  - need a way to designate children
+    - loop detection?
+- TIMESTAMPS/PHASES
+  - make sure this all works, for patterns, modules, etc
+- PATTERN
+  - pattern switching
+  - should pattern have the random seed?
+  - special script for switching a pattern?
+  - or are patterns special modules?
+  - system level script(for switching between patterns?)
+- SAVING: REIMPORTING, FLAGS, IDS, TIMESTAMPS/PHASES
+  - before saving, we re-import because we need to modify flags(& ids) before saving
+    - need some better id system then just random uuids.  possibly prefixed
+    - flags
+      - remove live
+      - add user?
+    - props
+      - db: user
+      - savename?
+      - saveloc?
+  - anything to do wrt phases?
+- SLIB
+  - ?
+- SCREENSHOTS?
+  - associated with pattern?
+- SERVER
+  - still backed up by text files?
+  - OP
+    - READ
+      - by libsearch
+        - parse data, run search(new library??), serialize data, send
+    - INSERT
+      - by path?
+        - just write data to file
+    - MODIFY
+      - by (type, id, path)
+        - parse path, find entity, update, replace path
+        - parse path data, update library, re-serialize, replace file
+    - DELETE
+      - by (type, id, path)
+      - parse path, find entity(s), delete, replace path
+    - SAVE SCREENSHOT
+      - ?
+  - backup on each write?
+    - git?
+  - HOW?
+    - if we use purescript, we might be able to re-use code w/ local-storage
+      - cant easily do this with current datamodel
+- PERIODIC SAVING
+  - periodic saving
+- ACCESS
+  - some kind of permissioning system for writes
+  - some flag to make sure all online users arent getting all of my saves
 
 
 
-- FIRST STEP:
-  - serialize live tree & store it on disk as user/*
-  - this is a whole pattern
-    - everything live & systemConfD.pattern
-    - need to change flags & ids.  data is named
-      - so we need to clone the data
-        - basically re-import pattern, but with some flags
+- SHARING CODE BETWEEN SERVER & CLIENT (NOT HAPPENING)
+  - would need to share serialization code & library
+  - want to avoid sharing type specific code
+    - parse code currently has this, wrt library
+    - as does sidx for module
+      - could remove this, either by denormailizing into props
+      - or by supporting structured queries

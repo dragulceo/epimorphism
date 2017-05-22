@@ -197,8 +197,8 @@ parseLibData allData = do
 
   -- sections
   sectionLib <- case (parseSLib buildSection sectionData) of
-      (Right res') -> pure res'
-      (Left (SLibError s)) -> throwError $ "Error parsing sections: " <> s
+    (Right res') -> pure res'
+    (Left (SLibError s)) -> throwError $ "Error parsing sections: " <> s
   sl <- liftEff $ thawST sectionLib
 
   pure $ Library ld {sectionLib = sl}

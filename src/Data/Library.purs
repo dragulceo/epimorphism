@@ -12,6 +12,7 @@ import Data.StrMap (StrMap, freezeST, fromFoldable, insert, isSubmap, values)
 import Data.StrMap.ST (STStrMap, delete, peek, poke)
 import Data.Tuple (Tuple)
 import Data.Types (Component(Component), ComponentD, ComponentRef, EngineConf(EngineConf), EngineConfD, EpiS, Family(Family), Image(Image), Index, Library(Library), Module(Module), ModuleD, Pattern(Pattern), PatternD, Section(Section), SystemConf(SystemConf), SystemConfD, UIConf(UIConf), UIConfD)
+import Unsafe.Coerce (unsafeCoerce)
 import Util (fromJustE)
 
 class DataTable a ad | a -> ad where

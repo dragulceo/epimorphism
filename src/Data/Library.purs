@@ -18,7 +18,7 @@ import Util (fromJustE)
 data GenericIdx  = GenericIdx Index GenericIdxD
 type GenericIdxD = { }
 
-derive instance genericG :: Generic (GenericIdx)
+--derive instance genericG :: Generic (GenericIdx)
 
 class Indexable a where
   toG   :: a -> GenericIdx

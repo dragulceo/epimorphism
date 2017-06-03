@@ -5,6 +5,12 @@ flags {lib}
 sub {wt_exp:w}
 
 ###Module
+id wt_sq
+component wt
+flags {lib}
+sub {wt_exp:w * w}
+
+###Module
 id wt_inv
 component wt
 sub {wt_exp:1.0 - w}

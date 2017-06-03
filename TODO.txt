@@ -2,6 +2,7 @@ PROJECTS:
   - Misc
     - rethink how famaily/sidx is working (independent searchable typeclass?)
     - clean up library & serialize
+    - auto image crop/resize
 
   - Sort backlog
 

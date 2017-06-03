@@ -267,3 +267,20 @@ shitty_images {{
 		textures/shitty/trans_5.png
 		textures/shitty/trans_6.png
 }}
+
+
+alice_images {{
+		textures/alice/alice1.png
+		textures/alice/alice2.png
+		textures/alice/alice3.png
+		textures/alice/alice4.png
+		textures/alice/alice5.png
+		textures/alice/alice6.png
+		textures/alice/alice7.png
+		textures/alice/alice8.png
+		textures/alice/alice9.png
+		textures/alice/alice10.png
+		textures/alice/alice11.png
+		textures/alice/alice12.png
+		textures/alice/alice13.png						
+}}

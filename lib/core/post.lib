@@ -65,6 +65,9 @@ res = rgb2hsv(res);
 frame.x = res.x;
 frame.y *= |sat_sc|;
 frame = hsv2rgb(frame);
+//float sc = (frame.x + frame.y + frame.z) / 3.0;
+//sc = sqrt(sqrt(sc));
+//frame = vec4(sc, sc, sc, frame.a);
 
 ### Component
 id post_pallet1

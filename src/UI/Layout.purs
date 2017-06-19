@@ -54,7 +54,7 @@ initLayout uiST lib = do
       pure unit
 
 
--- hides malformed html issues
+-- hides malformed html issues? what?
 updateLayout :: forall eff h. UIST -> SystemST h -> EngineST -> Library h -> Boolean -> EpiS eff h Unit
 updateLayout uiST systemST engineST lib force = do
   uiConfD <- getUIConfD lib "updateLayout"

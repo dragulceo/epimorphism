@@ -65,6 +65,11 @@ res = rgb2hsv(res);
 frame.x = res.x;
 frame.y *= |sat_sc|;
 frame = hsv2rgb(frame);
+
+//frame.r = frame.r * frame.r * frame.r;
+//frame.g = frame.g * frame.g;
+//frame.b = sqrt(frame.b);
+frame = vec4(pow(frame.xyz, vec3(2.1, 1.5, .75)), frame.w);
 //float sc = (frame.x + frame.y + frame.z) / 3.0;
 //sc = sqrt(sqrt(sc));
 //frame = vec4(sc, sc, sc, frame.a);

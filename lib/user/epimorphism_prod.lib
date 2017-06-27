@@ -86,7 +86,7 @@ component tex_color_scroll
 flags {anim1}
 images [textures/simplegeom/tile_grid1.png]
 par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0}
-scripts [randomize dly:55 spd:0.05 lib:images1 dim:vec4 sub:0 typ:image]
+scripts [randomize dly:55 spd:0.05 lib:1024 dim:vec4 sub:0 typ:image]
 
 ### Module
 id tex_color_anim2
@@ -94,7 +94,7 @@ component tex_color_scroll
 flags {anim2}
 images [textures/simplegeom/tile_grid1.png]
 par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0}
-scripts [randomize dly:65 spd:0.05 lib:images2 dim:vec4 sub:0 typ:image]
+scripts [randomize dly:65 spd:0.05 lib:1024 dim:vec4 sub:0 typ:image]
 
 ### Module
 id w_circle_anim

@@ -28,7 +28,7 @@ import Engine.Texture (initAuxTex, initTexFb, emptyImage)
 import Graphics.Canvas (setCanvasHeight, setCanvasWidth, getCanvasElementById)
 import Graphics.WebGL.Context (getWebglContextWithAttrs, defaultWebglContextAttrs)
 import Graphics.WebGL.Methods (uniform2fv, uniform1fv, drawArrays, uniform1f, clearColor)
-import Graphics.WebGL.Raw (getParameter)
+import Graphics.WebGL.Raw (getParameter, getExtension)
 import Graphics.WebGL.Types (DrawMode(Triangles), Uniform(Uniform), WebGLContext, WebGLError(ShaderError), WebGLFramebuffer, WebGLTexture)
 import Paths (runPath)
 import Util (Now, fromJustE, hasAttr, imag, log, real, unsafeGetAttr, unsafeNull, zipI)
@@ -105,6 +105,8 @@ initEngineST lib canvasId esRef' = do
 
   -- webgl initialization
   ref <- execGL ctx do
+--    liftEff $ getExtension ctx "OES_texture_float"
+    
     Tuple tex0 fb0 <- initTexFb dim
     Tuple tex1 fb1 <- initTexFb dim
     auxTex <- initAuxTex engineConfD es.ctx empty

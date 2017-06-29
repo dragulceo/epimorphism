@@ -269,12 +269,14 @@ family library
 code &&&
 
 vec3 rotate3D(vec3 v, vec3 axis, float th){
+  axis = normalize(axis);
   // compute constants
   float c = cos(th);
   float s = sin(th);
 
   // compute rotation
   vec3 res;
+
   res.x = (1.0 + (1.0 - c) * (axis.x * axis.x - 1.0)) * v.x +
           (axis.z * s + (1.0 - c) * axis.x * axis.y) * v.y +
           (-1.0 * axis.y * s + (1.0 - c) * axis.x * axis.z) * v.z;

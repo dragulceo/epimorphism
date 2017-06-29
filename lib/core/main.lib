@@ -1,7 +1,7 @@
 ### Component
 id seed_main
 family main
-includes [header, colorspace, math]
+includes [header, colorspace, math, math_extra, distance_util]
 code &&&
 
 void main() {

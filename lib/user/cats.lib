@@ -1,0 +1,94 @@
+### SystemConf
+id cats
+engineConf default
+uiConf prod
+pattern cats
+
+### Pattern
+id cats
+seed seed_cats
+vert vert
+main main_cats
+disp disp_id
+defaultImageLib cats_images
+imageLib cats_images
+
+### Module
+id main_cats
+component main
+flags {cats, root}
+modules {application:epimorphism_app_cats}
+
+### Module
+id epimorphism_app_cats
+component epimorphism
+flags {cats, lib}
+modules {seed:seed_wrap_cats, t:t_main, color:color_id, reduce:torus_reduce}
+
+### Module
+id seed_wrap_cats
+component seed_wrap
+flags {lib}
+modules {t_seed:t_seed_anim, seed_body:seed_buf, seed_mod:mod_id, reduce:torus_reduce}
+
+### Module
+id seed_cats
+component seed_main
+flags {lib, dev, root}
+modules {seed:seed_multi_cats}
+
+### Module
+id seed_multi_cats
+component seed_multi
+flags {cats, multi, lib}
+modules {reduce:torus_reduce, t_seed0:t_id, t_seed1:t_seed_anim1, t_seed2:t_id, seed0:seed_wca1_cats, seed1:seed_wca2_cats, seed2:seed_nothing}
+
+### Module
+id seed_wca1_cats
+component seed_wca
+flags {cats, wca}
+par {smooth_mask: 50.0}
+modules {w:w_lines_border_anim, wt:wt_id, a:alpha_id, seed_color:color1_cats}
+scripts [randomize dly:75 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
+
+### Module
+id color1_cats
+component tex_color_scroll
+flags {cats}
+images [textures/cats/cat7.png]
+par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:0.0}
+scripts [randomize dly:65 spd:0.05 lib:cats_images dim:vec4 sub:0 typ:image]
+
+
+### Module
+id seed_wca2_cats
+component seed_wca
+flags {cats, wca}
+par {smooth_mask: 50.0}
+modules {w:w_lines_inner_anim, wt:wt_id, a:alpha_id, seed_color:color2_cats}
+scripts [randomize dly:70 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
+
+### Module
+id color2_cats
+component tex_color_scroll
+flags {cats}
+images [textures/cats/cat7.png]
+par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:0.0}
+scripts [randomize dly:53 spd:0.05 lib:cats_images dim:vec4 sub:0 typ:image]
+
+
+### Module
+id seed_wca3_cats
+component seed_wca
+flags {cats, wca}
+par {smooth_mask: 50.0}
+modules {w:w_square_anim, wt:wt_id, a:alpha_id, seed_color:color3_cats}
+scripts [randomize dly:80 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
+
+### Module
+id color3_cats
+component tex_color_scroll
+flags {cats}
+images [textures/cats/cat7.png]
+par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:0.0}
+scripts [randomize dly:85 spd:0.05 lib:cats_images dim:vec4 sub:0 typ:image]

@@ -282,5 +282,36 @@ alice_images {{
 		textures/alice/alice10.png
 		textures/alice/alice11.png
 		textures/alice/alice12.png
-		textures/alice/alice13.png						
+		textures/alice/alice13.png
+}}
+
+cats_images {{
+		textures/cats/cat0.png
+		textures/cats/cat1.png
+		textures/cats/cat2.png
+		textures/cats/cat3.png
+		textures/cats/cat4.png
+		textures/cats/cat5.png
+		textures/cats/cat6.png
+		textures/cats/cat7.png
+		textures/cats/cat8.png
+		textures/cats/cat9.png
+		textures/cats/cat10.png
+		textures/cats/cat11.png
+		textures/cats/cat12.png
+		textures/cats/cat13.png
+		textures/cats/cat14.png
+		textures/cats/cat15.png
+		textures/cats/cat16.png
+		textures/cats/cat17.png
+		textures/cats/cat18.png
+		textures/cats/cat19.png
+		textures/cats/cat19.png
+		textures/cats/cat20.png
+		textures/cats/cat21.png
+		textures/cats_old/cats1.png
+		textures/cats_old/cats2.png
+		textures/cats_old/cats3.png
+		textures/cats_old/cats4.png
+    textures/stoopid/stoopid_4.png
 }}

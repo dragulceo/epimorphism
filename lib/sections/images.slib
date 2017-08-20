@@ -87,6 +87,80 @@ all_images {{
   textures/psych/psych_7.png
 }}
 
+1024 {{
+  textures/1024/img_0.png
+  textures/1024/img_1.png
+  textures/1024/img_2.png
+  textures/1024/img_3.png
+  textures/1024/img_4.png
+  textures/1024/img_5.png
+  textures/1024/img_6.png
+  textures/1024/img_7.png
+  textures/1024/img_8.png
+  textures/1024/img_9.png		
+  textures/1024/img_10.png
+  textures/1024/img_11.png
+  textures/1024/img_12.png
+  textures/1024/img_13.png
+  textures/1024/img_14.png
+  textures/1024/img_15.png
+  textures/1024/img_16.png
+  textures/1024/img_17.png
+  textures/1024/img_18.png
+  textures/1024/img_19.png
+  textures/1024/img_20.png
+  textures/1024/img_21.png
+  textures/1024/img_22.png
+  textures/1024/img_23.png
+  textures/1024/img_24.png
+  textures/1024/img_25.png
+  textures/1024/img_26.png
+  textures/1024/img_28.png
+  textures/1024/img_29.png
+  textures/1024/img_30.png
+  textures/1024/img_31.png
+  textures/1024/img_32.png
+  textures/1024/img_33.png
+  textures/1024/img_34.png
+  textures/1024/img_35.png
+  textures/1024/img_36.png
+  textures/1024/img_37.png
+  textures/1024/img_38.png
+  textures/1024/img_39.png
+  textures/1024/img_40.png
+  textures/1024/img_41.png
+  textures/1024/img_43.png
+  textures/1024/img_44.png
+  textures/1024/img_45.png
+  textures/1024/img_46.png
+  textures/1024/img_47.png
+  textures/1024/img_49.png
+  textures/1024/img_50.png
+  textures/1024/img_51.png
+  textures/1024/img_52.png
+  textures/1024/img_53.png
+  textures/1024/img_54.png
+  textures/1024/img_55.png
+  textures/1024/img_56.png
+  textures/1024/img_57.png
+  textures/1024/img_58.png
+  textures/1024/img_59.png
+  textures/1024/img_60.png
+  textures/1024/img_61.png
+  textures/1024/img_62.png
+  textures/1024/img_63.png
+  textures/1024/img_64.png
+  textures/1024/img_65.png
+  textures/1024/img_66.png
+  textures/1024/img_67.png
+}}
+
+missing {{
+	textures/1024/img_27.png
+	textures/1024/img_42.png
+  textures/1024/img_48.png
+}}		
+
 extra_images {{
 	textures/cats/cats1.png
   textures/cats/cats2.png

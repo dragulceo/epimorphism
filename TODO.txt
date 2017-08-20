@@ -3,6 +3,7 @@ PROJECTS:
     - rethink how famaily/sidx is working (independent searchable typeclass?)
     - clean up library & serialize
     - auto image crop/resize
+    - take textures out of html folder
 
   - Sort backlog
 

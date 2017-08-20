@@ -1,0 +1,94 @@
+### SystemConf
+id alice
+engineConf default
+uiConf prod
+pattern alice
+
+### Pattern
+id alice
+seed seed_alice
+vert vert
+main main_alice
+disp disp_id
+defaultImageLib alice_images
+imageLib alice_images
+
+### Module
+id main_alice
+component main
+flags {alice, root}
+modules {application:epimorphism_app_alice}
+
+### Module
+id epimorphism_app_alice
+component epimorphism
+flags {alice, lib}
+modules {seed:seed_wrap_alice, t:t_main, color:color_id, reduce:torus_reduce}
+
+### Module
+id seed_wrap_alice
+component seed_wrap
+flags {lib}
+modules {t_seed:t_seed_anim, seed_body:seed_buf, seed_mod:mod_id, reduce:torus_reduce}
+
+### Module
+id seed_alice
+component seed_main
+flags {lib, dev, root}
+modules {seed:seed_multi_alice}
+
+### Module
+id seed_multi_alice
+component seed_multi
+flags {alice, multi, lib}
+modules {reduce:torus_reduce, t_seed0:t_id, t_seed1:t_seed_anim1, t_seed2:t_id, seed0:seed_wca1_alice, seed1:seed_wca2_alice, seed2:seed_nothing}
+
+### Module
+id seed_wca1_alice
+component seed_wca
+flags {alice, wca}
+par {smooth_mask: 50.0}
+modules {w:w_lines_border_anim, wt:wt_id, a:alpha_id, seed_color:color1_alice}
+scripts [randomize dly:75 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
+
+### Module
+id color1_alice
+component tex_color_scroll
+flags {alice}
+images [textures/alice/alice7.png]
+par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:0.0}
+scripts [randomize dly:65 spd:0.05 lib:alice_images dim:vec4 sub:0 typ:image]
+
+
+### Module
+id seed_wca2_alice
+component seed_wca
+flags {alice, wca}
+par {smooth_mask: 50.0}
+modules {w:w_lines_inner_anim, wt:wt_id, a:alpha_id, seed_color:color2_alice}
+scripts [randomize dly:70 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
+
+### Module
+id color2_alice
+component tex_color_scroll
+flags {alice}
+images [textures/alice/alice7.png]
+par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:0.0}
+scripts [randomize dly:53 spd:0.05 lib:alice_images dim:vec4 sub:0 typ:image]
+
+
+### Module
+id seed_wca3_alice
+component seed_wca
+flags {alice, wca}
+par {smooth_mask: 50.0}
+modules {w:w_square_anim, wt:wt_id, a:alpha_id, seed_color:color3_alice}
+scripts [randomize dly:80 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
+
+### Module
+id color3_alice
+component tex_color_scroll
+flags {alice}
+images [textures/alice/alice7.png]
+par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:0.0}
+scripts [randomize dly:85 spd:0.05 lib:alice_images dim:vec4 sub:0 typ:image]

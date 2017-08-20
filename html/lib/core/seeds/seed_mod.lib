@@ -1,0 +1,34 @@
+###Module
+id mod_id
+component mod_id
+flags {lib}
+
+### Component
+id mod_id
+family seed_mod
+default_mod mod_id
+code &&&
+// Nothing
+
+
+###Module
+id mod_pal
+component mod_pal
+flags {lib}
+par {pal:1.0}
+
+### Component
+id mod_pal
+family seed_mod
+default_mod mod_pal
+code &&&
+//float hofs = 0.75 * freqData(0.1 * (z.x + wx + wy + w));
+float hofs = 0.0;
+// palletize as function of z
+float l = 0.08 * sqrt(t_z.x * t_z.x + t_z.y * t_z.y);
+float l2 = 0.08 * sqrt(z_in.x * z_in.x + z_in.y * z_in.y);
+vec4 del = vec4(pal(l, vec3(0.5,0.5,0.5), vec3(0.5,0.5,0.5), vec3(2.0,1.0,0.0), vec3(l2 + 0.5,0.20,0.25)), 0);
+
+seed = rgb2hsv(seed);
+seed.x += hofs + |pal| * del.x;
+seed = hsv2rgb(seed);

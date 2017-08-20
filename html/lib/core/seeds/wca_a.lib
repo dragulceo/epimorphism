@@ -1,0 +1,48 @@
+###Module
+id alpha_id
+component alpha
+flags {lib}
+par {alpha:1.0}
+sub {a_exp:a}
+
+###Module
+id alpha_no
+component alpha
+flags {lib}
+par {alpha:1.0}
+sub {a_exp:1.0}
+
+###Module
+id alpha_solid
+component alpha
+flags {lib}
+par {alpha:1.0}
+sub {a_exp:a * |alpha|}
+
+###Module
+id alpha_sqrt
+component alpha
+flags {lib}
+par {alpha:1.0}
+sub {a_exp:sqrt(a) * |alpha|}
+
+###Module
+id alpha_linear
+component alpha
+flags {lib}
+par {alpha:1.0}
+sub {a_exp:w * a * |alpha|}
+
+###Module
+id alpha_circ
+component alpha
+flags {lib}
+par {alpha:1.0}
+sub {a_exp:sqrt(1.0 - (1.0 - w) * (1.0 - w)) * a * |alpha|}
+
+### Component
+id alpha
+family alpha
+default_mod alpha_id
+code &&&
+a = ~a_exp~;

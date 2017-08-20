@@ -1,0 +1,68 @@
+###Module
+id epimorphism_dev_main
+component main
+flags {dev, epimorphism, root}
+modules {application:epimorphism_dev}
+
+###Module
+id epimorphism_dev
+component epimorphism
+flags {lib}
+modules {t:t_wrap_zo, seed:seed_wrap, color:rotate_hsv0, reduce:torus_reduce}
+
+### Component
+id epimorphism
+family application
+default_mod epimorphism
+children {t:t, reduce:reduce, color:color, seed:seed}
+includes []
+code &&&
+
+vec4 seed, frame;
+vec2 frame_z, t_z;
+
+vec4 accum = vec4(0.0, 0.0, 0.0, 0.0);
+
+float delta = 1.0 / (float(~fract~) * kernel_dim);
+float ofs = delta * (float(~fract~) - 1.0);
+
+#ifndef _NO_FRACT_
+for(int i=0; i<~fract~; i++){
+  for(int j=0; j<~fract~; j++){
+    z = z_in;
+    z = z - vec2(ofs, ofs) + vec2(2.0 * delta * float(i), 2.0 * delta * float(j));
+#else
+    z = z_in;
+#endif
+
+    %t%
+
+    // get frame
+    t_z = z;
+    %reduce%
+    frame_z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+    frame = texture2D(fb, frame_z);
+    z = t_z;
+
+    %seed%
+    z = t_z;
+
+    // blend
+    float a = seed.a;
+    seed.a = DEPTH_INC;
+    frame.a = frame.a + DEPTH_INC;
+    accum += mix(frame, seed, a);
+#ifndef _NO_FRACT_
+  }
+}
+#endif
+z = z_in;
+
+#ifndef _NO_FRACT_
+float f2 = float(~fract~ * ~fract~);
+color = accum / vec4(f2, f2, f2, f2);
+#else
+color = accum;
+#endif
+
+%color%

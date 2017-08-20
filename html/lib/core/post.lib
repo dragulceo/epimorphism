@@ -1,0 +1,92 @@
+###Module
+id disp_id
+component disp
+modules {post: post_id}
+flags {root}
+
+###Module
+id post_id
+component post_id
+flags {lib}
+
+###Module
+id post_hlim
+component post_hlim
+flags {lib, post_hlim}
+par {gamma:1.5, hue:0.0, spread:0.5, lgv:0.5, sat_sc:1.0, inc_sc:0.1, gofs: 0.3}
+
+### Component
+id post_id
+family post
+default_mod post_id
+code &&&
+// Nothing
+
+### Component
+id post_hlim
+family post
+default_mod post_hlim
+includes []
+code &&&
+// optimize me!
+vec4 frame_i = frame;
+//frame = _gamma3(frame, 1.2);//|gamma|);
+
+frame = rgb2hsv(frame);
+
+float inc = (frame.a - DEPTH_INC) / (1.0 - DEPTH_INC);
+inc = |inc_sc| * inc;
+float gofs = |gofs| * frame_i.x;
+
+vec4 c0 = hsv2rgb(vec4(0.9 + 1.0 * gofs + 1.0 * inc + |hue|, 1.0, 0.5, 1.0));
+vec4 c1 = hsv2rgb(vec4(0.9 + 1.0 * gofs + 0.0 * inc + |hue| + |spread| / 2.0, 1.0, |lgv|, 1.0));
+vec4 c2 = hsv2rgb(vec4(0.9 + 0.8 * gofs + 1.0 * inc + |hue| - |spread| / 2.0, 1.0, -1.0 * |lgv|, 1.0));
+
+vec4 res, r0, r1;
+float f;
+
+if(frame.x < 1.0 / 3.0){
+  f = 3.0 * frame.x;
+  r0 = c0;
+  r1 = c1;
+}else if(frame.x < 2.0 / 3.0){
+  f = 3.0 * frame.x - 1.0;
+  r0 = c1;
+  r1 = c2;
+}else{
+  f = 3.0 * frame.x - 2.0;
+  r0 = c2;
+  r1 = c0;
+}
+res = (1.0 - f) * r0 + f * r1;
+
+// modulate hue
+res = rgb2hsv(res);
+frame.x = res.x;
+frame.y *= |sat_sc|;
+frame = hsv2rgb(frame);
+//float sc = (frame.x + frame.y + frame.z) / 3.0;
+//sc = sqrt(sqrt(sc));
+//frame = vec4(sc, sc, sc, frame.a);
+
+### Component
+id post_pallet1
+family post
+default_mod post_pallet1
+includes []
+code &&&
+vec4 frame_i = frame;
+//frame = _gamma3(frame, 1.2);//|gamma|);
+
+float val = rgb2hsv(frame).z;
+
+float inp = (frame.x + frame.y + frame.z);// / 6.0 + 0.5 * frame.a;
+
+vec3 res = pal(inp, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(2.0,1.0,0.0),vec3(0.5,0.20,0.25));
+//vec3(0.5,0.5,0.5), vec3(0.5,0.5,0.5), vec3(1.0,1.0,1.0), vec3(0.0,0.10,0.20)
+frame = frame_i;//vec4(res, 1.0);
+
+frame = rgb2hsv(frame);
+// frame.y += 0.1 * frame.a * frame.a * frame.a;
+frame.z *= (frame.a - DEPTH_INC);//val;
+frame = hsv2rgb(frame);

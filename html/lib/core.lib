@@ -1,0 +1,2467 @@
+###Module
+id color_id
+component color_id
+flags {color_main, lib}
+
+###Module
+id color_bgr
+component color_bgr
+flags {lib}
+
+###Module
+id color_gbr
+component color_gbr
+flags {lib}
+
+###Module
+id rotate_hsv0
+component rotate_hsv
+flags {color_main, farm1, lib}
+par {sat_sc:1.05, rot:0.1, len_sc:0.0, len_sc_amt:0.0, th_spd:0.0}
+
+###Module
+id rotate_hsv1
+component rotate_hsv
+flags {color_main, farm1, lib}
+par {sat_sc:1.05, rot:0.0, len_sc:0.0, len_sc_amt:0.00, th_spd:0.00}
+
+### Component
+id color_id
+family color
+default_mod color_id
+code &&&
+// Nothing
+
+### Component
+id color_bgr
+family color
+default_mod color_bgr
+code &&&
+  color = color.bgra;
+
+### Component
+id color_gbr
+family color
+default_mod color_gbr
+code &&&
+  color = color.gbra;
+
+### Component
+id rotate_hsv
+family color
+default_mod rotate_hsv
+includes []
+code &&&
+color = rgb2hsv(color);
+
+float l = sqrt(z_in.x * z_in.x + z_in.y * z_in.y);
+//float l = sqrt(t_z.x * t_z.x + t_z.y * t_z.y);
+l = (4.0 * |len_sc| + 1.0) * l / (l + 4.0 * |len_sc|);
+l = |len_sc_amt| * log(l + 1.0);
+
+float th = (|rot| + l + time * |th_spd|);
+color.x += th;
+color.y *= |sat_sc|;
+//color.z /= (1.0 + 0.5 * l);
+
+color = hsv2rgb(color);
+
+### Component
+id rotate_hsls
+family color
+default_mod rotate_hsls
+includes []
+code &&&
+// complex hsls rotation
+// FULL, LIVE, DEV
+color = rgb2hsls(color);
+
+// compute l
+float l = sqrt(z_in.x * z_in.x + z_in.y * z_in.y);
+l = (4.0 * |len_sc| + 1.0) * l / (1.0 + 4.0 * |len_sc| *l);
+l = |len_sc_amt| * log(l + 1.0);
+
+// compute rotation axis
+float phi = 2.0 * PI * |phi_1|;
+float psi = 2.0 * PI * |psi_1|;
+vec3 axis = vec3(cos(psi) * cos(phi), cos(psi) * sin(phi), sin(psi));
+
+// compute rotation 1
+float th = 2.0 * PI * (l + time * |th_spd|);
+
+//th = remf(CX(th, 0.0), 2.0 * PI).x;
+vec3 tmp = rotate3D(color.xyz, axis, th);
+
+// compute rotation 2
+th = 2.0 * PI * |rot|;
+phi += 2.0 * PI * |phi_2|;
+psi += 2.0 * PI * |psi_2|;
+axis = vec3(cos(psi) * cos(phi), cos(psi) * sin(phi), sin(psi));
+tmp = rotate3D(tmp, axis, th);
+
+color = hsls2rgb(vec4(tmp, color.w));
+
+
+
+### SystemConf
+id dev
+engineConf default
+uiConf dev
+pattern dev
+debug true
+seed 8563
+
+### SystemConf
+id test
+engineConf default
+uiConf dev
+pattern test
+debug true
+seed 8563
+
+### SystemConf
+id prod
+engineConf default
+uiConf prod
+pattern prod
+
+### SystemConf
+id proddev
+engineConf default
+uiConf dev
+pattern prod
+debug true
+seed 8563
+
+### SystemConf
+id analysis
+engineConf default
+uiConf dev
+pattern analysis
+debug true
+
+### SystemConf
+id interference
+engineConf default
+uiConf prod
+pattern interference
+
+### SystemConf
+id julia
+engineConf default
+uiConf prod
+pattern julia
+
+
+### UIConf
+id dev
+canvasId glcanvas
+consoleId console
+fpsId showFps
+showFps true
+windowState dev
+uiUpdateFreq 20
+keyboardSwitchSpd 1.0
+keySet dev
+uiCompLib lib
+
+### UIConf
+id debug
+canvasId glcanvas
+consoleId console
+fpsId showFps
+showFps true
+windowState dev
+uiUpdateFreq 1
+keyboardSwitchSpd 1.0
+keySet dev
+uiCompLib lib
+
+### UIConf
+id prod
+canvasId glcanvas
+consoleId console
+fpsId showFps
+showFps false
+windowState fullWindow
+uiUpdateFreq 50
+keyboardSwitchSpd 1.0
+keySet prod
+uiCompLib lib
+
+### EngineConf
+id min
+kernelDim 512
+fract 1
+numAuxBuffers 10
+audioAnalysisEnabled false
+audioBufferSize 128
+
+### EngineConf
+id low
+kernelDim 512
+fract 4
+numAuxBuffers 10
+audioAnalysisEnabled false
+audioBufferSize 128
+
+### EngineConf
+id default
+kernelDim 1024
+fract 3
+numAuxBuffers 10
+audioAnalysisEnabled false
+audioBufferSize 128
+
+### EngineConf
+id high
+kernelDim 2048
+fract 2
+numAuxBuffers 10
+audioAnalysisEnabled false
+audioBufferSize 128
+
+### EngineConf
+id ultra
+kernelDim 4096
+fract 2
+numAuxBuffers 10
+audioAnalysisEnabled false
+audioBufferSize 128
+
+### EngineConf
+id insane
+kernelDim 4096
+fract 5
+numAuxBuffers 10
+audioAnalysisEnabled false
+audioBufferSize 128
+
+
+
+### Component
+id distance_util
+family ibrary
+code &&&
+
+#define D_EPSILON 0.00001
+#define D_MAX_STEPS 400
+#define D_BOUND 2.0
+
+
+vec4 df1(vec3 p, float d, float time) {
+  vec3 p1, p2;
+  p1 = rotate3D(p, vec3(0.0, 1.0, 0.0), time / 4.0);
+  //p2 = rotate3D(p, vec3(1.0, 0.0, 0.0), time / 4.0);  
+
+  float l1 = length(p1.xz) - d;
+  //float l2 = length(p2.yz) - d;
+
+  //float l = min(l1, l2);
+  float l = l1;
+  vec2 ofs;
+  //if(l1 < l2)
+    ofs = vec2(atan(p1.x, p1.z) / PI, p1.y / (2.0 * PI * d));
+  //else
+    //ofs = vec2(atan(p2.y, p2.z) / PI, p2.x / (2.0 * PI * d));
+
+  ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);      
+  
+  return vec4(ofs, 0.0, l);
+}
+
+
+vec4 df2(vec3 p, float d, float time) {
+  p = rotate3D(p, vec3(1.0, 0.3, -0.2), time / 8.0);
+  vec3 sc = p / vec3(d, d, d);
+  
+  vec2 ofs;
+  
+  if(abs(sc.z) > 1.0)
+    ofs = sc.xy;
+  //else if(abs(sc.x) > 1.0)
+  //  ofs = sc.yz;
+  else
+    ofs = sc.zx;
+  ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);      
+    
+  //float l = length(max(abs(p) - vec3(d, d, d), 0.0));
+  float l = length(p) - 1.0;
+
+  //vec2 q = vec2(length(p.xy) - d, p.z);
+  //float l = length(q) - d * 0.5;
+  
+  return vec4(ofs, 0.0, l);
+}
+
+vec4 inter1(vec3 r_origin, vec3 r_dir, float d, float time) {
+  float l = 0.0;
+  
+  for (int count=0; count < D_MAX_STEPS; count += 1) {
+    vec3 pos = r_origin + l * r_dir;
+    vec4 res = df1(pos, d, time);
+    float dist = res.w;
+    
+    if (dist < D_EPSILON)
+      return vec4(res.xy, 0.0, l);    
+
+    l += dist;
+    
+    if (l > D_BOUND) return vec4(0.0, 0.0, 0.0, -1.0);
+  }
+  return vec4(0.0, 0.0, 0.0, -1.0);
+}
+
+vec3 calcNormal1(vec3 p, float d, float time) {
+  vec3 e = vec3(0.001, 0.0, 0.0);
+  vec3 n;
+  n.x = df1(p+e.xyy, d, time).w - df1(p-e.xyy, d, time).w;
+  n.y = df1(p+e.yxy, d, time).w - df1(p-e.yxy, d, time).w;
+  n.z = df1(p+e.yyx, d, time).w - df1(p-e.yyx, d, time).w;
+
+  return normalize(n);
+}
+
+vec4 inter2(vec3 r_origin, vec3 r_dir, float d, float time) {
+  float l = 0.0;
+  
+  for (int count=0; count < D_MAX_STEPS; count += 1) {
+    vec3 pos = r_origin + l * r_dir;
+    vec4 res = df2(pos, d, time);
+    float dist = res.w;
+    
+    if (dist < D_EPSILON)
+      return vec4(res.xy, 0.0, l);    
+
+    l += dist;
+    
+    if (l > D_BOUND) return vec4(0.0, 0.0, 0.0, -1.0);
+  }
+  return vec4(0.0, 0.0, 0.0, -1.0);
+}
+
+vec3 calcNormal2(vec3 p, float d, float time) {
+  vec3 e = vec3(0.001, 0.0, 0.0);
+  vec3 n;
+  n.x = df2(p+e.xyy, d, time).w - df2(p-e.xyy, d, time).w;
+  n.y = df2(p+e.yxy, d, time).w - df2(p-e.yxy, d, time).w;
+  n.z = df2(p+e.yyx, d, time).w - df2(p-e.yyx, d, time).w;
+
+  return normalize(n);
+}
+
+
+###Module
+id epimorphism_dev_main
+component main
+flags {dev, epimorphism, root}
+modules {application:epimorphism_dev}
+
+###Module
+id epimorphism_dev
+component epimorphism
+flags {lib}
+modules {t:t_wrap_zo, seed:seed_wrap, color:rotate_hsv0, reduce:torus_reduce}
+
+### Component
+id epimorphism
+family application
+default_mod epimorphism
+children {t:t, reduce:reduce, color:color, seed:seed}
+includes []
+code &&&
+
+vec4 seed, frame;
+vec2 frame_z, t_z;
+
+vec4 accum = vec4(0.0, 0.0, 0.0, 0.0);
+
+float delta = 1.0 / (float(~fract~) * kernel_dim);
+float ofs = delta * (float(~fract~) - 1.0);
+
+#ifndef _NO_FRACT_
+for(int i=0; i<~fract~; i++){
+  for(int j=0; j<~fract~; j++){
+    z = z_in;
+    z = z - vec2(ofs, ofs) + vec2(2.0 * delta * float(i), 2.0 * delta * float(j));
+#else
+    z = z_in;
+#endif
+
+    %t%
+
+    // get frame
+    t_z = z;
+    %reduce%
+    frame_z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+    frame = texture2D(fb, frame_z);
+    z = t_z;
+
+    %seed%
+    z = t_z;
+
+    // blend
+    float a = seed.a;
+    seed.a = DEPTH_INC;
+    frame.a = frame.a + DEPTH_INC;
+    accum += mix(frame, seed, a);
+#ifndef _NO_FRACT_
+  }
+}
+#endif
+z = z_in;
+
+#ifndef _NO_FRACT_
+float f2 = float(~fract~ * ~fract~);
+color = accum / vec4(f2, f2, f2, f2);
+#else
+color = accum;
+#endif
+
+%color%
+
+
+
+### Family
+id library
+
+### Family
+id main
+var color
+dim 4
+default_comp test_pattern_main
+
+### Family
+id disp
+var frame
+dim 4
+default_comp
+
+### Family
+id vert
+dim 0
+
+### Family
+id application
+var color
+dim 4
+default_comp test_pattern
+
+### Family
+id color
+var color
+dim 4
+default_comp color_id
+
+### Family
+id post
+var frame
+dim 4
+default_comp post_id
+
+### Family
+id seed
+var seed
+dim 4
+default_comp seed_simple
+
+### Family
+id seed_mod
+var seed
+dim 4
+default_comp mod_id
+
+### Family
+id reduce
+var z
+dim 2
+default_comp reduce
+
+### Family
+id t
+var z
+dim 2
+default_comp t_id
+
+### Family
+id t_inner
+var z
+dim 2
+default_comp t_sub
+
+### Family
+id w
+var wdt
+dim 4
+default_comp w_lines_box
+
+### Family
+id wt
+var w
+dim 1
+default_comp wt_id
+
+### Family
+id alpha
+var a
+dim 1
+default_comp alpha_id
+
+### Family
+id seed_color
+var seed
+dim 4
+default_comp simple_color
+
+### Family
+id switch
+var *
+dim 0
+default_comp smooth_switch
+
+### Family
+id *
+var *
+dim 0
+default_comp
+
+### Family
+id nul
+
+
+### Component
+id header
+family library
+code &&&
+
+precision highp float;
+#define PI 3.1415926535
+#define DEPTH_INC (32.0 / 255.0)
+
+uniform sampler2D fb;
+uniform sampler2D seedBuf;
+uniform float time;
+uniform float kernel_dim;
+uniform sampler2D audioData;
+~NO_FRACT~
+#par#
+#zn#
+#aux#
+
+### Component
+id additional_funcs
+family library
+code &&&
+/*
+float freqData(float x){
+  return texture2D(audioData, vec2(mod(x, 1.0), 0.0)).a;
+}
+
+float timeData(float x){
+  return texture2D(audioData, vec2(mod(x, 1.0), 2.0)).a;
+}
+*/
+
+float plane_wave(vec2 k, vec2 z, float w, float time){
+
+  float th = (k.x * z.x + k.y * z.y) - w * time;
+  th = mod(th, 1.0);
+  float v = sin(2.0 * PI * th);
+
+  return v;
+}
+
+### Component
+id colorspace
+family library
+code &&&
+/* colorspace library */
+vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d ){
+  return a + b * cos(2.0 * PI * (c * t + d));
+}
+
+vec4 rgb2hsv(vec4 c){
+  vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+  vec4 p = c.g < c.b ? vec4(c.bg, K.wz) : vec4(c.gb, K.xy);
+  vec4 q = c.r < p.x ? vec4(p.xyw, c.r) : vec4(c.r, p.yzx);
+
+  float d = q.x - min(q.w, q.y);
+  float e = 1.0e-10;
+  return vec4(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x, c.w);
+}
+
+vec4 hsv2rgb(vec4 c){
+  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+  return vec4(c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y), c.w);
+}
+
+### Component
+id colorspace_extra
+family library
+code &&&
+
+// can probably optimize all hsl functions
+vec4 hsl2rgb(vec4 c){
+  float h = c.x;
+  float s = c.y;
+  float l = c.z;
+
+  if(s == 0.0)
+    return vec4((l + 1.0) / 2.0, (l + 1.0) / 2.0, (l + 1.0) /  2.0, c.w);
+
+  float delta = s / sqrt(1.0 - l * l);
+
+  if(l > 0.0)
+    delta *= (2.0 - l - 1.0);
+  else
+    delta *= (l + 1.0);
+
+  float v = (l + 1.0 + delta) / 2.0;
+  float min = v - delta;
+  s = 1.0 - min / v;
+
+  return hsv2rgb(vec4(h, s, v, c.w));
+}
+
+vec4 hsls2rgb(vec4 c){
+
+  float s = sqrt(c.x * c.x + c.y * c.y);
+  float h;
+
+  if(s == 0.0){
+    h = 0.0;
+  }else{
+    h = atan(c.y, c.x);
+  }
+
+  if(h <= 0.0)
+    h += 2.0 * PI;
+  h /= (2.0 * PI);
+
+  c.x = h;
+  c.y = s;
+
+  return hsl2rgb(c);
+}
+
+
+vec4 rgb2hsls(vec4 c){
+  float h, s, l;
+  float vmin = min(min(c.x, c.y), c.z);
+  float vmax = max(max(c.x, c.y), c.z);
+
+  float delta = vmax - vmin;
+
+  l = (vmax + vmin) - 1.0;
+
+  s = delta * sqrt(1.0 - l * l);
+
+  if(l == -1.0 || l == 1.0)
+    s = 0.0;
+  else if(l > 0.0)
+    s = s / (2.0 - l - 1.0);
+  else if(l <= 0.0)
+    s = s / (l + 1.0);
+
+  if(s == 0.0){
+    h = 0.0;
+  }else {
+    if(c.x == vmax)
+      h = (c.y - c.z) / delta;            // between yellow & magenta
+    else if(c.y == vmax)
+      h = 2.0 + (c.z - c.x) / delta;     // between cyan & yellow
+    else
+      h = 4.0 + (c.x - c.y) / delta;
+    h *= PI / 3.0;
+  }
+
+  // l was *= 0.9999999 brfore import?
+  vec4 r = vec4(s * cos(h), s * sin(h), l, c.w);
+
+  return r;
+
+}
+
+### Component
+id math
+family library
+code &&&
+/* math utility library */
+
+float sinh(float x){
+  return (exp(x) - exp(-1.0 * x)) / 2.0;
+}
+
+float cosh(float x){
+  return (exp(x) + exp(-1.0 * x)) / 2.0;
+}
+
+vec2 CONJ(vec2 z0){
+  return vec2(z0.x, -1.0 * z0.y);
+}
+
+vec2 A(vec2 z0, vec2 z1){
+  return vec2(z0.x + z1.x, z0.y + z1.y);
+}
+
+vec2 M(vec2 z0, vec2 z1){
+  return vec2(z0.x * z1.x - z0.y * z1.y, z0.x * z1.y + z0.y * z1.x);
+}
+
+vec2 S(vec2 z0, vec2 z1){
+  return vec2(z0.x - z1.x, z0.y - z1.y);
+}
+
+vec2 D(vec2 z0, vec2 z1){
+  float r = dot(z1, z1);
+  return vec2((z0.x * z1.x + z0.y * z1.y) / r, (z0.y * z1.x - z0.x * z1.y) / r);
+}
+
+vec2 SQZ(vec2 z0){
+  return M(z0, z0);
+}
+
+vec2 EXPZ(vec2 z0){
+  float f = exp(z0.x);
+  float s, c;
+  s = sin(z0.y);
+  c = cos(z0.y);
+  return vec2(f * c, f * s);
+}
+
+vec2 SINZ(vec2 z0){
+  float s = sin(z0.x);
+  float c = cos(z0.x);
+  return vec2(s * cosh(z0.y), c * sinh(z0.y));
+}
+
+vec2 COSZ(vec2 z0){
+  float s = sin(z0.x);
+  float c = cos(z0.x);
+  return vec2(c * cosh(z0.y), -1.0 * s * sinh(z0.y));
+}
+
+vec2 TANZ(vec2 z0){
+  float s, c;
+  s = sin(2.0 * z0.x);
+  c = cos(2.0 * z0.x);
+  float r = c + cosh(2.0 * z0.y);
+  return vec2(s, sinh(2.0 * z0.y)) / r;
+}
+
+vec2 SINHZ(vec2 z0){
+  float s, c;
+  s = sin(z0.y);
+  c = cos(z0.y);
+  return vec2(sinh(z0.x) * c, cosh(z0.x) * s);
+}
+
+vec2 COSHZ(vec2 z0){
+  float s, c;
+  s = sin(z0.y);
+  c = cos(z0.y);
+  return vec2(cosh(z0.x) * c, sinh(z0.x) * s);
+}
+
+vec2 TANHZ(vec2 z0){
+  float s, c;
+  s = sin(2.0 * z0.y);
+  c = cos(2.0 * z0.y);
+  float r = cosh(2.0 * z0.x) + c;
+  return vec2(sinh(2.0 * z0.x), s) / r;
+}
+
+vec4 _gamma3(vec4 v, float gamma){
+  return vec4(pow(v.xyz, vec3(gamma, gamma, gamma)), v.w);
+}
+
+bool isNan(float val){
+  return ( val < 0.0 || 0.0 < val || val == 0.0 ) ? false : true;
+}
+
+vec2 torus_reduce(vec2 z){
+  z = z + vec2(1.0, 1.0);
+  z = mod(z, 4.0);
+  z = vec2(1.0, 1.0) - abs(z - vec2(2.0, 2.0));
+  return z;
+}
+
+vec2 grid_reduce(vec2 z){
+  z = z + vec2(1.0, 1.0);
+  z = mod(z, 2.0);
+  z = z - vec2(1.0, 1.0);
+  return z;
+}
+
+### Component
+id math_extra
+family library
+code &&&
+
+vec3 rotate3D(vec3 v, vec3 axis, float th){
+  axis = normalize(axis);
+  // compute constants
+  float c = cos(th);
+  float s = sin(th);
+
+  // compute rotation
+  vec3 res;
+
+  res.x = (1.0 + (1.0 - c) * (axis.x * axis.x - 1.0)) * v.x +
+          (axis.z * s + (1.0 - c) * axis.x * axis.y) * v.y +
+          (-1.0 * axis.y * s + (1.0 - c) * axis.x * axis.z) * v.z;
+
+  res.y = (-1.0 * axis.z * s + (1.0 - c) * axis.x * axis.y) * v.x +
+          (1.0 + (1.0 - c) * (axis.y * axis.y - 1.0)) * v.y +
+          (axis.x * s + (1.0 - c) * axis.y * axis.z) * v.z;
+
+  res.z = (axis.y * s + (1.0 - c) * axis.x * axis.z) * v.x +
+          (-1.0 * axis.x * s + (1.0 - c) * axis.y * axis.z) * v.y +
+          (1.0 + (1.0 - c) * (axis.z * axis.z - 1.0)) * v.z;
+
+  return res;
+}
+
+
+
+###Module
+id interference_main
+component main
+flags {lib, root}
+modules {application: interference}
+
+###Module
+id interference
+component interference
+flags {lib}
+modules {t:t_wrap}
+par {N:2.0, waves:4.0, spd:0.02}
+
+### Component
+id interference
+family application
+default_mod interference
+children {}
+includes [additional_funcs]
+code &&&
+  z = z_in;
+
+  const int max_waves = 10;
+  float waves[max_waves + 1];
+  %t%
+
+  // compute val
+  float sum = 0.0;
+  for(int i = 0; i <= max_waves; i++){
+    float th = float(i) * PI / |waves|;
+    th += (float(i) - |waves| / 2.0) * time * |spd|;
+
+    vec2 k = vec2(cos(th), sin(th));
+    waves[i] = plane_wave(|N| * k, z, |N|, time * |spd|);
+    if(float(i) <= |waves|)
+      sum += waves[i];
+  }
+
+  sum = mod(sum / 2.0, 1.0);
+  float val = (sum < 0.5 ? 2.0 * sum : 2.0 - 2.0 * sum);
+
+
+  // compute hue
+  sum = 0.0;
+  for(int i = 0; i <= max_waves; i++){
+    float th = float(i) * PI / |waves|;
+    th += (float(i) - |waves| / 2.0) * time * |spd|;
+
+    vec2 k = vec2(cos(th), sin(th));
+    waves[i] = plane_wave(|N| * k, z, |N|, 2.0 * time * |spd|) / 6.0;
+    if(float(i) <= |waves|)
+      sum += waves[i];
+  }
+
+  sum = mod(sum / 2.0, 1.0);
+  float hue = (sum < 0.5 ? 2.0 * sum : 2.0 - 2.0 * sum);
+
+  color = hsv2rgb(vec4(hue, 1.0, val, 1.0));
+  z = z_in;
+
+
+
+###Module
+id julia_main
+component main
+flags {lib, root}
+modules {application: julia}
+
+###Module
+id julia
+component julia
+flags {lib}
+modules {t:t_julia}
+
+###Module
+id t_julia
+component t_wrap
+flags {lib, wrap}
+modules {t_inner:t_p4}
+zn [1.0+0.0i, 0.0+0.0i, 1.0+0.0i, circle 0.035 1.0]
+
+### Component
+id julia
+family application
+default_mod julia
+children {t:t}
+includes []
+code &&&
+  int j = 0;
+  const int max_iter = 700;
+  float escape_rad = 4.0;
+
+  z = z_in;
+
+  for(int i = 0; i < max_iter; i++){
+    if(dot(z,z) > escape_rad)
+      break;
+
+    %t%
+
+    j += 1;
+  }
+
+    %t%
+    %t%
+    %t%
+
+  float mu = float(j) - log(log(length(z)) / log(2.0) ) / log(2.0);
+
+  if(j != max_iter){
+    //color = hsv2rgb(vec4(float(j) / 256.0, 1.0, 1.0, 1.0));
+    float f1 = 1.0 - 1.0 / (mu / 6.0 + 1.0);
+    float f2 = 1.0 - 1.0 / (mu / 3.0 + 1.0);
+    color = vec4(f1, f2, 1.0, 1.0);
+
+      //hsv2rgb(vec4(mu / 20.0, 1.0, 1.0, 1.0));
+  }else
+    color = vec4(0.0,0.0,0.0,1.0);
+
+  z = z_in;
+
+
+
+### Component
+id seed_main
+family main
+includes [header, colorspace, math, math_extra, distance_util]
+code &&&
+
+void main() {
+  // into z coordinates
+  vec2 z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(kernel_dim, kernel_dim) - vec2(1.0, 1.0);
+
+  vec4 seed;
+  %seed%
+
+  gl_FragColor = seed;
+}
+
+
+### Component
+id main
+family main
+includes [header, colorspace, math]
+code &&&
+
+void main() {
+  vec4 color;
+  vec2 z, z_in;
+
+  // into z coordinates
+  z = vec2(2.0, 2.0) * gl_FragCoord.xy / vec2(kernel_dim, kernel_dim) - vec2(1.0, 1.0);
+  z_in = z;
+
+  %application%
+
+  gl_FragColor = color;
+}
+
+### Component
+id disp
+family disp
+includes [header, colorspace]
+code &&&
+
+void main() {
+  vec4 frame;
+  vec2 clipSpace = gl_FragCoord.xy / vec2(kernel_dim, kernel_dim);
+  vec2 z = vec2(2.0, 2.0) * clipSpace - vec2(1.0, 1.0);
+  frame = texture2D(fb, clipSpace);
+
+  %post%
+
+  frame.a = 1.0; // this value is used by webgl
+  gl_FragColor = frame;
+}
+
+
+### Component
+id vert
+family vert
+code &&&
+attribute vec2 a_position;
+
+void main() {
+  gl_Position = vec4(a_position, 0, 1);
+}
+
+
+
+### Pattern
+id dev
+seed   seed_dev_distance
+main   epimorphism_dev_main
+disp   disp_id
+vert   vert
+defaultImageLib default_images
+imageLib 1024
+
+### Pattern
+id test
+seed   seed_dev
+main   epimorphism_dev_main
+disp   disp_id
+vert   vert
+defaultImageLib default_images
+imageLib all_images
+
+### Pattern
+id analysis
+seed   seed_dev
+main   analysis_main
+disp   disp_id
+vert   vert
+defaultImageLib default_images
+imageLib all_images
+
+### Pattern
+id prod
+seed   seed_main
+main   epimorphism_main
+disp   disp_main
+vert   vert
+defaultImageLib default_images
+imageLib 1024
+
+### Pattern
+id interference
+seed   seed_na
+main   interference_main
+disp   disp_id
+vert   vert
+defaultImageLib default_images
+imageLib all_images
+
+### Pattern
+id julia
+seed   seed_na
+main   julia_main
+disp   disp_id
+vert   vert
+defaultImageLib default_images
+imageLib all_images
+
+
+
+###Module
+id disp_id
+component disp
+modules {post: post_id}
+flags {root}
+
+###Module
+id post_id
+component post_id
+flags {lib}
+
+###Module
+id post_hlim
+component post_hlim
+flags {lib, post_hlim}
+par {gamma:1.5, hue:0.0, spread:0.5, lgv:0.5, sat_sc:1.0, inc_sc:0.1, gofs: 0.3}
+
+### Component
+id post_id
+family post
+default_mod post_id
+code &&&
+// Nothing
+
+### Component
+id post_hlim
+family post
+default_mod post_hlim
+includes []
+code &&&
+// optimize me!
+vec4 frame_i = frame;
+//frame = _gamma3(frame, 1.2);//|gamma|);
+
+frame = rgb2hsv(frame);
+
+float inc = (frame.a - DEPTH_INC) / (1.0 - DEPTH_INC);
+inc = |inc_sc| * inc;
+float gofs = |gofs| * frame_i.x;
+
+vec4 c0 = hsv2rgb(vec4(0.9 + 1.0 * gofs + 1.0 * inc + |hue|, 1.0, 0.5, 1.0));
+vec4 c1 = hsv2rgb(vec4(0.9 + 1.0 * gofs + 0.0 * inc + |hue| + |spread| / 2.0, 1.0, |lgv|, 1.0));
+vec4 c2 = hsv2rgb(vec4(0.9 + 0.8 * gofs + 1.0 * inc + |hue| - |spread| / 2.0, 1.0, -1.0 * |lgv|, 1.0));
+
+vec4 res, r0, r1;
+float f;
+
+if(frame.x < 1.0 / 3.0){
+  f = 3.0 * frame.x;
+  r0 = c0;
+  r1 = c1;
+}else if(frame.x < 2.0 / 3.0){
+  f = 3.0 * frame.x - 1.0;
+  r0 = c1;
+  r1 = c2;
+}else{
+  f = 3.0 * frame.x - 2.0;
+  r0 = c2;
+  r1 = c0;
+}
+res = (1.0 - f) * r0 + f * r1;
+
+// modulate hue
+res = rgb2hsv(res);
+frame.x = res.x;
+frame.y *= |sat_sc|;
+frame = hsv2rgb(frame);
+//float sc = (frame.x + frame.y + frame.z) / 3.0;
+//sc = sqrt(sqrt(sc));
+//frame = vec4(sc, sc, sc, frame.a);
+
+### Component
+id post_pallet1
+family post
+default_mod post_pallet1
+includes []
+code &&&
+vec4 frame_i = frame;
+//frame = _gamma3(frame, 1.2);//|gamma|);
+
+float val = rgb2hsv(frame).z;
+
+float inp = (frame.x + frame.y + frame.z);// / 6.0 + 0.5 * frame.a;
+
+vec3 res = pal(inp, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(2.0,1.0,0.0),vec3(0.5,0.20,0.25));
+//vec3(0.5,0.5,0.5), vec3(0.5,0.5,0.5), vec3(1.0,1.0,1.0), vec3(0.0,0.10,0.20)
+frame = frame_i;//vec4(res, 1.0);
+
+frame = rgb2hsv(frame);
+// frame.y += 0.1 * frame.a * frame.a * frame.a;
+frame.z *= (frame.a - DEPTH_INC);//val;
+frame = hsv2rgb(frame);
+
+
+
+### Module
+id test_pattern_main
+component main
+modules {application: test_pattern}
+flags {root}
+
+###Module
+id test_pattern
+component test_pattern
+flags {lib}
+
+### Component
+id test_pattern
+family application
+default_mod test_pattern
+code &&&
+  z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+  color = vec4(z, 0.0, 1.0);
+
+
+###Module
+id test_image
+component test_image
+images [textures/simplegeom/tile_grid1.png, textures/simplegeom/tile_grid3.png]
+flags {lib}
+
+### Component
+id test_image
+family application
+default_mod test_image
+code &&&
+  z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+  color = texture2D(aux[#0], z);
+  //color += 0.5 * texture2D(aux[#1], z);
+
+
+###Module
+id analysis
+component epimorphism
+flags {lib}
+modules {seed:seed_analysis, t:t_wrap_zo, color:color_id, reduce:torus_reduce}
+
+###Module
+id seed_analysis
+component seed_analysis
+flags {analysis}
+par {w:0.05}
+
+### Component
+id seed_analysis
+family seed
+default_mod seed_analysis
+children {t:t, reduce:reduce}
+includes []
+code &&&
+  vec2 z_i = z;
+  %t%
+  %reduce%
+
+  float wx = (abs(z.x) + |w| - 1.0) / |w|;
+  float wy = (abs(z.y) + |w| - 1.0) / |w|;
+
+  float w = max(0.0, max(wx, wy));
+  float mask = ceil(w);
+
+  // could fix this if cared
+  if(w < 0.00001){
+    vec2 fr = fract((z + vec2(1,1)) / vec2(2,2));
+    seed = vec4(0, fr.x, fr.y, 1.0);
+  }else{
+    seed = vec4(w, 0, 0, 1.0);
+  }
+
+  z = z_i;
+
+
+
+###Module
+id no_reduce
+component reduce
+flags {lib}
+sub {reduce:z}
+
+###Module
+id grid_reduce
+component reduce
+flags {lib}
+sub {reduce:grid_reduce(z)}
+
+###Module
+id torus_reduce
+component reduce
+flags {lib}
+sub {reduce:torus_reduce(z)}
+
+### Component
+id reduce
+family reduce
+default_mod torus_reduce
+children {}
+includes []
+code &&&
+z = ~reduce~;
+
+
+###Module
+id switch
+component switch
+modules {m0:id, m1:id}
+par {intrp:0.0}
+sub {var:v0, dim:float}
+
+###Module
+id smooth_switch
+component smooth_switch
+modules {m0:id, m1:id}
+par {intrp:0.0}
+sub {var:v0, dim:float}
+
+### Module
+id id
+component id
+
+### Component
+id switch
+family switch
+default_mod switch
+children {m0:*, m1:*}
+includes []
+code &&&
+~dim~ v0, v1, init;
+init = ~var~;
+%m0%
+v0 = ~var~;
+
+~var~ = init;
+%m1%
+v1 = ~var~;
+
+~var~ = mix(v0, v1, clamp(0.0, 1.0, |intrp|));
+
+### Component
+id smooth_switch
+family switch
+default_mod smooth_switch
+children {m0:*, m1:*}
+includes []
+code &&&
+~dim~ v0, v1, init;
+
+init = ~var~;
+%m0%
+v0 = ~var~;
+
+~var~ = init;
+%m1%
+v1 = ~var~;
+
+~var~ = mix(v0, v1, smoothstep(0.0, 1.0, |intrp|));
+
+### Component
+id id
+family nul
+
+
+###Module
+id vert
+component vert
+flags {root}
+
+
+
+###Module
+id seed_distance1
+component seed_distance1
+flags {lib, distance}
+par {d1: wave 0.044 0.1 0.45}
+modules {tex:tex_color_dist1}
+
+###Module
+id seed_distance2
+component seed_distance2
+flags {lib, distance}
+par {d2: wave 0.054 0.1 0.45}
+modules {tex:tex_color_dist2}
+
+###Module
+id tex_color_dist1
+component tex_simple
+flags {lib}
+images [textures/simplegeom/tile_grid1.png]
+par {scale:1.0}
+scripts [randomize dly:40 spd:0.04 lib:1024 dim:vec4 sub:0 typ:image]
+
+###Module
+id tex_color_dist2
+component tex_simple
+flags {lib}
+images [textures/simplegeom/tile_grid1.png]
+par {scale:1.0}
+scripts [randomize dly:43 spd:0.04 lib:1024 dim:vec4 sub:0 typ:image]
+
+### Component
+id tex_simple
+family seed_color
+default_mod tex_color_dist
+code &&&
+ofs = vec2(2.0, 2.0) * ofs - vec2(1.0, 1.0);
+ofs = |scale| * torus_reduce(ofs);
+ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+seed = texture2D(aux[#0], ofs);
+
+###Component
+id seed_distance1
+family seed
+default_mod seed_distance
+children {tex:seed_color}
+code &&&
+
+vec3 r_eye = vec3(0.0, 0.0, -1.5);
+vec3 r_dir = normalize(vec3(z.x, z.y, 1.0));
+
+vec4 res = inter1(r_eye, r_dir, |d1|, time);
+float hit = res.w;
+vec2 ofs = res.xy;
+
+// generate color(z)
+if (hit >= 0.0) {
+  vec3 pos = r_eye + hit * r_dir;
+  vec3 n = calcNormal1(pos, |d1|, time);  
+
+  %tex%
+
+  float v = (seed.r + seed.g + seed.b) / 3.0;
+
+  // compute phong lighting
+  float shininess = 16.0; 
+  vec3 ev = normalize(hit * r_dir);
+  vec3 ref_ev = reflect(ev, n);
+
+  vec3 light = vec3(0.0);
+
+  { 
+    vec3 light_pos   = vec3(0.5, 5.0, -4.5);    
+    vec3 light_color = vec3(1.0, 0.7, 0.7);
+    
+    vec3 vl = normalize(light_pos - pos + vec3(seed.r));
+    
+    float diffuse  = max(0.0, dot(vl, n));
+    float specular = max(0.0, dot(vl, ref_ev));
+    specular = pow(specular, shininess * v);
+    
+    light += light_color * (diffuse + specular);
+  }
+
+/*
+  { 
+    vec3 light_pos   = vec3(-10.0, cos(time / 5.0) * 20.0, cos(time / 5.0) * -20.0);
+    //vec3 light_pos   = vec3(-3.0, -5.0, -9.0);        
+    vec3 light_color = vec3(0.3, 0.7, 1.0);
+    
+    vec3 vl = normalize(light_pos - pos) + vec3(seed.b);
+    
+    float diffuse  = max(0.0, dot(vl, n));
+    float specular = max(0.0, dot(vl, ref_ev));
+    specular = pow(specular, shininess * (seed.g + 0.1));
+    
+    light += light_color * (diffuse + specular);
+  }
+*/
+
+  // illuminate texture
+  seed = vec4(light, 1.0) * seed.brga;
+}else
+  seed = vec4(0.0, 0.0, 0.0, 0.0);
+
+
+//seed = vec4(z.x, z.y, 0.0, 1.0);
+
+
+###Component
+id seed_distance2
+family seed
+default_mod seed_distance2
+children {tex:seed_color}
+code &&&
+
+vec3 r_eye = vec3(0.0, 0.0, -1.5);
+vec3 r_dir = normalize(vec3(z.x, z.y, 1.0));
+
+vec4 res = inter2(r_eye, r_dir, |d2|, time);
+float hit = res.w;
+vec2 ofs = res.xy;
+
+// generate color(z)
+if (hit >= 0.0) {
+  vec3 pos = r_eye + hit * r_dir;
+  vec3 n = calcNormal2(pos, |d2|, time);  
+
+  %tex%
+
+  float v = (seed.r + seed.g + seed.b) / 3.0;
+
+  // compute phong lighting
+  float shininess = 16.0; 
+  vec3 ev = normalize(hit * r_dir);
+  vec3 ref_ev = reflect(ev, n);
+
+  vec3 light = vec3(0.0);
+
+  { 
+    //vec3 light_pos   = vec3(5.0 * cos(time), 5.0 * sin(time), -5.0);
+    vec3 light_pos   = vec3(5.0, 5.0, -8.0);    
+    vec3 light_color = vec3(1.0, 0.7, 0.7);
+    
+    vec3 vl = normalize(light_pos - pos + vec3(seed.r));
+    
+    float diffuse  = max(0.0, dot(vl, n));
+    float specular = max(0.0, dot(vl, ref_ev));
+    specular = pow(specular, shininess * v);
+    
+    light += light_color * (diffuse + specular);
+  }
+
+  // illuminate texture
+  seed = vec4(light, 1.0) * seed;
+}else
+  seed = vec4(0.0, 0.0, 0.0, 0.0);
+
+
+
+###Module
+id seed_na
+component seed_main
+flags {lib, dev, root}
+modules {seed:seed_nothing}
+
+###Module
+id seed_dev
+component seed_main
+flags {lib, dev, root}
+modules {seed:seed_wca}
+
+###Module
+id seed_dev_distance
+component seed_main
+flags {lib, dev, root}
+modules {seed:seed_distance1}
+
+###Module
+id seed_nothing
+component seed_nothing
+flags {lib}
+
+### Component
+id seed_nothing
+family seed
+default_mod seed_nothing
+code &&&
+seed = vec4(0.0, 0.0, 0.0, 0.0);
+
+
+###Module
+id seed_buf
+component seed_buf
+flags {lib}
+
+###Component
+id seed_buf
+family seed
+default_mod seed_buf
+code &&&
+frame_z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+seed = texture2D(seedBuf, frame_z);
+
+
+###Module
+id seed_wrap
+component seed_wrap
+flags {lib}
+modules {t_seed:t_wrap, seed_body:seed_buf, seed_mod:mod_id, reduce:torus_reduce}
+
+###Component
+id seed_wrap
+family seed
+default_mod seed_wrap
+children {seed_body:seed, t_seed:t, seed_mod:seed_mod, reduce:reduce}
+code &&&
+%reduce% // add an additional layer of symmetry
+%t_seed%
+%reduce%
+%seed_body%
+%seed_mod%
+
+
+###Module
+id seed_simple
+component seed_simple
+flags {lib}
+par {w:0.2, alpha:1.0}
+
+### Component
+id seed_simple
+family seed
+default_mod seed_simple
+includes []
+code &&&
+float wx = (abs(z.x) + |w| - 1.0) / |w|;
+float wy = (abs(z.y) + |w| - 1.0) / |w|;
+
+float w = max(0.0, max(wx, wy));
+float mask = ceil(w);
+
+seed = hsv2rgb(vec4(0.0, 1.0, w, mask * |alpha|));
+
+
+###Module
+id seed_img1
+component seed_simple_img
+flags {img}
+images [textures/simplegeom/tile_grid1.png]
+par {w:0.2, alpha:1.0}
+
+### Component
+id seed_simple_img
+family seed
+default_mod seed_simple_img
+code &&&
+float wx = (abs(z.x) + |w| - 1.0) / |w|;
+float wy = (abs(z.y) + |w| - 1.0) / |w|;
+
+float w = max(0.0, max(wx, wy));
+float mask = ceil(w);
+
+float sc = 0.25;
+vec2 ofs = mod(sc * vec2(wx, wy), 1.0);
+seed = texture2D(aux[#0], ofs);
+
+// mask w
+seed.w *= mask * |alpha|;
+
+// preserve val
+seed = rgb2hsv(seed);
+seed.z *= w;
+seed = hsv2rgb(seed);
+
+
+###Module
+id seed_multi
+component seed_multi
+flags {lib, multi}
+modules {reduce:torus_reduce, t:t_wrap, t_seed0:t_affine, seed0:seed_wca, t_seed1:t_affine, seed1:seed_nothing, t_seed2:t_affine, seed2:seed_nothing}
+
+
+### Component
+id seed_multi
+family seed
+default_mod seed_multi
+children {seed0:seed, seed1:seed, seed2:seed}
+code &&&
+vec4 seed0, seed1, seed2;
+
+%t_seed0%
+%reduce%
+%seed0%
+seed0 = seed;
+
+%t_seed1%
+%reduce%
+%seed1%
+seed1 = seed;
+
+%t_seed2%
+%reduce%
+%seed2%
+seed2 = seed;
+
+float a = 1.0 - (1.0 - seed0.a) * (1.0 - seed1.a) * (1.0 - seed2.a);
+
+if(a == 0.0)
+  seed = vec4(0.0, 0.0, 0.0, 0.0);
+else {
+  vec4 m1 = mix(seed0.a * seed0, seed1, seed1.a);
+  vec4 m2 = mix(m1, seed2, seed2.a);
+  seed = 1.0 / a * m2;
+}
+seed.a = a;
+
+
+
+###Module
+id mod_id
+component mod_id
+flags {lib}
+
+### Component
+id mod_id
+family seed_mod
+default_mod mod_id
+code &&&
+// Nothing
+
+
+###Module
+id mod_pal
+component mod_pal
+flags {lib}
+par {pal:1.0}
+
+### Component
+id mod_pal
+family seed_mod
+default_mod mod_pal
+code &&&
+//float hofs = 0.75 * freqData(0.1 * (z.x + wx + wy + w));
+float hofs = 0.0;
+// palletize as function of z
+float l = 0.08 * sqrt(t_z.x * t_z.x + t_z.y * t_z.y);
+float l2 = 0.08 * sqrt(z_in.x * z_in.x + z_in.y * z_in.y);
+vec4 del = vec4(pal(l, vec3(0.5,0.5,0.5), vec3(0.5,0.5,0.5), vec3(2.0,1.0,0.0), vec3(l2 + 0.5,0.20,0.25)), 0);
+
+seed = rgb2hsv(seed);
+seed.x += hofs + |pal| * del.x;
+seed = hsv2rgb(seed);
+
+
+
+###Module
+id seed_wca
+component seed_wca
+flags {lib, wca}
+par {smooth_mask: 50.0}
+modules {w:w_lines_border_anim, wt:wt_id, a:alpha_solid, seed_color:simple_color}
+
+###Module
+id seed_wca_tex
+component seed_wca
+flags {lib, wca}
+par {smooth_mask: 50.0}
+modules {w:w_lines_border, wt:wt_id, a:alpha_solid, seed_color:tex_color}
+
+### Component
+id seed_wca
+family seed
+default_mod seed_wca
+children {w:w, wt:wt, a:a, seed_color:seed_color}
+code &&&
+vec4 wdt;
+float w, a, wx, wy, mask;
+
+// w = (w, alpha, wx, wy)
+%w%
+
+// w is basically just used for value scaling * alpha
+w = wdt.x;
+float w_orig = w;
+%wt%
+
+a = wdt.y;
+%a%
+if(|smooth_mask| > 0.0)
+  a = a * smoothstep(0.0, 1.0, |smooth_mask|*w_orig); // apply SMOOTH_MASK, makes a vary better to 0
+
+%seed_color%
+
+
+
+###Module
+id alpha_id
+component alpha
+flags {lib}
+par {alpha:1.0}
+sub {a_exp:a}
+
+###Module
+id alpha_no
+component alpha
+flags {lib}
+par {alpha:1.0}
+sub {a_exp:1.0}
+
+###Module
+id alpha_solid
+component alpha
+flags {lib}
+par {alpha:1.0}
+sub {a_exp:a * |alpha|}
+
+###Module
+id alpha_sqrt
+component alpha
+flags {lib}
+par {alpha:1.0}
+sub {a_exp:sqrt(a) * |alpha|}
+
+###Module
+id alpha_linear
+component alpha
+flags {lib}
+par {alpha:1.0}
+sub {a_exp:w * a * |alpha|}
+
+###Module
+id alpha_circ
+component alpha
+flags {lib}
+par {alpha:1.0}
+sub {a_exp:sqrt(1.0 - (1.0 - w) * (1.0 - w)) * a * |alpha|}
+
+### Component
+id alpha
+family alpha
+default_mod alpha_id
+code &&&
+a = ~a_exp~;
+
+
+
+###Module
+id seed_color_id
+component seed_color_id
+flags {lib}
+
+### Component
+id seed_color_id
+family seed_color
+default_mod seed_color_id
+code &&&
+// Nothing
+
+
+###Module
+id simple_color
+component simple_color
+flags {lib}
+par {spd:0.0, rot:0.0, sat:1.0, val:1.0}
+
+### Component
+id simple_color
+family seed_color
+default_mod simple_color
+code &&&
+seed = hsv2rgb(vec4(time * |spd| + |rot|, |sat|, w * |val|, a));
+
+
+###Module
+id border_color
+component border_color
+flags {lib}
+
+### Component
+id border_color
+family seed_color
+default_mod border_color
+code &&&
+seed = hsv2rgb(vec4((w > 0.8 ? 0.66 : 0.3), 1.0, 1.0, a));
+
+
+###Module
+id tex_color_test
+component tex_color
+flags {lib}
+images [textures/simplegeom/tile_grid3.png]
+par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0}
+
+###Module
+id tex_color
+component tex_color
+flags {lib}
+images [textures/simplegeom/tile_grid1.png]
+par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0}
+
+### Component
+id tex_color
+family seed_color
+default_mod tex_color
+code &&&
+vec2 ofs = wdt.zw;
+ofs = vec2(2.0, 2.0) * ofs - vec2(1.0, 1.0);
+ofs = |scale| * torus_reduce(ofs);
+ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+seed = texture2D(aux[#0], ofs);
+seed = rgb2hsv(seed);
+
+// multiplying the value by w makes things look nice
+// should possibly put this in a flag
+seed = hsv2rgb(vec4(seed.x + time * |spd| + |rot|, |sat| * seed.y, |val| * seed.z * w, a * seed.a));
+
+
+###Module
+id tex_color_scroll
+component tex_color_scroll
+flags {lib}
+images [textures/simplegeom/tile_grid1.png]
+par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0}
+
+### Component
+id tex_color_scroll
+family seed_color
+default_mod tex_color_scroll
+code &&&
+vec2 ofs = wdt.zw;
+ofs = vec2(2.0, 2.0) * ofs - vec2(1.0, 1.0);
+//float ti = 0.023 * time * |tex_spd|;
+//vec2 rot = mod(vec2(cos(ti) * ofs.x - sin(ti) * ofs.y, sin(ti) * ofs.x + cos(ti) * ofs.y), 1.0);
+ofs = |scale| * ofs;
+ofs.x += time * 0.025 * |tex_spd|;
+ofs.y += cos(time * 0.027 * |tex_spd|);
+ofs = torus_reduce(ofs);
+ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+seed = texture2D(aux[#0], ofs);
+seed = rgb2hsv(seed);
+
+// multiplying the value by w makes things look nice
+// should possibly put this in a flag
+seed = hsv2rgb(vec4(time * |spd| + |rot| + seed.x, |sat| * seed.y, |val| * seed.z * w, a * seed.a));
+
+
+###Module
+id fb_color
+component fb_color
+flags {lib}
+par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0}
+
+### Component
+id fb_color
+family seed_color
+default_mod fb_color
+code &&&
+vec2 ofs = mod(|scale| * wdt.zw, 1.0);
+
+//vec4 bg_seed = seed;
+
+seed = texture2D(fb, ofs);
+seed = rgb2hsv(seed);
+
+seed = hsv2rgb(vec4(time * |spd| + |rot| + seed.x, |sat| * seed.y, |val| * seed.z * w, a));// * seed.a));
+
+//seed = bg_seed * 0.2 + seed * 0.8;
+
+
+
+###Module
+id w_nul
+component w_nul
+flags {lib}
+
+### Component
+id w_nul
+family w
+default_mod w_nul
+code &&&
+wdt = vec4(0.0, 0.0, 0.0, 0.0);
+
+
+###Module
+id w_circle
+component w_circle
+flags {lib}
+par {w:0.2, r:0.8, N:8, wy_sc:0.25}
+
+### Component
+id w_circle
+family w
+default_mod w_circle
+code &&&
+float r = length(z);
+wx = atan(z.y, z.x) * |N| / (2.0 * PI);
+wy = |wy_sc| * (r - |r|) / |w| - 0.5;
+w = 1.0 - 2.0 * abs(r - |r|) / |w|;
+w = max(0.0, w);
+mask = ceil(w);
+
+wdt = vec4(w, mask, wx, wy);
+
+
+###Module
+id w_lines_inner
+component w_lines_inner
+flags {lib}
+par {w:0.2}
+
+### Component
+id w_lines_inner
+family w
+default_mod w_lines_inner
+code &&&
+wx = (z.x + |w|) / (2.0 * |w|);
+wy = (z.y + |w|) / (2.0 * |w|);
+w = 0.0;
+if(abs(z.x) < |w|)
+  w = (1.0 - abs(z.x) / |w|);
+if(abs(z.y) < |w|)
+  w = max(1.0 - abs(z.x) / |w|, 1.0 - abs(z.y) / |w|);
+wdt = vec4(w, ceil(w), wx, wy);
+
+
+###Module
+id w_lines_border
+component w_lines_border
+flags {lib}
+par {w:0.2}
+
+### Component
+id w_lines_border
+family w
+default_mod w_lines_border
+code &&&
+wx = (abs(z.x) + |w| - 1.0) / |w|;
+wy = (abs(z.y) + |w| - 1.0) / |w|;
+
+w = max(0.0, max(wx, wy));
+mask = ceil(w);
+
+wx = (z.x + 2.0 * |w|) / (2.0 * |w|);
+wy = (z.y + 2.0 * |w|) / (2.0 * |w|);
+
+wdt = vec4(w, mask, wx, wy);
+
+
+###Module
+id w_lines_lr
+component w_lines_lr
+flags {lib}
+par {w:0.2}
+
+### Component
+id w_lines_lr
+family w
+default_mod w_lines_lr
+code &&&
+w = 0.0;
+
+if(z.x > (1.0 - |w|)){
+  w = (z.x - (1.0 - |w|)) / |w|;
+}
+else if(z.x < -1.0 * (1.0 - |w|)){
+  w = (-1.0 * (1.0 - |w|) - z.x) / |w|;
+}
+wx = (z.x + 2.0 * |w|) / (2.0 * |w|);
+wy = (z.y + 2.0 * |w|) / (2.0 * |w|);
+wdt = vec4(w, ceil(w), wx, wy);
+
+
+###Module
+id w_lines_stag
+component w_lines_stag
+flags {lib}
+par {w:0.2}
+
+### Component
+id w_lines_stag
+family w
+default_mod w_lines_stag
+code &&&
+
+wx = (z.x + 2.0 * |w|) / (2.0 * |w|);
+wy = (z.y + 2.0 * |w|) / (2.0 * |w|);
+w = 0.0;
+if(z.x > (1.0 - |w|))
+  w = (z.x - (1.0 - |w|)) / |w|;
+if(z.y > (1.0 - |w|))
+  w = (z.y - (1.0 - |w|)) / |w|;
+if(z.x < -1.0 * (1.0 - |w|))
+  w = (-1.0 * (1.0 - |w|) - z.x) / |w|;
+if(z.y < -1.0 * (1.0 - |w|) && z.x < (1.0 - |w|))
+  w = (-1.0 * (1.0 - |w|) - z.y) / |w|;
+wdt = vec4(w, ceil(w), wx, wy);
+
+###Module
+id w_square
+component w_square
+flags {lib}
+par {w:0.3}
+
+###Module
+id w_square_full
+component w_square
+flags {lib}
+par {w:1.0}
+
+### Component
+id w_square
+family w
+default_mod w_square
+code &&&
+wx = 0.0;
+wy = 0.0;
+w = 0.0;
+if(z.x < |w| && z.x > -1.0 * |w| && z.y < |w| && z.y > -1.0 * |w|){
+  w = min((1.0 - abs(z.x) / |w|), (1.0 - abs(z.y) / |w|));
+  wx = (z.x + |w|) / (2.0 * |w|);
+  wy = (z.y + |w|) / (2.0 * |w|);
+}
+
+wdt = vec4(w, ceil(w), wx, -1.0 * wy);
+
+
+
+### Component
+id anti_grid_fade
+family w
+default_mod anti_grid_fade
+code &&&
+wx = 0.0;
+wy = 0.0;
+z = mod(floor(5.0 * |n|) / 2.0 * z, 1.0);
+if((z.x > 0.5 * (1.0 - |w|) && z.x < 0.5 * (1.0 + |w|)) && (z.y < 0.5 * (1.0 + |w|) && z.y > 0.5 * (1.0 - |w|))){
+  wx = 0.5 * (2.0 * z.x - 1.0) / |w| + 0.5;
+  wy = 0.5 * (2.0 * z.y - 1.0) / |w| + 0.5;
+  w = min((1.0 - 2.0 * abs(z.y - 0.5) / |w|), (1.0 - 2.0 * abs(z.x - 0.5) / |w|));
+}
+wdt = vec4(w, (w < 0.0 ? 0.0 : 1.0), wx, wy);
+
+### Component
+id grid_fade
+family w
+default_mod grid_fade
+code &&&
+wx = 0.0;
+wy = 0.0;
+z = mod(floor(5.0 * |n|) / 2.0 * z, 1.0);
+if((z.x > 0.5 * (1.0 - |w|) && z.x < 0.5 * (1.0 + |w|))){
+  wx = 0.5 * (2.0 * z.x - 1.0) / |w| + 0.5;
+  wy = 0.5 * (2.0 * z.y - 1.0) / |w| + 0.5;
+  w = (1.0 - 2.0 * abs(z.x - 0.5) / |w|);
+}
+if((z.y < 0.5 * (1.0 + |w|) && z.y > 0.5 * (1.0 - |w|))){
+  wx = 0.5 * (2.0 * z.x - 1.0) / |w| + 0.5;
+  wy = 0.5 * (2.0 * z.y - 1.0) / |w| + 0.5;
+  w = max((1.0 - 2.0 * abs(z.x - 0.5) / |w|), (1.0 - 2.0 * abs(z.y - 0.5) / |w|));
+}
+wdt = vec4(w, (w < 0.0 ? 0.0 : 1.0), wx, wy);
+
+
+
+###Module
+id wt_id
+component wt
+flags {lib}
+sub {wt_exp:w}
+
+###Module
+id wt_sq
+component wt
+flags {lib}
+sub {wt_exp:w * w}
+
+###Module
+id wt_inv
+component wt
+sub {wt_exp:1.0 - w}
+
+###Module
+id wt_circ
+component wt
+flags {lib}
+sub {wt_exp:sqrt(1.0 - (1.0 - w) * (1.0 - w))}
+
+###Module
+id wt_inv_circ
+component wt
+sub {wt_exp:1.0 - sqrt(1.0 - (1.0 - w) * (1.0 - w))}
+
+### Component
+id wt
+family wt
+default_mod wt_id
+code &&&
+w = ~wt_exp~;
+
+
+
+###Module
+id t_id
+component t_id
+
+###Module
+id t_wrap
+component t_wrap
+flags {lib, wrap}
+modules {t_inner:t_z}
+zn [1.0+0.0i, 0.0+0.0i, 1.0+0.0i, 0.0+0.0i]
+
+###Module
+id t_affine
+component t_affine
+flags {farm1, lib, wrap}
+modules {t_inner:t_z}
+zn [1.0+0.0i, 0.0+0.0i]
+
+###Module
+id t_wrap_zo
+component t_wrap
+flags {all, lib, wrap}
+modules {t_inner:t_z}
+zn [1.1+0.0i, 0.0+0.0i, 1.0+0.0i, 0.0+0.0i]
+
+###Module
+id t_wrap_z1
+component t_wrap
+flags {all, lib, wrap}
+modules {t_inner:t_z}
+zn [4.0+0.0i, 0.0+0.0i, 1.0+0.0i, 0.0+0.0i]
+
+###Module
+id t_wrap_zo'
+component t_wrap
+flags {all, lib, wrap}
+modules {t_inner:t_z}
+zn [1.1+0.0i, 0.0+0.0i, 0.0+1.0i, 1.0+0.0i]
+
+###Module
+id t_wrap_zo'1
+component t_wrap
+flags {all', wrap}
+modules {t_inner:t_z}
+zn [circle 0.005 1.0, 0.0+0.0i, 0.0+1.0i, 1.0+0.0i]
+
+###Module
+id t_wrap_zo'2
+component t_wrap
+flags {all', wrap}
+modules {t_inner:t_z}
+zn [1.1+0.0i, rose 0.004 0.8 5.0 -0.8, 0.0+1.0i, 1.0+0.0i]
+
+###Module
+id t_wrap_zo'3
+component t_wrap
+flags {all', wrap}
+modules {t_inner:t_z}
+zn [1.1+0.0i, 0.0+0.0i, 0.0+1.0i, rose 0.002 1.1 4.0 0.0]
+
+###Module
+id t_wrap_zo'4
+component t_wrap
+flags {all', wrap}
+modules {t_inner:t_z}
+zn [circle 0.005 1.0, 0.0+0.0i, 0.0+1.0i, rose 0.0025 1.1 4.0 0.0]
+
+
+### Component
+id t_id
+family t
+default_mod t_id
+code &&&
+// Nothing
+
+### Component
+id t_wrap
+family t
+default_mod t_wrap
+children {t_inner:t_inner}
+code &&&
+z = M(zn[#0], z) + zn[#1];
+%t_inner%
+z = M(zn[#2], z) + zn[#3];
+
+### Component
+id t_affine
+family t
+default_mod t_affine
+children {t_inner:t_inner}
+code &&&
+z = M(zn[#0], z) + zn[#1];
+%t_inner%
+
+
+
+###Module
+id t_z
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:z}
+
+###Module
+id t_cos
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:cos(z)}
+
+###Module
+id t_sin
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:sin(z)}
+
+###Module
+id t_cosh
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:cosh(z)}
+
+###Module
+id t_sinh
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:sinh(z)}
+
+###Module
+id t_tan
+component t_sub
+flags {all, lib}
+sub {t_expr:tan(z)}
+
+###Module
+id t_tanh
+component t_sub
+flags {all, lib}
+sub {t_expr:tanh(z)}
+
+###Module
+id t_exp
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:exp(z)}
+
+###Module
+id t_p0
+component t_sub
+sub {t_expr:z / (z + 1) + z / (z - 1)}
+
+###Module
+id t_p1
+component t_sub
+flags {no}
+sub {t_expr:0.5 * (1 - 5 * z * z * z / 3)}
+
+###Module
+id t_p2
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:0.9*(1 - z * z)}
+
+###Module
+id t_p3
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:z * (1 + z) / 2}
+
+###Module
+id t_p4
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:z * z}
+
+###Module
+id t_tp0
+component t_sub
+flags {all, lib}
+sub {t_expr:1.2 * (1 - (z * z + tanh(z)) / 2)}
+
+###Module
+id t_tp1
+component t_sub
+flags {all, lib}
+sub {t_expr:cos(z) - tanh(z)}
+
+###Module
+id t_tp2
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:(z + exp(z)) / 2}
+
+###Module
+id t_tp3
+component t_sub
+flags {all, lib}
+sub {t_expr:(sin(z) + tan(z)) / 2}
+
+###Module
+id t_tp4
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:0.8*(cosh(z) + exp(z))}
+
+###Module
+id t_tp5
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:z * cos(z)}
+
+###Module
+id t_tp6
+component t_sub
+flags {all, all_seed, lib}
+sub {t_expr:(cosh(z) + sinh(z)) / 2}
+
+###Module
+id t_inv
+component t_sub
+sub {t_expr:1.0 / z}
+
+###Module
+id t_zti
+component t_sub
+flags {all, lib}
+sub {t_expr:2.0 * z / tan (z * i)}
+
+###Module
+id t_f0
+component t_sub
+flags {all, lib, new}
+sub {t_expr:z * cosh(z)}
+
+###Module
+id t_f1
+component t_sub
+flags {lib}
+sub {t_expr:0.8 * (cosh(z) + z * z + i)}
+
+###Module
+id t_f2
+component t_sub
+flags {all, lib, new}
+sub {t_expr:sin(z) * cosh(z)}
+
+###Module
+id t_f3
+component t_sub
+flags {lib}
+sub {t_expr:sin(z*z) * sin(z * i)}
+
+###Module
+id t_f4
+component t_sub
+flags {all, lib, new}
+sub {t_expr:0.8 * (cos(z) + exp(i * z))}
+
+###Module
+id t_f5
+component t_sub
+flags {all, lib, new}
+sub {t_expr:1.3 * cos(sin(z))}
+
+###Module
+id t_f6
+component t_sub
+flags {all, lib, new}
+sub {t_expr:1.3 * cos(i * sin(z))}
+
+###Module
+id t_f7
+component t_sub
+flags {all, lib, new}
+sub {t_expr:sin(i * z)}
+
+###Module
+id t_f8
+component t_sub
+flags {all, lib, new}
+sub {t_expr:0.5 * (cos(i * z) + z * z)}
+
+###Module
+id t_f9
+component t_sub
+flags {all, lib, new}
+sub {t_expr:0.8 * z * tanh(z)}
+
+###Module
+id t_f10
+component t_sub
+flags {all, lib, new}
+sub {t_expr:0.9*(z*tanh(z)+cos(exp(z)))}
+
+###Module
+id t_f11
+component t_sub
+flags {all, lib, new}
+sub {t_expr:0.7*(cos(z)+tan(z))*z}
+
+###Module
+id t_f12
+component t_sub
+flags {lib}
+sub {t_expr:0.7 * (z-1)*(z+1)*(z-i)*(z+i)}
+
+###Module
+id t_f13
+component t_sub
+flags {all, lib, new}
+sub {t_expr:(0.8 * (cos(z)-1)*(sin(z)+1))}
+
+###Module
+id t_f14
+component t_sub
+flags {lib}
+sub {t_expr:z+i*cos(i*sin(i*z))}
+
+
+### Component
+id t_sub
+family t_inner
+default_mod t_sub
+code &&&
+z = ~t_expr~;
+
+
+

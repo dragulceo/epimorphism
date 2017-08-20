@@ -1,0 +1,88 @@
+### SystemConf
+id shitty
+engineConf default
+uiConf prod
+pattern shitty
+
+### Pattern
+id shitty
+seed seed_shitty
+vert vert
+main main_shitty
+disp disp_id
+defaultImageLib shitty_images
+imageLib shitty_images
+
+### Module
+id main_shitty
+component main
+flags {shitty, root}
+modules {application:epimorphism_app_shitty}
+
+### Module
+id epimorphism_app_shitty
+component epimorphism
+flags {shitty, lib}
+modules {seed:seed_wrap_main, t:t_main, color:color_id, reduce:torus_reduce}
+
+### Module
+id seed_shitty
+component seed_main
+flags {lib, dev, root}
+modules {seed:seed_multi_shitty}
+
+### Module
+id seed_multi_shitty
+component seed_multi
+flags {shitty, multi, lib}
+modules {reduce:torus_reduce, t_seed0:t_id, t_seed1:t_seed_anim1, t_seed2:t_seed_anim2, seed0:seed_wca1_shitty, seed1:seed_wca2_shitty, seed2:seed_wca3_shitty}
+
+### Module
+id seed_wca1_shitty
+component seed_wca
+flags {shitty, wca}
+par {smooth_mask: 50.0}
+modules {w:w_lines_border_anim, wt:wt_id, a:alpha_id, seed_color:color1_shitty}
+scripts [randomize dly:75 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
+
+### Module
+id color1_shitty
+component tex_color_scroll
+flags {shitty}
+images [textures/shitty/logo_7.png]
+par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:0.0, pal:0.0}
+scripts [randomize dly:65 spd:0.05 lib:shitty_images dim:vec4 sub:0 typ:image]
+
+
+### Module
+id seed_wca2_shitty
+component seed_wca
+flags {shitty, wca}
+par {smooth_mask: 50.0}
+modules {w:w_lines_inner_anim, wt:wt_id, a:alpha_id, seed_color:color2_shitty}
+scripts [randomize dly:70 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
+
+### Module
+id color2_shitty
+component tex_color_scroll
+flags {shitty}
+images [textures/shitty/logo_7.png]
+par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:0.0, pal:0.0}
+scripts [randomize dly:53 spd:0.05 lib:shitty_images dim:vec4 sub:0 typ:image]
+
+
+### Module
+id seed_wca3_shitty
+component seed_wca
+flags {shitty, wca}
+par {smooth_mask: 50.0}
+modules {w:w_square_anim, wt:wt_id, a:alpha_id, seed_color:color3_shitty}
+scripts [randomize dly:80 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
+
+### Module
+id color3_shitty
+component tex_color_scroll
+flags {shitty}
+images [textures/shitty/logo_7.png]
+par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:0.0, pal:0.0}
+scripts [randomize dly:85 spd:0.05 lib:shitty_images dim:vec4 sub:0 typ:image]

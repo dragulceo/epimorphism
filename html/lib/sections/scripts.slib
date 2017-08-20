@@ -1,0 +1,5 @@
+t_1 {{
+	zpath main.application.t idx:1 path:linx spd:0.0
+	zpath main.application.t idx:1 path:linx spd:0.1
+	zpath main.application.t idx:1 path:circle r:1.0 spd:0.01
+}}

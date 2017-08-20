@@ -1,0 +1,37 @@
+###Module
+id seed_wca
+component seed_wca
+flags {lib, wca}
+par {smooth_mask: 50.0}
+modules {w:w_lines_border_anim, wt:wt_id, a:alpha_solid, seed_color:simple_color}
+
+###Module
+id seed_wca_tex
+component seed_wca
+flags {lib, wca}
+par {smooth_mask: 50.0}
+modules {w:w_lines_border, wt:wt_id, a:alpha_solid, seed_color:tex_color}
+
+### Component
+id seed_wca
+family seed
+default_mod seed_wca
+children {w:w, wt:wt, a:a, seed_color:seed_color}
+code &&&
+vec4 wdt;
+float w, a, wx, wy, mask;
+
+// w = (w, alpha, wx, wy)
+%w%
+
+// w is basically just used for value scaling * alpha
+w = wdt.x;
+float w_orig = w;
+%wt%
+
+a = wdt.y;
+%a%
+if(|smooth_mask| > 0.0)
+  a = a * smoothstep(0.0, 1.0, |smooth_mask|*w_orig); // apply SMOOTH_MASK, makes a vary better to 0
+
+%seed_color%

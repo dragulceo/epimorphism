@@ -1,0 +1,71 @@
+###Module
+id epimorphism_ponies
+component main
+flags {epimorphism, root}
+modules {application:epimorphism_ponies_app}
+
+###Module
+id epimorphism_dev_ponies_main
+component main
+flags {dev, epimorphism, root}
+modules {application:epimorphism_dev_ponies}
+
+
+###Module
+id epimorphism_dev_ponies
+component epimorphism
+flags {lib}
+modules {seed:seed_wca_tex_ponies, t:t_wrap_zo, color:color_id, reduce:torus_reduce}
+
+###Module
+id epimorphism_ponies_app
+component epimorphism
+flags {lib}
+modules {seed:seed_multi_anim_ponies, t:t_main2, color:rotate_hsv1, reduce:torus_reduce}
+scripts [randomize dly:35 spd:0.3 lib:color_main dim:vec4 sub:color typ:mod]
+
+###Module
+id seed_wca_tex_ponies
+component seed_wca
+par {smooth_mask: 50.0}
+flags {lib, wca}
+modules {t:t_wrap, w:w_lines_border, wt:wt_id, a:alpha_id, seed_color:tex_color_ponies}
+
+###Module
+id tex_color_ponies
+component tex_color
+flags {farm1, farm2, lib}
+images [textures/ponies_1.png]
+par {scale:0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, pal:1.0}
+
+###Module
+id seed_multi_anim_ponies
+component seed_multi
+flags {multi}
+modules {t:t_wrap, seed0:seed_wca_anim1_ponies, seed1:seed_wca_anim2_ponies, seed2:seed_nothing}
+
+###Module
+id seed_wca_anim1_ponies
+component seed_wca
+modules {t:t_seed_anim1, w:w_lines_border_anim, wt:wt_id, a:alpha_id, seed_color:tex_color_ponies1}
+scripts [randomize dly:55 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
+
+###Module
+id seed_wca_anim2_ponies
+component seed_wca
+modules {t:t_seed_anim2, w:w_lines_border_anim, wt:wt_anim2, a:alpha_anim1, seed_color:tex_color_ponies2}
+scripts [randomize dly:65 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
+
+###Module
+id tex_color_ponies1
+component tex_color_scroll
+images [textures/ponies/ponies_1.png]
+par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:1.0}
+scripts [randomize dly:55 spd:0.05 lib:ponies dim:vec4 sub:0 typ:image]
+
+###Module
+id tex_color_ponies2
+component tex_color_scroll
+images [textures/ponies/ponies_9.png]
+par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0, pal:1.0}
+scripts [randomize dly:45 spd:0.05 lib:ponies dim:vec4 sub:0 typ:image]

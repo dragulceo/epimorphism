@@ -1,0 +1,110 @@
+### Component
+id distance_util
+family ibrary
+code &&&
+
+#define D_EPSILON 0.00001
+#define D_MAX_STEPS 400
+#define D_BOUND 2.0
+
+
+vec4 df1(vec3 p, float d, float time) {
+  vec3 p1, p2;
+  p1 = rotate3D(p, vec3(0.0, 1.0, 0.0), time / 4.0);
+  //p2 = rotate3D(p, vec3(1.0, 0.0, 0.0), time / 4.0);  
+
+  float l1 = length(p1.xz) - d;
+  //float l2 = length(p2.yz) - d;
+
+  //float l = min(l1, l2);
+  float l = l1;
+  vec2 ofs;
+  //if(l1 < l2)
+    ofs = vec2(atan(p1.x, p1.z) / PI, p1.y / (2.0 * PI * d));
+  //else
+    //ofs = vec2(atan(p2.y, p2.z) / PI, p2.x / (2.0 * PI * d));
+
+  ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);      
+  
+  return vec4(ofs, 0.0, l);
+}
+
+
+vec4 df2(vec3 p, float d, float time) {
+  p = rotate3D(p, vec3(1.0, 0.3, -0.2), time / 8.0);
+  vec3 sc = p / vec3(d, d, d);
+  
+  vec2 ofs;
+  
+  if(abs(sc.z) > 1.0)
+    ofs = sc.xy;
+  //else if(abs(sc.x) > 1.0)
+  //  ofs = sc.yz;
+  else
+    ofs = sc.zx;
+  ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);      
+    
+  //float l = length(max(abs(p) - vec3(d, d, d), 0.0));
+  float l = length(p) - 1.0;
+
+  //vec2 q = vec2(length(p.xy) - d, p.z);
+  //float l = length(q) - d * 0.5;
+  
+  return vec4(ofs, 0.0, l);
+}
+
+vec4 inter1(vec3 r_origin, vec3 r_dir, float d, float time) {
+  float l = 0.0;
+  
+  for (int count=0; count < D_MAX_STEPS; count += 1) {
+    vec3 pos = r_origin + l * r_dir;
+    vec4 res = df1(pos, d, time);
+    float dist = res.w;
+    
+    if (dist < D_EPSILON)
+      return vec4(res.xy, 0.0, l);    
+
+    l += dist;
+    
+    if (l > D_BOUND) return vec4(0.0, 0.0, 0.0, -1.0);
+  }
+  return vec4(0.0, 0.0, 0.0, -1.0);
+}
+
+vec3 calcNormal1(vec3 p, float d, float time) {
+  vec3 e = vec3(0.001, 0.0, 0.0);
+  vec3 n;
+  n.x = df1(p+e.xyy, d, time).w - df1(p-e.xyy, d, time).w;
+  n.y = df1(p+e.yxy, d, time).w - df1(p-e.yxy, d, time).w;
+  n.z = df1(p+e.yyx, d, time).w - df1(p-e.yyx, d, time).w;
+
+  return normalize(n);
+}
+
+vec4 inter2(vec3 r_origin, vec3 r_dir, float d, float time) {
+  float l = 0.0;
+  
+  for (int count=0; count < D_MAX_STEPS; count += 1) {
+    vec3 pos = r_origin + l * r_dir;
+    vec4 res = df2(pos, d, time);
+    float dist = res.w;
+    
+    if (dist < D_EPSILON)
+      return vec4(res.xy, 0.0, l);    
+
+    l += dist;
+    
+    if (l > D_BOUND) return vec4(0.0, 0.0, 0.0, -1.0);
+  }
+  return vec4(0.0, 0.0, 0.0, -1.0);
+}
+
+vec3 calcNormal2(vec3 p, float d, float time) {
+  vec3 e = vec3(0.001, 0.0, 0.0);
+  vec3 n;
+  n.x = df2(p+e.xyy, d, time).w - df2(p-e.xyy, d, time).w;
+  n.y = df2(p+e.yxy, d, time).w - df2(p-e.yxy, d, time).w;
+  n.z = df2(p+e.yyx, d, time).w - df2(p-e.yyx, d, time).w;
+
+  return normalize(n);
+}

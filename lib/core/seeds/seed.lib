@@ -22,6 +22,11 @@ default_mod seed_nothing
 code &&&
 seed = vec4(0.0, 0.0, 0.0, 0.0);
 
+###Module
+id seed_dev_distance
+component seed_main
+flags {lib, dev, root}
+modules {seed:seed_distance1}
 
 ###Module
 id seed_buf

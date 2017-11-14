@@ -18,7 +18,7 @@ void main() {
 ### Component
 id main
 family main
-includes [header, colorspace, math, distance_util]
+includes [header, colorspace, math]
 code &&&
 
 void main() {

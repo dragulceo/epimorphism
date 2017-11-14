@@ -1,5 +1,6 @@
 PROJECTS:
   - Misc
+    - figure out float texture stuff
     - rethink how famaily/sidx is working (independent searchable typeclass?)
     - clean up library & serialize
     - auto image crop/resize

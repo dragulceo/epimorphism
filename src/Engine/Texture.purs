@@ -46,6 +46,7 @@ initTexFb dim = do
   ctx <- ask
   tex <- newTex
   fb <- createFramebuffer
+  -- TODO: why does this float work?
   liftEff $ GL.texImage2D_ ctx GLE.texture2d 0 GLE.rgba dim dim 0 GLE.rgba GLE.float (unsafeNull :: GLT.ArrayBufferView)
   liftEff $ GL.bindFramebuffer ctx GLE.framebuffer fb
   liftEff $ GL.framebufferTexture2D ctx GLE.framebuffer GLE.colorAttachment0 GLE.texture2d tex 0

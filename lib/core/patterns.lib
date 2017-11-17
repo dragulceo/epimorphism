@@ -1,5 +1,14 @@
 ### Pattern
 id dev
+seed   seed_dev_distanceasdfawf
+main   epimorphism_dev_main
+disp   disp_id
+vert   vert
+defaultImageLib default_images
+imageLib 1024
+
+### Pattern
+id dev_default
 seed   seed_dev
 main   epimorphism_dev_main
 disp   disp_id

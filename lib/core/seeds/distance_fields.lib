@@ -26,6 +26,7 @@ ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 float l = length(pos) - |diam|;
 
 df = vec3(ofs, l);
+pos = pos_orig;
 
 
 ###Module

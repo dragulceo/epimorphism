@@ -33,4 +33,6 @@ float specular = max(0.0, dot(vl, ref_ev));
 float v = (seed.r + seed.g + seed.b) / 3.0;
 specular = pow(specular, v / |shininess|);
 
-light += light_color * (diffuse + specular);
+vec3 ambient = vec3(0.3, 0.0, 0.3);
+
+light += light_color * (diffuse + specular + ambient);

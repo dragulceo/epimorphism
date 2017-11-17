@@ -2,7 +2,8 @@
 id seed_distance
 component seed_distance
 flags {lib, distance}
-modules {tex:tex_simple, df:df_cylinder, distance_light: light1}
+par {d_bound: 2.0}
+modules {tex:tex_simple, df:df_sphere, distance_light: light1}
 
 ###Component
 id seed_distance
@@ -13,7 +14,6 @@ code &&&
 
 #define D_EPSILON 0.00001
 #define D_MAX_STEPS 400
-#define D_BOUND 2.0
 
 vec3 df;
 
@@ -27,6 +27,7 @@ float l = 0.0;
 
 for (int count=0; count < D_MAX_STEPS; count += 1) {
   vec3 pos = r_eye + l * r_dir;
+  vec3 pos_orig = pos;
 
   %df%
 
@@ -39,7 +40,6 @@ for (int count=0; count < D_MAX_STEPS; count += 1) {
      // calculate normal
      vec3 ep = vec3(0.001, 0.0, 0.0);
      vec3 nor = vec3(0.0, 0.0, 0.0);
-     vec3 pos_orig = pos;
 
      // nor.x
      pos = pos_orig + ep.xyy;
@@ -87,6 +87,6 @@ for (int count=0; count < D_MAX_STEPS; count += 1) {
 
   l += dist;
 
-  if (l > D_BOUND)
+  if (l > |d_bound|)
      break;
 }

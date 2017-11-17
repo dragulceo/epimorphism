@@ -54,8 +54,14 @@ dim 3
 default_comp df_sphere
 
 ### Family
+id distance_light
+var light
+dim 3
+default_comp light1
+
+### Family
 id cam_trans
-var p
+var pos
 dim 3
 default_comp trans_1
 

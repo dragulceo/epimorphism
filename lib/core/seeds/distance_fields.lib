@@ -12,10 +12,9 @@ default_mod df_sphere
 children {cam_trans: cam_trans}
 code &&&
 
-vec3 p = pos;
 %cam_trans%
 
-vec3 sc = p / vec3(|tex_sc|, |tex_sc|, |tex_sc|);
+vec3 sc = pos / vec3(|tex_sc|, |tex_sc|, |tex_sc|);
 vec2 ofs;
 
 if(abs(sc.z) > 1.0)
@@ -24,7 +23,7 @@ else
   ofs = sc.zx;
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
-float l = length(p) - |diam|;
+float l = length(pos) - |diam|;
 
 df = vec3(ofs, l);
 
@@ -34,7 +33,7 @@ id df_cylinder
 component df_cylinder
 flags {lib, distance}
 par {diam: wave 0.044 0.1 0.45}
-modules {cam_trans: trans_y}
+modules {cam_trans: trans_no}
 
 ###Component
 id df_cylinder
@@ -43,13 +42,12 @@ default_mod df_cylinder
 children {cam_trans: cam_trans}
 code &&&
 
-vec3 p = pos;
 %cam_trans%
 
-float l = length(p.xz) - |diam|;
+float l = length(pos.xz) - |diam|;
 
 vec2 ofs;
-ofs = vec2(atan(p.x, p.z) / PI, p.y / (2.0 * PI * |diam|));
+ofs = vec2(atan(pos.x, pos.z) / PI, pos.y / (2.0 * PI * |diam|));
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
 df = vec3(ofs, l);
@@ -69,15 +67,14 @@ default_mod df_cube
 children {cam_trans: cam_trans}
 code &&&
 
-vec3 p = pos;
 %cam_trans%
 
-vec3 d  = abs(p) - vec3(|diam|, |diam|, |diam|);
+vec3 d  = abs(pos) - vec3(|diam|, |diam|, |diam|);
 float l = min(max(d.x, max(d.y, d.z)), 0.0) + length(max(d, 0.0));
 
 // TODO: finish me
 vec2 ofs;
-ofs = vec2(atan(p.x, p.z) / PI, p.y / (2.0 * PI * |diam|));
+ofs = vec2(atan(pos.x, pos.z) / PI, pos.y / (2.0 * PI * |diam|));
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
 df = vec3(ofs, l);
@@ -97,15 +94,14 @@ default_mod df_torus
 children {cam_trans: cam_trans}
 code &&&
 
-vec3 p = pos;
 %cam_trans%
 
-vec2 q = vec2(length(p.xz) - |diam1|, p.y);
+vec2 q = vec2(length(pos.xz) - |diam1|, pos.y);
 float l = length(q) - |diam2|;
 
 // TODO: finish me
 vec2 ofs;
-ofs = vec2(atan(p.x, p.z) / PI, p.y / (2.0 * PI * |diam2|));
+ofs = vec2(atan(pos.x, pos.z) / PI, pos.y / (2.0 * PI * |diam2|));
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
 df = vec3(ofs, l);

@@ -1,0 +1,36 @@
+###Module
+id light1
+component distance_light
+flags {lib, distance}
+par {num_lights: 1.0, shininess:0.05}
+modules {light_trans: trans_no}
+
+###Component
+id distance_light
+family distance_light
+default_mod light1
+children {light_trans: cam_trans}
+code &&&
+
+// somewhat arbitrary lighting positions & colors
+vec3 light_color = vec3(1.0, 0.7, 0.7);
+
+vec3 pos = vec3(5.0, 5.0, -8.0);
+%light_trans%
+vec3 light_pos = pos;
+
+pos = pos_orig;
+
+// vary specular & diffuse component via red channel (a bit arbitrary)
+vec3 vl = normalize(light_pos - pos + vec3(seed.r));
+vec3 ev = normalize(l * r_dir);
+vec3 ref_ev = reflect(ev, nor);
+
+float diffuse  = max(0.0, dot(vl, nor));
+float specular = max(0.0, dot(vl, ref_ev));
+
+// vary specular even farther by seed luminosity
+float v = (seed.r + seed.g + seed.b) / 3.0;
+specular = pow(specular, v / |shininess|);
+
+light += light_color * (diffuse + specular);

@@ -1,4 +1,16 @@
 PROJECTS:
+  - Distance Fields
+    - generalize lighting model
+    - switch cam_trans bug??
+    - textures are off for all fields
+    - better rotations/translations?
+    - add more fields
+    - blend fields?
+    - modulate fields?
+    - different norms?
+    - pretty much everything - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
+    - integrate with prod pattern
+
   - Misc
     - figure out float texture stuff
     - rethink how famaily/sidx is working (independent searchable typeclass?)

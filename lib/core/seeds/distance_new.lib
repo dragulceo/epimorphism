@@ -33,17 +33,46 @@ for (int count=0; count < D_MAX_STEPS; count += 1) {
 
   // we have a hit
   if (dist < D_EPSILON){
+     vec2 ofs = df.xy;
 
      // calculate normal
      vec3 ep = vec3(0.001, 0.0, 0.0);
      vec3 nor = vec3(0.0, 0.0, 0.0);
-     nor.x = df2(pos + ep.xyy, d, time).w - df2(pos - ep.xyy, d, time).w;
-     nor.y = df2(pos + ep.yxy, d, time).w - df2(pos - ep.yxy, d, time).w;
-     nor.z = df2(pos + ep.yyx, d, time).w - df2(pos - ep.yyx, d, time).w;
+     vec3 pos_orig = pos;
+
+     // nor.x
+     pos = pos_orig + ep.xyy;
+     %df%
+     float norx1 = df.w;
+
+     pos = pos_orig - ep.xyy;
+     %df%
+     float norx2 = df.w;
+     nor.x = norx1 - norx2;
+
+     // nor.y
+     pos = pos_orig + ep.yxy;
+     %df%
+     float nory1 = df.w;
+
+     pos = pos_orig - ep.yxy;
+     %df%
+     float nory2 = df.w;
+     nor.y = nory1 - nory2;
+
+     // nor.z
+     pos = pos_orig + ep.yyx;
+     %df%
+     float norz1 = df.w;
+
+     pos = pos_orig - ep.yyx;
+     %df%
+     float norz2 = df.w;
+     nor.z = norz1 - norz2;
+
      nor = normalize(nor);
 
      // get texture/seed value
-     vec2 ofs = df.xy;
      %tex%
 
      // compute phong lighting

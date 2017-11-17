@@ -2,6 +2,7 @@
 id df_sphere
 component df_sphere
 flags {lib, distance}
+par {diam: 1.0, tex_sc: wave 0.044 0.1 0.45}
 
 ###Component
 id df_sphere
@@ -13,8 +14,8 @@ vec3 p = pos;
 
 // rotate about a somewhat arbitrary axis
 p = rotate3D(p, vec3(1.0, 0.3, -0.2), time / 8.0);
-vec3 sc = p / vec3(d, d, d);
 
+vec3 sc = p / vec3(|tex_sc|, |tex_sc|, |tex_sc|);
 vec2 ofs;
 
 if(abs(sc.z) > 1.0)
@@ -23,7 +24,7 @@ else
   ofs = sc.zx;
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
-float l = length(p) - 1.0;
+float l = length(p) - |diam|;
 
 df = vec4(ofs, 0.0, l);
 
@@ -32,6 +33,7 @@ df = vec4(ofs, 0.0, l);
 id df_cylinder
 component df_cylinder
 flags {lib, distance}
+par {diam: wave 0.044 0.1 0.45}
 
 ###Component
 id df_cylinder
@@ -44,10 +46,10 @@ vec3 p = pos;
 // rotate about y arbitrary axis
 p = rotate3D(p, vec3(0.0, 1.0, 0.0), time / 4.0);
 
-float l = length(p.xz) - d;
+float l = length(p.xz) - |diam|;
 
 vec2 ofs;
-ofs = vec2(atan(p.x, p.z) / PI, p.y / (2.0 * PI * d));
+ofs = vec2(atan(p.x, p.z) / PI, p.y / (2.0 * PI * |diam|));
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
 df = vec4(ofs, 0.0, l);

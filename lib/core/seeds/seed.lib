@@ -26,7 +26,7 @@ seed = vec4(0.0, 0.0, 0.0, 0.0);
 id seed_dev_distance
 component seed_main
 flags {lib, dev, root}
-modules {seed:seed_distance1}
+modules {seed:seed_distance}
 
 ###Module
 id seed_buf

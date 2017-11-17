@@ -43,13 +43,69 @@ code &&&
 
 vec3 p = pos;
 
-// rotate about y arbitrary axis
+// rotate about y axis
 p = rotate3D(p, vec3(0.0, 1.0, 0.0), time / 4.0);
 
 float l = length(p.xz) - |diam|;
 
 vec2 ofs;
 ofs = vec2(atan(p.x, p.z) / PI, p.y / (2.0 * PI * |diam|));
+ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+
+df = vec4(ofs, 0.0, l);
+
+
+###Module
+id df_cube
+component df_cube
+flags {lib, distance}
+par {diam: 0.5}
+
+###Component
+id df_cube
+family distance_field
+default_mod df_cube
+code &&&
+
+vec3 p = pos;
+
+// rotate about arbitrary axis
+p = rotate3D(p, vec3(-0.3, 1.2, 0.4), time / 4.0);
+
+vec3 d  = abs(p) - vec3(|diam|, |diam|, |diam|);
+float l = min(max(d.x, max(d.y, d.z)), 0.0) + length(max(d, 0.0));
+
+// TODO: finish me
+vec2 ofs;
+ofs = vec2(atan(p.x, p.z) / PI, p.y / (2.0 * PI * |diam|));
+ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+
+df = vec4(ofs, 0.0, l);
+
+
+###Module
+id df_torus
+component df_torus
+flags {lib, distance}
+par {diam1: 0.7, diam2: 0.2}
+
+###Component
+id df_torus
+family distance_field
+default_mod df_torus
+code &&&
+
+vec3 p = pos;
+
+// rotate about arbitrary axis
+p = rotate3D(p, vec3(-0.3, -1.2, -0.4), time / 2.0);
+
+vec2 q = vec2(length(p.xz) - |diam1|, p.y);
+float l = length(q) - |diam2|;
+
+// TODO: finish me
+vec2 ofs;
+ofs = vec2(atan(p.x, p.z) / PI, p.y / (2.0 * PI * |diam2|));
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
 df = vec4(ofs, 0.0, l);

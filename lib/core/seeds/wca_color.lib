@@ -45,6 +45,26 @@ flags {lib}
 images [textures/simplegeom/tile_grid3.png]
 par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0}
 
+
+###Module
+id tex_simple
+component tex_simple
+flags {lib}
+images [textures/simplegeom/tile_grid1.png]
+par {scale:1.0}
+scripts [randomize dly:40 spd:0.04 lib:1024 dim:vec4 sub:0 typ:image]
+
+### Component
+id tex_simple
+family seed_color
+default_mod tex_color_dist
+code &&&
+ofs = vec2(2.0, 2.0) * ofs - vec2(1.0, 1.0);
+ofs = |scale| * torus_reduce(ofs);
+ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+seed = texture2D(aux[#0], ofs);
+
+
 ###Module
 id tex_color
 component tex_color

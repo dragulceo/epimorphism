@@ -1,32 +1,178 @@
 ###Module
-id seed_distance1
-component seed_distance1
+id seed_distance
+component seed_distance
 flags {lib, distance}
-par {d1: wave 0.044 0.1 0.45}
-modules {tex:tex_color_dist1}
+par {d: wave 0.044 0.1 0.45, shininess:0.05}
+modules {tex:tex_color_dist, df:df_sphere}
+
+###Component
+id seed_distance
+family seed
+default_mod seed_distance
+children {tex:seed_color, df:distance_field}
+code &&&
+
+#define D_EPSILON 0.00001
+#define D_MAX_STEPS 400
+#define D_BOUND 2.0
+
+vec4 df;
+
+seed = vec4(0.0, 0.0, 0.0, 0.0);
+
+vec3 r_eye = vec3(0.0, 0.0, -1.5);
+vec3 r_dir = normalize(vec3(z.x, z.y, 1.0));
+
+float d = |d|;
+
+// intersect ray
+float l = 0.0;
+
+for (int count=0; count < D_MAX_STEPS; count += 1) {
+  vec3 pos = r_eye + l * r_dir;
+
+  %df%
+
+  float dist = df.w;
+
+  // we have a hit
+  if (dist < D_EPSILON){
+     vec2 ofs = df.xy;
+
+     // calculate normal
+     vec3 ep = vec3(0.001, 0.0, 0.0);
+     vec3 nor = vec3(0.0, 0.0, 0.0);
+     vec3 pos_orig = pos;
+
+     // nor.x
+     pos = pos_orig + ep.xyy;
+     %df%
+     float norx1 = df.w;
+
+     pos = pos_orig - ep.xyy;
+     %df%
+     float norx2 = df.w;
+     nor.x = norx1 - norx2;
+
+     // nor.y
+     pos = pos_orig + ep.yxy;
+     %df%
+     float nory1 = df.w;
+
+     pos = pos_orig - ep.yxy;
+     %df%
+     float nory2 = df.w;
+     nor.y = nory1 - nory2;
+
+     // nor.z
+     pos = pos_orig + ep.yyx;
+     %df%
+     float norz1 = df.w;
+
+     pos = pos_orig - ep.yyx;
+     %df%
+     float norz2 = df.w;
+     nor.z = norz1 - norz2;
+
+     nor = normalize(nor);
+
+     // get texture/seed value
+     %tex%
+
+     // compute phong lighting
+     vec3 light = vec3(0.0);
+
+     // somewhat arbitrary lighting positions & colors
+     vec3 light_pos   = vec3(5.0, 5.0, -8.0);
+     vec3 light_color = vec3(1.0, 0.7, 0.7);
+
+     // vary specular & diffuse component via red channel (a bit arbitrary)
+     vec3 vl = normalize(light_pos - pos + vec3(seed.r));
+     vec3 ev = normalize(l * r_dir);
+     vec3 ref_ev = reflect(ev, nor);
+
+     float diffuse  = max(0.0, dot(vl, nor));
+     float specular = max(0.0, dot(vl, ref_ev));
+
+     // vary specular even farther by seed luminosity
+     float v = (seed.r + seed.g + seed.b) / 3.0;
+     specular = pow(specular, v / |shininess|);
+
+     light += light_color * (diffuse + specular);
+
+     // illuminate texture
+     seed = vec4(light, 1.0) * seed;
+
+     break;
+  }
+
+  l += dist;
+
+  if (l > D_BOUND)
+     break;
+}
+
 
 ###Module
-id seed_distance2
-component seed_distance2
+id df_sphere
+component df_sphere
 flags {lib, distance}
-par {d2: wave 0.054 0.1 0.45}
-modules {tex:tex_color_dist2}
+
+###Component
+id df_sphere
+family distance_field
+default_mod df_sphere
+code &&&
+
+vec3 p = pos;
+
+p = rotate3D(p, vec3(1.0, 0.3, -0.2), time / 8.0);
+vec3 sc = p / vec3(d, d, d);
+
+vec2 ofs;
+
+if(abs(sc.z) > 1.0)
+  ofs = sc.xy;
+else
+  ofs = sc.zx;
+ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+
+float l = length(p) - 1.0;
+
+df = vec4(ofs, 0.0, l);
+
 
 ###Module
-id tex_color_dist1
+id df_cylinder
+component df_cylinder
+flags {lib, distance}
+
+###Component
+id df_cylinder
+family distance_field
+default_mod df_cylinder
+code &&&
+
+vec3 p = pos;
+
+p = rotate3D(p, vec3(0.0, 1.0, 0.0), time / 4.0);
+
+float l = length(p.xz) - d;
+
+vec2 ofs;
+ofs = vec2(atan(p.x, p.z) / PI, p.y / (2.0 * PI * d));
+ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+
+df = vec4(ofs, 0.0, l);
+
+
+###Module
+id tex_color_dist
 component tex_simple
 flags {lib}
 images [textures/simplegeom/tile_grid1.png]
 par {scale:1.0}
 scripts [randomize dly:40 spd:0.04 lib:1024 dim:vec4 sub:0 typ:image]
-
-###Module
-id tex_color_dist2
-component tex_simple
-flags {lib}
-images [textures/simplegeom/tile_grid1.png]
-par {scale:1.0}
-scripts [randomize dly:43 spd:0.04 lib:1024 dim:vec4 sub:0 typ:image]
 
 ### Component
 id tex_simple
@@ -37,120 +183,3 @@ ofs = vec2(2.0, 2.0) * ofs - vec2(1.0, 1.0);
 ofs = |scale| * torus_reduce(ofs);
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 seed = texture2D(aux[#0], ofs);
-
-###Component
-id seed_distance1
-family seed
-default_mod seed_distance
-children {tex:seed_color}
-code &&&
-
-vec3 r_eye = vec3(0.0, 0.0, -1.5);
-vec3 r_dir = normalize(vec3(z.x, z.y, 1.0));
-
-vec4 res = inter1(r_eye, r_dir, |d1|, time);
-float hit = res.w;
-vec2 ofs = res.xy;
-
-// generate color(z)
-if (hit >= 0.0) {
-  vec3 pos = r_eye + hit * r_dir;
-  vec3 n = calcNormal1(pos, |d1|, time);  
-
-  %tex%
-
-  float v = (seed.r + seed.g + seed.b) / 3.0;
-
-  // compute phong lighting
-  float shininess = 16.0; 
-  vec3 ev = normalize(hit * r_dir);
-  vec3 ref_ev = reflect(ev, n);
-
-  vec3 light = vec3(0.0);
-
-  { 
-    vec3 light_pos   = vec3(0.5, 5.0, -4.5);    
-    vec3 light_color = vec3(1.0, 0.7, 0.7);
-    
-    vec3 vl = normalize(light_pos - pos + vec3(seed.r));
-    
-    float diffuse  = max(0.0, dot(vl, n));
-    float specular = max(0.0, dot(vl, ref_ev));
-    specular = pow(specular, shininess * v);
-    
-    light += light_color * (diffuse + specular);
-  }
-
-/*
-  { 
-    vec3 light_pos   = vec3(-10.0, cos(time / 5.0) * 20.0, cos(time / 5.0) * -20.0);
-    //vec3 light_pos   = vec3(-3.0, -5.0, -9.0);        
-    vec3 light_color = vec3(0.3, 0.7, 1.0);
-    
-    vec3 vl = normalize(light_pos - pos) + vec3(seed.b);
-    
-    float diffuse  = max(0.0, dot(vl, n));
-    float specular = max(0.0, dot(vl, ref_ev));
-    specular = pow(specular, shininess * (seed.g + 0.1));
-    
-    light += light_color * (diffuse + specular);
-  }
-*/
-
-  // illuminate texture
-  seed = vec4(light, 1.0) * seed.brga;
-}else
-  seed = vec4(0.0, 0.0, 0.0, 0.0);
-
-
-//seed = vec4(z.x, z.y, 0.0, 1.0);
-
-
-###Component
-id seed_distance2
-family seed
-default_mod seed_distance2
-children {tex:seed_color}
-code &&&
-
-vec3 r_eye = vec3(0.0, 0.0, -1.5);
-vec3 r_dir = normalize(vec3(z.x, z.y, 1.0));
-
-vec4 res = inter2(r_eye, r_dir, |d2|, time);
-float hit = res.w;
-vec2 ofs = res.xy;
-
-// generate color(z)
-if (hit >= 0.0) {
-  vec3 pos = r_eye + hit * r_dir;
-  vec3 n = calcNormal2(pos, |d2|, time);  
-
-  %tex%
-
-  float v = (seed.r + seed.g + seed.b) / 3.0;
-
-  // compute phong lighting
-  float shininess = 16.0; 
-  vec3 ev = normalize(hit * r_dir);
-  vec3 ref_ev = reflect(ev, n);
-
-  vec3 light = vec3(0.0);
-
-  { 
-    //vec3 light_pos   = vec3(5.0 * cos(time), 5.0 * sin(time), -5.0);
-    vec3 light_pos   = vec3(5.0, 5.0, -8.0);    
-    vec3 light_color = vec3(1.0, 0.7, 0.7);
-    
-    vec3 vl = normalize(light_pos - pos + vec3(seed.r));
-    
-    float diffuse  = max(0.0, dot(vl, n));
-    float specular = max(0.0, dot(vl, ref_ev));
-    specular = pow(specular, shininess * v);
-    
-    light += light_color * (diffuse + specular);
-  }
-
-  // illuminate texture
-  seed = vec4(light, 1.0) * seed;
-}else
-  seed = vec4(0.0, 0.0, 0.0, 0.0);

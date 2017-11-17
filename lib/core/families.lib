@@ -48,6 +48,12 @@ dim 4
 default_comp mod_id
 
 ### Family
+id distance_field
+var df
+dim 4
+default_comp df_sphere
+
+### Family
 id reduce
 var z
 dim 2

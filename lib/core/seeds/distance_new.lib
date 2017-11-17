@@ -3,7 +3,7 @@ id seed_distance
 component seed_distance
 flags {lib, distance}
 par {d: wave 0.044 0.1 0.45}
-modules {tex:tex_color_dist1, df:df_sphere}
+modules {tex:tex_color_dist1, df:df_cylinder}
 
 ###Component
 id seed_distance
@@ -134,5 +134,29 @@ else
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
 float l = length(p) - 1.0;
+
+df = vec4(ofs, 0.0, l);
+
+
+###Module
+id df_cylinder
+component df_cylinder
+flags {lib, distance}
+
+###Component
+id df_cylinder
+family distance_field
+default_mod df_cylinder
+code &&&
+
+vec3 p = pos;
+
+p = rotate3D(p, vec3(0.0, 1.0, 0.0), time / 4.0);
+
+float l = length(p.xz) - d;
+
+vec2 ofs;
+ofs = vec2(atan(p.x, p.z) / PI, p.y / (2.0 * PI * d));
+ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
 df = vec4(ofs, 0.0, l);

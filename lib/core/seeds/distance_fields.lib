@@ -3,17 +3,17 @@ id df_sphere
 component df_sphere
 flags {lib, distance}
 par {diam: 1.0, tex_sc: wave 0.044 0.1 0.45}
+modules {cam_trans: trans1}
 
 ###Component
 id df_sphere
 family distance_field
 default_mod df_sphere
+children {cam_trans: cam_trans}
 code &&&
 
 vec3 p = pos;
-
-// rotate about a somewhat arbitrary axis
-p = rotate3D(p, vec3(1.0, 0.3, -0.2), time / 8.0);
+%cam_trans%
 
 vec3 sc = p / vec3(|tex_sc|, |tex_sc|, |tex_sc|);
 vec2 ofs;
@@ -26,7 +26,7 @@ ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
 float l = length(p) - |diam|;
 
-df = vec4(ofs, 0.0, l);
+df = vec3(ofs, l);
 
 
 ###Module
@@ -34,17 +34,17 @@ id df_cylinder
 component df_cylinder
 flags {lib, distance}
 par {diam: wave 0.044 0.1 0.45}
+modules {cam_trans: trans_y}
 
 ###Component
 id df_cylinder
 family distance_field
 default_mod df_cylinder
+children {cam_trans: cam_trans}
 code &&&
 
 vec3 p = pos;
-
-// rotate about y axis
-p = rotate3D(p, vec3(0.0, 1.0, 0.0), time / 4.0);
+%cam_trans%
 
 float l = length(p.xz) - |diam|;
 
@@ -52,7 +52,7 @@ vec2 ofs;
 ofs = vec2(atan(p.x, p.z) / PI, p.y / (2.0 * PI * |diam|));
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
-df = vec4(ofs, 0.0, l);
+df = vec3(ofs, l);
 
 
 ###Module
@@ -60,17 +60,17 @@ id df_cube
 component df_cube
 flags {lib, distance}
 par {diam: 0.5}
+modules {cam_trans: trans1}
 
 ###Component
 id df_cube
 family distance_field
 default_mod df_cube
+children {cam_trans: cam_trans}
 code &&&
 
 vec3 p = pos;
-
-// rotate about arbitrary axis
-p = rotate3D(p, vec3(-0.3, 1.2, 0.4), time / 4.0);
+%cam_trans%
 
 vec3 d  = abs(p) - vec3(|diam|, |diam|, |diam|);
 float l = min(max(d.x, max(d.y, d.z)), 0.0) + length(max(d, 0.0));
@@ -80,7 +80,7 @@ vec2 ofs;
 ofs = vec2(atan(p.x, p.z) / PI, p.y / (2.0 * PI * |diam|));
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
-df = vec4(ofs, 0.0, l);
+df = vec3(ofs, l);
 
 
 ###Module
@@ -88,17 +88,17 @@ id df_torus
 component df_torus
 flags {lib, distance}
 par {diam1: 0.7, diam2: 0.2}
+modules {cam_trans: trans1}
 
 ###Component
 id df_torus
 family distance_field
 default_mod df_torus
+children {cam_trans: cam_trans}
 code &&&
 
 vec3 p = pos;
-
-// rotate about arbitrary axis
-p = rotate3D(p, vec3(-0.3, -1.2, -0.4), time / 2.0);
+%cam_trans%
 
 vec2 q = vec2(length(p.xz) - |diam1|, p.y);
 float l = length(q) - |diam2|;
@@ -108,4 +108,4 @@ vec2 ofs;
 ofs = vec2(atan(p.x, p.z) / PI, p.y / (2.0 * PI * |diam2|));
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
-df = vec4(ofs, 0.0, l);
+df = vec3(ofs, l);

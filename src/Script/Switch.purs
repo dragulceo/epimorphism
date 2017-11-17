@@ -138,6 +138,7 @@ switchModules lib sysT rootId childN m1 spd = do
     0 -> pure ""
     1 -> pure "float"
     2 -> pure "vec2"
+    3 -> pure "vec3"
     4 -> pure "vec4"
     _ -> throwError $ "invalid dim: " <> (show fm.dim)
 

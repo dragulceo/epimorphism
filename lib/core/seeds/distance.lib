@@ -3,7 +3,7 @@ id seed_distance
 component seed_distance
 flags {lib, distance}
 par {shininess:0.05}
-modules {tex:tex_simple, df:df_sphere}
+modules {tex:tex_simple, df:df_cube}
 
 ###Component
 id seed_distance
@@ -16,7 +16,7 @@ code &&&
 #define D_MAX_STEPS 400
 #define D_BOUND 2.0
 
-vec4 df;
+vec3 df;
 
 seed = vec4(0.0, 0.0, 0.0, 0.0);
 
@@ -31,7 +31,7 @@ for (int count=0; count < D_MAX_STEPS; count += 1) {
 
   %df%
 
-  float dist = df.w;
+  float dist = df.z;
 
   // we have a hit
   if (dist < D_EPSILON){
@@ -45,31 +45,31 @@ for (int count=0; count < D_MAX_STEPS; count += 1) {
      // nor.x
      pos = pos_orig + ep.xyy;
      %df%
-     float norx1 = df.w;
+     float norx1 = df.z;
 
      pos = pos_orig - ep.xyy;
      %df%
-     float norx2 = df.w;
+     float norx2 = df.z;
      nor.x = norx1 - norx2;
 
      // nor.y
      pos = pos_orig + ep.yxy;
      %df%
-     float nory1 = df.w;
+     float nory1 = df.z;
 
      pos = pos_orig - ep.yxy;
      %df%
-     float nory2 = df.w;
+     float nory2 = df.z;
      nor.y = nory1 - nory2;
 
      // nor.z
      pos = pos_orig + ep.yyx;
      %df%
-     float norz1 = df.w;
+     float norz1 = df.z;
 
      pos = pos_orig - ep.yyx;
      %df%
-     float norz2 = df.w;
+     float norz2 = df.z;
      nor.z = norz1 - norz2;
 
      nor = normalize(nor);

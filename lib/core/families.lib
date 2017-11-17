@@ -50,8 +50,14 @@ default_comp mod_id
 ### Family
 id distance_field
 var df
-dim 4
+dim 3
 default_comp df_sphere
+
+### Family
+id cam_trans
+var p
+dim 3
+default_comp trans_1
 
 ### Family
 id reduce

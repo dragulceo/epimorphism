@@ -1,0 +1,19 @@
+###Module
+id trans1
+component cam_trans
+flags {lib, distance}
+par {axis_x:1.0, axis_y: 0.3, axis_z: -0.2, spd:0.125}
+
+###Module
+id trans_y
+component cam_trans
+flags {lib, distance}
+par {axis_x:0.0, axis_y: 1.0, axis_z: 0.0, spd:0.25}
+
+###Component
+id cam_trans
+family cam_trans
+default_mod trans_1
+code &&&
+
+p = rotate3D(pos, vec3(|axis_x|, |axis_y|, |axis_z|), |spd| * time);

@@ -21,7 +21,7 @@ code &&&
 ###Module
 id test_image
 component test_image
-images [textures/simplegeom/tile_grid1.png, textures/simplegeom/tile_grid3.png]
+images [textures/default.png, textures/simplegeom/tile_grid3.png]
 flags {lib}
 
 ### Component

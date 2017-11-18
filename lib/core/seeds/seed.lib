@@ -86,7 +86,7 @@ seed = hsv2rgb(vec4(0.0, 1.0, w, mask * |alpha|));
 id seed_img1
 component seed_simple_img
 flags {img}
-images [textures/simplegeom/tile_grid1.png]
+images [textures/default.png]
 par {w:0.2, alpha:1.0}
 
 ### Component

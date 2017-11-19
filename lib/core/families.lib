@@ -61,7 +61,7 @@ default_comp light1
 
 ### Family
 id cam_trans
-var pos
+var cam
 dim 3
 default_comp trans_1
 

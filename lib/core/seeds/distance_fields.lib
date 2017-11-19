@@ -3,7 +3,7 @@ id df_sphere
 component df_sphere
 flags {lib, distance}
 par {diam: 1.0, tex_sc: 1.0}
-modules {cam_trans: trans_no}
+modules {cam_trans: trans1}
 
 ###Component
 id df_sphere
@@ -12,16 +12,16 @@ default_mod df_sphere
 children {cam_trans: cam_trans}
 code &&&
 
+vec3 cam = pos;
 %cam_trans%
 
-float d = length(pos) - |diam|;
+float d = length(cam) - |diam|;
 
-vec3 sc = pos / vec3(|tex_sc|, |tex_sc|, |tex_sc|);
+vec3 sc = cam / |tex_sc|;
 vec2 ofs = sc.xy;
-ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+ofs = (ofs + vec2(1.0)) / vec2(2.0);
 
 df = vec3(ofs, d);
-pos = pos_orig;
 
 
 ###Module
@@ -29,7 +29,7 @@ id df_cylinder
 component df_cylinder
 flags {lib, distance}
 par {diam: 0.5, tex_sc: 1.0}
-modules {cam_trans: trans_no}
+modules {cam_trans: trans_y}
 
 ###Component
 id df_cylinder
@@ -38,17 +38,17 @@ default_mod df_cylinder
 children {cam_trans: cam_trans}
 code &&&
 
+vec3 cam = pos;
 %cam_trans%
 
-float d = length(pos.xz) - |diam|;
+float d = length(cam.xz) - |diam|;
 
-vec3 sc = pos / vec3(|tex_sc|, |tex_sc|, |tex_sc|);
+vec3 sc = cam / |tex_sc|;
 vec2 ofs;
 ofs = vec2(atan(sc.x, sc.z) / PI, -1.0 * sc.y / (2.0 * PI * |diam|));
-ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+ofs = (ofs + vec2(1.0)) / vec2(2.0);
 
 df = vec3(ofs, d);
-pos = pos_orig;
 
 
 ###Module
@@ -56,7 +56,7 @@ id df_cube
 component df_cube
 flags {lib, distance}
 par {diam: 0.5, tex_sc: 1.0}
-modules {cam_trans: trans_no}
+modules {cam_trans: trans2}
 
 ###Component
 id df_cube
@@ -65,12 +65,13 @@ default_mod df_cube
 children {cam_trans: cam_trans}
 code &&&
 
+vec3 cam = pos;
 %cam_trans%
 
-vec3 dc  = abs(pos) - vec3(|diam|, |diam|, |diam|);
+vec3 dc  = abs(cam) - vec3(|diam|);
 float d = min(max(dc.x, max(dc.y, dc.z)), 0.0) + length(max(dc, 0.0));
 
-vec3 sc = pos / vec3(|tex_sc| * |diam|, |tex_sc| * |diam|, |tex_sc| * |diam|);
+vec3 sc = cam / (|tex_sc| * |diam|);
 vec2 ofs;
 
 // optomize?
@@ -83,10 +84,9 @@ if(abs(sc.z) > sc.x && abs(sc.z) > -1.0 * sc.x &&
 }else
   ofs = sc.zx;
 
-ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+ofs = (ofs + vec2(1.0)) / vec2(2.0);
 
 df = vec3(ofs, d);
-pos = pos_orig;
 
 
 ###Module
@@ -94,7 +94,7 @@ id df_torus
 component df_torus
 flags {lib, distance}
 par {diam1: 0.7, diam2: 0.2, tex_sc: 1.0}
-modules {cam_trans: trans_no}
+modules {cam_trans: trans2}
 
 ###Component
 id df_torus
@@ -103,15 +103,15 @@ default_mod df_torus
 children {cam_trans: cam_trans}
 code &&&
 
+vec3 cam = pos;
 %cam_trans%
 
-vec2 q = vec2(length(pos.xy) - |diam1|, pos.z);
+vec2 q = vec2(length(cam.xy) - |diam1|, cam.z) / |tex_sc|;
 float d = length(q) - |diam2|;
 
 vec2 ofs;
-ofs = vec2(atan(q.x / |tex_sc|, q.y / |tex_sc|) / PI,
-           atan(pos.x / |tex_sc|, pos.y / |tex_sc|) / (2.0 * PI * |diam2|));
-ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+ofs = vec2(atan(q.x, q.y) / PI,
+           atan(cam.x / |tex_sc|, cam.y / |tex_sc|) / (2.0 * PI * |diam2|));
+ofs = (ofs + vec2(1.0)) / vec2(2.0);
 
 df = vec3(ofs, d);
-pos = pos_orig;

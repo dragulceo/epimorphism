@@ -27,4 +27,4 @@ id cam_trans
 family cam_trans
 default_mod trans_1
 code &&&
-pos = rotate3D(pos, vec3(|axis_x|, |axis_y|, |axis_z|), |spd| * time);
+cam = rotate3D(cam, vec3(|axis_x|, |axis_y|, |axis_z|), |spd| * time);

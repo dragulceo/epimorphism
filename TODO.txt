@@ -1,9 +1,5 @@
 PROJECTS:
   - Distance Fields
-    - switching glitchs
-      - distance fields
-      - cam_trans bug??
-
     - integrate with prod pattern
       - add a bunch of scripts
         - better rotations/translations?

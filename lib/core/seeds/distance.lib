@@ -2,8 +2,8 @@
 id seed_distance
 component seed_distance
 flags {lib, distance}
-par {d_bound: 2.0}
-modules {tex:tex_simple, df:df_cube, distance_light: light1}
+par {d_bound: 2.5}
+modules {tex:tex_simple, df:df_torus, distance_light: light1}
 
 ###Component
 id seed_distance

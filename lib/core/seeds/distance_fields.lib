@@ -72,6 +72,7 @@ float l = min(max(d.x, max(d.y, d.z)), 0.0) + length(max(d, 0.0));
 vec3 sc = pos / vec3(|tex_sc| * |diam|, |tex_sc| * |diam|, |tex_sc| * |diam|);
 vec2 ofs;
 
+// optomize?
 if(abs(sc.z) > sc.x && abs(sc.z) > -1.0 * sc.x &&
    abs(sc.z) > sc.y && abs(sc.z) > -1.0 * sc.y){
   ofs = sc.xy;
@@ -90,8 +91,8 @@ df = vec3(ofs, l);
 id df_torus
 component df_torus
 flags {lib, distance}
-par {diam1: 0.7, diam2: 0.2}
-modules {cam_trans: trans1}
+par {diam1: 0.7, diam2: 0.2, tex_sc: wave 0.044 0.1 0.45}
+modules {cam_trans: trans2}
 
 ###Component
 id df_torus
@@ -102,12 +103,13 @@ code &&&
 
 %cam_trans%
 
-vec2 q = vec2(length(pos.xz) - |diam1|, pos.y);
+vec2 q = vec2(length(pos.xy) - |diam1|, pos.z);
 float l = length(q) - |diam2|;
 
 // TODO: finish me
 vec2 ofs;
-ofs = vec2(atan(pos.x, pos.z) / PI, pos.y / (2.0 * PI * |diam2|));
+ofs = vec2(atan(q.x / |tex_sc|, q.y / |tex_sc|) / PI,
+           atan(pos.x / |tex_sc|, pos.y / |tex_sc|) / (2.0 * PI * |diam2|));
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
 df = vec3(ofs, l);

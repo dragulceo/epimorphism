@@ -1,11 +1,18 @@
 PROJECTS:
   - Distance Fields
-    - switch cam_trans bug??
-    - better rotations/translations?
+    - switching glitchs
+      - distance fields
+      - cam_trans bug??
 
-    - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
     - integrate with prod pattern
       - add a bunch of scripts
+        - better rotations/translations?
+        - change light colors & levels
+        - switching between(or simultaneous) fields
+
+    - play with mod
+
+    - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
     - possibly optimize by only getting distance(not ofs) when doing normals
     - more than 1 light?
 

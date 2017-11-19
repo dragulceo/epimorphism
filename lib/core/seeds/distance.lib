@@ -3,7 +3,7 @@ id seed_distance
 component seed_distance
 flags {lib, distance}
 par {d_bound: 5.0, eye: -1.5}
-modules {tex:tex_simple, df:df_torus, distance_light: light1}
+modules {tex:tex_simple, df:df_cube, distance_light: light1}
 sub {d_max_steps:400, d_epsilon:0.00001}
 
 ###Component
@@ -31,6 +31,11 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
   float s = sin(5.0*pos.y);
   mat2  m = mat2(c,-s,s,c);
   pos = vec3(m*pos.xz,pos.y);
+  */
+
+  /*
+  vec3 c = vec3(3.0, 3.0, 3.0);
+  pos = mod(pos, c) - 0.5 * c;
   */
 
   vec3 pos_orig = pos;

@@ -52,7 +52,7 @@ component tex_simple
 flags {lib}
 images [textures/default.png]
 par {scale:1.0}
-scripts [randomize dly:15 spd:0.08 lib:1024 dim:vec4 sub:0 typ:image]
+scripts [randomize dly:50 spd:0.08 lib:1024 dim:vec4 sub:0 typ:image]
 
 ### Component
 id tex_simple

@@ -106,7 +106,6 @@ code &&&
 vec2 q = vec2(length(pos.xy) - |diam1|, pos.z);
 float l = length(q) - |diam2|;
 
-// TODO: finish me
 vec2 ofs;
 ofs = vec2(atan(q.x / |tex_sc|, q.y / |tex_sc|) / PI,
            atan(pos.x / |tex_sc|, pos.y / |tex_sc|) / (2.0 * PI * |diam2|));

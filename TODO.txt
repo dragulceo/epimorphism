@@ -1,8 +1,6 @@
 PROJECTS:
   - Distance Fields
-    - generalize lighting model
     - switch cam_trans bug??
-    - textures are off for all fields
     - better rotations/translations?
     - add more fields
     - blend fields?
@@ -10,7 +8,9 @@ PROJECTS:
     - different norms?
     - pretty much everything - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
     - integrate with prod pattern
+      - add a bunch of scripts
     - possibly optimize by only getting distance(not ofs) when doing normals
+    - more than 1 light?
 
   - Misc
     - figure out float texture stuff
@@ -69,8 +69,6 @@ PROJECTS:
   - exposure
     - PureScript Hack Session
     - codame?
-    - priceless?
-    - burningman? - probably not
     - museums?
     - twitter handle
     - Scenario? (https://itunes.apple.com/us/app/scenario/id423444193?mt=12)
@@ -167,6 +165,7 @@ SYSTEM:
       - namespace collisions detection
 
 FEATURE IDEAS:
+  - vector pars (for 3d stuff?)
   - non t-based seed animation
   - optional increase of bit depth - half float, etc (works?  not obvious is better; half_float = 36193)
   - shader precision optimization? mediump, highp, etc

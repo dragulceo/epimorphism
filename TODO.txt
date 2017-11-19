@@ -1,21 +1,33 @@
 PROJECTS:
   - Distance Fields
-    - something is moving too fast
-    - theres some black glitchiness?
-    - overlaying distance fields is a bit weird.  merge them?
-    - transparency?
-    - dont reduce distance seeds?
-    - deformations?
-    - tweak animation constants
+    - IMMEDIATE
+      - overlaying distance fields is a bit weird.  merge them (union)?
 
-    - enable with UI switch?
-    - better rotations/translations?
-    - play with mod
-    - torus involution - https://i.redd.it/bfg90xr89gyz.gif
+      - theres some black glitchiness?
+      - transparency?
+      - dont reduce distance seeds?
+      - deformations?
+      - something is moving too fast(sometimes??)
+      - enable with UI switch?
 
-    - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
-    - possibly optimize by only getting distance(not ofs) when doing normals
-    - more than 1 light?
+    - EXPERIMENTAL
+      - optimization (necessary)
+        - possibly optimize by only getting distance(not ofs) when doing normals
+      - de-pixelate?
+      - tweak animation constants
+      - better rotations/translations?
+      - play with mod
+      - torus involution - https://i.redd.it/bfg90xr89gyz.gif
+      - more than 1 light?
+
+      - fog?
+      - anti-aliasing
+
+
+    - RELEASE!
+
+    - REFERENCE
+      - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
   - Misc
     - WEIGHTED SWITCHING

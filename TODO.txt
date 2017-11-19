@@ -17,6 +17,8 @@ PROJECTS:
 
   - Misc
     - WEIGHTED SWITCHING
+    - randomized start times?
+    - more color variation?  saturation -> divergence?
     - figure out float texture stuff
     - rethink how famaily/sidx is working (independent searchable typeclass?)
     - clean up library & serialize

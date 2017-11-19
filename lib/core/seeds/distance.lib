@@ -6,31 +6,6 @@ par {d_bound: 5.0, eye: -1.5}
 modules {tex:tex_simple, df:df_sphere, distance_light: light1}
 sub {d_max_steps:400, d_epsilon:0.00001}
 
-###Module
-id seed_distance_switching1
-component seed_distance
-flags {lib, distance}
-par {d_bound: 5.0, eye: -1.5}
-modules {tex:tex_simple, df:df_sphere, distance_light: light_anim1}
-sub {d_max_steps:400, d_epsilon:0.00001}
-scripts [randomize dly:50 spd:0.6 lib:distance_field dim:vec4 sub:df typ:mod]
-
-###Module
-id seed_distance_switching2
-component seed_distance
-flags {lib, distance}
-par {d_bound: 5.0, eye: -1.5}
-modules {tex:tex_simple, df:df_cube, distance_light: light_anim2}
-sub {d_max_steps:400, d_epsilon:0.00001}
-scripts [randomize dly:45 spd:0.6 lib:distance_field dim:vec4 sub:df typ:mod]
-
-### Module
-id seed_distance_multi
-component seed_multi
-flags {multi, lib, distance}
-modules {reduce:torus_reduce, t_seed0:t_id, seed0:seed_distance_switching1, t_seed1:t_seed_anim2, seed1:seed_distance_switching2, t_seed2:t_id, seed2:seed_nothing}
-
-
 ###Component
 id seed_distance
 family seed

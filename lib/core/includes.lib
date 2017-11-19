@@ -256,6 +256,13 @@ vec2 torus_reduce(vec2 z){
   return z;
 }
 
+vec3 torus_reduce3(vec3 z){
+  z = z + vec3(1.0, 1.0, 1.0);
+  z = mod(z, 4.0);
+  z = vec3(1.0, 1.0, 1.0) - abs(z - vec3(2.0, 2.0, 2.0));
+  return z;
+}
+
 vec2 grid_reduce(vec2 z){
   z = z + vec2(1.0, 1.0);
   z = mod(z, 2.0);

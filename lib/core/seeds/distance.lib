@@ -2,8 +2,9 @@
 id seed_distance
 component seed_distance
 flags {lib, distance}
-par {d_bound: 2.5}
+par {d_bound: 5.0, eye: -1.5}
 modules {tex:tex_simple, df:df_torus, distance_light: light1}
+sub {d_max_steps:400, d_epsilon:0.00001}
 
 ###Component
 id seed_distance
@@ -12,21 +13,26 @@ default_mod seed_distance
 children {tex:seed_color, df:distance_field, distance_light: distance_light}
 code &&&
 
-#define D_EPSILON 0.00001
-#define D_MAX_STEPS 400
-
 vec3 df;
 
 seed = vec4(0.0, 0.0, 0.0, 0.0);
 
-vec3 r_eye = vec3(0.0, 0.0, -1.5);
+vec3 r_eye = vec3(0.0, 0.0, |eye|);
 vec3 r_dir = normalize(vec3(z.x, z.y, 1.0));
 
 // intersect ray
 float l = 0.0;
 
-for (int count=0; count < D_MAX_STEPS; count += 1) {
+for (int count=0; count < ~d_max_steps~; count += 1) {
   vec3 pos = r_eye + l * r_dir;
+
+  /*
+  float c = cos(5.0*pos.y);
+  float s = sin(5.0*pos.y);
+  mat2  m = mat2(c,-s,s,c);
+  pos = vec3(m*pos.xz,pos.y);
+  */
+
   vec3 pos_orig = pos;
 
   %df%
@@ -34,7 +40,7 @@ for (int count=0; count < D_MAX_STEPS; count += 1) {
   float dist = df.z;
 
   // we have a hit
-  if (dist < D_EPSILON){
+  if (dist < ~d_epsilon~){
      vec2 ofs = df.xy;
 
      // calculate normal

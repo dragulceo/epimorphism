@@ -2,11 +2,8 @@ PROJECTS:
   - Distance Fields
     - switch cam_trans bug??
     - better rotations/translations?
-    - add more fields
-    - blend fields?
-    - modulate fields?
-    - different norms?
-    - pretty much everything - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
+
+    - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
     - integrate with prod pattern
       - add a bunch of scripts
     - possibly optimize by only getting distance(not ofs) when doing normals

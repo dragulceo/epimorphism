@@ -2,8 +2,8 @@
 id df_sphere
 component df_sphere
 flags {lib, distance}
-par {diam: 1.0, tex_sc: wave 0.044 0.1 0.45}
-modules {cam_trans: trans1}
+par {diam: 1.0, tex_sc: 1.0}
+modules {cam_trans: trans_no}
 
 ###Component
 id df_sphere
@@ -14,13 +14,13 @@ code &&&
 
 %cam_trans%
 
-float l = length(pos) - |diam|;
+float d = length(pos) - |diam|;
 
 vec3 sc = pos / vec3(|tex_sc|, |tex_sc|, |tex_sc|);
 vec2 ofs = sc.xy;
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
-df = vec3(ofs, l);
+df = vec3(ofs, d);
 pos = pos_orig;
 
 
@@ -28,8 +28,8 @@ pos = pos_orig;
 id df_cylinder
 component df_cylinder
 flags {lib, distance}
-par {diam: 0.5, tex_sc: wave 0.044 0.1 0.45}
-modules {cam_trans: trans_y}
+par {diam: 0.5, tex_sc: 1.0}
+modules {cam_trans: trans_no}
 
 ###Component
 id df_cylinder
@@ -40,14 +40,15 @@ code &&&
 
 %cam_trans%
 
-float l = length(pos.xz) - |diam|;
+float d = length(pos.xz) - |diam|;
 
 vec3 sc = pos / vec3(|tex_sc|, |tex_sc|, |tex_sc|);
 vec2 ofs;
 ofs = vec2(atan(sc.x, sc.z) / PI, -1.0 * sc.y / (2.0 * PI * |diam|));
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
-df = vec3(ofs, l);
+df = vec3(ofs, d);
+pos = pos_orig;
 
 
 ###Module
@@ -55,7 +56,7 @@ id df_cube
 component df_cube
 flags {lib, distance}
 par {diam: 0.5, tex_sc: 1.0}
-modules {cam_trans: trans2}
+modules {cam_trans: trans_no}
 
 ###Component
 id df_cube
@@ -66,8 +67,8 @@ code &&&
 
 %cam_trans%
 
-vec3 d  = abs(pos) - vec3(|diam|, |diam|, |diam|);
-float l = min(max(d.x, max(d.y, d.z)), 0.0) + length(max(d, 0.0));
+vec3 dc  = abs(pos) - vec3(|diam|, |diam|, |diam|);
+float d = min(max(dc.x, max(dc.y, dc.z)), 0.0) + length(max(dc, 0.0));
 
 vec3 sc = pos / vec3(|tex_sc| * |diam|, |tex_sc| * |diam|, |tex_sc| * |diam|);
 vec2 ofs;
@@ -84,15 +85,16 @@ if(abs(sc.z) > sc.x && abs(sc.z) > -1.0 * sc.x &&
 
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
-df = vec3(ofs, l);
+df = vec3(ofs, d);
+pos = pos_orig;
 
 
 ###Module
 id df_torus
 component df_torus
 flags {lib, distance}
-par {diam1: 0.7, diam2: 0.2, tex_sc: wave 0.044 0.1 0.45}
-modules {cam_trans: trans2}
+par {diam1: 0.7, diam2: 0.2, tex_sc: 1.0}
+modules {cam_trans: trans_no}
 
 ###Component
 id df_torus
@@ -104,11 +106,12 @@ code &&&
 %cam_trans%
 
 vec2 q = vec2(length(pos.xy) - |diam1|, pos.z);
-float l = length(q) - |diam2|;
+float d = length(q) - |diam2|;
 
 vec2 ofs;
 ofs = vec2(atan(q.x / |tex_sc|, q.y / |tex_sc|) / PI,
            atan(pos.x / |tex_sc|, pos.y / |tex_sc|) / (2.0 * PI * |diam2|));
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 
-df = vec3(ofs, l);
+df = vec3(ofs, d);
+pos = pos_orig;

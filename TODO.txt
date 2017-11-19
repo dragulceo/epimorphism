@@ -11,6 +11,8 @@ PROJECTS:
         - switching between(or simultaneous) fields
 
     - play with mod
+    - torus involution - https://i.redd.it/bfg90xr89gyz.gif
+    - transparency?
 
     - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
     - possibly optimize by only getting distance(not ofs) when doing normals

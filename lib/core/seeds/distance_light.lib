@@ -35,3 +35,23 @@ specular = pow(specular, v / |shininess|);
 vec3 ambient = vec3(|amb_r|, |amb_g|, |amb_b|);
 
 light += light_color * (diffuse + specular + ambient);
+
+
+
+###Module
+id light_amb
+component distance_light_amb
+flags {lib, distance}
+par {amb_r:0.5, amb_g:0.5, amb_b:0.5}
+modules {light_trans: trans_no}
+
+###Component
+id distance_light_amb
+family distance_light
+default_mod light1
+children {light_trans: cam_trans}
+code &&&
+
+vec3 ambient = vec3(|amb_r|, |amb_g|, |amb_b|);
+
+light += ambient;

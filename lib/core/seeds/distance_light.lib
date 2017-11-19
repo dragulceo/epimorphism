@@ -11,6 +11,13 @@ flags {lib, distance}
 par {shininess:0.05, light_r:wave 0.1 0.2 0.8, light_g:wave 0.07 0.2 0.8, light_b:wave 0.11 0.2 0.8, light_x:wave 0.07 5.0 0.0, light_y:wave 0.08 5.0 0.0, light_z:wave 0.08 0.5 -8.0, amb_r:wave 0.05 0.2 0.1, amb_g:wave 0.06 0.1 0.1, amb_b:wave 0.04 0.1 0.2}
 
 
+###Module
+id light_anim2
+component distance_light
+flags {lib, distance}
+par {shininess:0.06, light_r:wave 0.08 0.2 0.8, light_g:wave 0.07 0.2 0.8, light_b:wave 0.11 0.2 0.8, light_x:wave 0.07 5.0 0.0, light_y:wave 0.07 5.0 0.0, light_z:wave 0.09 0.5 -8.0, amb_r:wave 0.06 0.2 0.1, amb_g:wave 0.05 0.1 0.1, amb_b:wave 0.04 0.1 0.2}
+
+
 ###Component
 id distance_light
 family distance_light

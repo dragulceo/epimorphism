@@ -1,22 +1,22 @@
 PROJECTS:
   - Distance Fields
-    - integrate with prod pattern
-      - add a bunch of scripts
-        - better rotations/translations?
-        - distance multi seed
-        - switching between(or simultaneous) fields
 
+    - move modules to epimorphism_prod
+    - better rotations/translations?
     - play with mod
     - torus involution - https://i.redd.it/bfg90xr89gyz.gif
     - transparency?
     - deformations?
     - dont reduce distance seeds?
+    - tweak animation constants
+    - theres some black glitchiness?
 
     - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
     - possibly optimize by only getting distance(not ofs) when doing normals
     - more than 1 light?
 
   - Misc
+    - WEIGHTED SWITCHING
     - figure out float texture stuff
     - rethink how famaily/sidx is working (independent searchable typeclass?)
     - clean up library & serialize

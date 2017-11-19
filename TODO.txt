@@ -3,7 +3,6 @@ PROJECTS:
     - integrate with prod pattern
       - add a bunch of scripts
         - better rotations/translations?
-        - change light color, position, etc
         - distance multi seed
         - switching between(or simultaneous) fields
 
@@ -11,6 +10,7 @@ PROJECTS:
     - torus involution - https://i.redd.it/bfg90xr89gyz.gif
     - transparency?
     - deformations?
+    - dont reduce distance seeds?
 
     - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
     - possibly optimize by only getting distance(not ofs) when doing normals

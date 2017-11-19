@@ -3,20 +3,22 @@ id light1
 component distance_light
 flags {lib, distance}
 par {shininess:0.05, light_r:1.0, light_g:0.7, light_b:0.7, light_x:5.0, light_y:5.0, light_z:-8.0, amb_r:0.3, amb_g:0.0, amb_b:0.3}
-modules {light_trans: trans_no}
+
+###Module
+id light_anim1
+component distance_light
+flags {lib, distance}
+par {shininess:0.05, light_r:wave 0.1 0.2 0.8, light_g:wave 0.07 0.2 0.8, light_b:wave 0.11 0.2 0.8, light_x:wave 0.07 5.0 0.0, light_y:wave 0.08 5.0 0.0, light_z:wave 0.08 0.5 -8.0, amb_r:wave 0.05 0.2 0.1, amb_g:wave 0.06 0.1 0.1, amb_b:wave 0.04 0.1 0.2}
+
 
 ###Component
 id distance_light
 family distance_light
 default_mod light1
-children {light_trans: cam_trans}
 code &&&
 
 vec3 light_color = vec3(|light_r|, |light_g|, |light_b|);
-
-vec3 cam = vec3(|light_x|, |light_y|, |light_z|);
-%light_trans%
-vec3 light_pos = cam;
+vec3 light_pos = vec3(|light_x|, |light_y|, |light_z|);
 
 // vary specular & diffuse component via red channel (a bit arbitrary)
 vec3 vl = normalize(light_pos - pos + vec3(seed.r));
@@ -34,22 +36,18 @@ vec3 ambient = vec3(|amb_r|, |amb_g|, |amb_b|);
 
 light += light_color * (diffuse + specular + ambient);
 
-
-
 ###Module
-id light_amb
-component distance_light_amb
+id light_simple
+component distance_light_simple
 flags {lib, distance}
-par {amb_r:0.5, amb_g:0.5, amb_b:0.5}
+par {light_r:0.5, light_g:0.5, light_b:0.5}
 modules {light_trans: trans_no}
 
 ###Component
-id distance_light_amb
+id distance_light_simple
 family distance_light
 default_mod light1
 children {light_trans: cam_trans}
 code &&&
 
-vec3 ambient = vec3(|amb_r|, |amb_g|, |amb_b|);
-
-light += ambient;
+light += vec3(|light_r|, |light_g|, |light_b|);

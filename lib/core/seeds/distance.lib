@@ -11,9 +11,8 @@ id seed_distance_switching
 component seed_distance
 flags {lib, distance}
 par {d_bound: 5.0, eye: -1.5}
-modules {tex:tex_simple, df:df_sphere, distance_light: light1}
+modules {tex:tex_simple, df:df_sphere, distance_light: light_anim1}
 sub {d_max_steps:400, d_epsilon:0.00001}
-scripts [randomize dly:50 spd:0.6 lib:distance_field dim:vec4 sub:df typ:mod]
 
 ###Component
 id seed_distance

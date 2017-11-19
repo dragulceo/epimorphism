@@ -1,11 +1,14 @@
 PROJECTS:
   - Distance Fields
+    - something is moving too fast
     - theres some black glitchiness?
+    - overlaying distance fields is a bit weird.  merge them?
     - transparency?
     - dont reduce distance seeds?
     - deformations?
     - tweak animation constants
 
+    - enable with UI switch?
     - better rotations/translations?
     - play with mod
     - torus involution - https://i.redd.it/bfg90xr89gyz.gif
@@ -16,6 +19,8 @@ PROJECTS:
 
   - Misc
     - WEIGHTED SWITCHING
+    - on linux controls go away in full screen
+    - not sure resolution cookie is working?
     - randomized start times?
     - more color variation?  saturation -> divergence?
     - figure out float texture stuff

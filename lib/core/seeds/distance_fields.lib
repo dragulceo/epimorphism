@@ -106,11 +106,11 @@ code &&&
 vec3 cam = pos;
 %cam_trans%
 
-vec2 q = vec2(length(cam.xy) - |diam1|, cam.z) / |tex_sc|;
+vec2 q = vec2(length(cam.xy) - |diam1|, cam.z);
 float d = length(q) - |diam2|;
 
 vec2 ofs;
-ofs = vec2(atan(q.x, q.y) / PI,
+ofs = vec2(atan(q.x / |tex_sc|, q.y / |tex_sc|) / PI,
            atan(cam.x / |tex_sc|, cam.y / |tex_sc|) / (2.0 * PI * |diam2|));
 ofs = (ofs + vec2(1.0)) / vec2(2.0);
 

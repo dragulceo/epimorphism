@@ -20,13 +20,13 @@ id seed_nothing
 family seed
 default_mod seed_nothing
 code &&&
-seed = vec4(0.0, 0.0, 0.0, 0.0);
+seed = vec4(0.0);
 
 ###Module
 id seed_dev_distance
 component seed_main
 flags {lib, dev, root}
-modules {seed:seed_distance}
+modules {seed:seed_distance_switching}
 
 ###Module
 id seed_buf
@@ -146,7 +146,7 @@ seed2 = seed;
 float a = 1.0 - (1.0 - seed0.a) * (1.0 - seed1.a) * (1.0 - seed2.a);
 
 if(a == 0.0)
-  seed = vec4(0.0, 0.0, 0.0, 0.0);
+  seed = vec4(0.0);
 else {
   vec4 m1 = mix(seed0.a * seed0, seed1, seed1.a);
   vec4 m2 = mix(m1, seed2, seed2.a);

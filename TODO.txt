@@ -1,4 +1,10 @@
 PROJECTS:
+  - NOW
+    - color homogeneity
+    - overlaying distance fields is a bit weird.  merge them (union)?
+    - theres some black glitchiness?
+    - transparency?
+
   - Distance Fields
     - IMMEDIATE
       - overlaying distance fields is a bit weird.  merge them (union)?
@@ -11,7 +17,7 @@ PROJECTS:
       - enable with UI switch?
 
     - EXPERIMENTAL
-      - optimization (necessary)
+      - optimization (necessary) sometimes ~10 fps on insane w/ 1080 gtx
         - possibly optimize by only getting distance(not ofs) when doing normals
       - de-pixelate?
       - tweak animation constants
@@ -30,6 +36,11 @@ PROJECTS:
       - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
   - Misc
+    - sometimes zooms out too far
+    - COLORS TOO HOMOGENOUS
+      - limuisoty, pallet, divergence?
+      - internal representation
+      - post processing
     - WEIGHTED SWITCHING
     - on linux controls go away in full screen
     - not sure resolution cookie is working?

@@ -197,6 +197,7 @@ command usRef esRef ssRef lib msg = handleError do
 -- PRIVATE
 save :: forall eff h. (SystemST h) -> PatternD -> EpiS eff h Unit
 save systemST patternD = do
+  lift $ saveCanvas
   pure unit
   -- pattern
 --  id <- lift $ uuid
@@ -209,7 +210,6 @@ save systemST patternD = do
 --  let res = "#PATTERN\n" <> ps <> "\n\n#MODULES\n" <> mres
 --  let a = lg res
 --
---  lift $ saveCanvas
 --
 --  pure unit
 --

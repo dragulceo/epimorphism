@@ -10,6 +10,7 @@ PROJECTS:
     - different norms?
     - pretty much everything - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
     - integrate with prod pattern
+    - possibly optimize by only getting distance(not ofs) when doing normals
 
   - Misc
     - figure out float texture stuff

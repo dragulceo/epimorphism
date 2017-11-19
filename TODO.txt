@@ -1,15 +1,14 @@
 PROJECTS:
   - Distance Fields
+    - theres some black glitchiness?
+    - transparency?
+    - dont reduce distance seeds?
+    - deformations?
+    - tweak animation constants
 
-    - move modules to epimorphism_prod
     - better rotations/translations?
     - play with mod
     - torus involution - https://i.redd.it/bfg90xr89gyz.gif
-    - transparency?
-    - deformations?
-    - dont reduce distance seeds?
-    - tweak animation constants
-    - theres some black glitchiness?
 
     - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
     - possibly optimize by only getting distance(not ofs) when doing normals

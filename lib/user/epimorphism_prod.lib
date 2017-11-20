@@ -15,7 +15,7 @@ id t_main
 component t_wrap
 flags {lib, wrap}
 modules {t_inner:t_sinh}
-zn [0.95 + 0.0i, 0.0 + 0.0i, 0.0 + 1.1i, 1.0 + 0.0i]
+zn [0.90 + 0.0i, 0.0 + 0.0i, 0.0 + 1.1i, 1.0 + 0.0i]
 scripts [randomize dly:50 spd:0.04 lib:new dim:vec2 sub:t_inner typ:mod]
 
 ### Module
@@ -172,7 +172,7 @@ component t_wrap
 flags {wrap}
 modules {t_inner:t_z}
 scripts [randomize dly:45 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
-zn [rose 0.0025 0.2 6.0 1.2, rose 0.001 0.8 5.0 -0.8, rose 0.002 0.1 7.0 1.1, rose 0.003 1.2 4.0 0.0]
+zn [rose 0.0025 0.1 5.0 1.2, rose 0.001 0.8 4.0 -0.8, rose 0.002 0.1 6.0 1.1, rose 0.003 1.2 3.0 0.0]
 
 ### Module
 id t_seed_anim3

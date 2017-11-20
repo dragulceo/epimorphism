@@ -1,15 +1,17 @@
 PROJECTS:
   - NOW
+    - tex_sc for distance fields
     - color homogeneity
     - overlaying distance fields is a bit weird.  merge them (union)?
-    - theres some black glitchiness?
+    - theres some black glitchiness (related to overlaying fields?)?
     - transparency?
+    - starting weird on linux when breaking cache
 
   - Distance Fields
     - IMMEDIATE
       - overlaying distance fields is a bit weird.  merge them (union)?
 
-      - theres some black glitchiness?
+      - theres some black glitchiness (related to overlaying fields?)?
       - transparency?
       - dont reduce distance seeds?
       - deformations?

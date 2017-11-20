@@ -2,7 +2,7 @@
 id df_sphere
 component df_sphere
 flags {lib, distance, distance_field}
-par {diam: wave 0.043 0.1 0.9, tex_sc: wave 0.04 0.1 0.45}
+par {diam: wave 0.043 0.1 0.9, tex_sc: wave 0.04 0.2 0.45}
 modules {cam_trans: trans1}
 
 ###Component
@@ -28,7 +28,7 @@ df = vec3(ofs, d);
 id df_cylinder
 component df_cylinder
 flags {lib, distance, distance_field}
-par {diam: wave 0.041 0.1 0.5, tex_sc: wave 0.044 0.1 0.45}
+par {diam: wave 0.041 0.1 0.5, tex_sc: wave 0.054 0.25 0.45}
 modules {cam_trans: trans_y}
 
 ###Component
@@ -55,7 +55,7 @@ df = vec3(ofs, d);
 id df_cube
 component df_cube
 flags {lib, distance, distance_field}
-par {diam: wave 0.052 0.1 0.5, tex_sc: wave 0.05 0.1 0.45}
+par {diam: wave 0.052 0.1 0.5, tex_sc: wave 0.05 0.3 0.55}
 modules {cam_trans: trans2}
 
 ###Component
@@ -93,7 +93,7 @@ df = vec3(ofs, d);
 id df_torus
 component df_torus
 flags {lib, distance, distance_field}
-par {diam1: wave 0.041 0.1 0.7, diam2: wave 0.029 0.05 0.2, tex_sc: wave 0.044 0.1 0.45}
+par {diam1: wave 0.041 0.1 0.7, diam2: wave 0.029 0.05 0.2, tex_sc: wave 0.04 0.2 0.47}
 modules {cam_trans: trans2}
 
 ###Component

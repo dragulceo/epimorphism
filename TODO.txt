@@ -1,7 +1,9 @@
 PROJECTS:
   - NOW
-    - tex_sc for distance fields
+    - something is moving too fast(sometimes??)
     - color homogeneity
+    - distance fieds seem locked to each other
+    - too large of a zoom out sometines
     - overlaying distance fields is a bit weird.  merge them (union)?
     - theres some black glitchiness (related to overlaying fields?)?
     - transparency?
@@ -9,13 +11,8 @@ PROJECTS:
 
   - Distance Fields
     - IMMEDIATE
-      - overlaying distance fields is a bit weird.  merge them (union)?
-
-      - theres some black glitchiness (related to overlaying fields?)?
-      - transparency?
       - dont reduce distance seeds?
       - deformations?
-      - something is moving too fast(sometimes??)
       - enable with UI switch?
 
     - EXPERIMENTAL

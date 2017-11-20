@@ -172,7 +172,7 @@ component t_wrap
 flags {wrap}
 modules {t_inner:t_z}
 scripts [randomize dly:45 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
-zn [rose 0.0025 0.1 5.0 1.2, rose 0.001 0.8 4.0 -0.8, rose 0.002 0.1 6.0 1.1, rose 0.003 1.2 3.0 0.0]
+zn [rose 0.0025 0.1 4.0 1.2, rose 0.001 0.8 3.0 -0.8, rose 0.002 0.1 5.0 1.1, rose 0.003 1.2 3.0 0.0]
 
 ### Module
 id t_seed_anim3

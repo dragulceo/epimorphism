@@ -53,6 +53,7 @@ flags {lib}
 images [textures/default.png]
 par {scale:1.0}
 
+
 ### Component
 id tex_simple
 family seed_color

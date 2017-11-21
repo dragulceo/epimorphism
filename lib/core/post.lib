@@ -1,15 +1,15 @@
-###Module
+### Module
 id disp_id
 component disp
 modules {post: post_id}
 flags {root}
 
-###Module
+### Module
 id post_id
 component post_id
 flags {lib}
 
-###Module
+### Module
 id post_hlim
 component post_hlim
 flags {lib, post_hlim}
@@ -38,9 +38,13 @@ float inc = (frame.a - DEPTH_INC) / (1.0 - DEPTH_INC);
 inc = |inc_sc| * inc;
 float gofs = |gofs| * frame_i.x;
 
-vec4 c0 = hsv2rgb(vec4(0.9 + 1.0 * gofs + 1.0 * inc + |hue|, 1.0, 0.5, 1.0));
-vec4 c1 = hsv2rgb(vec4(0.9 + 1.0 * gofs + 0.0 * inc + |hue| + |spread| / 2.0, 1.0, |lgv|, 1.0));
-vec4 c2 = hsv2rgb(vec4(0.9 + 0.8 * gofs + 1.0 * inc + |hue| - |spread| / 2.0, 1.0, -1.0 * |lgv|, 1.0));
+float h0 = 0.9 + 1.0 * gofs + 1.0 * inc + |hue|;
+float h1 = 0.9 + 1.0 * gofs + 0.0 * inc + |hue| + |spread| / 2.0;
+float h2 = 0.9 + 0.8 * gofs + 1.0 * inc + |hue| - |spread| / 2.0;
+
+vec4 c0 = hsv2rgb(vec4(h0, 1.0, 0.5, 1.0));
+vec4 c1 = hsv2rgb(vec4(h1, 1.0, |lgv|, 1.0));
+vec4 c2 = hsv2rgb(vec4(h2, 1.0, |lgv|, 1.0));
 
 vec4 res, r0, r1;
 float f;

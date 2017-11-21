@@ -13,7 +13,7 @@ PROJECTS:
     - IMMEDIATE
       - dont reduce distance seeds?
       - deformations?
-      - enable with UI switch?
+      - enable with UI switch?p
 
     - EXPERIMENTAL
       - optimization (necessary) sometimes ~10 fps on insane w/ 1080 gtx
@@ -35,6 +35,7 @@ PROJECTS:
       - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
   - Misc
+    - customize glsl mode
     - sometimes zooms out too far
     - COLORS TOO HOMOGENOUS
       - limuisoty, pallet, divergence?

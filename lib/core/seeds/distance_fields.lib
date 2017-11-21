@@ -13,13 +13,11 @@ children {cam_trans: cam_trans}
 code &&&
 
 vec3 cam = pos;
-vec2 tex_ofs;
 %cam_trans%
 
 float d = length(cam) - |diam|;
 
-vec3 sc = cam / |tex_sc|;
-tex_ofs = sc.xy;
+vec2 tex_ofs = cam.xy / |tex_sc|;
 tex_ofs = (tex_ofs + vec2(1.0)) / vec2(2.0);
 
 df = vec3(tex_ofs, d);
@@ -40,14 +38,13 @@ children {cam_trans: cam_trans}
 code &&&
 
 vec3 cam = pos;
-vec2 tex_ofs;
 %cam_trans%
 
 float d = length(cam.xz) - |diam|;
 
 vec3 sc = cam / |tex_sc|;
 
-tex_ofs = vec2(atan(sc.x, sc.z) / PI, -1.0 * sc.y / (2.0 * PI * |diam|));
+vec2 tex_ofs = vec2(atan(sc.x, sc.z) / PI, -1.0 * sc.y / (2.0 * PI * |diam|));
 tex_ofs = (tex_ofs + vec2(1.0)) / vec2(2.0);
 
 df = vec3(tex_ofs, d);
@@ -68,15 +65,15 @@ children {cam_trans: cam_trans}
 code &&&
 
 vec3 cam = pos;
-vec2 tex_ofs;
 %cam_trans%
 
 vec3 dc  = abs(cam) - vec3(|diam|);
 float d = min(max(dc.x, max(dc.y, dc.z)), 0.0) + length(max(dc, 0.0));
 
-vec3 sc = cam / (|tex_sc| * |diam|);
 
-// optomize?
+// optimize?
+vec2 tex_ofs;
+vec3 sc = cam / (|tex_sc| * |diam|);
 if(abs(sc.z) > sc.x && abs(sc.z) > -1.0 * sc.x &&
    abs(sc.z) > sc.y && abs(sc.z) > -1.0 * sc.y){
   tex_ofs = sc.xy;

@@ -19,6 +19,13 @@ zn [0.90 + 0.0i, 0.0 + 0.0i, 0.0 + 1.05i, 1.0 + 0.0i]
 scripts [randomize dly:50 spd:0.04 lib:new dim:vec2 sub:t_inner typ:mod]
 
 ### Module
+id t_main_id
+component t_wrap
+flags {lib, wrap}
+modules {t_inner:t_id}
+zn [0.90 + 0.0i, 0.0 + 0.0i, 0.0 + 1.05i, 1.0 + 0.0i]
+
+### Module
 id seed_wrap_main
 component seed_wrap
 flags {lib}
@@ -157,6 +164,12 @@ modules {t_inner:t_z}
 scripts [randomize dly:35 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
 zn [rose 0.003 0.2 5.0 1.2, rose 0.001 0.8 4.5 -0.8, rose 0.0027 0.1 63.0 1.1, rose 0.0035 1.2 3.2 0.0]
 
+### Module
+id t_seed_max
+component t_wrap
+flags {wrap, lib}
+modules {t_inner:t_z}
+zn [1.4, -1.6, 1.2i, 1.2]
 
 ### Module
 id t_seed_anim1
@@ -164,7 +177,7 @@ component t_wrap
 flags {wrap}
 modules {t_inner:t_z}
 scripts [randomize dly:35 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
-zn [rose 0.001 0.1 6.0 1.1, rose 0.0005 0.8 5.0 -0.8, rose 0.0017 0.1 7.0 1.1, rose 0.002 1.2 4.0 0.0]
+zn [rose 0.001 0.1 6.0 0.9, rose 0.0005 0.8 5.0 -0.8, rose 0.0017 0.1 7.0 0.9, rose 0.002 1.2 4.0 0.0]
 
 ### Module
 id t_seed_anim2
@@ -172,7 +185,7 @@ component t_wrap
 flags {wrap}
 modules {t_inner:t_z}
 scripts [randomize dly:45 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
-zn [rose 0.0025 0.1 4.0 1.2, rose 0.001 0.8 3.0 -0.8, rose 0.002 0.1 5.0 1.1, rose 0.003 1.2 3.0 0.0]
+zn [rose 0.0025 0.1 4.0 0.9, rose 0.001 0.8 3.0 -0.8, rose 0.002 0.1 5.0 0.9, rose 0.003 1.2 3.0 0.0]
 
 ### Module
 id t_seed_anim3
@@ -180,7 +193,7 @@ component t_wrap
 flags {wrap}
 modules {t_inner:t_z}
 scripts [randomize dly:50 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
-zn [rose 0.002 0.2 6.0 1.2, rose 0.002 0.8 5.0 -0.8, rose 0.001 0.1 7.0 1.1, rose 0.003 1.2 4.0 0.0]
+zn [rose 0.002 0.2 6.0 0.8, rose 0.002 0.8 5.0 -0.8, rose 0.001 0.1 7.0 0.9, rose 0.003 1.2 4.0 0.0]
 
 
 ### Module
@@ -202,7 +215,7 @@ id seed_distance_switching1
 component seed_distance
 flags {lib, distance}
 par {d_bound: 5.0, eye: -1.5}
-modules {tex:tex_simple1, df:df_sphere, distance_light: light_anim1}
+modules {tex:tex_simple1, df:df_sphere, distance_light: light_anim1, a:alpha_dist1}
 sub {d_max_steps:400, d_epsilon:0.00001}
 scripts [randomize dly:50 spd:0.6 lib:distance_field dim:vec4 sub:df typ:mod]
 
@@ -211,7 +224,7 @@ id seed_distance_switching2
 component seed_distance
 flags {lib, distance}
 par {d_bound: 5.0, eye: -1.5}
-modules {tex:tex_simple2, df:df_cube, distance_light: light_anim2}
+modules {tex:tex_simple2, df:df_cube, distance_light: light_anim2, a:alpha_dist2}
 sub {d_max_steps:400, d_epsilon:0.00001}
 scripts [randomize dly:45 spd:0.6 lib:distance_field dim:vec4 sub:df typ:mod]
 
@@ -219,7 +232,23 @@ scripts [randomize dly:45 spd:0.6 lib:distance_field dim:vec4 sub:df typ:mod]
 id seed_distance_multi
 component seed_multi
 flags {multi, lib, distance}
-modules {reduce:torus_reduce, t_seed0:t_id, seed0:seed_distance_switching1, t_seed1:t_seed_anim2, seed1:seed_distance_switching2, t_seed2:t_id, seed2:seed_nothing}
+modules {reduce:torus_reduce, t_seed0:t_id, seed0:seed_distance_switching1, t_seed1:t_seed_anim3, seed1:seed_distance_switching2, t_seed2:t_id, seed2:seed_nothing}
+
+
+### Module
+id alpha_dist1
+component alpha
+flags {distance, lib}
+par {alpha: skewwave 0.03 0.2 0.8 6.0}
+sub {a_exp:a * |alpha|}
+
+### Module
+id alpha_dist2
+component alpha
+flags {distance, lib}
+par {alpha: skewwave 0.035 0.3 0.7 4.0}
+sub {a_exp:a * |alpha|}
+
 
 
 ###Module

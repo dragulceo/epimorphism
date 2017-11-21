@@ -18,6 +18,7 @@ PROJECTS:
 
 
     - EXPERIMENTAL
+      - alpha_linear?
       - optimization (necessary) sometimes ~10 fps on insane w/ 1080 gtx
         - possibly optimize by only getting distance(not ofs) when doing normals
       - de-pixelate?

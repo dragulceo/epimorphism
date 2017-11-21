@@ -8,7 +8,7 @@ import Data.Maybe (Maybe(..))
 import Data.String (Pattern(..), split, trim)
 import Data.Tuple (Tuple(Tuple))
 import Data.Types (EpiS)
-import Math (pi, min, cos, floor)
+import Math (pi, min, cos, floor, pow, sin)
 import Util (cxFromString, cxFromStringE, numFromStringE)
 
 
@@ -62,16 +62,17 @@ parsePath dta = do
 getPathObj :: forall eff h. String -> EpiS eff h (Tuple (PathFunc eff h) PathConfig)
 getPathObj name = do
   case name of
-    "const"  -> pure $ Tuple cnst (PathConfig "z")
-    "linear" -> pure $ Tuple linear (PathConfig "t")
-    "loop"   -> pure $ Tuple loop (PathConfig "mod t 1")
-    "smooth" -> pure $ Tuple smooth (PathConfig "t * t * (3 - 2 * t)")
-    "wave"   -> pure $ Tuple wave (PathConfig "a * cos(2.0 * pi * t) + b")
-    "intrp"  -> pure $ Tuple intrp (PathConfig "(1-t) * z0 + t * z1")
-    "linx"   -> pure $ Tuple linx (PathConfig "t + 0*i")
-    "liny"   -> pure $ Tuple liny (PathConfig "t*i")
-    "circle" -> pure $ Tuple circle (PathConfig "r * e^(2 * pi * i * t")
-    "rose"   -> pure $ Tuple rose (PathConfig "(2.0 * pi * t) + (a * cos(b * t) + c) * i")
+    "const"    -> pure $ Tuple cnst (PathConfig "z")
+    "linear"   -> pure $ Tuple linear (PathConfig "t")
+    "loop"     -> pure $ Tuple loop (PathConfig "mod t 1")
+    "smooth"   -> pure $ Tuple smooth (PathConfig "t * t * (3 - 2 * t)")
+    "wave"     -> pure $ Tuple wave (PathConfig "a * cos(2.0 * pi * t) + b")
+    "intrp"    -> pure $ Tuple intrp (PathConfig "(1-t) * z0 + t * z1")
+    "linx"     -> pure $ Tuple linx (PathConfig "t + 0*i")
+    "liny"     -> pure $ Tuple liny (PathConfig "t*i")
+    "circle"   -> pure $ Tuple circle (PathConfig "r * e^(2 * pi * i * t")
+    "rose"     -> pure $ Tuple rose (PathConfig "(2.0 * pi * t) + (a * cos(b * t) + c) * i")
+    "skewwave" -> pure $ Tuple skewwave (PathConfig "a * (1.0 - sin^(2 * c)(2.0 * pi * t)) + b")
     -- ""   -> pure $ Tuple (PFD ) (PathConfig "")
     _ -> throwError $ "unknown path: " <> name
 
@@ -110,11 +111,23 @@ wave t args = do
     [a', b'] -> do
       a <- numFromStringE a'
       b <- numFromStringE b'
-      pure $ a * cos(2.0 * pi * t) + b
+      pure $ a * cos (2.0 * pi * t) + b
     _ -> throwError "invalid arguments for wave"
   let z = outCartesian (Cartesian x 0.0)
   pure $ Tuple z false
 
+skewwave :: forall eff h. PathFunc eff h
+skewwave t args = do
+  x <- case args of
+    [a', b', c'] -> do
+      a <- numFromStringE a'
+      b <- numFromStringE b'
+      c <- numFromStringE c'
+      let v = sin (2.0 * pi * t)
+      pure $ a * (1.0 - (pow v (2.0 * c))) + b
+    _ -> throwError "invalid arguments for skewwave"
+  let z = outCartesian (Cartesian x 0.0)
+  pure $ Tuple z false
 
 -- 2D FUNCTIONS
 intrp :: forall eff h. PathFunc eff h

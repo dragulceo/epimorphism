@@ -14,8 +14,8 @@ id test_pattern
 family application
 default_mod test_pattern
 code &&&
-  z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
-  color = vec4(z, 0.0, 1.0);
+vec2 r = (z + vec2(1.0)) / vec2(2.0);
+color = hsv2rgb(vec4(r.xy, 1.0, 1.0));
 
 
 ###Module

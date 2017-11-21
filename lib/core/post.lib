@@ -13,7 +13,7 @@ flags {lib}
 id post_hlim
 component post_hlim
 flags {lib, post_hlim}
-par {gamma:1.5, hue:0.0, spread:0.5, lgv:0.5, sat_sc:1.0, inc_sc:0.1, gofs: 0.3}
+par {gamma:1.0, hue:0.0, spread:0.5, lgv:0.5, sat_sc:1.0, inc_sc:0.1, gofs: 0.3}
 
 ### Component
 id post_id
@@ -43,13 +43,13 @@ float inc = (frame.a - DEPTH_INC) / (1.0 - DEPTH_INC);
 inc = |inc_sc| * inc;
 float gofs = |gofs| * frame_rgb.x;
 
-float h0 = 0.9 + 1.0 * gofs + 1.0 * inc + |hue|;
-float h1 = 0.9 + 1.0 * gofs + 0.0 * inc + |hue| + |spread| / 2.0;
-float h2 = 0.9 + 0.8 * gofs + 1.0 * inc + |hue| - |spread| / 2.0;
+float h0 = 0.6 + 1.0 * gofs + 1.0 * inc + |hue|;
+float h1 = 0.6 + 1.0 * gofs + 0.0 * inc + |hue| + |spread| / 2.0;
+float h2 = 0.6 + 0.8 * gofs + 1.0 * inc + |hue| - |spread| / 2.0;
 
 vec4 c0 = hsv2rgb(vec4(h0, 1.0, 0.5, 1.0));
 vec4 c1 = hsv2rgb(vec4(h1, 1.0, |lgv|, 1.0));
-vec4 c2 = hsv2rgb(vec4(h2, 1.0, -1.0 * |lgv|, 1.0));
+vec4 c2 = hsv2rgb(vec4(h2, 1.0, 1.0 - |lgv|, 1.0));
 
 vec4 res, r0, r1;
 float f;
@@ -70,30 +70,6 @@ if(frame.x < 1.0 / 3.0){
 res = (1.0 - f) * r0 + f * r1;
 
 // modulate hue
-
-// try something
-
-if(|test| > 0.0){
-/*
-if(frame.y < 0.5){
-	f = 2.0 * frame.y;
-	r0 = res;
-	r1 = d;
-}else{
-	f = 2.0 * frame.y - 1.0;
-	r0 = d;
-	r1 = res;
-}
-*/
-
-	vec4 d = rgb2hsv(res);
-	d.r += PI;
-	d = hsv2rgb(d);
-
-	f = frame.y;
-	res = (1.0 - f) * d + f * res;
-}
-
 res = rgb2hsv(res);
 frame.x = res.x + PI;
 frame.y *= |sat_sc|;

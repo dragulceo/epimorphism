@@ -193,7 +193,7 @@ modules {post:post_epimorphism_prod}
 id post_epimorphism_prod
 component post_hlim
 flags {farm1, farm2, lib}
-par {test: 1.0, hue:loop 0.01, spread:wave 0.011 0.35 1.3, lgv:wave 0.07 0.225 0.5, inc_sc:0.2, sat_sc:wave 0.006 0.3 1.4, gofs:0.3, gamma: 1.0}
+par {hue:loop 0.01, spread:wave 0.011 0.35 1.3, lgv:wave 0.05 0.125 0.3, inc_sc:0.1, sat_sc:wave 0.006 0.3 1.4, gofs:0.3, gamma: 1.1}
 
 
 
@@ -242,7 +242,7 @@ component tex_simple
 flags {lib}
 images [textures/default.png]
 par {scale:1.0}
-scripts [randomize dly:50 spd:0.16 lib:1024 dim:vec4 sub:0 typ:image]
+scripts [randomize dly:40 spd:0.16 lib:1024 dim:vec4 sub:0 typ:image]
 
 ###Module
 id tex_simple2
@@ -250,4 +250,4 @@ component tex_simple
 flags {lib}
 images [textures/default.png]
 par {scale:1.0}
-scripts [randomize dly:60 spd:0.18 lib:1024 dim:vec4 sub:0 typ:image]
+scripts [randomize dly:45 spd:0.18 lib:1024 dim:vec4 sub:0 typ:image]

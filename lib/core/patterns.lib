@@ -19,8 +19,8 @@ imageLib 1024
 ### Pattern
 id test
 seed   seed_dev
-main   epimorphism_dev_main
-disp   disp_id
+main   test_pattern_main
+disp   disp_main
 vert   vert
 defaultImageLib default_images
 imageLib all_images

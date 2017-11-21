@@ -3,6 +3,7 @@ PROJECTS:
     - 2 dfs 180 deg out of color phase
     - theres some black glitchiness (related to overlaying fields?)?
     - something is moving too fast(sometimes??)
+    - maybe smaler tex_sc
 
   - MAKE SURE
     - color garishness

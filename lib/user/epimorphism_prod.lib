@@ -210,14 +210,6 @@ par {hue:loop 0.01, spread:wave 0.011 0.35 1.0, lgv:wave 0.05 0.125 0.8, inc_sc:
 
 
 
-###Module
-id seed_distance_switching1
-component seed_distance
-flags {lib, distance}
-par {d_bound: 5.0, eye: -1.5}
-modules {seed_color:tex_dist1, df:df_sphere, distance_light: light_anim1, a:alpha_dist1}
-sub {d_max_steps:400, d_epsilon:0.00001}
-scripts [randomize dly:50 spd:0.6 lib:distance_field dim:vec4 sub:df typ:mod]
 
 ###Module
 id seed_distance_switching2
@@ -232,7 +224,7 @@ scripts [randomize dly:45 spd:0.6 lib:distance_field dim:vec4 sub:df typ:mod]
 id seed_distance_multi
 component seed_multi
 flags {multi, lib, distance}
-modules {reduce:torus_reduce, t_seed0:t_id, seed0:seed_distance_switching1, t_seed1:t_seed_anim3, seed1:seed_distance_switching2, t_seed2:t_id, seed2:seed_nothing}
+modules {reduce:torus_reduce, t_seed0:t_id, seed0:seed_distance_switching1, t_seed1:, seed1:seed_nothing, t_seed2:t_id, seed2:seed_nothing}
 
 
 ### Module

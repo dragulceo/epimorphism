@@ -40,6 +40,7 @@ PROJECTS:
       - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
   - Misc
+    - split epimorphism_prod.lib into separate files
     - add default par values to components
     - investigate seed_mod & mod_pal
     - some kind of wave path that spends more time towards one of the extremes(+1?)

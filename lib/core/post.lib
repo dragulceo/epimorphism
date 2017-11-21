@@ -71,7 +71,7 @@ res = (1.0 - f) * r0 + f * r1;
 
 // modulate hue
 res = rgb2hsv(res);
-frame.x = res.x + PI;
+frame.x = res.x;
 frame.y *= |sat_sc|;
 frame = hsv2rgb(frame);
 

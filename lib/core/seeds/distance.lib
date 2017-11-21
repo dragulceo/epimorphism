@@ -2,15 +2,15 @@
 id seed_distance
 component seed_distance
 flags {lib, distance}
-par {d_bound: 5.0, eye: -1.5, alpha: 1.0}
-modules {seed_color:tex_simple, df:df_torus, distance_light: light1, a: alpha_solid}
+par {d_bound: 5.0, eye: -1.5}
+modules {seed_color:tex_simple, df:df_sphere, distance_light: light1}
 sub {d_max_steps:400, d_epsilon:0.00001}
 
 ###Component
 id seed_distance
 family seed
 default_mod seed_distance
-children {seed_color:seed_color, df:distance_field, distance_light: distance_light, a:a}
+children {seed_color:seed_color, df:distance_field, distance_light: distance_light}
 code &&&
 
 vec3 df;
@@ -86,10 +86,6 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
     // compute phong lighting
     vec3 light = vec3(0.0);
     %distance_light%
-
-    // alpha
-		float a = 1.0;
-		%a%
 
     // get texture/seed value
 		float w = 1.0;

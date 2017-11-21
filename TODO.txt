@@ -35,6 +35,7 @@ PROJECTS:
       - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
   - Misc
+    - some kind of wave path that spends more time towards one of the extremes(+1?)
     - customize glsl mode
     - sometimes zooms out too far
     - COLORS TOO HOMOGENOUS

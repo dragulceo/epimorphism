@@ -44,6 +44,10 @@ id colorspace
 family library
 code &&&
 /* colorspace library */
+vec4 gamma3(vec4 v, float gamma){
+  return vec4(pow(v.xyz, vec3(gamma)), v.w);
+}
+
 vec3 pal(float t, vec3 a, vec3 b, vec3 c, vec3 d ){
   return a + b * cos(2.0 * PI * (c * t + d));
 }
@@ -235,10 +239,6 @@ vec2 TANHZ(vec2 z0){
   c = cos(2.0 * z0.y);
   float r = cosh(2.0 * z0.x) + c;
   return vec2(sinh(2.0 * z0.x), s) / r;
-}
-
-vec4 _gamma3(vec4 v, float gamma){
-  return vec4(pow(v.xyz, vec3(gamma)), v.w);
 }
 
 bool isNan(float val){

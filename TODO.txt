@@ -1,11 +1,13 @@
 PROJECTS:
   - NOW
+    - 2 dfs 180 deg out of color phase
+    - theres some black glitchiness (related to overlaying fields?)?
     - something is moving too fast(sometimes??)
+
+  - MAKE SURE
     - color garishness
     - too large of a zoom out sometines
-    - theres some black glitchiness (related to overlaying fields?)?
     - transparency?
-    - 2 dfs 180 deg out of color phase
 
   - Distance Fields
     - IMMEDIATE
@@ -38,6 +40,8 @@ PROJECTS:
       - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
   - Misc
+    - add default par values to components
+    - investigate seed_mod & mod_pal
     - some kind of wave path that spends more time towards one of the extremes(+1?)
     - customize glsl mode
     - sometimes zooms out too far
@@ -136,6 +140,7 @@ PERF:
     - EXT_disjoint_timer_query to measure/scale performance?
 
 SYSTEM:
+  - add input variable dependencies to familes?
   - take snapshot of flattened shader code?
   - rebuild monad transformer stack
   - KMap a monad?  sized-vector?

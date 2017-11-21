@@ -34,4 +34,5 @@ a = wdt.y;
 if(|smooth_mask| > 0.0)
   a = a * smoothstep(0.0, 1.0, |smooth_mask|*w_orig); // apply SMOOTH_MASK, makes a vary better to 0
 
+vec2 ofs = wdt.xw;
 %seed_color%

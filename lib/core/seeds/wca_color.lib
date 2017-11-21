@@ -77,7 +77,6 @@ id tex_color
 family seed_color
 default_mod tex_color
 code &&&
-vec2 ofs = wdt.zw;
 ofs = vec2(2.0, 2.0) * ofs - vec2(1.0, 1.0);
 ofs = |scale| * torus_reduce(ofs);
 ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
@@ -101,7 +100,6 @@ id tex_color_scroll
 family seed_color
 default_mod tex_color_scroll
 code &&&
-vec2 ofs = wdt.zw;
 ofs = vec2(2.0, 2.0) * ofs - vec2(1.0, 1.0);
 //float ti = 0.023 * time * |tex_spd|;
 //vec2 rot = mod(vec2(cos(ti) * ofs.x - sin(ti) * ofs.y, sin(ti) * ofs.x + cos(ti) * ofs.y), 1.0);
@@ -129,7 +127,7 @@ id fb_color
 family seed_color
 default_mod fb_color
 code &&&
-vec2 ofs = mod(|scale| * wdt.zw, 1.0);
+ofs = mod(|scale| * ofs, 1.0);
 
 //vec4 bg_seed = seed;
 

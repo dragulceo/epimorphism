@@ -100,7 +100,7 @@ id tex_color_anim2
 component tex_color_scroll
 flags {anim2}
 images [textures/default.png]
-par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0}
+par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.5, sat:1.0, val:1.0, tex_spd:1.0}
 scripts [randomize dly:65 spd:0.05 lib:1024 dim:vec4 sub:0 typ:image]
 
 ### Module
@@ -215,7 +215,7 @@ id seed_distance_switching1
 component seed_distance
 flags {lib, distance}
 par {d_bound: 5.0, eye: -1.5}
-modules {tex:tex_simple1, df:df_sphere, distance_light: light_anim1, a:alpha_dist1}
+modules {seed_color:tex_dist1, df:df_sphere, distance_light: light_anim1, a:alpha_dist1}
 sub {d_max_steps:400, d_epsilon:0.00001}
 scripts [randomize dly:50 spd:0.6 lib:distance_field dim:vec4 sub:df typ:mod]
 
@@ -224,7 +224,7 @@ id seed_distance_switching2
 component seed_distance
 flags {lib, distance}
 par {d_bound: 5.0, eye: -1.5}
-modules {tex:tex_simple2, df:df_cube, distance_light: light_anim2, a:alpha_dist2}
+modules {seed_color:tex_dist2, df:df_cube, distance_light: light_anim2, a:alpha_dist2}
 sub {d_max_steps:400, d_epsilon:0.00001}
 scripts [randomize dly:45 spd:0.6 lib:distance_field dim:vec4 sub:df typ:mod]
 
@@ -266,17 +266,17 @@ par {shininess:0.06, light_r:wave 0.08 0.2 0.8, light_g:wave 0.07 0.2 0.8, light
 
 
 ###Module
-id tex_simple1
-component tex_simple
+id tex_dist1
+component tex_color
 flags {lib}
 images [textures/default.png]
-par {scale:1.0}
+par {scale:1.0, spd:0.0, sat:1.0, val:1.0, rot:0.25}
 scripts [randomize dly:40 spd:0.16 lib:1024 dim:vec4 sub:0 typ:image]
 
 ###Module
-id tex_simple2
-component tex_simple
+id tex_dist2
+component tex_color
 flags {lib}
 images [textures/default.png]
-par {scale:1.0}
+par {scale:1.0, spd:0.0, sat:1.0, val:1.0, rot:0.75}
 scripts [randomize dly:45 spd:0.18 lib:1024 dim:vec4 sub:0 typ:image]

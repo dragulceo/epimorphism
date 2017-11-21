@@ -1,8 +1,7 @@
 PROJECTS:
   - NOW
-    - 2 dfs 180 deg out of color phase
-    - theres some black glitchiness (related to overlaying fields?)?
-    - something is moving too fast(sometimes??)
+    - something is moving too fast(sometimes??) (overzoom?)
+    - white sparklies??
     - maybe smaler tex_sc
 
   - MAKE SURE
@@ -14,9 +13,8 @@ PROJECTS:
     - IMMEDIATE
       - dont reduce distance seeds?
       - deformations?
-      - enable with UI switch?p
-    - distance fieds seem locked to each other
-    - overlaying distance fields is a bit weird.  merge them (union)?
+      - enable with UI switch?
+    - overlaying distance fields is a bit weird.  maybe merge them (union)?
     - starting weird on linux when breaking cache
 
 
@@ -34,13 +32,14 @@ PROJECTS:
       - fog?
       - anti-aliasing
 
-
     - RELEASE!
 
     - REFERENCE
       - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
   - Misc
+    - make system time vary with framerate 30 fps -> 0.01
+    - in UI scrolling should only effect text
     - split epimorphism_prod.lib into separate files
     - add default par values to components
     - investigate seed_mod & mod_pal

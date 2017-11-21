@@ -15,7 +15,7 @@ id t_main
 component t_wrap
 flags {lib, wrap}
 modules {t_inner:t_sinh}
-zn [0.90 + 0.0i, 0.0 + 0.0i, 0.0 + 1.05i, 1.0 + 0.0i]
+zn [1.0 + 0.0i, 0.0 + 0.0i, 0.0 + 1.1i, 1.0 + 0.0i]
 scripts [randomize dly:50 spd:0.04 lib:new dim:vec2 sub:t_inner typ:mod]
 
 ### Module
@@ -185,7 +185,7 @@ component t_wrap
 flags {wrap}
 modules {t_inner:t_z}
 scripts [randomize dly:45 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
-zn [rose 0.0025 0.1 4.0 0.9, rose 0.001 0.8 3.0 -0.8, rose 0.002 0.1 5.0 0.9, rose 0.003 1.2 3.0 0.0]
+zn [rose 0.0008 0.1 4.0 0.9, rose 0.0004 0.8 3.0 -0.8, rose 0.001 0.1 5.0 0.9, rose 0.0015 1.2 3.0 0.0]
 
 ### Module
 id t_seed_anim3
@@ -193,7 +193,7 @@ component t_wrap
 flags {wrap}
 modules {t_inner:t_z}
 scripts [randomize dly:50 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
-zn [rose 0.002 0.2 6.0 0.8, rose 0.002 0.8 5.0 -0.8, rose 0.001 0.1 7.0 0.9, rose 0.003 1.2 4.0 0.0]
+zn [rose 0.0004 0.2 6.0 0.8, rose 0.0002 0.8 5.0 -0.8, rose 0.0006 0.1 7.0 0.9, rose 0.001 1.2 4.0 0.0]
 
 
 ### Module
@@ -206,7 +206,7 @@ modules {post:post_epimorphism_prod}
 id post_epimorphism_prod
 component post_hlim
 flags {farm1, farm2, lib}
-par {hue:loop 0.01, spread:wave 0.011 0.35 1.0, lgv:wave 0.05 0.125 0.8, inc_sc:0.1, sat_sc:wave 0.006 0.3 1.3, gofs:0.3, gamma: 1.1}
+par {hue:loop 0.01, spread:wave 0.011 0.35 1.0, lgv:wave 0.05 0.125 0.8, inc_sc:0.1, sat_sc:wave 0.006 0.3 1.3, gofs:0.3, gamma: wave 0.02 0.1 1.0}
 
 
 ###Module
@@ -231,7 +231,7 @@ scripts [randomize dly:45 spd:0.6 lib:distance_field dim:vec4 sub:df typ:mod]
 id seed_distance_multi
 component seed_multi
 flags {multi, lib, distance}
-modules {reduce:torus_reduce, t_seed0:t_id, seed0:seed_distance_switching1, t_seed1:t_seed_anim3, seed1:seed_distance_switching2, t_seed2:t_id, seed2:seed_nothing}
+modules {reduce:torus_reduce, t_seed0:t_seed_anim1, seed0:seed_distance_switching1, t_seed1:t_seed_anim3, seed1:seed_distance_switching2, t_seed2:t_id, seed2:seed_nothing}
 
 
 ### Module
@@ -270,7 +270,7 @@ component tex_color
 flags {lib}
 images [textures/default.png]
 par {scale:1.0, spd:0.0, sat:1.0, val:1.0, rot:0.25}
-scripts [randomize dly:40 spd:0.16 lib:1024 dim:vec4 sub:0 typ:image]
+scripts [randomize dly:20 spd:0.16 lib:1024 dim:vec4 sub:0 typ:image]
 
 ###Module
 id tex_dist2
@@ -278,4 +278,4 @@ component tex_color
 flags {lib}
 images [textures/default.png]
 par {scale:1.0, spd:0.0, sat:1.0, val:1.0, rot:0.75}
-scripts [randomize dly:45 spd:0.18 lib:1024 dim:vec4 sub:0 typ:image]
+scripts [randomize dly:25 spd:0.18 lib:1024 dim:vec4 sub:0 typ:image]

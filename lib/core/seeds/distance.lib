@@ -96,6 +96,11 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
 
     seed = vec4(light, 1.0) * seed;
 
+		// specular lighthing + some textures seem to
+		// return NaN or Inf?? - WEIRD
+		if(isBorked(seed))
+			seed = vec4(0.0, 0.0, 0.0, 1.0);
+
     break;
   }
 

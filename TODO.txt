@@ -1,19 +1,21 @@
 PROJECTS:
   - NOW
     - something is moving too fast(sometimes??)
-    - color homogeneity
-    - distance fieds seem locked to each other
+    - color garishness
     - too large of a zoom out sometines
-    - overlaying distance fields is a bit weird.  merge them (union)?
     - theres some black glitchiness (related to overlaying fields?)?
     - transparency?
-    - starting weird on linux when breaking cache
+    - 2 dfs 180 deg out of color phase
 
   - Distance Fields
     - IMMEDIATE
       - dont reduce distance seeds?
       - deformations?
       - enable with UI switch?p
+    - distance fieds seem locked to each other
+    - overlaying distance fields is a bit weird.  merge them (union)?
+    - starting weird on linux when breaking cache
+
 
     - EXPERIMENTAL
       - optimization (necessary) sometimes ~10 fps on insane w/ 1080 gtx

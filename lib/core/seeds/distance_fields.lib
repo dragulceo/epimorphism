@@ -2,8 +2,8 @@
 id df_sphere
 component df_sphere
 flags {lib, distance, distance_field}
-par {diam: wave 0.043 0.1 0.9, tex_sc: wave 0.04 0.25 0.7}
-modules {cam_trans: trans1}
+par {diam: 0.5, tex_sc: wave 0.04 0.25 0.7}
+modules {cam_trans: trans_no}
 
 ### Component
 id df_sphere
@@ -30,7 +30,7 @@ df = vec4(tex_ofs, d, surface);
 id df_cylinder
 component df_cylinder
 flags {lib, distance, distance_field}
-par {diam: wave 0.041 0.1 0.5, tex_sc: wave 0.054 0.2 0.65}
+par {diam: 0.4, tex_sc: wave 0.054 0.2 0.65}
 modules {cam_trans: trans_y}
 
 ### Component
@@ -127,7 +127,7 @@ df = vec4(tex_ofs, d, surface);
 id df_multi
 component df_multi
 flags {lib, distance, distance_field, df_multi}
-modules {df0: df_sphere, df1: df_cylinder}
+modules {df0: df_sphere, df1: df_torus}
 
 ### Component
 id df_multi

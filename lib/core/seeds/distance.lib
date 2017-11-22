@@ -3,7 +3,7 @@ id seed_distance
 component seed_distance
 flags {lib, distance}
 par {d_bound: 5.0, eye: -1.5}
-modules {seed_color:tex_df_surface, df:df_sphere, distance_light: light1, a:alpha_solid}
+modules {seed_color:tex_df_surface, df:df_multi, distance_light: light1, a:alpha_solid}
 sub {d_max_steps:400, d_epsilon:0.00001}
 
 ### Component

@@ -3,7 +3,7 @@ id seed_distance
 component seed_distance
 flags {lib, distance}
 par {d_bound: 5.0, eye: -1.5}
-modules {seed_color:tex_simple, df:df_cube, distance_light: light1, a:alpha_solid}
+modules {seed_color:tex_simple, df:df_sphere, distance_light: light1, a:alpha_solid}
 sub {d_max_steps:400, d_epsilon:0.00001}
 
 ### Component
@@ -51,6 +51,9 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
     vec3 ep = vec3(0.001, 0.0, 0.0);
     vec3 nor = vec3(0.0, 0.0, 0.0);
 
+		// disable tex_ofs computations
+		#define NO_TEX_OFS 1
+
     // nor.x
     pos = pos_orig + ep.xyy;
     %df%
@@ -80,6 +83,8 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
     %df%
     float norz2 = df.z;
     nor.z = norz1 - norz2;
+
+		#undef NO_TEX_OFS
 
     nor = normalize(nor);
 

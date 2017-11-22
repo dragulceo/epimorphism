@@ -1,7 +1,7 @@
 PROJECTS:
   - NOW
     - occasionally disable various seeds
-    - something is moving too fast(sometimes??) (overzoom?)
+    - things still too fast?
     - white sparklies??
 
   - MAKE SURE
@@ -11,18 +11,16 @@ PROJECTS:
   - Distance Fields
     - IMMEDIATE
       - dont reduce distance seeds?
-      - deformations?
       - enable with UI switch?
     - overlaying distance fields is a bit weird.  maybe merge them (union)?
     - starting weird on linux when breaking cache
 
     - EXPERIMENTAL
+      - deformations?
       - alpha_linear?
       - optimization (necessary) sometimes ~10 fps on insane w/ 1080 gtx
-        - possibly optimize by only getting distance(not ofs) when doing normals
       - de-pixelate?
-      - tweak animation constants
-      - better rotations/translations?
+
       - play with mod
       - torus involution - https://i.redd.it/bfg90xr89gyz.gif
       - more than 1 light?

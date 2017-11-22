@@ -1,11 +1,11 @@
-###Module
+### Module
 id df_sphere
 component df_sphere
 flags {lib, distance, distance_field}
 par {diam: wave 0.043 0.1 0.9, tex_sc: wave 0.04 0.25 0.7}
 modules {cam_trans: trans1}
 
-###Component
+### Component
 id df_sphere
 family distance_field
 default_mod df_sphere
@@ -13,24 +13,27 @@ children {cam_trans: cam_trans}
 code &&&
 
 vec3 cam = pos;
+vec2 tex_ofs;
 %cam_trans%
 
 float d = length(cam) - |diam|;
 
-vec2 tex_ofs = cam.xy / |tex_sc|;
+#ifndef NO_TEX_OFS
+tex_ofs = cam.xy / |tex_sc|;
 tex_ofs = (tex_ofs + vec2(1.0)) / vec2(2.0);
+#endif
 
 df = vec3(tex_ofs, d);
 
 
-###Module
+### Module
 id df_cylinder
 component df_cylinder
 flags {lib, distance, distance_field}
 par {diam: wave 0.041 0.1 0.5, tex_sc: wave 0.054 0.2 0.65}
 modules {cam_trans: trans_y}
 
-###Component
+### Component
 id df_cylinder
 family distance_field
 default_mod df_cylinder
@@ -38,14 +41,16 @@ children {cam_trans: cam_trans}
 code &&&
 
 vec3 cam = pos;
+vec2 tex_ofs;
 %cam_trans%
 
 float d = length(cam.xz) - |diam|;
 
+#ifndef NO_TEX_OFS
 vec3 sc = cam / |tex_sc|;
-
-vec2 tex_ofs = vec2(atan(sc.x, sc.z) / PI, -1.0 * sc.y / (2.0 * PI * |diam|));
+tex_ofs = vec2(atan(sc.x, sc.z) / PI, -1.0 * sc.y / (2.0 * PI * |diam|));
 tex_ofs = (tex_ofs + vec2(1.0)) / vec2(2.0);
+#endif
 
 df = vec3(tex_ofs, d);
 
@@ -65,14 +70,14 @@ children {cam_trans: cam_trans}
 code &&&
 
 vec3 cam = pos;
+vec2 tex_ofs;
 %cam_trans%
 
 vec3 dc  = abs(cam) - vec3(|diam|);
 float d = min(max(dc.x, max(dc.y, dc.z)), 0.0) + length(max(dc, 0.0));
 
-
 // optimize?
-vec2 tex_ofs;
+#ifndef NO_TEX_OFS
 vec3 sc = cam / (|tex_sc| * |diam|);
 if(abs(sc.z) > sc.x && abs(sc.z) > -1.0 * sc.x &&
    abs(sc.z) > sc.y && abs(sc.z) > -1.0 * sc.y){
@@ -82,8 +87,8 @@ if(abs(sc.z) > sc.x && abs(sc.z) > -1.0 * sc.x &&
   tex_ofs = sc.yz;
 }else
   tex_ofs = sc.zx;
-
 tex_ofs = (tex_ofs + vec2(1.0)) / vec2(2.0);
+#endif
 
 df = vec3(tex_ofs, d);
 
@@ -109,8 +114,10 @@ vec2 tex_ofs;
 vec2 q = vec2(length(cam.xy) - |diam1|, cam.z);
 float d = length(q) - |diam2|;
 
+#ifndef NO_TEX_OFS
 tex_ofs = vec2(atan(q.x / |tex_sc|, q.y / |tex_sc|) / PI,
            atan(cam.x / |tex_sc|, cam.y / |tex_sc|) / (2.0 * PI * |diam2|));
 tex_ofs = (tex_ofs + vec2(1.0)) / vec2(2.0);
+#endif
 
 df = vec3(tex_ofs, d);

@@ -121,3 +121,33 @@ tex_ofs = (tex_ofs + vec2(1.0)) / vec2(2.0);
 #endif
 
 df = vec4(tex_ofs, d, surface);
+
+
+### Module
+id df_multi
+component df_multi
+flags {lib, distance, distance_field, df_multi}
+modules {df0: df_sphere, df1: df_cylinder}
+
+### Component
+id df_multi
+family distance_field
+default_mod df_multi
+children {df0: distance_field, df1: distance_field}
+code &&&
+vec4 df0, df1 = vec4(0.0, 0.0, 10000000.0, 0.0);
+
+surface = 0.0;
+%df0%
+df0 = df;
+
+surface = 1.0;
+%df1%
+df1 = df;
+
+if(df0.z <= df1.z)
+	df = df0;
+else
+	df = df1;
+
+//df = df0;

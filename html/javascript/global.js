@@ -43,20 +43,24 @@ function webGLEnabled() {
 }
 
 // apparently preload images
-var preload = ["textures/default/default0.png"];
-var promises = [];
-for (var i = 0; i < preload.length; i++) {
-    (function(url, promise) {
-        var img = new Image();
-        img.onload = function() {
-          promise.resolve();
-        };
-        img.src = url;
-    })(preload[i], promises[i] = $.Deferred());
+function preloadAndStart(){
+  console.log("Preloading");
+  var preload = ["textures/default/default0.png", "textures/default/default1.png"];
+  var promises = [];
+  for (var i = 0; i < preload.length; i++) {
+      (function(url, promise) {
+          var img = new Image();
+          img.onload = function() {
+            promise.resolve();
+          };
+          img.src = url;
+      })(preload[i], promises[i] = $.Deferred());
+  }
+  $.when.apply($, promises).done(function() {
+    console.log("FINISHED PRELOADING");
+    Main.main();
+  });
 }
-$.when.apply($, promises).done(function() {
-  Main.main();
-});
 
 // start main application
 $(document).ready( function() {
@@ -64,6 +68,7 @@ $(document).ready( function() {
     var c = getCookie("epimorphism_profile");
     if(c)
       $("#resolutionSel").val(c);
+    preloadAndStart();
   }else{
     $('#loading').html("<center style='margin-top:50px;color:white;'>WebGL not available</center>")
   }

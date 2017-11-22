@@ -5,7 +5,7 @@ exports.loadImages = function(default_images){
     return function (){
 
       // preloaded default image
-      var img0 = $("#defaultImg0")[0];
+      var img0 = $("#defaultImg1")[0];
       var img1 = $("#defaultImg1")[0];
       window.auxImageLib = {"textures/default/default0.png": img0, "textures/default/default1.png": img1};
       window.loadedDefaults = ["textures/default/default0.png", "textures/default/default1.png"];

@@ -3,7 +3,7 @@ id seed_distance
 component seed_distance
 flags {lib, distance}
 par {d_bound: 5.0, eye: -1.5}
-modules {seed_color:tex_df_surface, df:df_multi, distance_light: light1, a:alpha_solid}
+modules {seed_color:tex_df_surface, df:df_sphere, distance_light: light1, a:alpha_solid}
 sub {d_max_steps:400, d_epsilon:0.00001}
 
 ### Component
@@ -15,7 +15,6 @@ code &&&
 
 vec4 df;
 vec2 ofs;
-float surface = 1.5;
 
 seed = vec4(0.0);
 
@@ -24,6 +23,7 @@ vec3 r_dir = normalize(vec3(z.x, z.y, 1.0));
 
 // intersect ray
 float l = 0.0;
+float surface = -1.0;
 
 for (int count=0; count < ~d_max_steps~; count += 1) {
   vec3 pos = r_eye + l * r_dir;
@@ -94,6 +94,7 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
 
 		// get texture/seed value
 		float w = 1.0;
+
     %seed_color%
 
     // compute phong lighting & illuminate

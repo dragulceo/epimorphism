@@ -154,7 +154,11 @@ ofs = 2.0 * ofs - vec2(1.0);
 ofs = |scale| * torus_reduce(ofs);
 ofs = (ofs + vec2(1.0)) / 2.0;
 
-seed = texture2D(aux[#0], ofs);
+if(surface < 1.0)
+  seed = texture2D(aux[#0], ofs);
+else
+	seed = texture2D(aux[#1], ofs);
+
 seed = rgb2hsv(seed);
 
 seed = hsv2rgb(vec4(seed.x + time * |spd| + |rot|, |sat| * seed.y, |val| * seed.z * w, a * seed.a));

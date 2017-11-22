@@ -8,6 +8,7 @@ PROJECTS:
     - white sparklies??
 
     - MAKE PRELOADING IMAGES NON-GHETTO!
+    - MISSING IMAGES (vs langton10?)
 
   - MAKE SURE
     - more color variation(white never shows up?)

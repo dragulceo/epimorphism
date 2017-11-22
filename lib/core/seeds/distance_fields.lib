@@ -150,4 +150,6 @@ if(df0.z <= df1.z)
 else
 	df = df1;
 
+surface = df.w;
+
 //df = df0;

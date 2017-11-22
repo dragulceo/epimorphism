@@ -94,7 +94,6 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
 
 		// get texture/seed value
 		float w = 1.0;
-
     %seed_color%
 
     // compute phong lighting & illuminate

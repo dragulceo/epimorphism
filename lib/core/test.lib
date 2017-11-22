@@ -21,7 +21,7 @@ color = hsv2rgb(vec4(r.xy, 1.0, 1.0));
 ###Module
 id test_image
 component test_image
-images [textures/default.png, textures/simplegeom/tile_grid3.png]
+images [textures/default/default0.png, textures/simplegeom/tile_grid3.png]
 flags {lib}
 
 ### Component

@@ -50,7 +50,7 @@ par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0}
 id tex_simple
 component tex_simple
 flags {lib}
-images [textures/default.png]
+images [textures/default/default0.png]
 par {scale:1.0}
 
 
@@ -69,7 +69,7 @@ seed = texture2D(aux[#0], ofs);
 id tex_color
 component tex_color
 flags {lib}
-images [textures/default.png]
+images [textures/default/default0.png]
 par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0}
 
 ### Component
@@ -92,7 +92,7 @@ seed = hsv2rgb(vec4(seed.x + time * |spd| + |rot|, |sat| * seed.y, |val| * seed.
 id tex_color_scroll
 component tex_color_scroll
 flags {lib}
-images [textures/default.png]
+images [textures/default/default0.png]
 par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0, tex_spd:1.0}
 
 ### Component

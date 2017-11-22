@@ -5,9 +5,10 @@ exports.loadImages = function(default_images){
     return function (){
 
       // preloaded default image
-      var img = $("#defaultImg")[0];
-      window.auxImageLib = {"textures/default.png": img};
-      window.loadedDefaults = ["textures/default.png"];
+      var img0 = $("#defaultImg0")[0];
+      var img1 = $("#defaultImg1")[0];
+      window.auxImageLib = {"textures/default/default0.png": img0, "textures/default/default1.png": img1};
+      window.loadedDefaults = ["textures/default/default0.png", "textures/default/default1.png"];
 
       var all = default_images.concat(images);
       for (var i = 0; i < all.length; i++) {

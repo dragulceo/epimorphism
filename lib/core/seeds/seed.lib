@@ -86,7 +86,7 @@ seed = hsv2rgb(vec4(0.0, 1.0, w, mask * |alpha|));
 id seed_img1
 component seed_simple_img
 flags {img}
-images [textures/default.png]
+images [textures/default/default0.png]
 par {w:0.2, alpha:1.0}
 
 ### Component

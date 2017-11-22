@@ -155,6 +155,12 @@ par {alpha:wave 0.038 0.15 0.85}
 scripts [randomize dly:55 spd:0.5 lib:seed_a_main dim:float sub:a_exp typ:sub]
 sub {a_exp:a * |alpha|}
 
+### Module
+id t_seed_max
+component t_wrap
+flags {wrap, lib}
+modules {t_inner:t_z}
+zn [1.4, -1.6, 1.2i, 1.2]
 
 ### Module
 id t_seed_anim
@@ -162,14 +168,7 @@ component t_wrap
 flags {wrap, lib}
 modules {t_inner:t_z}
 scripts [randomize dly:35 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
-zn [rose 0.003 0.2 5.0 1.2, rose 0.001 0.8 4.5 -0.8, rose 0.0027 0.1 63.0 1.1, rose 0.0035 1.2 3.2 0.0]
-
-### Module
-id t_seed_max
-component t_wrap
-flags {wrap, lib}
-modules {t_inner:t_z}
-zn [1.4, -1.6, 1.2i, 1.2]
+zn [rose 0.002 0.2 5.0 1.2, rose 0.001 0.8 4.5 -0.8, rose 0.0027 0.1 63.0 1.1, rose 0.0035 1.2 3.2 0.0]
 
 ### Module
 id t_seed_anim1
@@ -185,7 +184,7 @@ component t_wrap
 flags {wrap}
 modules {t_inner:t_z}
 scripts [randomize dly:45 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
-zn [rose 0.0008 0.1 4.0 0.9, rose 0.0004 0.8 3.0 -0.8, rose 0.001 0.1 5.0 0.9, rose 0.0015 1.2 3.0 0.0]
+zn [rose 0.0008 0.1 4.0 0.9, rose 0.0004 0.8 3.0 -0.8, rose 0.001 0.1 5.0 0.7, rose 0.0015 1.2 3.0 0.0]
 
 ### Module
 id t_seed_anim3
@@ -193,7 +192,7 @@ component t_wrap
 flags {wrap}
 modules {t_inner:t_z}
 scripts [randomize dly:50 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
-zn [rose 0.0004 0.2 6.0 0.8, rose 0.0002 0.8 5.0 -0.8, rose 0.0006 0.1 7.0 0.9, rose 0.001 1.2 4.0 0.0]
+zn [rose 0.0004 0.1 6.0 0.9, rose 0.0002 0.6 2.5 -0.8, rose 0.0006 0.1 3.0 0.8, rose 0.0001 1.2 2.5 0.0]
 
 
 ### Module
@@ -231,7 +230,7 @@ scripts [randomize dly:45 spd:0.6 lib:distance_field dim:vec4 sub:df typ:mod]
 id seed_distance_multi
 component seed_multi
 flags {multi, lib, distance}
-modules {reduce:torus_reduce, t_seed0:t_seed_anim1, seed0:seed_distance_switching1, t_seed1:t_seed_anim3, seed1:seed_distance_switching2, t_seed2:t_id, seed2:seed_nothing}
+modules {reduce:torus_reduce, t_seed0:t_seed_anim2, seed0:seed_distance_switching1, t_seed1:t_seed_anim3, seed1:seed_distance_switching2, t_seed2:t_id, seed2:seed_nothing}
 
 
 ### Module

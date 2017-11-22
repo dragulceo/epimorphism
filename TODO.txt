@@ -2,7 +2,7 @@ PROJECTS:
   - NOW
     - something is moving too fast(sometimes??) (overzoom?)
     - white sparklies??
-    - maybe smaler tex_sc
+    - occasionally disable various seeds
 
   - MAKE SURE
     - color garishness
@@ -16,7 +16,7 @@ PROJECTS:
       - enable with UI switch?
     - overlaying distance fields is a bit weird.  maybe merge them (union)?
     - starting weird on linux when breaking cache
-
+    - maybe smaler tex_sc?
 
     - EXPERIMENTAL
       - alpha_linear?

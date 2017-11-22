@@ -13,8 +13,9 @@ default_mod seed_distance
 children {seed_color:seed_color, df:distance_field, distance_light: distance_light, a:a}
 code &&&
 
-vec3 df;
+vec4 df;
 vec2 ofs;
+float surface = -1.0;
 
 seed = vec4(0.0);
 

@@ -23,7 +23,7 @@ tex_ofs = cam.xy / |tex_sc|;
 tex_ofs = (tex_ofs + vec2(1.0)) / vec2(2.0);
 #endif
 
-df = vec3(tex_ofs, d);
+df = vec4(tex_ofs, d, surface);
 
 
 ### Module
@@ -52,7 +52,7 @@ tex_ofs = vec2(atan(sc.x, sc.z) / PI, -1.0 * sc.y / (2.0 * PI * |diam|));
 tex_ofs = (tex_ofs + vec2(1.0)) / vec2(2.0);
 #endif
 
-df = vec3(tex_ofs, d);
+df = vec4(tex_ofs, d, surface);
 
 
 ###Module
@@ -90,7 +90,7 @@ if(abs(sc.z) > sc.x && abs(sc.z) > -1.0 * sc.x &&
 tex_ofs = (tex_ofs + vec2(1.0)) / vec2(2.0);
 #endif
 
-df = vec3(tex_ofs, d);
+df = vec4(tex_ofs, d, surface);
 
 
 ###Module
@@ -120,4 +120,4 @@ tex_ofs = vec2(atan(q.x / |tex_sc|, q.y / |tex_sc|) / PI,
 tex_ofs = (tex_ofs + vec2(1.0)) / vec2(2.0);
 #endif
 
-df = vec3(tex_ofs, d);
+df = vec4(tex_ofs, d, surface);

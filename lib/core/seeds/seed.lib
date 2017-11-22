@@ -1,16 +1,16 @@
-###Module
+### Module
 id seed_na
 component seed_main
 flags {lib, dev, root}
 modules {seed:seed_nothing}
 
-###Module
+### Module
 id seed_dev
 component seed_main
 flags {lib, dev, root}
 modules {seed:seed_wca}
 
-###Module
+### Module
 id seed_nothing
 component seed_nothing
 flags {lib}
@@ -22,18 +22,18 @@ default_mod seed_nothing
 code &&&
 seed = vec4(0.0);
 
-###Module
+### Module
 id seed_dev_distance
 component seed_main
 flags {lib, dev, root}
-modules {seed:seed_distance}
+modules {seed:seed_wca_tex}
 
-###Module
+### Module
 id seed_buf
 component seed_buf
 flags {lib}
 
-###Component
+### Component
 id seed_buf
 family seed
 default_mod seed_buf
@@ -42,13 +42,13 @@ frame_z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
 seed = texture2D(seedBuf, frame_z);
 
 
-###Module
+### Module
 id seed_wrap
 component seed_wrap
 flags {lib}
 modules {t_seed:t_wrap, seed_body:seed_buf, seed_mod:mod_id, reduce:torus_reduce}
 
-###Component
+### Component
 id seed_wrap
 family seed
 default_mod seed_wrap
@@ -61,7 +61,7 @@ code &&&
 %seed_mod%
 
 
-###Module
+### Module
 id seed_simple
 component seed_simple
 flags {lib}
@@ -82,7 +82,7 @@ float mask = ceil(w);
 seed = hsv2rgb(vec4(0.0, 1.0, w, mask * |alpha|));
 
 
-###Module
+### Module
 id seed_img1
 component seed_simple_img
 flags {img}
@@ -113,7 +113,7 @@ seed.z *= w;
 seed = hsv2rgb(seed);
 
 
-###Module
+### Module
 id seed_multi
 component seed_multi
 flags {lib, multi}

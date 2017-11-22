@@ -3,7 +3,7 @@ id seed_distance
 component seed_distance
 flags {lib, distance}
 par {d_bound: 5.0, eye: -1.5}
-modules {seed_color:tex_df_surface, df:df_multi, distance_light: light1, a:alpha_solid}
+modules {seed_color:tex_df_surface, df:df_cube, distance_light: light1, a:alpha_solid}
 sub {d_max_steps:400, d_epsilon:0.00001}
 
 ### Component
@@ -20,14 +20,13 @@ seed = vec4(0.0);
 
 vec3 r_eye = vec3(0.0, 0.0, |eye|);
 vec3 r_dir = normalize(vec3(z.x, z.y, 1.0));
+vec3 pos_del = vec3(0.0);
 
 // intersect ray
 float l = 0.0;
 float surface = -1.0;
 
 for (int count=0; count < ~d_max_steps~; count += 1) {
-  vec3 pos = r_eye + l * r_dir;
-
   /*
   float c = cos(5.0*pos.y);
   float s = sin(5.0*pos.y);
@@ -45,7 +44,6 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
 
   // we have a hit
   if (dist < ~d_epsilon~){
-    vec3 pos_orig = pos;
     vec2 ofs = df.xy;
 
     // calculate normal
@@ -56,31 +54,31 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
 		#define NO_TEX_OFS 1
 
     // nor.x
-    pos = pos_orig + ep.xyy;
+    pos_del = ep.xyy;
     %df%
     float norx1 = df.z;
 
-    pos = pos_orig - ep.xyy;
+    pos_del = -ep.xyy;
     %df%
     float norx2 = df.z;
     nor.x = norx1 - norx2;
 
     // nor.y
-    pos = pos_orig + ep.yxy;
+    pos_del = ep.yxy;
     %df%
     float nory1 = df.z;
 
-    pos = pos_orig - ep.yxy;
+    pos_del = -ep.yxy;
     %df%
     float nory2 = df.z;
     nor.y = nory1 - nory2;
 
     // nor.z
-    pos = pos_orig + ep.yyx;
+    pos_del = ep.yyx;
     %df%
     float norz1 = df.z;
 
-    pos = pos_orig - ep.yyx;
+    pos_del = -ep.yyx;
     %df%
     float norz2 = df.z;
     nor.z = norz1 - norz2;
@@ -112,6 +110,6 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
 
   l += dist;
 
-  if (l > |d_bound|)
+  if (l >= |d_bound|)
      break;
 }

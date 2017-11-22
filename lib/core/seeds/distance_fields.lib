@@ -1,9 +1,24 @@
 ### Module
+id df_nothing
+component df_nothing
+flags {lib, distance, distance_field}
+
+### Component
+id df_nothing
+family distance_field
+default_mod df_nothing
+children {cam_trans: cam_trans}
+code &&&
+
+df = vec4(0.0, 0.0, 1000000.0, surface);
+
+
+### Module
 id df_sphere
 component df_sphere
 flags {lib, distance, distance_field}
-par {diam: 0.5, tex_sc: wave 0.04 0.25 0.7}
-modules {cam_trans: trans_no}
+par {diam: wave 0.02 0.1 0.5, tex_sc: wave 0.04 0.25 0.6}
+modules {cam_trans: trans1}
 
 ### Component
 id df_sphere
@@ -12,14 +27,14 @@ default_mod df_sphere
 children {cam_trans: cam_trans}
 code &&&
 
-vec3 cam = pos;
+vec3 cam = r_eye + l * r_dir + pos_del;
 vec2 tex_ofs;
 %cam_trans%
 
 float d = length(cam) - |diam|;
 
 #ifndef NO_TEX_OFS
-tex_ofs = cam.xy / |tex_sc|;
+tex_ofs = 2.0 * cam.xy / (|tex_sc| * |diam|);
 tex_ofs = (tex_ofs + vec2(1.0)) / vec2(2.0);
 #endif
 
@@ -30,7 +45,7 @@ df = vec4(tex_ofs, d, surface);
 id df_cylinder
 component df_cylinder
 flags {lib, distance, distance_field}
-par {diam: 0.4, tex_sc: wave 0.054 0.2 0.65}
+par {diam: wave 0.03 0.1 0.5, tex_sc: wave 0.054 0.2 0.65}
 modules {cam_trans: trans_y}
 
 ### Component
@@ -40,7 +55,7 @@ default_mod df_cylinder
 children {cam_trans: cam_trans}
 code &&&
 
-vec3 cam = pos;
+vec3 cam = r_eye + l * r_dir + pos_del;
 vec2 tex_ofs;
 %cam_trans%
 
@@ -55,21 +70,21 @@ tex_ofs = (tex_ofs + vec2(1.0)) / vec2(2.0);
 df = vec4(tex_ofs, d, surface);
 
 
-###Module
+### Module
 id df_cube
 component df_cube
 flags {lib, distance, distance_field}
 par {diam: wave 0.03 0.1 0.5, tex_sc: wave 0.05 0.1 0.9}
 modules {cam_trans: trans2}
 
-###Component
+### Component
 id df_cube
 family distance_field
 default_mod df_cube
 children {cam_trans: cam_trans}
 code &&&
 
-vec3 cam = pos;
+vec3 cam = r_eye + l * r_dir + pos_del;
 vec2 tex_ofs;
 %cam_trans%
 
@@ -93,21 +108,21 @@ tex_ofs = (tex_ofs + vec2(1.0)) / vec2(2.0);
 df = vec4(tex_ofs, d, surface);
 
 
-###Module
+### Module
 id df_torus
 component df_torus
 flags {lib, distance, distance_field}
 par {diam1: wave 0.041 0.1 0.7, diam2: wave 0.029 0.05 0.2, tex_sc: wave 0.04 0.2 0.65}
 modules {cam_trans: trans3}
 
-###Component
+### Component
 id df_torus
 family distance_field
 default_mod df_torus
 children {cam_trans: cam_trans}
 code &&&
 
-vec3 cam = pos;
+vec3 cam = r_eye + l * r_dir + pos_del;
 vec2 tex_ofs;
 %cam_trans%
 
@@ -127,24 +142,38 @@ df = vec4(tex_ofs, d, surface);
 id df_multi
 component df_multi
 flags {lib, distance, distance_field, df_multi}
-modules {df0: df_sphere, df1: df_torus}
+modules {df0: df_sphere, df1: df_nothing, t_dist: t_id}
 
 ### Component
 id df_multi
 family distance_field
 default_mod df_multi
-children {df0: distance_field, df1: distance_field}
+children {df0: distance_field, df1: distance_field, t_dist: t}
 code &&&
 vec4 df0, df1 = vec4(0.0, 0.0, 10000000.0, 0.0);
+vec3 r_dir_orig = r_dir;
 
+// first surface
+vec3 pos = r_eye + l * r_dir + pos_del;
 surface = 0.0;
 %df0%
 df0 = df;
 
+// transform
+vec2 z_in = z;
+z = r_dir.xy;
+%t_dist%
+z = torus_reduce(z);
+r_dir.xy = z;
+z = z_in;
+
+// second surface
+pos = r_eye + l * r_dir + pos_del;
 surface = 1.0;
 %df1%
 df1 = df;
 
+// intersect
 if(df0.z <= df1.z)
 	df = df0;
 else
@@ -152,4 +181,4 @@ else
 
 surface = df.w;
 
-//df = df0;
+r_dir = r_dir_orig;

@@ -208,7 +208,7 @@ flags {farm1, farm2, lib}
 par {hue:loop 0.01, spread:wave 0.011 0.1 0.33, lgv:wave 0.05 0.125 0.8, inc_sc:0.1, sat_sc:wave 0.006 0.3 1.3, gofs:0.3, gamma: wave 0.02 0.1 1.0}
 
 
-###Module
+### Module
 id seed_distance_switching1
 component seed_distance
 flags {lib, distance}
@@ -217,7 +217,7 @@ modules {seed_color:tex_dist1, df:df_sphere, distance_light: light_anim1, a:alph
 sub {d_max_steps:400, d_epsilon:0.00001}
 scripts [randomize dly:50 spd:0.1 lib:distance_field dim:vec4 sub:df typ:mod]
 
-###Module
+### Module
 id seed_distance_switching2
 component seed_distance
 flags {lib, distance}
@@ -249,21 +249,21 @@ sub {a_exp:a * |alpha|}
 
 
 
-###Module
+### Module
 id light_anim1
 component distance_light
 flags {lib, distance}
 par {shininess:0.05, light_r:wave 0.1 0.2 0.8, light_g:wave 0.07 0.2 0.8, light_b:wave 0.11 0.2 0.8, light_x:wave 0.07 5.0 0.0, light_y:wave 0.08 5.0 0.0, light_z:wave 0.08 0.5 -8.0, amb_r:wave 0.05 0.2 0.1, amb_g:wave 0.06 0.1 0.1, amb_b:wave 0.04 0.1 0.2}
 
 
-###Module
+### Module
 id light_anim2
 component distance_light
 flags {lib, distance}
 par {shininess:0.06, light_r:wave 0.08 0.2 0.8, light_g:wave 0.07 0.2 0.8, light_b:wave 0.11 0.2 0.8, light_x:wave 0.07 5.0 0.0, light_y:wave 0.07 5.0 0.0, light_z:wave 0.09 0.5 -8.0, amb_r:wave 0.06 0.2 0.1, amb_g:wave 0.05 0.1 0.1, amb_b:wave 0.04 0.1 0.2}
 
 
-###Module
+### Module
 id tex_dist1
 component tex_color
 flags {lib}
@@ -271,7 +271,7 @@ images [textures/default/default0.png]
 par {scale:1.0, spd:0.0, sat:1.0, val:1.0, rot:0.25}
 scripts [randomize dly:20 spd:0.16 lib:1024 dim:vec4 sub:0 typ:image]
 
-###Module
+### Module
 id tex_dist2
 component tex_color
 flags {lib}

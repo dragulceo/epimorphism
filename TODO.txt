@@ -1,8 +1,13 @@
 PROJECTS:
   - NOW
+    - overlaying distance fields is a bit weird.  maybe merge them (union)?
+      - shre the same lights?
+    - tex sc wrt diamter is messed up
     - occasionally disable various seeds
     - things still too fast?
     - white sparklies??
+
+    - MAKE PRELOADING IMAGES NON-GHETTO!
 
   - MAKE SURE
     - more color variation(white never shows up?)
@@ -12,7 +17,6 @@ PROJECTS:
     - IMMEDIATE
       - dont reduce distance seeds?
       - enable with UI switch?
-    - overlaying distance fields is a bit weird.  maybe merge them (union)?
     - starting weird on linux when breaking cache
 
     - EXPERIMENTAL
@@ -34,6 +38,8 @@ PROJECTS:
       - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
   - Misc
+    - no %application% file??
+    - add par ranges to components
     - change .lib && .slib suffixes
     - make system time vary with framerate 30 fps -> 0.01
     - in UI scrolling should only effect text

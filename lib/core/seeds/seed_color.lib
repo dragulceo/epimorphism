@@ -1,4 +1,4 @@
-###Module
+### Module
 id seed_color_id
 component seed_color_id
 flags {lib}
@@ -11,7 +11,7 @@ code &&&
 // Nothing
 
 
-###Module
+### Module
 id simple_color
 component simple_color
 flags {lib}
@@ -25,7 +25,7 @@ code &&&
 seed = hsv2rgb(vec4(time * |spd| + |rot|, |sat|, w * |val|, a));
 
 
-###Module
+### Module
 id border_color
 component border_color
 flags {lib}
@@ -38,7 +38,7 @@ code &&&
 seed = hsv2rgb(vec4((w > 0.8 ? 0.66 : 0.3), 1.0, 1.0, a));
 
 
-###Module
+### Module
 id tex_color_test
 component tex_color
 flags {lib}
@@ -46,7 +46,7 @@ images [textures/simplegeom/tile_grid3.png]
 par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0}
 
 
-###Module
+### Module
 id tex_simple
 component tex_simple
 flags {lib}
@@ -59,13 +59,13 @@ id tex_simple
 family seed_color
 default_mod tex_color_dist
 code &&&
-ofs = vec2(2.0, 2.0) * ofs - vec2(1.0, 1.0);
+ofs = 2.0 * ofs - vec2(1.0);
 ofs = |scale| * torus_reduce(ofs);
-ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+ofs = (ofs + vec2(1.0)) / 2.0;
 seed = texture2D(aux[#0], ofs);
 
 
-###Module
+### Module
 id tex_color
 component tex_color
 flags {lib}
@@ -77,9 +77,9 @@ id tex_color
 family seed_color
 default_mod tex_color
 code &&&
-ofs = vec2(2.0, 2.0) * ofs - vec2(1.0, 1.0);
+ofs = 2.0 * ofs - vec2(1.0);
 ofs = |scale| * torus_reduce(ofs);
-ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+ofs = (ofs + vec2(1.0)) / 2.0;
 seed = texture2D(aux[#0], ofs);
 seed = rgb2hsv(seed);
 
@@ -88,7 +88,7 @@ seed = rgb2hsv(seed);
 seed = hsv2rgb(vec4(seed.x + time * |spd| + |rot|, |sat| * seed.y, |val| * seed.z * w, a * seed.a));
 
 
-###Module
+### Module
 id tex_color_scroll
 component tex_color_scroll
 flags {lib}
@@ -100,14 +100,14 @@ id tex_color_scroll
 family seed_color
 default_mod tex_color_scroll
 code &&&
-ofs = vec2(2.0, 2.0) * ofs - vec2(1.0, 1.0);
+ofs = 2.0 * ofs - vec2(1.0);
 //float ti = 0.023 * time * |tex_spd|;
 //vec2 rot = mod(vec2(cos(ti) * ofs.x - sin(ti) * ofs.y, sin(ti) * ofs.x + cos(ti) * ofs.y), 1.0);
 ofs = |scale| * ofs;
 ofs.x += time * 0.025 * |tex_spd|;
 ofs.y += cos(time * 0.027 * |tex_spd|);
 ofs = torus_reduce(ofs);
-ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+ofs = (ofs + vec2(1.0)) / 2.0;
 seed = texture2D(aux[#0], ofs);
 seed = rgb2hsv(seed);
 
@@ -116,7 +116,7 @@ seed = rgb2hsv(seed);
 seed = hsv2rgb(vec4(time * |spd| + |rot| + seed.x, |sat| * seed.y, |val| * seed.z * w, a * seed.a));
 
 
-###Module
+### Module
 id fb_color
 component fb_color
 flags {lib}
@@ -138,7 +138,7 @@ seed = hsv2rgb(vec4(time * |spd| + |rot| + seed.x, |sat| * seed.y, |val| * seed.
 
 //seed = bg_seed * 0.2 + seed * 0.8;
 
-###Module
+### Module
 id tex_df_surface
 component tex_df_surface
 flags {lib, distance}
@@ -150,17 +150,11 @@ id tex_df_surface
 family seed_color
 default_mod tex_df_surface
 code &&&
-ofs = vec2(2.0, 2.0) * ofs - vec2(1.0, 1.0);
+ofs = 2.0 * ofs - vec2(1.0);
 ofs = |scale| * torus_reduce(ofs);
-ofs = (ofs + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+ofs = (ofs + vec2(1.0)) / 2.0;
 
-if(surface < 1.0)
-	seed = texture2D(aux[#0], ofs);
-else
-	seed = texture2D(aux[#1], ofs);
-
+seed = texture2D(aux[#0], ofs);
 seed = rgb2hsv(seed);
 
-// multiplying the value by w makes things look nice
-// should possibly put this in a flag
 seed = hsv2rgb(vec4(seed.x + time * |spd| + |rot|, |sat| * seed.y, |val| * seed.z * w, a * seed.a));

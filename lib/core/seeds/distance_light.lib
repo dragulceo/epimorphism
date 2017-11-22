@@ -15,6 +15,7 @@ vec3 light_color = vec3(|light_r|, |light_g|, |light_b|);
 vec3 light_pos = vec3(|light_x|, |light_y|, |light_z|);
 
 // vary specular & diffuse component via red channel (a bit arbitrary)
+vec3 pos = r_eye + l * r_dir;
 vec3 vl = normalize(light_pos - pos + vec3(seed.r));
 vec3 ev = normalize(l * r_dir);
 vec3 ref_ev = reflect(ev, nor);

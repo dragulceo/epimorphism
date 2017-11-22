@@ -59,10 +59,10 @@ id tex_simple
 family seed_color
 default_mod tex_color_dist
 code &&&
-ofs = 2.0 * ofs - vec2(1.0);
-ofs = |scale| * torus_reduce(ofs);
-ofs = (ofs + vec2(1.0)) / 2.0;
-seed = texture2D(aux[#0], ofs);
+vec2 tex_ofs = 2.0 * ofs - vec2(1.0);
+tex_ofs = |scale| * torus_reduce(tex_ofs);
+tex_ofs = (tex_ofs + vec2(1.0)) / 2.0;
+seed = texture2D(aux[#0], tex_ofs);
 
 
 ### Module
@@ -77,10 +77,10 @@ id tex_color
 family seed_color
 default_mod tex_color
 code &&&
-ofs = 2.0 * ofs - vec2(1.0);
-ofs = |scale| * torus_reduce(ofs);
-ofs = (ofs + vec2(1.0)) / 2.0;
-seed = texture2D(aux[#0], ofs);
+vec2 tex_ofs = 2.0 * ofs - vec2(1.0);
+tex_ofs = |scale| * torus_reduce(tex_ofs);
+tex_ofs = (tex_ofs + vec2(1.0)) / 2.0;
+seed = texture2D(aux[#0], tex_ofs);
 seed = rgb2hsv(seed);
 
 // multiplying the value by w makes things look nice
@@ -100,15 +100,15 @@ id tex_color_scroll
 family seed_color
 default_mod tex_color_scroll
 code &&&
-ofs = 2.0 * ofs - vec2(1.0);
+vec2 tex_ofs = 2.0 * ofs - vec2(1.0);
 //float ti = 0.023 * time * |tex_spd|;
-//vec2 rot = mod(vec2(cos(ti) * ofs.x - sin(ti) * ofs.y, sin(ti) * ofs.x + cos(ti) * ofs.y), 1.0);
-ofs = |scale| * ofs;
-ofs.x += time * 0.025 * |tex_spd|;
-ofs.y += cos(time * 0.027 * |tex_spd|);
-ofs = torus_reduce(ofs);
-ofs = (ofs + vec2(1.0)) / 2.0;
-seed = texture2D(aux[#0], ofs);
+//vec2 rot = mod(vec2(cos(ti) * tex_ofs.x - sin(ti) * tex_ofs.y, sin(ti) * tex_ofs.x + cos(ti) * tex_ofs.y), 1.0);
+tex_ofs = |scale| * tex_ofs;
+tex_ofs.x += time * 0.025 * |tex_spd|;
+tex_ofs.y += cos(time * 0.027 * |tex_spd|);
+tex_ofs = torus_reduce(tex_ofs);
+tex_ofs = (tex_ofs + vec2(1.0)) / 2.0;
+seed = texture2D(aux[#0], tex_ofs);
 seed = rgb2hsv(seed);
 
 // multiplying the value by w makes things look nice
@@ -127,11 +127,11 @@ id fb_color
 family seed_color
 default_mod fb_color
 code &&&
-ofs = mod(|scale| * ofs, 1.0);
+vec2 tex_ofs = mod(|scale| * ofs, 1.0);
 
 //vec4 bg_seed = seed;
 
-seed = texture2D(fb, ofs);
+seed = texture2D(fb, tex_ofs);
 seed = rgb2hsv(seed);
 
 seed = hsv2rgb(vec4(time * |spd| + |rot| + seed.x, |sat| * seed.y, |val| * seed.z * w, a));// * seed.a));
@@ -150,14 +150,14 @@ id tex_df_surface
 family seed_color
 default_mod tex_df_surface
 code &&&
-ofs = 2.0 * ofs - vec2(1.0);
-ofs = |scale| * torus_reduce(ofs);
-ofs = (ofs + vec2(1.0)) / 2.0;
+vec2 tex_ofs = 2.0 * ofs - vec2(1.0);
+tex_ofs = |scale| * torus_reduce(tex_ofs);
+tex_ofs = (tex_ofs + vec2(1.0)) / 2.0;
 
 if(surface < 1.0)
-  seed = texture2D(aux[#0], ofs);
+  seed = texture2D(aux[#0], tex_ofs);
 else
-	seed = texture2D(aux[#1], ofs);
+	seed = texture2D(aux[#1], tex_ofs);
 
 seed = rgb2hsv(seed);
 

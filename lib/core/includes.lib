@@ -241,31 +241,10 @@ vec2 TANHZ(vec2 z0){
   return vec2(sinh(2.0 * z0.x), s) / r;
 }
 
-bool isNan(float val){
-  return ( val < 0.0 || 0.0 < val || val == 0.0 ) ? false : true;
-}
-
-bool isInf(float val){
-	const float inf = 1.0 / 0.0;
-  return abs(val) == inf;
-}
-
-bool isBorked(vec4 v){
-	return isInf(v.x) || isNan(v.x) || isInf(v.y) || isNan(v.y) ||
-		isInf(v.z) || isNan(v.z) || isInf(v.w) || isNan(v.w);
-}
-
 vec2 torus_reduce(vec2 z){
   z = z + vec2(1.0);
   z = mod(z, 4.0);
   z = vec2(1.0) - abs(z - vec2(2.0));
-  return z;
-}
-
-vec3 torus_reduce3(vec3 z){
-  z = z + vec3(1.0);
-  z = mod(z, 4.0);
-  z = vec3(1.0) - abs(z - vec3(2.0));
   return z;
 }
 
@@ -276,6 +255,17 @@ vec2 grid_reduce(vec2 z){
   return z;
 }
 
+### Component
+id math_extra
+family library
+code &&&
+vec3 torus_reduce3(vec3 z){
+  z = z + vec3(1.0);
+  z = mod(z, 4.0);
+  z = vec3(1.0) - abs(z - vec3(2.0));
+  return z;
+}
+
 vec3 grid_reduce3(vec3 z){
   z = z + vec3(1.0);
   z = mod(z, 2.0);
@@ -283,10 +273,19 @@ vec3 grid_reduce3(vec3 z){
   return z;
 }
 
-### Component
-id math_extra
-family library
-code &&&
+bool isNan(float val){
+  return ( val < 0.0 || 0.0 < val || val == 0.0 ) ? false : true;
+}
+
+const float inf = 1.0 / 0.0;
+bool isInf(float val){
+  return abs(val) == inf;
+}
+
+bool isBorked(vec4 v){
+	return isInf(v.x) || isNan(v.x) || isInf(v.y) || isNan(v.y) ||
+		isInf(v.z) || isNan(v.z) || isInf(v.w) || isNan(v.w);
+}
 
 vec3 rotate3D(vec3 v, vec3 axis, float th){
   axis = normalize(axis);

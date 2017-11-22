@@ -1,13 +1,11 @@
 PROJECTS:
   - NOW
+    - occasionally disable various seeds
     - something is moving too fast(sometimes??) (overzoom?)
     - white sparklies??
-    - occasionally disable various seeds
-    - animate rotation axes
 
   - MAKE SURE
     - more color variation(white never shows up?)
-    - too large of a zoom out sometines
     - transparency?
 
   - Distance Fields
@@ -17,7 +15,6 @@ PROJECTS:
       - enable with UI switch?
     - overlaying distance fields is a bit weird.  maybe merge them (union)?
     - starting weird on linux when breaking cache
-    - maybe smaler tex_sc?
 
     - EXPERIMENTAL
       - alpha_linear?
@@ -39,13 +36,13 @@ PROJECTS:
       - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
   - Misc
+    - change .lib && .slib suffixes
     - make system time vary with framerate 30 fps -> 0.01
     - in UI scrolling should only effect text
     - split epimorphism_prod.lib into separate files
     - add default par values to components
     - investigate seed_mod & mod_pal
     - some kind of wave path that spends more time towards one of the extremes(+1?)
-    - customize glsl mode
     - sometimes zooms out too far
     - COLORS TOO HOMOGENOUS
       - limuisoty, pallet, divergence?
@@ -142,6 +139,7 @@ PERF:
     - EXT_disjoint_timer_query to measure/scale performance?
 
 SYSTEM:
+  - further customize epimorphism emacs mode
   - add input variable dependencies to familes?
   - take snapshot of flattened shader code?
   - rebuild monad transformer stack

@@ -8,13 +8,20 @@ par {axis_x:1.0, axis_y: 0.0, axis_z: 0.0, spd:0.0}
 id trans1
 component cam_trans
 flags {lib, distance}
-par {axis_x:1.0, axis_y: 0.3, axis_z: -0.2, spd:0.125}
+par {axis_x:wave 0.004 0.5 0.0, axis_y: wave 0.012 1.0 0.0, axis_z: wave 0.008 -0.6 0.0, spd:0.125}
 
 ###Module
 id trans2
 component cam_trans
 flags {lib, distance}
-par {axis_x:1.0, axis_y: 0.3, axis_z: -0.2, spd:1.0}
+par {axis_x:wave 0.006 0.3 0.0, axis_y: wave 0.012 -1.0 0.0, axis_z: wave 0.003 -0.2 0.0, spd:0.25}
+
+###Module
+id trans3
+component cam_trans
+flags {lib, distance}
+par {axis_x:wave 0.015 1.0 0.0, axis_y: wave 0.01 0.3 0.0, axis_z: wave 0.005 -0.2 0.0, spd:0.25}
+
 
 ###Module
 id trans_y

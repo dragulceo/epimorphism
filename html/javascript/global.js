@@ -43,7 +43,7 @@ function webGLEnabled() {
 }
 
 // apparently preload images
-var preload = ["textures/default/default0.png", "textures/default/default1.png"];
+var preload = ["textures/default/default0.png"];
 var promises = [];
 for (var i = 0; i < preload.length; i++) {
     (function(url, promise) {

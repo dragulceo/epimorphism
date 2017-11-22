@@ -5,6 +5,7 @@ uiConf dev
 pattern dev
 debug true
 seed 8563
+t_delta 0.01
 
 ### SystemConf
 id test
@@ -13,12 +14,14 @@ uiConf dev
 pattern test
 debug true
 seed 8563
+t_delta 0.01
 
 ### SystemConf
 id prod
 engineConf default
 uiConf prod
 pattern prod
+t_delta 0.01
 
 ### SystemConf
 id proddev
@@ -27,6 +30,7 @@ uiConf dev
 pattern prod
 debug true
 seed 8563
+t_delta 0.01
 
 ### SystemConf
 id analysis
@@ -34,18 +38,21 @@ engineConf default
 uiConf dev
 pattern analysis
 debug true
+t_delta 0.01
 
 ### SystemConf
 id interference
 engineConf default
 uiConf prod
 pattern interference
+t_delta 0.01
 
 ### SystemConf
 id julia
 engineConf default
 uiConf prod
 pattern julia
+t_delta 0.01
 
 
 ### UIConf

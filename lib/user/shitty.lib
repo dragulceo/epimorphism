@@ -3,6 +3,7 @@ id shitty
 engineConf default
 uiConf prod
 pattern shitty
+t_delta 0.01
 
 ### Pattern
 id shitty

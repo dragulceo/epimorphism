@@ -93,7 +93,7 @@ id df_torus
 component df_torus
 flags {lib, distance, distance_field}
 par {diam1: wave 0.041 0.1 0.7, diam2: wave 0.029 0.05 0.2, tex_sc: wave 0.04 0.2 0.65}
-modules {cam_trans: trans2}
+modules {cam_trans: trans1}
 
 ###Component
 id df_torus

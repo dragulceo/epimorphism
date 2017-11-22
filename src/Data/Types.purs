@@ -41,6 +41,7 @@ type SystemConfD = {
   , pattern    :: String --PatternRef
   , seed       :: String
   , debug      :: Boolean
+  , t_delta    :: Number
 }
 
 systemConfSchema :: Schema
@@ -50,6 +51,7 @@ systemConfSchema = [
   , SchemaEntry SE_St "pattern"
   , SchemaEntry SE_St "seed"
   , SchemaEntry SE_B  "debug"
+  , SchemaEntry SE_N  "t_delta"
 ]
 
 data EngineConf = EngineConf Index EngineConfD

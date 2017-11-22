@@ -131,9 +131,8 @@ animate state = handleError do
   currentTimeMS <- lift $ now
   let lastTimeMS = fromMaybe currentTimeMS systemST.lastTimeMS
 
-  let delta = 0.01 -- a fixed increment of time looks better (also maybe stick this # in system?)
   let pauseF = if systemST.paused then 0.0 else 1.0
-  let t' = systemST.t + pauseF * delta
+  let t' = systemST.t + pauseF * systemConfD.t_delta
   lift $ modifySTRef ssRef (\s -> s {t = t', lastTimeMS = Just currentTimeMS})
 
   -- fps

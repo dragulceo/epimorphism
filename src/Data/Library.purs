@@ -29,6 +29,7 @@ instance dtSystemConf :: DataTable SystemConf {
   , pattern    :: String --PatternRef
   , seed       :: String
   , debug      :: Boolean
+  , t_delta    :: Number
 } where
   libProj (Library {systemConfLib}) = systemConfLib
 --  libSet  (Library l@{systemConfLib}) a = Library l {systemConfLib = a}

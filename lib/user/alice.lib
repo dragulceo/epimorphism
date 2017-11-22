@@ -3,6 +3,7 @@ id alice
 engineConf default
 uiConf prod
 pattern alice
+t_delta 0.01
 
 ### Pattern
 id alice

@@ -3,9 +3,10 @@ PROJECTS:
     - something is moving too fast(sometimes??) (overzoom?)
     - white sparklies??
     - occasionally disable various seeds
+    - animate rotation axes
 
   - MAKE SURE
-    - color garishness
+    - more color variation(white never shows up?)
     - too large of a zoom out sometines
     - transparency?
 

@@ -3,6 +3,7 @@ id cats
 engineConf default
 uiConf prod
 pattern cats
+t_delta 0.01
 
 ### Pattern
 id cats

@@ -127,17 +127,20 @@ default_mod seed_multi
 children {seed0:seed, seed1:seed, seed2:seed}
 code &&&
 vec4 seed0, seed1, seed2;
+vec2 z_orig = z;
 
 %t_seed0%
 %reduce%
 %seed0%
 seed0 = seed;
 
+z = z_orig;
 %t_seed1%
 %reduce%
 %seed1%
 seed1 = seed;
 
+z = z_orig;
 %t_seed2%
 %reduce%
 %seed2%

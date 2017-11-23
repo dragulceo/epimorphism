@@ -142,23 +142,15 @@ seed = hsv2rgb(vec4(time * |spd| + |rot| + seed.x, |sat| * seed.y, |val| * seed.
 id tex_df_surface
 component tex_df_surface
 flags {lib, distance}
-images [textures/default/default0.png, textures/default/default1.png]
-par {spd:0.0, rot:0.0, sat:1.0, val:1.0}
+modules {seed0: tex_simple, seed1:tex_simple}
 
 ### Component
 id tex_df_surface
 family seed_color
+children {seed0:seed, seed1:seed}
 default_mod tex_df_surface
 code &&&
-vec2 tex_ofs = 2.0 * ofs - vec2(1.0);
-tex_ofs = torus_reduce(tex_ofs);
-tex_ofs = (tex_ofs + vec2(1.0)) / 2.0;
-
 if(surface < 1.0)
-  seed = texture2D(aux[#0], tex_ofs);
+  %seed0%
 else
-	seed = texture2D(aux[#1], tex_ofs);
-
-seed = rgb2hsv(seed);
-
-seed = hsv2rgb(vec4(seed.x + time * |spd| + |rot|, |sat| * seed.y, |val| * seed.z * w, a * seed.a));
+  %seed1%

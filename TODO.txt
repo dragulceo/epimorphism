@@ -1,30 +1,30 @@
 PROJECTS:
-  - NOW
-    - overlaying distance fields is a bit weird.  maybe merge them (union)?
-      - shre the same lights?
-    - tex sc wrt diamter is messed up
-    - occasionally disable various seeds
-    - things still too fast?
-    - white sparklies??
+  - DISTANCE FIELDS
+    - NOW
+      - soft shadows?
+      - smooth minimum?
+        - surface var non-binary
+      - emboss/bump maps?
 
-    - MAKE PRELOADING IMAGES NON-GHETTO!
-    - MISSING IMAGES (vs langton10?)
 
-  - MAKE SURE
-    - more color variation(white never shows up?)
-    - transparency?
 
-  - Distance Fields
-    - IMMEDIATE
-      - dont reduce distance seeds?
+      - more color variation(white never shows up?)
+      - things still too fast?
+      - do textures scaling for dfs in the actual seed, instead of the df?
+
+    - MAKE SURE
+      - transparency?
+
+    - NEXT
       - enable with UI switch?
-    - starting weird on linux when breaking cache
-
-    - EXPERIMENTAL
-      - deformations?
-      - alpha_linear?
       - optimization (necessary) sometimes ~10 fps on insane w/ 1080 gtx
       - de-pixelate?
+
+
+    - FUTURE
+      - starting weird on linux when breaking cache
+      - deformations?
+      - alpha_linear?
 
       - play with mod
       - torus involution - https://i.redd.it/bfg90xr89gyz.gif
@@ -38,7 +38,12 @@ PROJECTS:
     - REFERENCE
       - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
-  - Misc
+  - Misc (Sort)
+    - mipmaps?
+    - MAKE PRELOADING IMAGES NON-GHETTO!
+    - MISSING IMAGES (vs langton10?)
+    - issues animating > 1 texture
+    - KillPaths to set par {spd: 0.0}?
     - no %application% file??
     - add par ranges to components
     - change .lib && .slib suffixes

@@ -70,8 +70,6 @@ command usRef esRef ssRef lib msg = handleError do
 
             pure unit
           "killPaths" -> do
-            -- not working??
-
             let sch = buildSearch ["live"] [] []
             modules <- searchLib lib sch
 

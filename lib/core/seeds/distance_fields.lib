@@ -188,11 +188,7 @@ if(df0.z <= df1.z)
 	df = df0;
 else
 	df = df1;
-
-surface = df.w;
 */
-
-
 
 r_dir = r_dir_orig;
 pos = pos_in;

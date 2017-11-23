@@ -159,12 +159,10 @@ code &&&
 vec4 s0, s1;
 ofs = ofs0;
 %seed0%
-seed = vec4(1.0, 0.0, 0.0, 1.0);
 s0 = seed;
 
 ofs = ofs1;
 %seed1%
-seed = vec4(1.0, 0.0, 0.0, 1.0);
 s1 = seed;
 
 seed = mix(s0, s1, df.w);

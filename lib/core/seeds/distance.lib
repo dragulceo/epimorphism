@@ -47,8 +47,8 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
 
   // we have a hit
   if (dist < ~d_epsilon~){
-    vec2 ofs0 = df0.xy;
-    vec2 ofs1 = df1.xy;
+    vec2 ofs0_hit = df0.xy;
+    vec2 ofs1_hit = df1.xy;
 		vec4 df_hit  = df;
 
     // calculate normal
@@ -95,6 +95,8 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
 		float a = 1.0;
 		%a%
 
+		ofs0 = ofs0_hit;
+		ofs1 = ofs1_hit;
 		df = df_hit;
 		// get texture/seed value
 		float w = 1.0;

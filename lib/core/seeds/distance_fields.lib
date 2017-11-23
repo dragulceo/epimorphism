@@ -150,7 +150,7 @@ family distance_field
 default_mod df_multi
 children {df0: distance_field, df1: distance_field, cam_trans: cam_trans, t_dist: t}
 code &&&
-vec4 df0, df1 = vec4(0.0, 0.0, 10000000.0, 0.0);
+//vec4 df0, df1 = vec4(0.0, 0.0, 10000000.0, 0.0);
 vec3 pos_in = pos;
 vec3 r_dir_orig = r_dir;
 
@@ -179,9 +179,10 @@ df1 = df;
 // intersect
 //float m = (smin2(df0.z, df1.z, 0.0005) - df0.z) / (df1.z - df0.z);
 //float m = (smin3(df0.z, df1.z, 6.0) - df0.z) / (df1.z - df0.z);
-float m = (min(df0.z, df1.z) - df0.z) / (df1.z - df0.z);
+//float m = (min(df0.z, df1.z) - df0.z) / (df1.z - df0.z);
 
-df = mix(df0, df1, m);
+//df = mix(df0, df1, m);
+df = df0;
 
 /*
 if(df0.z <= df1.z)

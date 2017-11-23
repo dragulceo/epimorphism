@@ -1,6 +1,11 @@
 PROJECTS:
   - DISTANCE FIELDS
     - NOW
+      - COLORS TOO HOMOGENOUS
+        - limuisoty, pallet, divergence?
+        - internal representation
+        - post processing
+
       - soft shadows? - http://www.iquilezles.org/www/articles/rmshadows/rmshadows.htm
       - smooth minimum? - http://www.iquilezles.org/www/articles/smin/smin.htm
         - surface var non-binary
@@ -11,9 +16,6 @@ PROJECTS:
 
       - outdoor lighting? http://www.iquilezles.org/www/articles/outdoorslighting/outdoorslighting.htm
 
-
-
-      - more color variation(white never shows up?)
       - things still too fast?
       - do textures scaling for dfs in the actual seed, instead of the df?
 
@@ -62,10 +64,6 @@ PROJECTS:
     - investigate seed_mod & mod_pal
     - some kind of wave path that spends more time towards one of the extremes(+1?)
     - sometimes zooms out too far
-    - COLORS TOO HOMOGENOUS
-      - limuisoty, pallet, divergence?
-      - internal representation
-      - post processing
     - WEIGHTED SWITCHING
     - on linux controls go away in full screen
     - not sure resolution cookie is working?

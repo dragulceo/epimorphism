@@ -13,8 +13,8 @@ default_mod seed_distance
 children {seed_color:seed_color, df:distance_field, distance_light: distance_light, a:a}
 code &&&
 
-vec4 df;
-vec2 ofs;
+vec4 df, df0, df1;
+vec2 ofs, ofs0, ofs1;
 
 seed = vec4(0.0);
 
@@ -43,10 +43,13 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
 
   %df%
   float dist = df.z;
+	vec4 df_hit = df;
 
   // we have a hit
   if (dist < ~d_epsilon~){
-    vec2 ofs = df.xy;
+    vec2 ofs0_hit = df0.xy;
+    vec2 ofs1_hit = df1.xy;
+		vec4 df_hit  = df;
 
     // calculate normal
     vec3 ep = vec3(0.001, 0.0, 0.0);
@@ -92,6 +95,9 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
 		float a = 1.0;
 		%a%
 
+		ofs0 = ofs0_hit;
+		df = df_hit;
+		ofs0 = df.xy;
 		// get texture/seed value
 		float w = 1.0;
     %seed_color%

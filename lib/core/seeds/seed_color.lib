@@ -151,10 +151,12 @@ children {seed0:seed, seed1:seed}
 default_mod tex_df_surface
 code &&&
 vec4 s0, s1;
+ofs = ofs0;
 %seed0%
 s0 = seed;
 
+ofs = ofs1;
 %seed1%
 s1 = seed;
 
-seed = mix(s0, s1, df.w);
+seed = mix(s0, s1, 0.0);

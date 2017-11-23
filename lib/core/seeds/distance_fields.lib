@@ -142,7 +142,7 @@ df = vec4(tex_ofs, d, surface);
 id df_multi
 component df_multi
 flags {lib, distance, df_multi}
-modules {df0: df_sphere, df1: df_torus, cam_trans:trans_y, t_dist: t_id}
+modules {df0: df_nothing, df1: df_torus, cam_trans:trans_no, t_dist: t_id}
 
 ### Component
 id df_multi
@@ -160,6 +160,8 @@ surface = 0.0;
 df0 = df;
 
 // transform
+
+/*
 vec2 z_in = z;
 z = r_dir.xy;
 %t_dist%
@@ -170,6 +172,8 @@ z = z_in;
 vec3 cam = r_eye + l * r_dir;
 %cam_trans%
 pos = cam;
+*/
+
 
 // second surface
 surface = 1.0;
@@ -177,9 +181,9 @@ surface = 1.0;
 df1 = df;
 
 // intersect
-float m = (smin2(df0.z, df1.z, 0.02) - df0.z) / (df1.z - df0.z);
+//float m = (smin2(df0.z, df1.z, 0.02) - df0.z) / (df1.z - df0.z);
 //float m = (smin3(df0.z, df1.z, 6.0) - df0.z) / (df1.z - df0.z);
-//float m = (min(df0.z, df1.z) - df0.z) / (df1.z - df0.z);
+float m = (min(df0.z, df1.z) - df0.z) / (df1.z - df0.z);
 
 df = mix(df0, df1, m);
 df.w = m;

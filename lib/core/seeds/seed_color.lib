@@ -53,6 +53,12 @@ flags {lib}
 images [textures/default/default0.png]
 par {scale:1.0}
 
+### Module
+id tex_simple1
+component tex_simple
+flags {lib}
+images [textures/default/default1.png]
+par {scale:1.0}
 
 ### Component
 id tex_simple
@@ -142,7 +148,7 @@ seed = hsv2rgb(vec4(time * |spd| + |rot| + seed.x, |sat| * seed.y, |val| * seed.
 id tex_df_surface
 component tex_df_surface
 flags {lib, distance}
-modules {seed0: tex_simple, seed1:tex_simple}
+modules {seed0: tex_simple, seed1:tex_simple1}
 
 ### Component
 id tex_df_surface
@@ -153,10 +159,12 @@ code &&&
 vec4 s0, s1;
 ofs = ofs0;
 %seed0%
+seed = vec4(1.0, 0.0, 0.0, 1.0);
 s0 = seed;
 
 ofs = ofs1;
 %seed1%
+seed = vec4(1.0, 0.0, 0.0, 1.0);
 s1 = seed;
 
-seed = mix(s0, s1, 0.0);
+seed = mix(s0, s1, df.w);

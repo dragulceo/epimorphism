@@ -143,7 +143,7 @@ id tex_df_surface
 component tex_df_surface
 flags {lib, distance}
 images [textures/default/default0.png, textures/default/default1.png]
-par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.0, sat:1.0, val:1.0}
+par {spd:0.0, rot:0.0, sat:1.0, val:1.0}
 
 ### Component
 id tex_df_surface
@@ -151,7 +151,7 @@ family seed_color
 default_mod tex_df_surface
 code &&&
 vec2 tex_ofs = 2.0 * ofs - vec2(1.0);
-tex_ofs = |scale| * torus_reduce(tex_ofs);
+tex_ofs = torus_reduce(tex_ofs);
 tex_ofs = (tex_ofs + vec2(1.0)) / 2.0;
 
 if(surface < 1.0)

@@ -21,7 +21,7 @@ code &&&
 vec4 wdt;
 float w, a, wx, wy, mask;
 
-// w = (w, alpha, wx, wy)
+// wdt = (w, alpha, wx, wy)
 %w%
 
 // w is basically just used for value scaling * alpha

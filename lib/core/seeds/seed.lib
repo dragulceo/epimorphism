@@ -26,7 +26,7 @@ seed = vec4(0.0);
 id seed_dev_distance
 component seed_main
 flags {lib, dev, root}
-modules {seed:seed_wca_tex}
+modules {seed:seed_distance_multi_anim}
 
 ### Module
 id seed_buf

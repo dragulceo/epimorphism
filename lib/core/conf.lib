@@ -4,8 +4,7 @@ engineConf default
 uiConf dev
 pattern dev
 debug true
-seed 8563
-t_delta 0.01
+t_delta 0.02
 
 ### SystemConf
 id test

@@ -1,10 +1,15 @@
 PROJECTS:
   - DISTANCE FIELDS
     - NOW
-      - soft shadows?
-      - smooth minimum?
+      - soft shadows? - http://www.iquilezles.org/www/articles/rmshadows/rmshadows.htm
+      - smooth minimum? - http://www.iquilezles.org/www/articles/smin/smin.htm
         - surface var non-binary
       - emboss/bump maps?
+      - getTexel? - http://www.iquilezles.org/www/articles/texture/texture.htm
+
+      - global illumination/reflection - http://www.iquilezles.org/www/articles/simplepathtracing/simplepathtracing.htm
+
+      - outdoor lighting? http://www.iquilezles.org/www/articles/outdoorslighting/outdoorslighting.htm
 
 
 
@@ -18,6 +23,7 @@ PROJECTS:
     - NEXT
       - enable with UI switch?
       - optimization (necessary) sometimes ~10 fps on insane w/ 1080 gtx
+        - http://www.iquilezles.org/www/articles/noacos/noacos.htm
       - de-pixelate?
 
 
@@ -39,6 +45,8 @@ PROJECTS:
       - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
   - Misc (Sort)
+    - give "global includes" to modules, so they can define functions that are called >1
+      - say df or something defined before main
     - mipmaps?
     - MAKE PRELOADING IMAGES NON-GHETTO!
     - MISSING IMAGES (vs langton10?)

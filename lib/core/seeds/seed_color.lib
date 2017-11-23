@@ -150,7 +150,11 @@ family seed_color
 children {seed0:seed, seed1:seed}
 default_mod tex_df_surface
 code &&&
-if(surface < 1.0)
-  %seed0%
-else
-  %seed1%
+vec4 s0, s1;
+%seed0%
+s0 = seed;
+
+%seed1%
+s1 = seed;
+
+seed = mix(s0, s1, df.w);

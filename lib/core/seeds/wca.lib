@@ -3,7 +3,7 @@ id seed_wca
 component seed_wca
 flags {lib, wca}
 par {smooth_mask: 50.0}
-modules {w:w_lines_border_anim, wt:wt_id, a:alpha_solid, seed_color:simple_color}
+modules {w:w_lines_border_anim, wt:wt_id, a:alpha_solid, seed_color:simple_color0}
 
 ###Module
 id seed_wca_tex

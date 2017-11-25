@@ -105,7 +105,7 @@ default_comp alpha_id
 id seed_color
 var seed
 dim 4
-default_comp simple_color
+default_comp simple_color0
 
 ### Family
 id switch

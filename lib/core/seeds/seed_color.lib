@@ -12,10 +12,17 @@ code &&&
 
 
 ### Module
-id simple_color
+id simple_color0
 component simple_color
 flags {lib}
 par {spd:0.0, rot:0.0, sat:1.0, val:1.0}
+
+### Module
+id simple_color1
+component simple_color
+flags {lib}
+par {spd:0.0, rot:0.5, sat:1.0, val:1.0}
+
 
 ### Component
 id simple_color
@@ -47,7 +54,7 @@ par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0}
 
 
 ### Module
-id tex_simple
+id tex_simple0
 component tex_simple
 flags {lib}
 images [textures/default/default0.png]
@@ -148,7 +155,7 @@ seed = hsv2rgb(vec4(time * |spd| + |rot| + seed.x, |sat| * seed.y, |val| * seed.
 id tex_df_surface
 component tex_df_surface
 flags {lib, distance}
-modules {seed0: tex_simple, seed1:tex_simple1}
+modules {seed0: tex_simple0, seed1:tex_simple1}
 
 ### Component
 id tex_df_surface

@@ -82,24 +82,59 @@ sc = sqrt(sqrt(sc));
 frame = vec4(sc, sc, sc, frame.a);
 */
 
+### Module
+id disp_pal1
+component disp
+modules {post: post_pal1}
+flags {root}
+
+### Module
+id post_pal1
+component post_pallet1
+flags {lib, post_pallet}
+par {}
+
 ### Component
 id post_pallet1
 family post
 default_mod post_pallet1
 includes []
 code &&&
-vec4 frame_i = frame;
-//frame = _gamma3(frame, 1.2);//|gamma|);
+vec4 frame_hsv = rgb2hsv(frame);
+float idx = frame_hsv.x;
 
-float val = rgb2hsv(frame).z;
+vec4 pal_res = vec4(pal(idx, vec3(0.5,0.5,0.5), vec3(0.5,0.5,0.5),
+												vec3(2.0,1.0,0.0), vec3(0.5,0.20,0.25)), 1.0);
 
-float inp = (frame.x + frame.y + frame.z);// / 6.0 + 0.5 * frame.a;
+pal_res = rgb2hsv(pal_res);
+pal_res.z = frame_hsv.z;
 
-vec3 res = pal(inp, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(2.0,1.0,0.0),vec3(0.5,0.20,0.25));
-//vec3(0.5,0.5,0.5), vec3(0.5,0.5,0.5), vec3(1.0,1.0,1.0), vec3(0.0,0.10,0.20)
-frame = frame_i;//vec4(res, 1.0);
+frame = hsv2rgb(pal_res);
+//frame.z *= (frame.a - DEPTH_INC);//val;
 
-frame = rgb2hsv(frame);
-// frame.y += 0.1 * frame.a * frame.a * frame.a;
-frame.z *= (frame.a - DEPTH_INC);//val;
-frame = hsv2rgb(frame);
+
+
+### Module
+id disp_gamma
+component disp
+modules {post: post_gamma}
+flags {root}
+
+### Module
+id post_gamma
+component post_gamma
+flags {lib, post_gamma}
+par {gamma: 0.8}
+
+### Component
+id post_gamma
+family post
+default_mod post_pallet1
+includes []
+code &&&
+
+vec4 frame_hsv = rgb2hsv(frame);
+
+float val = floor(frame_hsv.r * 20.0) / 20.0;
+
+frame = gamma3(hsv2rgb(vec4(0.0, 0.0, val, 1.0)), |gamma|);

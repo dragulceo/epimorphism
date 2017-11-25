@@ -5,6 +5,7 @@ PROJECTS:
         - limuisoty, pallet, divergence?
         - internal representation
         - post processing
+        - gamma correction?  can test
 
       - soft shadows? - http://www.iquilezles.org/www/articles/rmshadows/rmshadows.htm
       - smooth minimum? - http://www.iquilezles.org/www/articles/smin/smin.htm

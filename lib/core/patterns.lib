@@ -20,7 +20,7 @@ imageLib 1024
 id test
 seed   seed_dev
 main   test_pattern_main
-disp   disp_main
+disp   disp_pal1
 vert   vert
 defaultImageLib default_images
 imageLib all_images

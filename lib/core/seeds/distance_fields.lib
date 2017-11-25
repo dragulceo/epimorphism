@@ -180,9 +180,9 @@ surface = 1.0;
 df1 = df;
 
 // intersect
-float m = (smin2(df0.z, df1.z, 0.2) - df0.z) / (df1.z - df0.z);
+//float m = (smin2(df0.z, df1.z, 0.2) - df0.z) / (df1.z - df0.z);
 //float m = (smin3(df0.z, df1.z, 6.0) - df0.z) / (df1.z - df0.z);
-//float m = (min(df0.z, df1.z) - df0.z) / (df1.z - df0.z);
+float m = (min(df0.z, df1.z) - df0.z) / (df1.z - df0.z);
 
 df = mix(df0, df1, m);
 //df.w = m;

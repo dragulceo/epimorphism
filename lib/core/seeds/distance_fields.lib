@@ -183,13 +183,12 @@ df1 = df;
  //float m = smin2(df0.z, df1.z, |bf|);
 //float m = smin3(df0.z, df1.z, |bf|);
 float m = min(df0.z, df1.z);
- //float m1 = m;
-// normalize from 0 -> 1
- //m = (m - df0.z) / (df1.z - df0.z);
 
- //df = mix(df0, df1, m);
-df.z = m;
-//df.xy = vec2(0.0);
+// normalize from 0 -> 1
+m = (m - df0.z) / (df1.z - df0.z);
+
+df = mix(df0, df1, m);
+
 //df.w = abs(m);
 
 r_dir = r_dir_orig;

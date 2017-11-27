@@ -213,7 +213,7 @@ id seed_distance_multi_anim
 component seed_distance
 flags {lib, distance}
 par {d_bound: 3.0, eye: -1.5}
-modules {seed_color:tex_df_surface1, df:df_multi_anim, distance_light: light_anim, a:alpha_dist}
+modules {seed_color:tex_df_multi1, df:df_multi_anim, distance_light: light_anim, a:alpha_dist}
 sub {d_max_steps:200, d_epsilon:0.00001}
 
 ### Module
@@ -238,8 +238,8 @@ flags {lib, distance}
 par {shininess:0.05, light_r:wave 0.1 0.2 0.8, light_g:wave 0.07 0.2 0.8, light_b:wave 0.11 0.2 0.8, light_x:wave 0.07 5.0 0.0, light_y:wave 0.08 5.0 0.0, light_z:wave 0.08 0.5 -8.0, amb_r:wave 0.05 0.2 0.1, amb_g:wave 0.06 0.1 0.1, amb_b:wave 0.04 0.1 0.2}
 
 ### Module
-id tex_df_surface1
-component tex_df_surface
+id tex_df_multi1
+component tex_df_multi
 flags {lib, distance}
 images [textures/default/default0.png, textures/default/default1.png]
 modules {seed0: tex_dist1, seed1:tex_dist2}

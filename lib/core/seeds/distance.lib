@@ -3,7 +3,7 @@ id seed_distance
 component seed_distance
 flags {lib, distance}
 par {d_bound: 3.0, eye: -1.5}
-modules {seed_color:tex_df_surface, df:df_multi, distance_light: light_simple, a:alpha_solid}
+modules {seed_color:tex_df_multi, df:df_multi, distance_light: light1, a:alpha_solid}
 sub {d_max_steps:200, d_epsilon:0.00001}
 
 ### Component
@@ -13,7 +13,7 @@ default_mod seed_distance
 children {seed_color:seed_color, df:distance_field, distance_light: distance_light, a:a}
 code &&&
 
-vec4 df, df0, df1;
+vec4 df, df_hit, df0, df1;
 vec2 ofs, ofs0, ofs1;
 
 seed = vec4(0.0);
@@ -46,9 +46,10 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
 
   // we have a hit
   if (dist < ~d_epsilon~){
-    vec2 ofs0_hit = df0.xy;
-    vec2 ofs1_hit = df1.xy;
-		vec4 df_hit  = df;
+    ofs0 = df0.xy;
+    ofs1 = df1.xy;
+		ofs  = df.xy;
+		df_hit  = df;
 
     // calculate normal
     vec3 ep = vec3(0.001, 0.0, 0.0);
@@ -94,10 +95,8 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
 		float a = 1.0;
 		%a%
 
-		ofs0 = ofs0_hit;
-		ofs1 = ofs1_hit;
-		df = df_hit;
 		// get texture/seed value
+		df = df_hit;
 		float w = 1.0;
     %seed_color%
 

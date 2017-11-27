@@ -38,7 +38,7 @@ imageLib all_images
 id prod
 seed   seed_main
 main   epimorphism_main
-disp   disp_main
+disp   disp_pal1
 vert   vert
 defaultImageLib default_images
 imageLib 1024

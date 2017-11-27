@@ -1,7 +1,7 @@
 ### Module
 id test_pattern_main
 component main
-modules {application: test_gamma}
+modules {application: test_pattern}
 flags {root}
 
 ### Module
@@ -22,7 +22,7 @@ color = hsv2rgb(vec4(r.xy, 1.0, 1.0));
 id test_gamma
 component test_gamma
 flags {lib}
-par {gamma: 1.0}
+par {gamma: 0.5}
 
 ### Component
 id test_gamma

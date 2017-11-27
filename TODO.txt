@@ -1,5 +1,12 @@
 PROJECTS:
   - DISTANCE FIELDS
+    - NOW!
+      - IN GNERAL WATCH & FIX THE REAL PROBLEMS FOR LIKE HOURS!!!
+        - some spazzy texture stuff which *must* be fixed
+        - too fast some times
+        - zoom levels can have issues
+        - also need to perfect pallets
+
     - NOW
       - COLORS TOO HOMOGENOUS
         - internal representation

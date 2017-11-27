@@ -34,7 +34,6 @@ code &&&
 // constructs final result by the input colors sat(scaled), value
 // and hue_out = pallet(hue_in)
 
-frame = gamma3(frame, |gamma|);
 vec4 frame_rgb = frame;
 
 frame = rgb2hsv(frame);
@@ -75,6 +74,8 @@ frame.x = res.x;
 frame.y *= |sat_sc|;
 frame = hsv2rgb(frame);
 
+frame = gamma3(frame, |gamma|);
+
 /*
 // black & white?
 float sc = (frame.x + frame.y + frame.z) / 3.0;
@@ -92,7 +93,7 @@ flags {root}
 id post_pal1
 component post_pallet1
 flags {lib, post_pallet}
-par {a_r:wave 0.01 0.1 0.5, a_g:wave 0.02 0.1 0.5, a_b:wave 0.05 0.1 0.5, b_r:wave 0.015 0.1 0.5, b_g:wave 0.025 0.1 0.5, b_b:wave 0.02 0.1 0.5, c_r:wave 0.05 1.0 2.0, c_g:wave 0.06 0.5 1.5, c_b:wave 0.08 1.0 1.0, d_r:0.5, d_g:0.2, d_b:0.25}
+par {a_r:wave 0.01 0.1 0.5, a_g:wave 0.02 0.1 0.5, a_b:wave 0.05 0.1 0.5, b_r:wave 0.015 0.1 0.5, b_g:wave 0.025 0.1 0.5, b_b:wave 0.02 0.1 0.5, c_r:wave 0.05 1.0 2.0, c_g:wave 0.06 0.5 1.5, c_b:wave 0.08 1.0 1.0, d_r:0.5, d_g:0.2, d_b:0.25, gamma: 1.0}
 
 ### Component
 id post_pallet1
@@ -115,6 +116,7 @@ pal_res.y = frame_hsv.y;  //or use the saturation to vary the pallet?
 pal_res.z = frame_hsv.z;
 
 frame = hsv2rgb(pal_res);
+frame = gamma3(frame, |gamma|);
 //frame.z *= (frame.a - DEPTH_INC);//val;
 
 

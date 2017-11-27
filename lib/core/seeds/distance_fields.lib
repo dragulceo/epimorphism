@@ -143,7 +143,7 @@ id df_multi
 component df_multi
 flags {lib, distance, df_multi}
 par {bf: 0.03}
-modules {df0: df_cube, df1: df_nothing, cam_trans:trans_no, t_dist: t_id}
+modules {df0: df_cube, df1: df_torus, cam_trans:trans_y, t_dist: t_id}
 
 ### Component
 id df_multi
@@ -180,15 +180,17 @@ surface = 1.0;
 df1 = df;
 
 // intersect
-float m = smin2(df0.z, df1.z, |bf|);
+ //float m = smin2(df0.z, df1.z, |bf|);
 //float m = smin3(df0.z, df1.z, |bf|);
-//float m = min(df0.z, df1.z);
-
+float m = min(df0.z, df1.z);
+ //float m1 = m;
 // normalize from 0 -> 1
-m = (m - df0.z) / (df1.z - df0.z);
+ //m = (m - df0.z) / (df1.z - df0.z);
 
-df = mix(df0, df1, m);
-df.w = m;
+ //df = mix(df0, df1, m);
+df.z = m;
+//df.xy = vec2(0.0);
+//df.w = abs(m);
 
 r_dir = r_dir_orig;
 pos = pos_in;

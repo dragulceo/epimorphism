@@ -1,10 +1,10 @@
 ### Module
 id test_pattern_main
 component main
-modules {application: test_pattern}
+modules {application: test_gamma}
 flags {root}
 
-###Module
+### Module
 id test_pattern
 component test_pattern
 flags {lib}
@@ -18,7 +18,25 @@ vec2 r = (z + vec2(1.0)) / vec2(2.0);
 color = hsv2rgb(vec4(r.xy, 1.0, 1.0));
 
 
-###Module
+### Module
+id test_gamma
+component test_gamma
+flags {lib}
+par {gamma: 1.0}
+
+### Component
+id test_gamma
+family application
+default_mod test_pattern
+code &&&
+vec2 r = (z + vec2(1.0)) / vec2(2.0);
+
+float val = floor(20.0 * r.x) / 20.0;
+color = hsv2rgb(vec4(0.0, 0.0, val, 1.0));
+color = gamma3(color, |gamma|);
+
+
+### Module
 id test_image
 component test_image
 images [textures/default/default0.png, textures/simplegeom/tile_grid3.png]
@@ -34,13 +52,13 @@ code &&&
   //color += 0.5 * texture2D(aux[#1], z);
 
 
-###Module
+### Module
 id analysis
 component epimorphism
 flags {lib}
 modules {seed:seed_analysis, t:t_wrap_zo, color:color_id, reduce:torus_reduce}
 
-###Module
+### Module
 id seed_analysis
 component seed_analysis
 flags {analysis}

@@ -220,6 +220,7 @@ sub {d_max_steps:200, d_epsilon:0.00001}
 id df_multi_anim
 component df_multi
 flags {lib, distance, df_multi}
+par {bf: 0.03}
 modules {df0: df_sphere, df1: df_torus, cam_trans:trans4, t_dist: t_seed_anim3}
 scripts [randomize dly:50 spd:0.1 lib:distance_field dim:vec4 sub:df0 typ:mod, randomize dly:60 spd:0.1 lib:distance_field dim:vec4 sub:df1 typ:mod]
 

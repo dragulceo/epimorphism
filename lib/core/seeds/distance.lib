@@ -43,7 +43,6 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
 
   %df%
   float dist = df.z;
-	vec4 df_hit = df;
 
   // we have a hit
   if (dist < ~d_epsilon~){

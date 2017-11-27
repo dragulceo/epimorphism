@@ -7,9 +7,9 @@ PROJECTS:
         - post processing
         - gamma correction?  can test
 
+      - start blanding tiles in the seed_color to create procedural variation
+
       - soft shadows? - http://www.iquilezles.org/www/articles/rmshadows/rmshadows.htm
-      - smooth minimum? - http://www.iquilezles.org/www/articles/smin/smin.htm
-        - surface var non-binary
       - emboss/bump maps?
       - getTexel? - http://www.iquilezles.org/www/articles/texture/texture.htm
 
@@ -22,8 +22,11 @@ PROJECTS:
 
     - MAKE SURE
       - transparency?
+      - smin could be better maybe?
 
     - NEXT
+      - https://en.wikipedia.org/wiki/Alpha_compositing
+      - https://en.wikipedia.org/wiki/Blend_modes
       - enable with UI switch?
       - optimization (necessary) sometimes ~10 fps on insane w/ 1080 gtx
         - http://www.iquilezles.org/www/articles/noacos/noacos.htm

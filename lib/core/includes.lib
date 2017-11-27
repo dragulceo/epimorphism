@@ -331,14 +331,6 @@ float smin3(float a, float b, float k){
 }
 
 /*
-float smin4(float a, float b){
-    a = pow(a, k);
-		b = pow(b, k);
-    return pow((a * b) / (a + b), 1.0 / k);
-}
-*/
-
-/*
 vec4 getTexel(vec2 p)
 {
     p = p*myTexResolution + 0.5;

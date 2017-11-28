@@ -1,61 +1,71 @@
 PROJECTS:
   - DISTANCE FIELDS
-    - NOW!
-      - IN GNERAL WATCH & FIX THE REAL PROBLEMS FOR LIKE HOURS!!!
-        - some spazzy texture stuff which *must* be fixed
-        - too fast some times
-        - zoom levels can have issues
-        - also need to perfect pallets
-
     - NOW
-      - soft shadows? - http://www.iquilezles.org/www/articles/rmshadows/rmshadows.htm
+      - IN GNERAL WATCH THE THING FOR HOURS & MAKE NOTES
+      - PRIORITIES
+        - MAKE SURE MULTI_DF COHERES
+          - t_seed_anim3 mmight not be appropriate
+          - then we can see if the advanced rendereing stuff is worth it
+            - if so fix the reflection bug
+            - also tune parameters
+            - is smin worth fixing?
+          - but maybe advanced shit isnt necessary?
+        - COLOR PALLETS
+          - add color harmony to current idea?
+          - it looks cool in general, but is to garsish often
+        - BUGS
+          - reflection
+          - some spazzy texture stuff which *must* be fixed
+          - too fast some times
+          - zoom levels can have issues
+          - I saw a texture pop in :/  and at like 60fps - it happens often
+          - it just straight up crash - can't find glcanvas.  maybe shaders too complex?  have seen before
+        - OPTIMIZATION
+          - takes too long to compile
+            - multiple seeds? varying dimenstions
+          - frame rate varries on high in ubungtu from 15-60fps
+            - need to modultate system speed based on fps
+          - are shadows, reflections, ao visible?
+          - FAKE SHADOWS?
+            - Recipe: take n points on the line from the surface to the light and evaluate the distance to the closest geometry. Find a magic formula to blend the n distances to obtain a shadow factor.
+        - REFLECTIONS
+          - worth it?
+          - how to blend in reflections
+          - perfectly reflective surface
+          - maybe use alpha to do reflectance?
+    - NEXT
       - global illumination/reflection - http://www.iquilezles.org/www/articles/simplepathtracing/simplepathtracing.htm
-      - smin got some issues?
-      - gamma correction on mix? - https://gamedevelopment.tutsplus.com/articles/gamma-correction-and-why-it-matters--gamedev-14466
-       - sphere tex coords (maybe long/lat?)
-
-
-      - start blanding tiles in the seed_color to create procedural variation
-
-
       - emboss/bump maps?
-      - getTexel? - http://www.iquilezles.org/www/articles/texture/texture.htm
+      - getTexel? - smoother texturs - http://www.iquilezles.org/www/articles/texture/texture.htm
 
       - outdoor lighting? http://www.iquilezles.org/www/articles/outdoorslighting/outdoorslighting.htm
-
-      - things still too fast?
       - do textures scaling for dfs in the actual seed, instead of the df?
 
-
-      FAKE SHADOWS?
-      - Recipe: take n points on the line from the surface to the light and evaluate the distance to the closest geometry. Find a magic formula to blend the n distances to obtain a shadow factor.
-
     - MAKE SURE
-      - transparency?
-      - smin could be better maybe?
+      - that transparency of dfs is good
+      - all kinds of other shit....
 
     - NEXT
-      - https://en.wikipedia.org/wiki/Alpha_compositing
-      - https://en.wikipedia.org/wiki/Blend_modes
+      - start blending tiles in the seed_color to create procedural variation
+      - gamma correction on mix? - https://gamedevelopment.tutsplus.com/articles/gamma-correction-and-why-it-matters--gamedev-14466
+      - sphere tex coords (maybe long/lat?)
+      - FB BLENDING
+        - https://en.wikipedia.org/wiki/Alpha_compositing
+        - https://en.wikipedia.org/wiki/Blend_modes
       - enable with UI switch?
-      - optimization (necessary) sometimes ~10 fps on insane w/ 1080 gtx
-        - http://www.iquilezles.org/www/articles/noacos/noacos.htm
-      - de-pixelate?
-
+      - anti-aliasing?
 
     - FUTURE
       - starting weird on linux when breaking cache
-      - deformations?
+      - df deformations?
       - alpha_linear?
-
       - play with mod
       - torus involution - https://i.redd.it/bfg90xr89gyz.gif
       - more than 1 light?
-
       - fog?
-      - anti-aliasing
 
     - RELEASE!
+      - everything through NEXT
 
     - REFERENCE
       - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm

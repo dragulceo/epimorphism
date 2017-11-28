@@ -30,6 +30,7 @@ code &&&
 // bendy
 vec3 cam = pos;
 vec2 z_tmp = z;
+z = cam.xy;
 %t%
 cam.xy = z;
 z = z_tmp;
@@ -63,6 +64,7 @@ code &&&
 // bendy
 vec3 cam = pos;
 vec2 z_tmp = z;
+z = cam.xy;
 %t%
 cam.xy = z;
 z = z_tmp;
@@ -97,6 +99,7 @@ code &&&
 // bendy
 vec3 cam = pos;
 vec2 z_tmp = z;
+z = cam.xy;
 %t%
 cam.xy = z;
 z = z_tmp;
@@ -140,6 +143,7 @@ code &&&
 // bendy
 vec3 cam = pos;
 vec2 z_tmp = z;
+z = cam.xy;
 %t%
 cam.xy = z;
 z = z_tmp;

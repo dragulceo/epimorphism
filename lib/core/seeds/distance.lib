@@ -2,8 +2,8 @@
 id seed_distance
 component seed_distance
 flags {lib, distance}
-par {d_bound: 3.0, eye: -1.5, l_exp: 3.0, ao_del: 0.01, ao_k:2.0, refl:0.0}
-modules {seed_color:tex_simple0, df:df_torus, distance_light: light1, a:alpha_solid}
+par {d_bound: 3.0, eye: -1.5, l_exp: 3.0, ao_del: 0.01, ao_k:2.0, refl:0.1}
+modules {seed_color:tex_df_multi, df:df_multi, distance_light: light1, a:alpha_solid}
 sub {d_max_steps:200, d_epsilon:0.00001}
 
 ### Component
@@ -15,7 +15,7 @@ code &&&
 seed = vec4(0.0);
 
 vec4 df, df_hit, df0, df1, seed0, seed1;
-vec3 pos, pos_hit, nor, light, light0, light1, light_pos;
+vec3 pos, pos_hit, nor, light, light_pos;
 vec2 ofs, ofs0, ofs1;
 float surface, a, w;
 
@@ -96,16 +96,12 @@ if(hit == 1){
   a = 1.0;
   %a%
 
-  // get texture/seed value
   df = df_hit;
   w = 1.0;
   %seed_color%
-	seed0 = seed;
 
   // compute phong lighting
   %distance_light%
-	light0 = light;
-
 
 	// cast shadow rays
   l = 0.001;
@@ -133,7 +129,7 @@ if(hit == 1){
   }
 
 	// scale the light
-	light0 *= shadow_scale;
+	light *= shadow_scale;
 
 	// ambient occlusion (is this worth it?)
 	float ao = 1.0;
@@ -147,22 +143,25 @@ if(hit == 1){
 		ao -= |ao_k| * fact;
 	}
 
-	light0 *= ao;
+	light *= ao;
 
 
-	// reflections?
-  l = 0.001;
+  seed0 = vec4(light, 1.0) * seed;
+
+	// reflections (currently some glitch)
+  l = 0.01;
 	r_eye = pos_hit; // start where we hit
 	r_dir = normalize(reflect(pos_hit, nor)); // reflect the incoming ray over the surface normal
 	hit = 0;
 	seed1 = vec4(0.0);
   for (int count=0; count < ~d_max_steps~; count += 1) { // arbitray max
-  	pos = r_eye + l * r_dir;
+  	pos = r_eye - l * r_dir;
 	  pos_hit = pos;
+
     %df%
 
     // we have a hit
-    if (df.z < ~d_epsilon~){
+    if (df.z < ~d_epsilon~ && df.z >= 0.0){
 	    ofs0   = df0.xy;
       ofs1   = df1.xy;
 		  ofs    = df.xy;
@@ -179,31 +178,63 @@ if(hit == 1){
 
 	// we have a reflected object
 	if(hit == 1){
+    // calculate new normal
+		nor = vec3(0.0);
+
+    // disable tex_ofs computations
+    //  #define NO_TEX_OFS 1
+
+    // nor.x
+    pos = pos_hit + ep.xyy;
+    %df%
+    float norx1 = df.z;
+
+    pos = pos_hit - ep.xyy;
+    %df%
+    float norx2 = df.z;
+    nor.x = norx1 - norx2;
+
+    // nor.y
+    pos = pos_hit + ep.yxy;
+    %df%
+    float nory1 = df.z;
+
+    pos = pos_hit - ep.yxy;
+    %df%
+    float nory2 = df.z;
+    nor.y = nory1 - nory2;
+
+    // nor.z
+    pos = pos_hit + ep.yyx;
+    %df%
+    float norz1 = df.z;
+
+    pos = pos_hit - ep.yyx;
+    %df%
+    float norz2 = df.z;
+    nor.z = norz1 - norz2;
+
+    //#undef NO_TEX_OFS
+
+    nor = normalize(nor);
 
     // get texture
     a = 1.0;
     %a%
 
-    // get texture/seed value
     df = df_hit;
     w = 1.0;
-
     %seed_color%
-			 seed = vec4(1.0);
-		seed1 = seed;
+		//seed = vec4(1.0);
 
     // compute phong lighting
-		/*
 		%distance_light%
-			 light1 = vec3(1.0);//light;
-		*/
+		seed1 = vec4(light, 1.0) * seed;
   }
 
-	// illuminate!
-  seed0 = vec4(nor, 1.0);//vec4(light0, 1.0) * seed0;
-  //seed1 = vec4(light1, 1.0) * seed1;
-
-	seed = seed0;//mix(seed0, seed1, |refl|);
+	// mix in reflection
+	seed.rgb = seed0.rgb + seed1.rgb * |refl|;
+	//seed = seed0;
 
 	// specular lighthing + some textures seem to
 	// return NaN or Inf?? - WEIRD

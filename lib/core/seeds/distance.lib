@@ -2,7 +2,7 @@
 id seed_distance
 component seed_distance
 flags {lib, distance}
-par {d_bound: 3.0, eye: -1.5, l_exp: 2.0}
+par {d_bound: 3.0, eye: -1.5, l_exp: 3.0}
 modules {seed_color:tex_df_multi, df:df_multi, distance_light: light1, a:alpha_solid}
 sub {d_max_steps:200, d_epsilon:0.00001}
 
@@ -104,16 +104,15 @@ if(hit == 1){
   // compute phong lighting
   vec3 light;
   vec3 light_pos;
-  pos = pos_hit;
   %distance_light%
 
 	// cast shadow rays
   l = 0.001;
-	r_eye = pos; // start where we hit
+	r_eye = pos_hit; // start where we hit
   r_dir = normalize(light_pos - pos); // point towards light
 
 	float l_scale = 1.0;
-  for (int count=0; count < 400; count += 1) { // arbitray max
+  for (int count=0; count < ~d_max_steps~; count += 1) { // arbitray max
   	pos = r_eye + l * r_dir;
 
     %df%
@@ -128,7 +127,7 @@ if(hit == 1){
 
     l += df.z;
 
-    if (l >= 10.0)
+    if (l >= |d_bound| / 2.0) // thing more about the bound?
        break;
   }
 
@@ -136,11 +135,11 @@ if(hit == 1){
 	light *= l_scale;
 
 
+	// illuminate!
   seed = vec4(light, 1.0) * seed;
 
 	// specular lighthing + some textures seem to
 	// return NaN or Inf?? - WEIRD
-
 	if(isBorked(seed))
 		seed = vec4(0.0, 0.0, 0.0, 1.0);
 }

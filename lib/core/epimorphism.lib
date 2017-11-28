@@ -51,7 +51,7 @@ for(int i=0; i<~fract~; i++){
     float a = seed.a;
     seed.a = DEPTH_INC;
     frame.a = frame.a + DEPTH_INC;
-    accum += seed;//mix(frame, seed, a);
+    accum += mix(frame, seed, a);
 #ifndef _NO_FRACT_
   }
 }

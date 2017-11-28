@@ -2,7 +2,7 @@
 id light1
 component distance_light
 flags {lib, distance}
-par {shininess:0.05, light_r:1.0, light_g:0.7, light_b:0.7, light_x:1.0, light_y:1.0, light_z:-5.0, amb_r:0.3, amb_g:0.0, amb_b:0.3}
+par {shininess:0.05, light_r:1.0, light_g:0.7, light_b:0.7, light_x:5.0, light_y:5.0, light_z:-8.0, amb_r:0.3, amb_g:0.0, amb_b:0.3}
 
 
 ### Component
@@ -28,7 +28,7 @@ specular = pow(specular, v / |shininess|);
 
 vec3 ambient = vec3(|amb_r|, |amb_g|, |amb_b|);
 
-light = light_color * (diffuse + specular + ambient);
+light = light_color * (specular);
 
 
 ### Module

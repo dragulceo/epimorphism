@@ -26,6 +26,10 @@ PROJECTS:
       - things still too fast?
       - do textures scaling for dfs in the actual seed, instead of the df?
 
+
+      FAKE SHADOWS?
+      - Recipe: take n points on the line from the surface to the light and evaluate the distance to the closest geometry. Find a magic formula to blend the n distances to obtain a shadow factor.
+
     - MAKE SURE
       - transparency?
       - smin could be better maybe?

@@ -106,6 +106,50 @@ if(hit == 1){
   %distance_light%
 	light0 = light;
 
+
+	// cast shadow rays
+  l = 0.001;
+	r_eye = pos_hit; // start where we hit
+  r_dir = normalize(light_pos - pos); // point towards light
+
+	float shadow_scale = 1.0;
+  for (int count=0; count < ~d_max_steps~; count += 1) { // arbitray max
+  	pos = r_eye + l * r_dir;
+
+    %df%
+
+    // we have a hit
+    if (df.z < ~d_epsilon~){
+  		shadow_scale = 0.0;
+  		break;
+  	}
+
+		shadow_scale = min(shadow_scale, |l_exp| * df.z / l );
+
+    l += df.z;
+
+    if (l >= |d_bound| / 2.0) // thing more about the bound?
+       break;
+  }
+
+	// scale the light
+	light0 *= shadow_scale;
+
+	// ambient occlusion (is this worth it?)
+	float ao = 1.0;
+	for(float i=1.0; i <= 5.0; i++){
+  	pos = pos_hit + i * |ao_del| * nor;
+    #define NO_TEX_OFS 1
+		%df%
+    #undef NO_TEX_OFS
+
+		float fact = pow(0.5, i) * (i * |ao_del| - df.z);
+		ao -= |ao_k| * fact;
+	}
+
+	light0 *= ao;
+
+
 	// reflections?
   l = 0.001;
 	r_eye = pos_hit; // start where we hit

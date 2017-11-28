@@ -15,7 +15,7 @@ code &&&
 seed = vec4(0.0);
 
 vec4 df, df_hit, df0, df1;
-vec3 pos, pos_orig;
+vec3 pos, pos_hit;
 vec2 ofs, ofs0, ofs1;
 float surface;
 
@@ -27,7 +27,7 @@ vec3 r_dir = normalize(vec3(z.x, z.y, 1.0));
 
 for (int count=0; count < ~d_max_steps~; count += 1) {
 	pos = r_eye + l * r_dir;
-	pos_orig = pos;
+	pos_hit = pos;
 
   surface = -1.0;
   %df%
@@ -59,31 +59,31 @@ if(hit == 1){
   #define NO_TEX_OFS 1
 
   // nor.x
-  pos = pos_orig + ep.xyy;
+  pos = pos_hit + ep.xyy;
   %df%
   float norx1 = df.z;
 
-  pos = pos_orig - ep.xyy;
+  pos = pos_hit - ep.xyy;
   %df%
   float norx2 = df.z;
   nor.x = norx1 - norx2;
 
   // nor.y
-  pos = pos_orig + ep.yxy;
+  pos = pos_hit + ep.yxy;
   %df%
   float nory1 = df.z;
 
-  pos = pos_orig - ep.yxy;
+  pos = pos_hit - ep.yxy;
   %df%
   float nory2 = df.z;
   nor.y = nory1 - nory2;
 
   // nor.z
-  pos = pos_orig + ep.yyx;
+  pos = pos_hit + ep.yyx;
   %df%
   float norz1 = df.z;
 
-  pos = pos_orig - ep.yyx;
+  pos = pos_hit - ep.yyx;
   %df%
   float norz2 = df.z;
   nor.z = norz1 - norz2;
@@ -104,7 +104,7 @@ if(hit == 1){
   // compute phong lighting
   vec3 light;
   vec3 light_pos;
-  pos = pos_orig;
+  pos = pos_hit;
   %distance_light%
 
 	// cast shadow rays

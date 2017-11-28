@@ -28,7 +28,7 @@ specular = pow(specular, v / |shininess|);
 
 vec3 ambient = vec3(|amb_r|, |amb_g|, |amb_b|);
 
-light = light_color * (diffuse + specular + ambient);
+light = light_color;// * (diffuse + specular + ambient);
 
 
 ### Module

@@ -10,6 +10,11 @@ default_mod seed_color_id
 code &&&
 // Nothing
 
+### Module
+id simple_color
+component simple_color
+flags {lib}
+par {spd:0.0, rot:0.0, sat:1.0, val:1.0}
 
 ### Module
 id simple_color0
@@ -22,7 +27,6 @@ id simple_color1
 component simple_color
 flags {lib}
 par {spd:0.0, rot:0.5, sat:1.0, val:1.0}
-
 
 ### Component
 id simple_color

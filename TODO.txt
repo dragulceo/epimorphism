@@ -57,6 +57,7 @@ PROJECTS:
       - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
   - Misc (Sort)
+    - key to exit dev?
     - give "global includes" to modules, so they can define functions that are called >1
       - say df or something defined before main
     - mipmaps?

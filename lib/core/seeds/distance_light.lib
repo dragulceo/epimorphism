@@ -12,10 +12,11 @@ default_mod light1
 code &&&
 
 vec3 light_color = vec3(|light_r|, |light_g|, |light_b|);
-light_pos = vec3(|light_x|, |light_y|, |light_z|);
+//light_pos = vec3(|light_x|, |light_y|, |light_z|);
+
+light_pos = vec3(1.0, 1.0, -5.0);
 
 // vary specular & diffuse component via red channel (a bit arbitrary)
-vec3 pos = pos_orig;
 vec3 vl = normalize(light_pos - pos + vec3(seed.r));
 vec3 ev = normalize(l * r_dir);
 vec3 ref_ev = reflect(ev, nor);

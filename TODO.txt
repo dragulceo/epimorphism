@@ -2,21 +2,19 @@ PROJECTS:
   - DISTANCE FIELDS
     - NOW
       - IN GENERAL WATCH THE THING FOR HOURS & MAKE NOTES
-        - need new restricted image lib for df
-
-        - issues when df0 = df1, overlap, etc
+        - some minor glitchiness (maybe sharp edges?)
+        - better tex_ofs when are on df1?
+        - light position?
+        - compiler optimization
       - PRIORITIES
-        - MAKE SURE MULTI_DF COHERES
-
-
-          - t_seed_anim3 mmight not be appropriate
-          - then we can see if the advanced rendereing stuff is worth it
-            - also tune parameters
-            - is smin worth fixing?
-          - but maybe advanced shit isnt necessary?
-        - COLOR PALLETS
+        - COLOR PALLETS (might be good enough now)
+          - can possibly just be smart with the right a,b,c,d
+          - use depth to vary pallet
           - add color harmony to current idea?
           - it looks cool in general, but is to garsish often
+        - MULTI_DF
+           - general parameter tuning
+             - more work on smin?
         - BUGS
           - some spazzy texture stuff which *must* be fixed
           - too fast some times
@@ -37,6 +35,7 @@ PROJECTS:
       - all kinds of other shit....
 
     - NEXT
+      - opacity but for rays??
       - re-enable reflections?
       - global illumination/reflection - http://www.iquilezles.org/www/articles/simplepathtracing/simplepathtracing.htm
       - emboss/bump maps?

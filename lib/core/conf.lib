@@ -20,7 +20,7 @@ id prod
 engineConf default
 uiConf prod
 pattern prod
-t_delta 0.02
+t_delta 0.04
 
 ### SystemConf
 id proddev

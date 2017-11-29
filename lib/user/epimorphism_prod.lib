@@ -41,7 +41,7 @@ modules {seed:seed_multi_anim}
 id seed_multi_anim
 component seed_multi
 flags {multi, lib}
-modules {reduce:torus_reduce, t_seed0:t_id, seed0:seed_nothing, t_seed1:t_seed_anim1, seed1:seed_nothing, t_seed2:t_id, seed2:seed_distance_multi_anim}
+modules {reduce:torus_reduce, t_seed0:t_id, seed0:seed_wca_anim1, t_seed1:t_seed_anim1, seed1:seed_wca_anim2, t_seed2:t_id, seed2:seed_distance_multi_anim}
 
 ### Module
 id seed_wca_anim1
@@ -213,7 +213,7 @@ id seed_distance_multi_anim
 component seed_distance
 flags {lib, distance}
 par {d_bound: 3.0, eye: -1.5, l_exp: 3.0, ao_del: 0.01, ao_k:2.0, refl:0.0}
-modules {seed_color:tex_df_scroll, df:df_multi_anim, distance_light: light_anim, a:alpha_dist}
+modules {seed_color:tex_df_scroll, df:df_multi_anim, distance_light: light1, a:alpha_dist}
 sub {d_max_steps:200, d_epsilon:0.00001}
 
 ### Module
@@ -274,4 +274,4 @@ component tex_color_scroll
 flags {anim2}
 images [textures/default/default0.png]
 par {scale:1.0, spd:0.0, rot:0.5, sat:1.0, val:1.0, tex_spd:1.0}
-scripts [randomize dly:35 spd:0.05 lib:1024 dim:vec4 sub:0 typ:image]
+scripts [randomize dly:35 spd:0.05 lib:1024_df dim:vec4 sub:0 typ:image]

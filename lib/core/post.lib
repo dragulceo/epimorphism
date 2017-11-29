@@ -93,7 +93,7 @@ flags {root}
 id post_pal1
 component post_pallet1
 flags {lib, post_pallet}
-par {a_r:wave 0.01 0.1 0.5, a_g:wave 0.02 0.1 0.5, a_b:wave 0.05 0.1 0.5, b_r:wave 0.015 0.1 0.5, b_g:wave 0.025 0.1 0.5, b_b:wave 0.02 0.1 0.5, c_r:wave 0.05 1.0 2.0, c_g:wave 0.06 0.5 1.5, c_b:wave 0.08 1.0 1.0, d_r:0.5, d_g:0.2, d_b:0.25, gamma: 1.0}
+par {a_r:wave 0.01 0.1 0.5, a_g:wave 0.02 0.1 0.5, a_b:wave 0.05 0.1 0.5, b_r:wave 0.015 0.1 0.5, b_g:wave 0.025 0.1 0.5, b_b:wave 0.02 0.1 0.5, c_r:wave 0.05 0.5 1.0, c_g:wave 0.06 0.5 1.0, c_b:wave 0.08 0.6 0.6, d_r:0.5, d_g:0.2, d_b:0.25, gamma: 1.0}
 
 ### Component
 id post_pallet1
@@ -102,6 +102,9 @@ default_mod post_pallet1
 includes []
 code &&&
 vec4 frame_hsv = rgb2hsv(frame);
+
+float inc = (frame.a - DEPTH_INC) / (1.0 - DEPTH_INC);
+
 float idx = frame_hsv.x;
 
 vec3 a = vec3(|a_r|, |a_g|, |a_b|);
@@ -109,10 +112,10 @@ vec3 b = vec3(|b_r|, |b_g|, |b_b|);
 vec3 c = vec3(|c_r|, |c_g|, |c_b|);
 vec3 d = vec3(|d_r|, |d_g|, |d_b|);
 
-vec4 pal_res = vec4(pal(idx, a, b, c, d), 1.0);
+vec4 pal_res = vec4(pal(idx, a, frame_hsv.y * b, c, d * (1.0 - inc)), 1.0);
 
 pal_res = rgb2hsv(pal_res);
-pal_res.y = frame_hsv.y;  //or use the saturation to vary the pallet?
+//pal_res.y = frame_hsv.y;  //or use the saturation to vary the pallet?
 pal_res.z = frame_hsv.z;
 
 frame = hsv2rgb(pal_res);

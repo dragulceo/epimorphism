@@ -228,62 +228,30 @@ scripts [randomize dly:50 spd:0.1 lib:df_epi dim:vec4 sub:df0 typ:mod, randomize
 id df_sphere_anim
 component df_sphere
 flags {lib, distance, distance_field, df_epi}
-par {diam: wave 0.02 0.1 0.65, tex_sc: wave 0.04 0.25 1.2}
+par {diam: wave 0.02 0.2 0.6, tex_sc: wave 0.04 0.25 1.2}
 modules {cam_trans: trans1, t:t_id}
 
 ### Module
 id df_cylinder_anim
 component df_cylinder
 flags {lib, distance, distance_field, df_epi}
-par {diam: wave 0.03 0.1 0.5, tex_sc: wave 0.054 0.2 0.65}
+par {diam: wave 0.01 0.2 0.5, tex_sc: wave 0.054 0.2 0.65}
 modules {cam_trans: trans_y, t:t_id}
 
 ### Module
 id df_cube_anim
 component df_cube
 flags {lib, distance, distance_field, df_epi}
-par {diam: wave 0.03 0.1 0.6, tex_sc: wave 0.05 0.1 1.5}
+par {diam: wave 0.03 0.2 0.6, tex_sc: wave 0.05 0.1 1.5}
 modules {cam_trans: trans2, t:t_id}
 
 ### Module
 id df_torus_anim
 component df_torus
 flags {lib, distance, distance_field, df_epi}
-par {diam1: wave 0.041 0.1 0.7, diam2: wave 0.029 0.05 0.2, tex_sc: wave 0.04 0.2 0.65}
+par {diam1: wave 0.04 0.2 0.7, diam2: wave 0.029 0.01 0.2, tex_sc: wave 0.04 0.2 0.65}
 modules {cam_trans: trans3, t:t_id}
 
-
-### Module
-id t_df_anim1
-component t_wrap
-flags {wrap}
-modules {t_inner:t_z}
-zn [1.0, 0.0, 1.0, 0.0]
-scripts [randomize dly:35 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
-
-### Module
-id t_df_anim2
-component t_wrap
-flags {wrap}
-modules {t_inner:t_z}
-zn [1.0, 0.0, 1.0, 0.0]
-scripts [randomize dly:45 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
-
-### Module
-id t_df_anim3
-component t_wrap
-flags {wrap}
-modules {t_inner:t_z}
-zn [1.0, 0.0, 1.0, 0.0]
-scripts [randomize dly:40 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
-
-### Module
-id t_df_anim4
-component t_wrap
-flags {wrap}
-modules {t_inner:t_z}
-zn [1.0, 0.0, 1.0, 0.0]
-scripts [randomize dly:30 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
 
 
 ### Module

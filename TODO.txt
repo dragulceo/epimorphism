@@ -6,6 +6,7 @@ PROJECTS:
         - better tex_ofs when are on df1?
         - light position?
         - compiler optimization
+        - syncing up first wca with df might be cool?
       - PRIORITIES
         - COLOR PALLETS (might be good enough now)
           - can possibly just be smart with the right a,b,c,d
@@ -69,6 +70,7 @@ PROJECTS:
       - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
   - Misc (Sort)
+    - fix fswatch in ubuntu..
     - key to exit dev?
     - give "global includes" to modules, so they can define functions that are called >1
       - say df or something defined before main

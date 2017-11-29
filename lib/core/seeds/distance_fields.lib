@@ -7,7 +7,7 @@ flags {lib, distance, distance_field}
 id df_nothing
 family distance_field
 default_mod df_nothing
-children {cam_trans: cam_trans, t:t_id}
+children {cam_trans: cam_trans}
 code &&&
 
 df = vec4(0.0, 0.0, 1000000.0, surface);
@@ -18,22 +18,16 @@ id df_sphere
 component df_sphere
 flags {lib, distance, distance_field}
 par {diam: wave 0.02 0.1 0.65, tex_sc: wave 0.04 0.25 1.2}
-modules {cam_trans: trans1, t:t_id}
+modules {cam_trans: trans1}
 
 ### Component
 id df_sphere
 family distance_field
 default_mod df_sphere
-children {cam_trans: cam_trans, t:t}
+children {cam_trans: cam_trans}
 code &&&
 
-// bendy
 vec3 cam = pos;
-vec2 z_tmp = z;
-z = cam.xy;
-%t%
-cam.xy = z;
-z = z_tmp;
 vec2 tex_ofs;
 %cam_trans%
 
@@ -52,22 +46,16 @@ id df_cylinder
 component df_cylinder
 flags {lib, distance, distance_field}
 par {diam: wave 0.03 0.1 0.5, tex_sc: wave 0.054 0.2 0.65}
-modules {cam_trans: trans_y, t:t_id}
+modules {cam_trans: trans_y}
 
 ### Component
 id df_cylinder
 family distance_field
 default_mod df_cylinder
-children {cam_trans: cam_trans, t:t}
+children {cam_trans: cam_trans}
 code &&&
 
-// bendy
 vec3 cam = pos;
-vec2 z_tmp = z;
-z = cam.xy;
-%t%
-cam.xy = z;
-z = z_tmp;
 vec2 tex_ofs;
 %cam_trans%
 
@@ -87,22 +75,17 @@ id df_cube
 component df_cube
 flags {lib, distance, distance_field}
 par {diam: wave 0.03 0.1 0.6, tex_sc: wave 0.05 0.1 1.5}
-modules {cam_trans: trans2, t:t_id}
+modules {cam_trans: trans2}
 
 ### Component
 id df_cube
 family distance_field
 default_mod df_cube
-children {cam_trans: cam_trans, t:t}
+children {cam_trans: cam_trans}
 code &&&
 
 // bendy
 vec3 cam = pos;
-vec2 z_tmp = z;
-z = cam.xy;
-%t%
-cam.xy = z;
-z = z_tmp;
 vec2 tex_ofs;
 %cam_trans%
 
@@ -131,22 +114,17 @@ id df_torus
 component df_torus
 flags {lib, distance, distance_field}
 par {diam1: wave 0.041 0.1 0.7, diam2: wave 0.029 0.05 0.2, tex_sc: wave 0.04 0.2 0.65}
-modules {cam_trans: trans_y, t:t_id}
+modules {cam_trans: trans_y}
 
 ### Component
 id df_torus
 family distance_field
 default_mod df_torus
-children {cam_trans: cam_trans, t:t}
+children {cam_trans: cam_trans}
 code &&&
 
 // bendy
 vec3 cam = pos;
-vec2 z_tmp = z;
-z = cam.xy;
-%t%
-cam.xy = z;
-z = z_tmp;
 vec2 tex_ofs;
 %cam_trans%
 
@@ -180,7 +158,7 @@ vec3 pos_in = pos;
 // first surface
 surface = 0.0;
 %df0%
-df0 = df;
+vec4 df0 = df;
 
 vec3 cam = pos;
 %cam_trans%
@@ -189,7 +167,7 @@ pos = cam;
 // second surface
 surface = 1.0;
 %df1%
-df1 = df;
+vec4 df1 = df;
 
 // intersect
 float m = smin2(df0.z, df1.z, |bf|);
@@ -200,6 +178,7 @@ float m = smin2(df0.z, df1.z, |bf|);
 m = (m - df0.z) / (df1.z - df0.z);
 
 df = mix(df0, df1, m);
+df.xy = df0.xy;
 //df.w = abs(m);
 
 pos = pos_in;

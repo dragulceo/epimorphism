@@ -3,8 +3,8 @@ PROJECTS:
     - NOW
       - IN GENERAL WATCH THE THING FOR HOURS & MAKE NOTES
         - need new restricted image lib for df
-        - some weird ass blackness thats still there even without shadows (due to %t% in dfs)
-        - issues when df0 = df1
+
+        - issues when df0 = df1, overlap, etc
       - PRIORITIES
         - MAKE SURE MULTI_DF COHERES
 

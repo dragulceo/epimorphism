@@ -154,25 +154,3 @@ seed = rgb2hsv(seed);
 seed = hsv2rgb(vec4(time * |spd| + |rot| + seed.x, |sat| * seed.y, |val| * seed.z * w, a));// * seed.a));
 
 //seed = bg_seed * 0.2 + seed * 0.8;
-
-### Module
-id tex_df_multi
-component tex_df_multi
-flags {lib, distance}
-modules {seed0: tex_simple0, seed1:tex_simple1}
-
-### Component
-id tex_df_multi
-family seed_color
-children {seed0:seed, seed1:seed}
-default_mod tex_df_multi
-code &&&
-ofs = ofs0;
-%seed0%
-vec4 s0 = seed;
-
-ofs = ofs1;
-%seed1%
-vec4 s1 = seed;
-
-seed = mix(s0, s1, df.w);

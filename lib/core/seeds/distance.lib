@@ -252,9 +252,9 @@ children {seed_color:seed_color, df:distance_field, distance_light: distance_lig
 code &&&
 seed = vec4(0.0);
 
-vec4 df, df_hit, df0, df1, seed0, seed1;
+vec4 df, seed0, seed1;
 vec3 pos, pos_hit, nor, light, light_pos;
-vec2 ofs, ofs0, ofs1;
+vec2 ofs;
 float surface, a, w;
 
 // shoot rays!
@@ -272,10 +272,7 @@ for (int count=0; count < ~d_max_steps~; count += 1) {
 
   // we have a hit
   if (df.z < ~d_epsilon~){
-    ofs0   = df0.xy;
-    ofs1   = df1.xy;
-		ofs    = df0.xy;
-		df_hit = df;
+		ofs = df.xy;
 		hit = 1;
 		break;
 	}
@@ -334,7 +331,6 @@ if(hit == 1){
   a = 1.0;
   %a%
 
-  df = df_hit;
   w = 1.0;
   %seed_color%
 

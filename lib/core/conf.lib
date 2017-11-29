@@ -29,7 +29,7 @@ uiConf dev
 pattern prod
 debug true
 seed 8563
-t_delta 0.03
+t_delta 0.06
 
 ### SystemConf
 id analysis

@@ -20,16 +20,16 @@ id prod
 engineConf default
 uiConf prod
 pattern prod
-t_delta 0.01
+t_delta 0.03
 
 ### SystemConf
 id proddev
-engineConf default
+engineConf low
 uiConf dev
 pattern prod
 debug true
 seed 8563
-t_delta 0.01
+t_delta 0.03
 
 ### SystemConf
 id analysis

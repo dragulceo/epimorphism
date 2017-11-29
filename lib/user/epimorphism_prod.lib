@@ -14,9 +14,8 @@ modules {seed: seed_wrap_main, t:t_main, color:color_id, reduce:torus_reduce}
 id t_main
 component t_wrap
 flags {lib, wrap}
-modules {t_inner:t_sinh}
-zn [1.0 + 0.0i, 0.0 + 0.0i, 0.0 + 1.1i, 1.0 + 0.0i]
-scripts [randomize dly:50 spd:0.04 lib:new dim:vec2 sub:t_inner typ:mod]
+modules {t_inner:t_id}
+zn [1.0 + 0.0i, 0.0 + 0.0i, 1.1, 0.0]
 
 ### Module
 id t_main_id
@@ -29,7 +28,7 @@ zn [0.90 + 0.0i, 0.0 + 0.0i, 0.0 + 1.05i, 1.0 + 0.0i]
 id seed_wrap_main
 component seed_wrap
 flags {lib}
-modules {t_seed:t_seed_anim, seed_body:seed_buf, seed_mod:mod_pal, reduce:torus_reduce}
+modules {t_seed:t_id, seed_body:seed_buf, seed_mod:mod_pal, reduce:torus_reduce}
 
 ### Module
 id seed_main
@@ -41,7 +40,7 @@ modules {seed:seed_multi_anim}
 id seed_multi_anim
 component seed_multi
 flags {multi, lib}
-modules {reduce:torus_reduce, t_seed0:t_id, seed0:seed_wca_anim1, t_seed1:t_seed_anim1, seed1:seed_wca_anim2, t_seed2:t_seed_anim2, seed2:seed_distance_multi_anim}
+modules {reduce:torus_reduce, t_seed0:t_id, seed0:seed_nothing, t_seed1:t_id, seed1:seed_nothing, t_seed2:t_id, seed2:seed_distance_multi_anim}
 
 ### Module
 id seed_wca_anim1
@@ -212,17 +211,80 @@ par {hue:loop 0.01, spread:wave 0.011 0.1 0.33, lgv:wave 0.05 0.125 0.8, inc_sc:
 id seed_distance_multi_anim
 component seed_distance
 flags {lib, distance}
-par {d_bound: 3.0, eye: -1.5, l_exp: 3.0, ao_del: 0.01, ao_k:2.0, refl:0.1}
-modules {seed_color:tex_df_multi1, df:df_multi_anim, distance_light: light_anim, a:alpha_dist}
+par {d_bound: 3.0, eye: -1.5, l_exp: 3.0, ao_del: 0.01, ao_k:2.0, refl:0.0}
+modules {seed_color:tex_df_scroll, df:df_multi_anim, distance_light: light_anim, a:alpha_dist}
 sub {d_max_steps:200, d_epsilon:0.00001}
 
 ### Module
 id df_multi_anim
 component df_multi
 flags {lib, distance, df_multi}
-par {bf: 0.03}
-modules {df0: df_sphere, df1: df_torus, cam_trans:trans4, t_dist: t_seed_anim3}
-scripts [randomize dly:50 spd:0.1 lib:distance_field dim:vec4 sub:df0 typ:mod, randomize dly:60 spd:0.1 lib:distance_field dim:vec4 sub:df1 typ:mod]
+par {bf: wave 0.01 0.04 0.1}
+modules {df0: df_sphere, df1: df_torus, cam_trans:trans_y}
+scripts [randomize dly:50 spd:0.1 lib:df_epi dim:vec4 sub:df0 typ:mod, randomize dly:40 spd:0.1 lib:df_epi dim:vec4 sub:df1 typ:mod]
+
+
+### Module
+id df_sphere_anim
+component df_sphere
+flags {lib, distance, distance_field, df_epi}
+par {diam: wave 0.02 0.1 0.65, tex_sc: wave 0.04 0.25 1.2}
+modules {cam_trans: trans1, t:t_id}
+
+### Module
+id df_cylinder_anim
+component df_cylinder
+flags {lib, distance, distance_field, df_epi}
+par {diam: wave 0.03 0.1 0.5, tex_sc: wave 0.054 0.2 0.65}
+modules {cam_trans: trans_y, t:t_id}
+
+### Module
+id df_cube_anim
+component df_cube
+flags {lib, distance, distance_field, df_epi}
+par {diam: wave 0.03 0.1 0.6, tex_sc: wave 0.05 0.1 1.5}
+modules {cam_trans: trans2, t:t_id}
+
+### Module
+id df_torus_anim
+component df_torus
+flags {lib, distance, distance_field, df_epi}
+par {diam1: wave 0.041 0.1 0.7, diam2: wave 0.029 0.05 0.2, tex_sc: wave 0.04 0.2 0.65}
+modules {cam_trans: trans3, t:t_id}
+
+
+### Module
+id t_df_anim1
+component t_wrap
+flags {wrap}
+modules {t_inner:t_z}
+zn [1.0, 0.0, 1.0, 0.0]
+scripts [randomize dly:35 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
+
+### Module
+id t_df_anim2
+component t_wrap
+flags {wrap}
+modules {t_inner:t_z}
+zn [1.0, 0.0, 1.0, 0.0]
+scripts [randomize dly:45 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
+
+### Module
+id t_df_anim3
+component t_wrap
+flags {wrap}
+modules {t_inner:t_z}
+zn [1.0, 0.0, 1.0, 0.0]
+scripts [randomize dly:40 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
+
+### Module
+id t_df_anim4
+component t_wrap
+flags {wrap}
+modules {t_inner:t_z}
+zn [1.0, 0.0, 1.0, 0.0]
+scripts [randomize dly:30 spd:0.04 lib:all_seed dim:vec2 sub:t_inner typ:mod]
+
 
 ### Module
 id alpha_dist
@@ -238,24 +300,9 @@ flags {lib, distance}
 par {shininess:0.05, light_r:wave 0.1 0.2 0.8, light_g:wave 0.07 0.2 0.8, light_b:wave 0.11 0.2 0.8, light_x:wave 0.07 5.0 0.0, light_y:wave 0.08 5.0 0.0, light_z:wave 0.08 0.5 -8.0, amb_r:wave 0.05 0.2 0.1, amb_g:wave 0.06 0.1 0.1, amb_b:wave 0.04 0.1 0.2}
 
 ### Module
-id tex_df_multi1
-component tex_df_multi
-flags {lib, distance}
-images [textures/default/default0.png, textures/default/default1.png]
-modules {seed0: tex_dist1, seed1:tex_dist2}
-
-### Module
-id tex_dist1
-component tex_color
-flags {lib}
+id tex_df_scroll
+component tex_color_scroll
+flags {anim2}
 images [textures/default/default0.png]
-par {scale:1.0, spd:0.0, rot:0.0, sat:1.0, val:1.0}
-scripts [randomize dly:30 spd:0.2 lib:1024 dim:vec4 sub:0 typ:image]
-
-### Module
-id tex_dist2
-component tex_color
-flags {lib}
-images [textures/default/default1.png]
-par {scale:1.0, spd:0.0, rot:0.5, sat:1.0, val:1.0}
-scripts [randomize dly:30 spd:0.2 lib:1024 dim:vec4 sub:0 typ:image]
+par {scale:1.0, spd:0.0, rot:0.5, sat:1.0, val:1.0, tex_spd:1.0}
+scripts [randomize dly:35 spd:0.05 lib:1024 dim:vec4 sub:0 typ:image]

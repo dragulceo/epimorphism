@@ -17,7 +17,7 @@ df = vec4(0.0, 0.0, 1000000.0, surface);
 id df_sphere
 component df_sphere
 flags {lib, distance, distance_field}
-par {diam: wave 0.02 0.1 0.65, tex_sc: wave 0.04 0.25 0.8}
+par {diam: wave 0.02 0.1 0.65, tex_sc: wave 0.04 0.25 1.2}
 modules {cam_trans: trans1, t:t_id}
 
 ### Component
@@ -86,7 +86,7 @@ df = vec4(tex_ofs, d, surface);
 id df_cube
 component df_cube
 flags {lib, distance, distance_field}
-par {diam: wave 0.03 0.1 0.6, tex_sc: wave 0.05 0.1 0.9}
+par {diam: wave 0.03 0.1 0.6, tex_sc: wave 0.05 0.1 1.5}
 modules {cam_trans: trans2, t:t_id}
 
 ### Component
@@ -167,19 +167,24 @@ id df_multi
 component df_multi
 flags {lib, distance, df_multi}
 par {bf: 0.08}
-modules {df0: df_cube, df1: df_torus, cam_trans:trans_y, t_dist: t_id}
+modules {df0: df_cube, df1: df_torus, cam_trans:trans_y}
 
 ### Component
 id df_multi
 family distance_field
 default_mod df_multi
-children {df0: distance_field, df1: distance_field, cam_trans: cam_trans, t_dist: t_id}
+children {df0: distance_field, df1: distance_field, cam_trans: cam_trans}
 code &&&
+vec3 pos_in = pos;
 
 // first surface
 surface = 0.0;
 %df0%
 df0 = df;
+
+vec3 cam = pos;
+%cam_trans%
+pos = cam;
 
 // second surface
 surface = 1.0;
@@ -187,12 +192,14 @@ surface = 1.0;
 df1 = df;
 
 // intersect
-//float m = smin2(df0.z, df1.z, |bf|);
+float m = smin2(df0.z, df1.z, |bf|);
 //float m = smin3(df0.z, df1.z, |bf|);
-float m = min(df0.z, df1.z);
+//float m = min(df0.z, df1.z);
 
 // normalize from 0 -> 1
 m = (m - df0.z) / (df1.z - df0.z);
 
 df = mix(df0, df1, m);
 //df.w = abs(m);
+
+pos = pos_in;

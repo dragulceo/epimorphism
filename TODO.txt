@@ -1,12 +1,16 @@
 PROJECTS:
   - DISTANCE FIELDS
     - NOW
-      - IN GNERAL WATCH THE THING FOR HOURS & MAKE NOTES
+      - IN GENERAL WATCH THE THING FOR HOURS & MAKE NOTES
+        - need new restricted image lib for df
+        - some weird ass blackness thats still there even without shadows (due to %t% in dfs)
+        - issues when df0 = df1
       - PRIORITIES
         - MAKE SURE MULTI_DF COHERES
+
+
           - t_seed_anim3 mmight not be appropriate
           - then we can see if the advanced rendereing stuff is worth it
-            - if so fix the reflection bug
             - also tune parameters
             - is smin worth fixing?
           - but maybe advanced shit isnt necessary?
@@ -14,7 +18,6 @@ PROJECTS:
           - add color harmony to current idea?
           - it looks cool in general, but is to garsish often
         - BUGS
-          - reflection
           - some spazzy texture stuff which *must* be fixed
           - too fast some times
           - zoom levels can have issues
@@ -28,12 +31,13 @@ PROJECTS:
           - are shadows, reflections, ao visible?
           - FAKE SHADOWS?
             - Recipe: take n points on the line from the surface to the light and evaluate the distance to the closest geometry. Find a magic formula to blend the n distances to obtain a shadow factor.
-        - REFLECTIONS
-          - worth it?
-          - how to blend in reflections
-          - perfectly reflective surface
-          - maybe use alpha to do reflectance?
+
+    - MAKE SURE
+      - that transparency of dfs is good
+      - all kinds of other shit....
+
     - NEXT
+      - re-enable reflections?
       - global illumination/reflection - http://www.iquilezles.org/www/articles/simplepathtracing/simplepathtracing.htm
       - emboss/bump maps?
       - getTexel? - smoother texturs - http://www.iquilezles.org/www/articles/texture/texture.htm
@@ -41,11 +45,6 @@ PROJECTS:
       - outdoor lighting? http://www.iquilezles.org/www/articles/outdoorslighting/outdoorslighting.htm
       - do textures scaling for dfs in the actual seed, instead of the df?
 
-    - MAKE SURE
-      - that transparency of dfs is good
-      - all kinds of other shit....
-
-    - NEXT
       - start blending tiles in the seed_color to create procedural variation
       - gamma correction on mix? - https://gamedevelopment.tutsplus.com/articles/gamma-correction-and-why-it-matters--gamedev-14466
       - sphere tex coords (maybe long/lat?)

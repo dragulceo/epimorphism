@@ -26,7 +26,7 @@ par {axis_x:wave 0.015 1.0 0.0, axis_y: wave 0.01 0.3 0.0, axis_z: wave 0.005 -0
 id trans4
 component cam_trans
 flags {lib, distance}
-par {axis_x:0.0, axis_y: 1.0, axis_z: 0.0, spd:0.3}
+par {axis_x:1.0, axis_y: 1.0, axis_z: 1.0, spd:0.3}
 
 
 ###Module

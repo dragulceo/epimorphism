@@ -30,6 +30,8 @@ PROJECTS:
         - syncing up first wca with df seems cool.  they share the same t_seed.  is this good?
         - more distanec fields?  rotated cylinders, toruses, etc?
       - PRIORITIES
+        - does ambient occlusion do anything?
+
         - COLOR PALLETS (might be good enough now)
           - can possibly just be smart with the right a,b,c,d
           - use depth to vary pallet
@@ -50,6 +52,7 @@ PROJECTS:
       - all kinds of other shit....
 
     - NEXT
+      - #undef NO_TEX_OFS not working?
       - maybe seed_wca can emulate a distance field?
       - opacity but for rays??
       - re-enable reflections?

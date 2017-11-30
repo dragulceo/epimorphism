@@ -1,12 +1,27 @@
 PROJECTS:
   - DISTANCE FIELDS
     - NOW
+      - MAJOR PROBLEMS (in general it's great)
+        - performance, particularly compilation & the performance hit of interpolated shaders
+        - speed unevenness
+          - tie t_inc to fps
+        - random glitches
+          - aliasing
+          - some minor glitchiness (maybe sharp edges?)
+        - maybe tweak transparency?
+        - make better use of inc in post?
+        - get rid of t_seed_anim, and just animate all seeds independantly?  so there is no composition?
+
       - IN GENERAL WATCH THE THING FOR HOURS & MAKE NOTES
-        - some minor glitchiness (maybe sharp edges?)
         - better tex_ofs when are on df1?
         - light position?
+          - often looks too high v, globaly
         - compiler optimization
-        - syncing up first wca with df might be cool?
+          - definitely too slow, compiling.  20-60fps(mostly 30) running on ubuntu on ultra
+        - syncing up first wca with df seems cool.  they share the same t_seed.  is this good?
+        - more distanec fields?  rotated cylinders, toruses, etc?
+        - remove global t_seed?  only have t_seed per component?
+          - easier to fix speedups, etc?
       - PRIORITIES
         - COLOR PALLETS (might be good enough now)
           - can possibly just be smart with the right a,b,c,d
@@ -36,6 +51,7 @@ PROJECTS:
       - all kinds of other shit....
 
     - NEXT
+      - maybe seed_wca can emulate a distance field?
       - opacity but for rays??
       - re-enable reflections?
       - global illumination/reflection - http://www.iquilezles.org/www/articles/simplepathtracing/simplepathtracing.htm
@@ -55,6 +71,7 @@ PROJECTS:
       - anti-aliasing?
 
     - FUTURE
+      - lighting being the same across reduction?
       - starting weird on linux when breaking cache
       - df deformations?
       - alpha_linear?

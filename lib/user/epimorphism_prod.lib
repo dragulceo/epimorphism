@@ -85,7 +85,7 @@ sub {wt_exp:w}
 id simple_color_anim1
 component simple_color
 flags {anim1, anim3}
-par {spd:0.05, rot:0.15, sat:1.0, val:1.0}
+par {spd:0.05, rot:0.0, sat:1.0, val:1.0}
 
 ### Module
 id tex_color_anim1
@@ -100,7 +100,7 @@ id tex_color_anim2
 component tex_color_scroll
 flags {anim2}
 images [textures/default/default0.png]
-par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.5, sat:1.0, val:1.0, tex_spd:1.0}
+par {scale:wave 0.02 0.1 0.33, spd:0.0, rot:0.33, sat:1.0, val:1.0, tex_spd:1.0}
 scripts [randomize dly:65 spd:0.05 lib:1024 dim:vec4 sub:0 typ:image]
 
 ### Module
@@ -273,5 +273,5 @@ id tex_df_scroll
 component tex_color_scroll
 flags {anim2}
 images [textures/default/default0.png]
-par {scale:1.0, spd:0.0, rot:0.5, sat:1.0, val:1.0, tex_spd:1.0}
+par {scale:1.0, spd:0.0, rot:0.66, sat:1.0, val:1.0, tex_spd:1.0}
 scripts [randomize dly:35 spd:0.05 lib:1024_df dim:vec4 sub:0 typ:image]

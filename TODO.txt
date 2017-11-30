@@ -1,27 +1,34 @@
 PROJECTS:
   - DISTANCE FIELDS
     - NOW
-      - MAJOR PROBLEMS (in general it's great)
-        - performance, particularly compilation & the performance hit of interpolated shaders
+      - IN PROGRESS (in general it's great)
+        - OPTIMIZATION
+          - takes too long to compile
+            - multiple seeds? varying dimensions
+          - frame rate varries on high in ubungtu from 15-60fps
+            - need to modultate system speed based on fps
+          - are shadows, reflections, ao visible?
+          - FAKE SHADOWS?
+            - Recipe: take n points on the line from the surface to the light and evaluate the distance to the closest geometry. Find a magic formula to blend the n distances to obtain a shadow factor.
+        - zoom too variable sometimes too close, sometimes, too far.
+          - get rid of t_seed_anim, and just animate all seeds independantly?  so there is no composition? (might be good.  easier to understand & isolate errors)
         - speed unevenness
           - tie t_inc to fps
+          - also seems zoomed in to far often & moving way fast..
         - random glitches
           - aliasing
           - some minor glitchiness (maybe sharp edges?)
         - maybe tweak transparency?
         - make better use of inc in post?
-        - get rid of t_seed_anim, and just animate all seeds independantly?  so there is no composition?
+
+        - tweak all speeds & frequencies
 
       - IN GENERAL WATCH THE THING FOR HOURS & MAKE NOTES
         - better tex_ofs when are on df1?
         - light position?
           - often looks too high v, globaly
-        - compiler optimization
-          - definitely too slow, compiling.  20-60fps(mostly 30) running on ubuntu on ultra
         - syncing up first wca with df seems cool.  they share the same t_seed.  is this good?
         - more distanec fields?  rotated cylinders, toruses, etc?
-        - remove global t_seed?  only have t_seed per component?
-          - easier to fix speedups, etc?
       - PRIORITIES
         - COLOR PALLETS (might be good enough now)
           - can possibly just be smart with the right a,b,c,d
@@ -37,14 +44,6 @@ PROJECTS:
           - zoom levels can have issues
           - I saw a texture pop in :/  and at like 60fps - it happens often
           - it just straight up crash - can't find glcanvas.  maybe shaders too complex?  have seen before
-        - OPTIMIZATION
-          - takes too long to compile
-            - multiple seeds? varying dimenstions
-          - frame rate varries on high in ubungtu from 15-60fps
-            - need to modultate system speed based on fps
-          - are shadows, reflections, ao visible?
-          - FAKE SHADOWS?
-            - Recipe: take n points on the line from the surface to the light and evaluate the distance to the closest geometry. Find a magic formula to blend the n distances to obtain a shadow factor.
 
     - MAKE SURE
       - that transparency of dfs is good

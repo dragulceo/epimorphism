@@ -136,30 +136,28 @@ initEngineST lib canvasId esRef' = do
 
 executeKernels :: forall eff h. Library h -> SystemST h -> EngineST -> PatternD -> EpiS eff h Unit
 executeKernels lib systemST engineST patternD = do
-  tex       <- fromJustE engineST.tex      "executeKernels: missing textures"
   fbs       <- fromJustE engineST.fb       "executeKernels: missing framebuffers"
-  seedTexFb <- fromJustE engineST.seed     "executeKernels: missing seed tex & fb"
+  seedTexFb <- fromJustE engineST.seed     "executeKernels: missing seed buffer"
 
   -- execute seed
   executeKernel lib systemST engineST Seed patternD.seed (snd seedTexFb) empty
 
   -- ping-pong buffers
-  let tm = if systemST.frameNum `mod` 2 == 0 then fst tex else snd tex
-  let td = if systemST.frameNum `mod` 2 == 1 then fst tex else snd tex
-  let fb = if systemST.frameNum `mod` 2 == 1 then fst fbs else snd fbs
+  let tex = if systemST.frameNum `mod` 2 == 0 then fst $ fst fbs else fst $ snd fbs
+  let fb = if systemST.frameNum `mod` 2 == 1 then snd $ fst fbs else snd $ snd fbs
 
   -- execute main
-  let buffers = fromFoldable [Tuple "fb" tm, Tuple "seedBuf" (fst seedTexFb)]
+  let buffers = fromFoldable [Tuple "fb" tex, Tuple "seedBuf" (fst seedTexFb)]
   executeKernel lib systemST engineST Main patternD.main fb buffers
 
   -- execute disp
-  let buffers' = fromFoldable [Tuple "fb" td]
+  let buffers' = fromFoldable [Tuple "fb" tex]
   executeKernel lib systemST engineST Disp patternD.disp unsafeNull buffers'
 
 
 executeKernel :: forall eff h. Library h -> SystemST h -> EngineST -> Kernel -> String ->
                  WebGLFramebuffer -> (StrMap WebGLTexture) -> EpiS eff h Unit
-executeKernel lib systemST engineST kernel mid out buffers = do
+executeKernel lib systemST engineST kernel mid out_fb in_tex = do
   engineConfD <- getEngineConfD lib "kernel ec"
   prog <- fromJustE (kGet engineST.curST.prog kernel) $ "missing program: " <> (show kernel)
   unif <- fromJustE (kGet engineST.curST.unif kernel) $ "missing uniforms: " <> (show kernel)
@@ -193,14 +191,14 @@ executeKernel lib systemST engineST kernel mid out buffers = do
         GL.bindTexture ctx GLE.texture2d t
 
     -- bind input buffers
-    let indexed = map (\(Tuple i (Tuple var tex)) -> {i, var, tex}) $ zipI (toUnfoldable buffers)
+    let indexed = map (\(Tuple i (Tuple var tex)) -> {i, var, tex}) $ zipI (toUnfoldable in_tex)
     for indexed \{i, var, tex} -> do
       liftEff $ GL.activeTexture ctx (GLE.texture0 + numAux + i)
       liftEff $ GL.bindTexture ctx GLE.texture2d tex
       liftEff $ GL.uniform1i ctx (unsafeGetAttr unif var) i
 
     -- draw to fb
-    liftEff $ GL.bindFramebuffer ctx GLE.framebuffer out
+    liftEff $ GL.bindFramebuffer ctx GLE.framebuffer out_fb
     drawArrays Triangles 0 6
 
 

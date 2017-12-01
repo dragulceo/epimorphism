@@ -66,7 +66,7 @@ initEngineST lib canvasId esRef' = do
 
   -- find canvas & create context
   canvasM <- liftEff $ getCanvasElementById canvasId
-  canvas <- fromJustE canvasM $ "init engine - canvas not found: " <> canvasId
+  canvas  <- fromJustE canvasM $ "init engine - canvas not found: " <> canvasId
 
   let dim = engineConfD.kernelDim
   lift $ setCanvasWidth (toNumber dim) canvas
@@ -98,7 +98,7 @@ initEngineST lib canvasId esRef' = do
     Nothing -> do
       let compST = newCompST
       let curST  = newCompST
-      let new = {tex: Nothing, fb: Nothing, auxTex: Nothing, audio: Nothing, currentImages: [], compQueue: fullCompile, seed: Nothing, ctx, empty, compST, curST, profile}
+      let new = {fb: Nothing, auxTex: Nothing, audio: Nothing, currentImages: [], compQueue: fullCompile, seed: Nothing, ctx, empty, compST, curST, profile}
       lift $ newSTRef new
 
   es <- lift $ readSTRef esRef
@@ -106,7 +106,7 @@ initEngineST lib canvasId esRef' = do
   -- webgl initialization
   ref <- execGL ctx do
 --    liftEff $ getExtension ctx "OES_texture_float"
-    
+
     Tuple tex0 fb0 <- initTexFb dim
     Tuple tex1 fb1 <- initTexFb dim
     auxTex <- initAuxTex engineConfD es.ctx empty
@@ -117,10 +117,8 @@ initEngineST lib canvasId esRef' = do
     clearColor 0.0 0.0 0.0 1.0
     liftEff $ GL.clear ctx GLE.colorBufferBit
     liftEff $ GL.viewport ctx 0 0 dim dim
-
     pure $ es {
-        fb  = Just (Tuple fb0 fb1)
-      , tex = Just (Tuple tex0 tex1)
+        fb  = Just (Tuple (Tuple tex0 fb0) (Tuple tex1 fb1))
       , seed = Just seed
       , auxTex = Just auxTex
       , audio = audio

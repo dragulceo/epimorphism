@@ -44,10 +44,10 @@ type EngineProfile = {
   , max_texture_size  :: Int
 }
 
+type KernelBuffer = Tuple WebGLTexture WebGLFramebuffer
 type EngineST = {
-    tex :: Maybe (Tuple WebGLTexture WebGLTexture)
-  , fb :: Maybe (Tuple WebGLFramebuffer WebGLFramebuffer)
-  , seed :: Maybe (Tuple WebGLTexture WebGLFramebuffer)
+    fb :: Maybe (Tuple KernelBuffer KernelBuffer)
+  , seed :: Maybe (KernelBuffer)
   , auxTex :: Maybe (Array WebGLTexture)
   , currentImages :: Array String
   , audio :: Maybe (Tuple WebGLTexture AudioAnalyser)

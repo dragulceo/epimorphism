@@ -1,34 +1,40 @@
 PROJECTS:
   - DISTANCE FIELDS
     - NOW
-      - IN PROGRESS (in general it's great)
+      - TOP PRIORITY (in general it's great)
         - OPTIMIZATION
-          - takes too long to compile
-            - multiple seeds? varying dimensions
-          - frame rate varries on high in ubungtu from 15-60fps
-            - need to modultate system speed based on fps
-          - are shadows, reflections, ao visible?
-          - FAKE SHADOWS?
-            - Recipe: take n points on the line from the surface to the light and evaluate the distance to the closest geometry. Find a magic formula to blend the n distances to obtain a shadow factor.
-        - zoom too variable sometimes too close, sometimes, too far.
-          - get rid of t_seed_anim, and just animate all seeds independantly?  so there is no composition? (might be good.  easier to understand & isolate errors)
-        - speed unevenness
-          - tie t_inc to fps
-          - also seems zoomed in to far often & moving way fast..
-        - random glitches
-          - aliasing
-          - some minor glitchiness (maybe sharp edges?)
-        - maybe tweak transparency?
-        - make better use of inc in post?
+          - COMPILATION
+            - already better
+            - most is from the complexity of the seed
+              - multiple seeds? varying dimensions
+            - try global functions?  unclear if it would help
+          - FPS
+            - speed constiency
+              - need to modultate system speed based on fps
+              - zoom fixing should help
+                - zoom too variable sometimes too close, sometimes, too far.
+                  - get rid of t_seed_anim, and just animate all seeds independantly?  so there is no composition? (might be good.  easier to understand & isolate errors)
+            - fake shadows?
+              - Recipe: take n points on the line from the surface to the light and evaluate the distance to the closest geometry. Find a magic formula to blend the n distances to obtain a shadow factor.
+        - NEXT
+          - maybe tweak transparency?
+          - make better use of inc in post?
 
-        - tweak all speeds & frequencies
+          - better tex_ofs when are on df1?
+          - random glitches
+            - aliasing
+            - some minor glitchiness (maybe sharp edges?)
+
+          - tweak all speeds & frequencies
+          - vary color in post(or somewhere) by spatial position
+          - TOTAL CRASHES
 
       - IN GENERAL WATCH THE THING FOR HOURS & MAKE NOTES
-        - better tex_ofs when are on df1?
         - light position?
           - often looks too high v, globaly
         - syncing up first wca with df seems cool.  they share the same t_seed.  is this good?
         - more distanec fields?  rotated cylinders, toruses, etc?
+
       - PRIORITIES
         - does ambient occlusion do anything?
 

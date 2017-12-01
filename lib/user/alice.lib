@@ -7,7 +7,7 @@ t_delta 0.01
 
 ### Pattern
 id alice
-seed seed_alice
+seed0 seed_alice
 vert vert
 main main_alice
 disp disp_id
@@ -30,7 +30,7 @@ modules {seed:seed_wrap_alice, t:t_main, color:color_id, reduce:torus_reduce}
 id seed_wrap_alice
 component seed_wrap
 flags {lib}
-modules {t_seed:t_seed_anim, seed_body:seed_buf, seed_mod:mod_id, reduce:torus_reduce}
+modules {t_seed:t_seed_anim, seed_body:seed_buf0, seed_mod:mod_id, reduce:torus_reduce}
 
 ### Module
 id seed_alice

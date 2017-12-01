@@ -103,7 +103,8 @@ data Pattern = Pattern Index PatternD
 type PatternD = {
     vert            :: String -- ModuleRef
   , main            :: String -- ModuleRef
-  , seed            :: String -- ModuleRef
+  , seed0           :: String -- ModuleRef
+  , seed1           :: String -- ModuleRef
   , disp            :: String -- ModuleRef
   , defaultImageLib :: String
   , imageLib        :: String
@@ -113,7 +114,8 @@ patternSchema :: Schema
 patternSchema = [
     SchemaEntry SE_St "vert"
   , SchemaEntry SE_St "main"
-  , SchemaEntry SE_St "seed"
+  , SchemaEntry SE_St "seed0"
+  , SchemaEntry SE_St "seed1"
   , SchemaEntry SE_St "disp"
   , SchemaEntry SE_St "defaultImageLib"
   , SchemaEntry SE_St "imageLib"

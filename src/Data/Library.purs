@@ -74,7 +74,8 @@ instance dtUIConf :: DataTable UIConf {
 instance dtPattern :: DataTable Pattern {
     vert            :: String -- ModuleRef
   , main            :: String -- ModuleRef
-  , seed            :: String -- ModuleRef
+  , seed0           :: String -- ModuleRef
+  , seed1           :: String -- ModuleRef
   , disp            :: String -- ModuleRef
   , defaultImageLib :: String
   , imageLib        :: String

@@ -29,24 +29,25 @@ flags {lib, dev, root}
 modules {seed:seed_distance}
 
 ### Module
-id seed_buf
+id seed_buf0
 component seed_buf
 flags {lib}
+sub {idx: 0}
 
 ### Component
 id seed_buf
 family seed
-default_mod seed_buf
+default_mod seed_buf0
 code &&&
 frame_z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
-seed = texture2D(seedBuf, frame_z);
+seed = texture2D(seedBuf~idx~, frame_z);
 
 
 ### Module
 id seed_wrap
 component seed_wrap
 flags {lib}
-modules {t_seed:t_wrap, seed_body:seed_buf, seed_mod:mod_id, reduce:torus_reduce}
+modules {t_seed:t_wrap, seed_body:seed_buf0, seed_mod:mod_id, reduce:torus_reduce}
 
 ### Component
 id seed_wrap

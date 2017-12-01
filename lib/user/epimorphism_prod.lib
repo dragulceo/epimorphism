@@ -29,7 +29,7 @@ zn [0.90 + 0.0i, 0.0 + 0.0i, 0.0 + 1.05i, 1.0 + 0.0i]
 id seed_wrap_main
 component seed_wrap
 flags {lib}
-modules {t_seed:t_seed_anim, seed_body:seed_buf, seed_mod:mod_pal, reduce:torus_reduce}
+modules {t_seed:t_seed_anim, seed_body:seed_buf0, seed_mod:mod_pal, reduce:torus_reduce}
 
 ### Module
 id seed_main

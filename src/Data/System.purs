@@ -47,7 +47,8 @@ type EngineProfile = {
 type KernelBuffer = Tuple WebGLTexture WebGLFramebuffer
 type EngineST = {
     fb :: Maybe (Tuple KernelBuffer KernelBuffer)
-  , seed :: Maybe (KernelBuffer)
+  , seed0 :: Maybe (KernelBuffer)
+  , seed1 :: Maybe (KernelBuffer)
   , auxTex :: Maybe (Array WebGLTexture)
   , currentImages :: Array String
   , audio :: Maybe (Tuple WebGLTexture AudioAnalyser)

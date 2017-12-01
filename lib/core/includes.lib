@@ -8,7 +8,8 @@ precision highp float;
 #define DEPTH_INC (32.0 / 255.0)
 
 uniform sampler2D fb;
-uniform sampler2D seedBuf;
+uniform sampler2D seedBuf0;
+uniform sampler2D seedBuf1;
 uniform float time;
 uniform float kernel_dim;
 uniform sampler2D audioData;

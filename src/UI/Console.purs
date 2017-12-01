@@ -40,13 +40,22 @@ renderConsole uiST systemST engineST lib = do
     Just src -> lift $ setInnerHTML src dsmSDiv
     Nothing -> pure unit
 
-  dssDiv <- findElt "debugSeed"
-  str1 <- renderModule systemST lib uiConfD.uiCompLib patternD.seed "SEED" Nothing
+  dssDiv <- findElt "debugSeed0"
+  str1 <- renderModule systemST lib uiConfD.uiCompLib patternD.seed0 "SEED0" Nothing
   lift $ setInnerHTML str1 dssDiv
 
-  dssSDiv <- findElt "debugSeedSrc"
-  case (kGet engineST.curST.src Seed) of
+  dssSDiv <- findElt "debugSeed0Src"
+  case (kGet engineST.curST.src Seed0) of
     Just src -> lift $ setInnerHTML src dssSDiv
+    Nothing -> pure unit
+
+  dssDiv' <- findElt "debugSeed1"
+  str1' <- renderModule systemST lib uiConfD.uiCompLib patternD.seed0 "SEED1" Nothing
+  lift $ setInnerHTML str1' dssDiv'
+
+  dssSDiv' <- findElt "debugSeed1Src"
+  case (kGet engineST.curST.src Seed1) of
+    Just src -> lift $ setInnerHTML src dssSDiv'
     Nothing -> pure unit
 
   dsdDiv <- findElt "debugDisp"

@@ -16,10 +16,10 @@ altCST {src: s0, prog: p0, unif: u0, aux: a0} {src: s1, prog: p1, unif: u1, aux:
 infixr 0 altCST as <|||>
 
 newCompST :: CompST
-newCompST = { src: KMap Nothing Nothing Nothing Nothing,
-              prog: KMap Nothing Nothing Nothing Nothing,
-              unif: KMap Nothing Nothing Nothing Nothing,
-              aux: KMap Nothing Nothing Nothing Nothing  }
+newCompST = { src: KMap Nothing Nothing Nothing Nothing Nothing,
+              prog: KMap Nothing Nothing Nothing Nothing Nothing,
+              unif: KMap Nothing Nothing Nothing Nothing Nothing,
+              aux: KMap Nothing Nothing Nothing Nothing Nothing  }
 
 data CompOp = CompShader Kernel | CompProg Kernel | CompFinish | CompStall
 instance showCompOp :: Show CompOp where
@@ -29,5 +29,5 @@ instance showCompOp :: Show CompOp where
   show (CompStall)    = "CompStall"
 
 fullCompile :: Array CompOp
-fullCompile = [CompShader Seed, CompShader Main, CompShader Disp, CompShader Vert,
-               CompProg Seed, CompProg Main, CompProg Disp, CompFinish]
+fullCompile = [CompShader Seed0, CompShader Seed1, CompShader Main, CompShader Disp, CompShader Vert,
+               CompProg Seed0, CompProg Seed1, CompProg Main, CompProg Disp, CompFinish]

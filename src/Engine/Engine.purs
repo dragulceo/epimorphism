@@ -98,7 +98,7 @@ initEngineST lib canvasId esRef' = do
     Nothing -> do
       let compST = newCompST
       let curST  = newCompST
-      let new = {fb: Nothing, auxTex: Nothing, audio: Nothing, currentImages: [], compQueue: fullCompile, seed: Nothing, ctx, empty, compST, curST, profile}
+      let new = {fb: Nothing, auxTex: Nothing, audio: Nothing, currentImages: [], compQueue: fullCompile, seed0: Nothing, seed1: Nothing, ctx, empty, compST, curST, profile}
       lift $ newSTRef new
 
   es <- lift $ readSTRef esRef
@@ -112,14 +112,16 @@ initEngineST lib canvasId esRef' = do
     auxTex <- initAuxTex engineConfD es.ctx empty
     audio <- initAudio engineConfD es.ctx empty
 
-    seed <- initTexFb dim
+    seed0 <- initTexFb dim
+    seed1 <- initTexFb dim
 
     clearColor 0.0 0.0 0.0 1.0
     liftEff $ GL.clear ctx GLE.colorBufferBit
     liftEff $ GL.viewport ctx 0 0 dim dim
     pure $ es {
         fb  = Just (Tuple (Tuple tex0 fb0) (Tuple tex1 fb1))
-      , seed = Just seed
+      , seed0 = Just seed0
+      , seed1 = Just seed1
       , auxTex = Just auxTex
       , audio = audio
     }
@@ -136,23 +138,24 @@ initEngineST lib canvasId esRef' = do
 
 executeKernels :: forall eff h. Library h -> SystemST h -> EngineST -> PatternD -> EpiS eff h Unit
 executeKernels lib systemST engineST patternD = do
-  fbs       <- fromJustE engineST.fb       "executeKernels: missing framebuffers"
-  seedTexFb <- fromJustE engineST.seed     "executeKernels: missing seed buffer"
+  fbs        <- fromJustE engineST.fb    "executeKernels: missing framebuffers"
+  seed0TexFb <- fromJustE engineST.seed0 "executeKernels: missing seed0 buffer"
+  seed1TexFb <- fromJustE engineST.seed0 "executeKernels: missing seed1 buffer"
 
   -- execute seed
-  executeKernel lib systemST engineST Seed patternD.seed (snd seedTexFb) empty
+  executeKernel lib systemST engineST Seed0 patternD.seed0 (snd seed0TexFb) empty
 
   -- ping-pong buffers
   let tex = if systemST.frameNum `mod` 2 == 0 then fst $ fst fbs else fst $ snd fbs
   let fb = if systemST.frameNum `mod` 2 == 1 then snd $ fst fbs else snd $ snd fbs
 
   -- execute main
-  let buffers = fromFoldable [Tuple "fb" tex, Tuple "seedBuf" (fst seedTexFb)]
-  executeKernel lib systemST engineST Main patternD.main fb buffers
+  let textures = fromFoldable [Tuple "fb" tex, Tuple "seedBuf0" (fst seed0TexFb)]
+  executeKernel lib systemST engineST Main patternD.main fb textures
 
   -- execute disp
-  let buffers' = fromFoldable [Tuple "fb" tex]
-  executeKernel lib systemST engineST Disp patternD.disp unsafeNull buffers'
+  let textures' = fromFoldable [Tuple "fb" tex]
+  executeKernel lib systemST engineST Disp patternD.disp unsafeNull textures'
 
 
 executeKernel :: forall eff h. Library h -> SystemST h -> EngineST -> Kernel -> String ->
@@ -163,7 +166,7 @@ executeKernel lib systemST engineST kernel mid out_fb in_tex = do
   unif <- fromJustE (kGet engineST.curST.unif kernel) $ "missing uniforms: " <> (show kernel)
 
   -- aux data
-  auxTex      <- fromJustE engineST.auxTex   "executeKernel: missing auxTex"
+  auxTex <- fromJustE engineST.auxTex   "executeKernel: missing auxTex"
   let auxImages = fromMaybe [] (kGet engineST.curST.aux kernel)
   auxIndexes <- getAuxIndexes auxImages engineST.currentImages
 
@@ -195,7 +198,7 @@ executeKernel lib systemST engineST kernel mid out_fb in_tex = do
         GL.activeTexture ctx (GLE.texture0 + i)
         GL.bindTexture ctx GLE.texture2d t
 
-    -- bind input buffers
+    -- bind input textures
     let indexed = map (\(Tuple i (Tuple var tex)) -> {i, var, tex}) $ zipI (toUnfoldable in_tex)
     for indexed \{i, var, tex} -> do
       liftEff $ GL.activeTexture ctx (GLE.texture0 + numAux + i)

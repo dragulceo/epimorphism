@@ -39,11 +39,12 @@ findModule lib patternD mid followSwitch = do
           -- pure $ kGet addrs k
 
           case addr of
-            "vert" -> findModule' lib patternD.vert rst followSwitch
-            "disp" -> findModule' lib patternD.disp rst followSwitch
-            "seed" -> findModule' lib patternD.seed rst followSwitch
-            "main" -> findModule' lib patternD.main rst followSwitch
-            x      -> throwError $ "value should be main, vert, or disp : " <> x
+            "vert"  -> findModule' lib patternD.vert rst followSwitch
+            "disp"  -> findModule' lib patternD.disp rst followSwitch
+            "seed0" -> findModule' lib patternD.seed0 rst followSwitch
+            "seed1" -> findModule' lib patternD.seed1 rst followSwitch
+            "main"  -> findModule' lib patternD.main rst followSwitch
+            x       -> throwError $ "value should be main, vert, or disp : " <> x
 
 
 

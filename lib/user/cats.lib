@@ -7,7 +7,7 @@ t_delta 0.01
 
 ### Pattern
 id cats
-seed seed_cats
+seed0 seed_cats
 vert vert
 main main_cats
 disp disp_id
@@ -30,7 +30,7 @@ modules {seed:seed_wrap_cats, t:t_main, color:color_id, reduce:torus_reduce}
 id seed_wrap_cats
 component seed_wrap
 flags {lib}
-modules {t_seed:t_seed_anim, seed_body:seed_buf, seed_mod:mod_id, reduce:torus_reduce}
+modules {t_seed:t_seed_anim, seed_body:seed_buf0, seed_mod:mod_id, reduce:torus_reduce}
 
 ### Module
 id seed_cats

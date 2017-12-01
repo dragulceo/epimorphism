@@ -1,6 +1,6 @@
 ### Pattern
 id dev
-seed   seed_dev_distance
+seed0   seed_dev_distance
 main   epimorphism_dev_main
 disp   disp_id
 vert   vert
@@ -9,7 +9,7 @@ imageLib 1024
 
 ### Pattern
 id dev_default
-seed   seed_dev
+seed0   seed_dev
 main   epimorphism_dev_main
 disp   disp_id
 vert   vert
@@ -18,7 +18,7 @@ imageLib 1024
 
 ### Pattern
 id test
-seed   seed_dev
+seed0   seed_dev
 main   test_pattern_main
 disp   disp_pal1
 vert   vert
@@ -27,7 +27,7 @@ imageLib all_images
 
 ### Pattern
 id analysis
-seed   seed_dev
+seed0   seed_dev
 main   analysis_main
 disp   disp_id
 vert   vert
@@ -36,7 +36,7 @@ imageLib all_images
 
 ### Pattern
 id prod
-seed   seed_main
+seed0   seed_main
 main   epimorphism_main
 disp   disp_pal1
 vert   vert
@@ -45,7 +45,7 @@ imageLib 1024
 
 ### Pattern
 id interference
-seed   seed_na
+seed0   seed_na
 main   interference_main
 disp   disp_id
 vert   vert
@@ -54,7 +54,7 @@ imageLib all_images
 
 ### Pattern
 id julia
-seed   seed_na
+seed0   seed_na
 main   julia_main
 disp   disp_id
 vert   vert

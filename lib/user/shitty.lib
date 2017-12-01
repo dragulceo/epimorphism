@@ -7,7 +7,7 @@ t_delta 0.01
 
 ### Pattern
 id shitty
-seed seed_shitty
+seed0 seed_shitty
 vert vert
 main main_shitty
 disp disp_id

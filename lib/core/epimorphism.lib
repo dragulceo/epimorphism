@@ -19,7 +19,7 @@ includes []
 code &&&
 
 vec4 seed, frame;
-vec2 frame_z, t_z;
+vec2 fb_z, t_z;
 
 vec4 accum = vec4(0.0, 0.0, 0.0, 0.0);
 
@@ -40,8 +40,8 @@ for(int i=0; i<~fract~; i++){
     // get frame
     t_z = z;
     %reduce%
-    frame_z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
-    frame = texture2D(fb, frame_z);
+    fb_z = (z + vec2(1.0, 1.0)) / vec2(2.0, 2.0);
+    frame = texture2D(fb, fb_z);
     z = t_z;
 
     %seed%

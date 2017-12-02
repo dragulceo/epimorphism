@@ -41,7 +41,7 @@ imageLib all_images
 ### Pattern
 id prod
 seed0  seed_main
-seed1  seed_na
+seed1  seed_distance_main
 main   epimorphism_main
 disp   disp_pal1
 vert   vert

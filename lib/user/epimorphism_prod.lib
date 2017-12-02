@@ -41,7 +41,7 @@ modules {seed:seed_multi_anim}
 id seed_multi_anim
 component seed_multi
 flags {multi, lib}
-modules {reduce:torus_reduce, t_seed0:t_id, seed0:seed_wca_anim1, t_seed1:t_seed_anim1, seed1:seed_wca_anim2, t_seed2:t_id, seed2:seed_buf1}
+modules {reduce:torus_reduce, t_seed0:t_id, seed0:seed_wca_anim1, t_seed1:t_id, seed1:seed_buf1, t_seed2:t_id, seed2:seed_nothing}
 
 ### Module
 id seed_wca_anim1

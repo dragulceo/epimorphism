@@ -140,19 +140,23 @@ executeKernels :: forall eff h. Library h -> SystemST h -> EngineST -> PatternD 
 executeKernels lib systemST engineST patternD = do
   fbs        <- fromJustE engineST.fb    "executeKernels: missing framebuffers"
   seed0TexFb <- fromJustE engineST.seed0 "executeKernels: missing seed0 buffer"
-  seed1TexFb <- fromJustE engineST.seed0 "executeKernels: missing seed1 buffer"
-
-  -- execute seed
-  executeKernel lib systemST engineST Seed0 patternD.seed0 (snd seed0TexFb) empty
-  executeKernel lib systemST engineST Seed1 patternD.seed1 (snd seed1TexFb) empty
+  seed1TexFb <- fromJustE engineST.seed1 "executeKernels: missing seed1 buffer"
 
   -- ping-pong buffers
   let tex = if systemST.frameNum `mod` 2 == 0 then fst $ fst fbs else fst $ snd fbs
   let fb = if systemST.frameNum `mod` 2 == 1 then snd $ fst fbs else snd $ snd fbs
 
-  -- execute main
+  -- get_textures
   let textures = fromFoldable [Tuple "fb" tex, Tuple "seedBuf0" (fst seed0TexFb),
                                Tuple "seedBuf1" (fst seed1TexFb)]
+
+  -- execute seed1
+  executeKernel lib systemST engineST Seed1 patternD.seed1 (snd seed1TexFb) textures
+
+  -- execute seed0
+  executeKernel lib systemST engineST Seed0 patternD.seed0 (snd seed0TexFb) textures
+
+  -- execute main
   executeKernel lib systemST engineST Main patternD.main fb textures
 
   -- execute disp

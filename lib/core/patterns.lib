@@ -1,7 +1,7 @@
 ### Pattern
 id dev
-seed0  seed_na
-seed1  seed_dev_distance
+seed0  seed_dev_distance
+seed1  seed_na
 main   epimorphism_dev_main
 disp   disp_id
 vert   vert

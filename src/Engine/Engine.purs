@@ -144,13 +144,15 @@ executeKernels lib systemST engineST patternD = do
 
   -- execute seed
   executeKernel lib systemST engineST Seed0 patternD.seed0 (snd seed0TexFb) empty
+  executeKernel lib systemST engineST Seed1 patternD.seed1 (snd seed1TexFb) empty
 
   -- ping-pong buffers
   let tex = if systemST.frameNum `mod` 2 == 0 then fst $ fst fbs else fst $ snd fbs
   let fb = if systemST.frameNum `mod` 2 == 1 then snd $ fst fbs else snd $ snd fbs
 
   -- execute main
-  let textures = fromFoldable [Tuple "fb" tex, Tuple "seedBuf0" (fst seed0TexFb)]
+  let textures = fromFoldable [Tuple "fb" tex, Tuple "seedBuf0" (fst seed0TexFb),
+                               Tuple "seedBuf1" (fst seed1TexFb)]
   executeKernel lib systemST engineST Main patternD.main fb textures
 
   -- execute disp

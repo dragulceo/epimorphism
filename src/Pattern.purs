@@ -16,7 +16,7 @@ import Data.Traversable (for, sequence, traverse)
 import Data.Tuple (Tuple(..))
 import Data.Types (EpiS, Library, Module(..), Pattern(..), PatternD)
 import System (loadLib)
-import Util (fromJustE, uuid)
+import Util (fromJustE, log, uuid)
 
 ------------------------ FIND ------------------------
 
@@ -104,10 +104,8 @@ importPattern lib pattern@(Pattern _ patternD) maid = do
   id <- case maid of
     Nothing -> lift $ uuid
     Just x -> pure x
-
   mod <- for kAcs \accs ->
     importModule lib (ImportRef (accs patternD))
-
   setLib lib id (apD pattern (kWrt mod))
   pure $ id
 
@@ -115,7 +113,6 @@ importPattern lib pattern@(Pattern _ patternD) maid = do
 importModule :: forall eff h. Library h -> ImportObj -> EpiS eff h String
 importModule lib obj = do
   id <- lift $ uuid
-
   -- find module & set orig
   mod@(Module iD modD) <- case obj of
     ImportModule m -> do

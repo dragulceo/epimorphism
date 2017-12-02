@@ -21,9 +21,9 @@ instance showKernel :: Show Kernel where
 
 readK :: String -> Maybe Kernel
 readK "seed0" = Just Seed0
-readK "Seed0" = Just Seed1
-readK "seed0" = Just Seed0
-readK "Seed0" = Just Seed1
+readK "Seed0" = Just Seed0
+readK "seed1" = Just Seed1
+readK "Seed1" = Just Seed1
 readK "main" = Just Main
 readK "Main" = Just Main
 readK "Disp" = Just Disp

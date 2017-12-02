@@ -50,7 +50,7 @@ renderConsole uiST systemST engineST lib = do
     Nothing -> pure unit
 
   dssDiv' <- findElt "debugSeed1"
-  str1' <- renderModule systemST lib uiConfD.uiCompLib patternD.seed0 "SEED1" Nothing
+  str1' <- renderModule systemST lib uiConfD.uiCompLib patternD.seed1 "SEED1" Nothing
   lift $ setInnerHTML str1' dssDiv'
 
   dssSDiv' <- findElt "debugSeed1Src"

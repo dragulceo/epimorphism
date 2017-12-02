@@ -34,6 +34,12 @@ component seed_buf
 flags {lib}
 sub {idx: 0}
 
+### Module
+id seed_buf1
+component seed_buf
+flags {lib}
+sub {idx: 1}
+
 ### Component
 id seed_buf
 family seed

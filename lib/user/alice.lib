@@ -8,6 +8,7 @@ t_delta 0.01
 ### Pattern
 id alice
 seed0 seed_alice
+seed1 seed_na
 vert vert
 main main_alice
 disp disp_id

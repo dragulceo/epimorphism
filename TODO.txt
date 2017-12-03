@@ -95,6 +95,7 @@ PROJECTS:
       - more info - http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
   - Misc (Sort)
+    - X screen saver
     - fix fswatch in ubuntu..
     - key to exit dev?
     - give "global includes" to modules, so they can define functions that are called >1

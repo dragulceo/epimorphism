@@ -16,7 +16,7 @@ import Data.Int (toNumber)
 import Data.Kernels (Kernel(..), kGet)
 import Data.Library (getEngineConfD, getLib, modLibD)
 import Data.Maybe (Maybe(Nothing, Just), fromMaybe)
-import Data.StrMap (StrMap, empty, fromFoldable, insert, keys, lookup, toUnfoldable, values)
+import Data.StrMap (StrMap, empty, fromFoldable, insert, keys, lookup, size, toUnfoldable, values)
 import Data.System (EngineProfile, EngineST, SystemST)
 import Data.Traversable (for, traverse)
 import Data.Tuple (Tuple(Tuple), fst, snd)
@@ -171,6 +171,11 @@ executeKernel lib systemST engineST kernel mid out_fb in_tex = do
   let ctx = engineST.ctx
   execGL ctx (liftEff $ GL.useProgram ctx prog)
 
+  lift $ log $ show kernel
+  lift $ log $ "numaux"
+  lift $ log $ length auxImages
+  lift $ log $ size in_tex
+
   -- bind par & zn
   (Tuple par zn) <- getParZn lib systemST.t (Tuple [] []) mid
   bindParZn ctx unif par zn
@@ -195,7 +200,7 @@ executeKernel lib systemST engineST kernel mid out_fb in_tex = do
     for indexed \{i, var, tex} -> do
       liftEff $ GL.activeTexture ctx (GLE.texture0 + numAux + i)
       liftEff $ GL.bindTexture ctx GLE.texture2d tex
-      liftEff $ GL.uniform1i ctx (unsafeGetAttr unif var) i
+      liftEff $ GL.uniform1i ctx (unsafeGetAttr unif var) (i + numAux)
 
     -- draw to fb
     liftEff $ GL.bindFramebuffer ctx GLE.framebuffer out_fb

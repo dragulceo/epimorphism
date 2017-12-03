@@ -6,7 +6,7 @@ PROJECTS:
           - COMPILATION
             - already better
             - most is from the complexity of the seed
-              - multiple seeds? varying dimensions
+              - multiple seeds? varying dimensions (fucking fuck!!)
             - try global functions?  unclear if it would help
           - FPS
             - speed constiency

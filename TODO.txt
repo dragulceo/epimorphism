@@ -2,25 +2,21 @@ PROJECTS:
   - DISTANCE FIELDS
     - NOW
       - TOP PRIORITY (in general it's great)
+        - dont use multi_df, hand make new distance fields
+          - fix texture artifacts from smin
+
+        - zoom too variable sometimes too close, sometimes, too far.
+          - just tweak t_seed_anim, etc
+
         - OPTIMIZATION
-          - COMPILATION
-            - already better
-            - most is from the complexity of the seed
-              - multiple seeds? varying dimensions (fucking fuck!!)
-            - try global functions?  unclear if it would help
-          - FPS
-            - speed constiency
-              - need to modultate system speed based on fps
-              - zoom fixing should help
-                - zoom too variable sometimes too close, sometimes, too far.
-                  - get rid of t_seed_anim, and just animate all seeds independantly?  so there is no composition? (might be good.  easier to understand & isolate errors)
-            - fake shadows?
-              - Recipe: take n points on the line from the surface to the light and evaluate the distance to the closest geometry. Find a magic formula to blend the n distances to obtain a shadow factor.
+          - speed constiency
+            - need to modultate system speed based on fps
+            - zoom fixing should help
+
         - NEXT
           - maybe tweak transparency?
           - make better use of inc in post?
 
-          - better tex_ofs when are on df1?
           - random glitches
             - aliasing
             - some minor glitchiness (maybe sharp edges?)
@@ -79,6 +75,10 @@ PROJECTS:
       - anti-aliasing?
 
     - FUTURE
+          - fake shadows?
+            - Recipe: take n points on the line from the surface to the light and evaluate the distance to the closest geometry. Find a magic formula to blend the n distances to obtain a shadow factor.
+      - compilation optimization
+        - try global functions?  unclear if it would help
       - lighting being the same across reduction?
       - starting weird on linux when breaking cache
       - df deformations?

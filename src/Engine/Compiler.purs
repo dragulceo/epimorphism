@@ -68,6 +68,7 @@ compileShaders esRef lib full = do
 
           -- aux
           let all_aux = nub $ fromMaybe [] (foldl (<>) Nothing newST.aux)
+          lift $ log all_aux
           uploadAux es all_aux
 
           -- update engine state with new info

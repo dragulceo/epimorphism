@@ -41,7 +41,7 @@ modules {seed:seed_multi_anim}
 id seed_multi_anim
 component seed_multi
 flags {multi, lib}
-modules {reduce:torus_reduce, t_seed0:t_id, seed0:seed_wca_anim2, t_seed1:t_id, seed1:seed_nothing, t_seed2:t_id, seed2:seed_nothing}
+modules {reduce:torus_reduce, t_seed0:t_id, seed0:seed_wca_anim2, t_seed1:t_seed_anim1, seed1:seed_buf1, t_seed2:t_id, seed2:seed_nothing}
 
 ### Module
 id seed_wca_anim1
@@ -64,8 +64,8 @@ id seed_wca_anim3
 component seed_wca
 flags {lib, wca}
 par {smooth_mask: 50.0}
-modules {w:w_lines_border_anim, wt:wt_id, a:alpha_anim1, seed_color:simple_color_anim1}
-scripts [randomize dly:27 spd:0.3 lib:anim dim:vec4 sub:w typ:mod, randomize dly:30 spd:0.3 lib:anim3 dim:vec4 sub:seed_color typ:mod]
+modules {w:w_lines_border_anim, wt:wt_id, a:alpha_anim1, seed_color:tex_color_anim1}
+scripts [randomize dly:27 spd:0.3 lib:anim dim:vec4 sub:w typ:mod]
 
 ### Module
 id wt_anim1

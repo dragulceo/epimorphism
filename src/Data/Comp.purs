@@ -29,5 +29,5 @@ instance showCompOp :: Show CompOp where
   show (CompStall)    = "CompStall"
 
 fullCompile :: Array CompOp
-fullCompile = [CompShader Seed0, CompShader Seed1, CompShader Main, CompShader Disp, CompShader Vert,
-               CompProg Seed0, CompProg Seed1, CompProg Main, CompProg Disp, CompFinish]
+fullCompile = [CompShader Seed1, CompShader Seed0, CompShader Main, CompShader Disp, CompShader Vert,
+               CompProg Seed1, CompProg Seed0, CompProg Main, CompProg Disp, CompFinish]

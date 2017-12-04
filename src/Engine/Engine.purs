@@ -180,11 +180,6 @@ executeKernel lib systemST engineST kernel mid out_fb in_tex = do
   let ctx = engineST.ctx
   execGL ctx (liftEff $ GL.useProgram ctx prog)
 
-  lift $ log $ show kernel
-  lift $ log $ "numaux"
-  lift $ log $ length auxImages
-  lift $ log $ size in_tex
-
   -- bind par & zn
   (Tuple par zn) <- getParZn lib systemST.t (Tuple [] []) mid
   bindParZn ctx unif par zn
@@ -196,6 +191,7 @@ executeKernel lib systemST engineST kernel mid out_fb in_tex = do
 
     -- bind aux
     let numAux = length auxImages
+    let numAuxTotal = length engineST.currentImages
     when (numAux > 0) do
       when (not $ hasAttr unif "aux[0]") do
         throwError $ ShaderError "missing aux uniform!"
@@ -207,9 +203,10 @@ executeKernel lib systemST engineST kernel mid out_fb in_tex = do
     -- bind input textures
     let indexed = map (\(Tuple i (Tuple var tex)) -> {i, var, tex}) $ zipI (toUnfoldable in_tex)
     for indexed \{i, var, tex} -> do
-      liftEff $ GL.activeTexture ctx (GLE.texture0 + numAux + i)
+      let idx = numAuxTotal + i
+      liftEff $ GL.activeTexture ctx (GLE.texture0 + idx) -- total numauxbuffers
       liftEff $ GL.bindTexture ctx GLE.texture2d tex
-      liftEff $ GL.uniform1i ctx (unsafeGetAttr unif var) (i + numAux)
+      liftEff $ GL.uniform1i ctx (unsafeGetAttr unif var) idx
 
     -- draw to fb
     liftEff $ GL.bindFramebuffer ctx GLE.framebuffer out_fb
